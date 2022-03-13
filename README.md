@@ -1,3 +1,7 @@
+# TW5 Modifications #
+```TW5_parse_top_stats_overview.py``` and ```TW5_parse_top_stats_tools.py``` provide alternative output to support posting to a TW5 wiki with shiraz plugin.
+Example available at (https://drevarr.github.io/FluxCapacity.html)
+
 # What is it all about? #
 
 Did you ever wonder how well you did compared to your squad mates, not only in a single fight, but over the whole raid? Do you want to know who to ask for help with a specific class? Or do you want to hand out an award to a guildie who did the most damage in all raids over a whole week? This project provides a tool for generating top stats from a set of arcdps logs, allowing you to easily identify top performing players in different stats.
