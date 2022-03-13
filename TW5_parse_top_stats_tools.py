@@ -120,6 +120,10 @@ def myprint(output_file, output_string):
     output_file.write(output_string+"\n")
 
 
+# JEL - format a number with commas every thousand
+def my_value(number):
+    return ("{:,}".format(number))
+
 
 # fills a Config with the given input    
 def fill_config(config_input):
@@ -1390,13 +1394,13 @@ def print_total_squad_stats(fights, overall_squad_stats, found_healing, found_ba
         else:
             print_string += ", "
         i += 1
-            
+        #JEL - modified select outputs to utilize my_value() formatting    
         if stat == 'dmg':
-            print_string += "did "+str(round(overall_squad_stats['dmg']))+" damage"
+            print_string += "did "+my_value(round(overall_squad_stats['dmg']))+" damage"
         elif stat == 'rips':
-            print_string += "ripped "+str(round(overall_squad_stats['rips']))+" boons"
+            print_string += "ripped "+my_value(round(overall_squad_stats['rips']))+" boons"
         elif stat == 'cleanses':
-            print_string += "cleansed "+str(round(overall_squad_stats['cleanses']))+" conditions"
+            print_string += "cleansed "+my_value(round(overall_squad_stats['cleanses']))+" conditions"
         elif stat in config.buff_ids:
             total_buff_duration = {}
             total_buff_duration["h"] = int(overall_squad_stats[stat]/3600)
@@ -1412,7 +1416,7 @@ def print_total_squad_stats(fights, overall_squad_stats, found_healing, found_ba
         elif stat == 'barrier' and found_barrier:
             print_string += "generated "+str(round(overall_squad_stats['barrier']))+" barrier"
         elif stat == 'dmg_taken':
-            print_string += "took "+str(round(overall_squad_stats['dmg_taken']))+" damage"
+            print_string += "took "+my_value(round(overall_squad_stats['dmg_taken']))+" damage"
         elif stat == 'deaths':
             print_string += "killed "+str(total_kills)+" enemies and had "+str(round(overall_squad_stats['deaths']))+" deaths"
             printed_kills = True
@@ -1498,13 +1502,17 @@ def write_fights_overview_xls(fights, overall_squad_stats, config, xls_output_fi
 
     wb.save(xls_output_filename)
 
-
+#JEL - TW5 tweaks for markdown table output
 def print_fights_overview(fights, overall_squad_stats, config, output):
     stat_len = {}
-    print_string = "  #  "+f"{'Date':<10}"+"  "+f"{'Start Time':>10}"+"  "+f"{'End Time':>8}"+"  Duration in s  Skipped  Num. Allies  Num. Enemies  Kills"
+    print_string = "|thead-dark table-hover|k"
+    myprint(output, print_string)
+    
+    print_string = "| Fight # | Date | Start Time | End Time | Duration | Skipped | Num. Allies | Num. Enemies| Kills |"
     for stat in overall_squad_stats:
         stat_len[stat] = max(len(config.stat_names[stat]), len(str(overall_squad_stats[stat])))
-        print_string += "  "+f"{config.stat_names[stat]:>{stat_len[stat]}}"
+        print_string += " "+config.stat_names[stat]+"|"
+    print_string += "h"
     myprint(output, print_string)
     for i in range(len(fights)):
         fight = fights[i]
@@ -1512,9 +1520,10 @@ def print_fights_overview(fights, overall_squad_stats, config, output):
         date = fight.start_time.split()[0]
         start_time = fight.start_time.split()[1]
         end_time = fight.end_time.split()[1]        
-        print_string = f"{i+1:>3}"+"  "+f"{date:<10}"+"  "+f"{start_time:>10}"+"  "+f"{end_time:>8}"+"  "+f"{fight.duration:>13}"+"  "+f"{skipped_str:>7}"+"  "+f"{fight.allies:>11}"+"  "+f"{fight.enemies:>12}"+"  "+f"{fight.kills:>5}"
+        print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(start_time)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.kills)+" |"
         for stat in overall_squad_stats:
-            print_string += "  "+f"{round(fight.total_stats[stat]):>{stat_len[stat]}}"
+            #JEL - added my_value formatting
+            print_string += " "+my_value(round(fight.total_stats[stat]))+"|"
         myprint(output, print_string)
 
     used_fights = [f for f in fights if not f.skipped]
@@ -1528,12 +1537,10 @@ def print_fights_overview(fights, overall_squad_stats, config, output):
     mean_enemies = round(sum([f.enemies for f in used_fights])/num_used_fights, 1)
     total_kills = sum([f.kills for f in used_fights])
 
-    print_string = "-" * (3+2+10+2+10+2+8+2+13+2+7+2+11+2+12+sum([stat_len[stat] for stat in overall_squad_stats])+2*len(stat_len))
-    myprint(output, print_string)
-    print_string = f"{num_used_fights:>3}"+"  "+f"{date:>7}"+"  "+f"{start_time:>10}"+"  "+f"{end_time:>8}"+"  "+f"{used_fights_duration:>13}"+"  "+f"{skipped_fights:>7}" +"  "+f"{mean_allies:>11}"+"  "+f"{mean_enemies:>12}"+"  "+f"{total_kills:>5}"
+    print_string = "| "+str(num_used_fights)+" | "+str(date)+" | "+str(start_time)+" | "+str(end_time)+" | "+str(used_fights_duration)+" | "+str(skipped_fights)+" | "+str(mean_allies)+" | "+str(mean_enemies)+" | "+str(total_kills)+" |"
     for stat in overall_squad_stats:
-        print_string += "  "+f"{round(overall_squad_stats[stat]):>{stat_len[stat]}}"
-    print_string += "\n\n"
+        print_string += " "+my_value(round(overall_squad_stats[stat]))+"|"
+    print_string += "f\n\n"
     myprint(output, print_string)
 
 
