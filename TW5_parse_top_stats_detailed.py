@@ -100,7 +100,7 @@ if __name__ == '__main__':
             continue
 
         #JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
-        myprint(output, "<<slider label:'"+config.stat_names[stat].upper()+"' labelClass:'' srcClass:'' src:'\n`")
+        myprint(output, "<<slider label:'"+config.stat_names[stat].upper()+"' labelClass:'' srcClass:'' src:'\n")
         
         if stat == 'dist':
             top_consistent_stat_players[stat] = get_top_players(players, config, stat, StatType.CONSISTENT)
@@ -119,7 +119,7 @@ if __name__ == '__main__':
             top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
         
         #JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
-        myprint(output, "`\n'>>\n")
+        myprint(output, "\n'>>\n")
 
     write_to_json(overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, args.json_output_filename)
 

@@ -459,6 +459,7 @@ def get_and_write_sorted_average(players, config, num_used_fights, stat, output_
 
 
 
+#JEL - Modified for TW5 Output
 # Write the top x people who achieved top y in stat most often.
 # Input:
 # players = list of Players
@@ -475,31 +476,34 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 
     if consistent_or_avg == StatType.CONSISTENT:
         if stat == "dist":
-            print_string = "Top "+str(config.num_players_considered_top[stat])+" "+config.stat_names[stat]+" consistency awards"
+            print_string = "`Top "+str(config.num_players_considered_top[stat])+" "+config.stat_names[stat]+" consistency awards"
         else:
-            print_string = "Top "+config.stat_names[stat]+" consistency awards (Max. "+str(config.num_players_listed[stat])+" places, min. "+str(round(config.portion_of_top_for_consistent*100.))+"% of most consistent)"
+            print_string = "`Top "+config.stat_names[stat]+" consistency awards (Max. "+str(config.num_players_listed[stat])+" places, min. "+str(round(config.portion_of_top_for_consistent*100.))+"% of most consistent)"
             myprint(output_file, print_string)
             print_string = "Most times placed in the top "+str(config.num_players_considered_top[stat])+". \nAttendance = number of fights a player was present out of "+str(num_used_fights)+" total fights."
             myprint(output_file, print_string)
     elif consistent_or_avg == StatType.AVERAGE:
         if stat == "dist":
-            print_string = "Top average "+str(config.num_players_considered_top[stat])+" "+config.stat_names[stat]+" awards"
+            print_string = "`Top average "+str(config.num_players_considered_top[stat])+" "+config.stat_names[stat]+" awards"
         else:
-            print_string = "Top average "+config.stat_names[stat]+" awards (Max. "+str(config.num_players_listed[stat])+" places)"
+            print_string = "`Top average "+config.stat_names[stat]+" awards (Max. "+str(config.num_players_listed[stat])+" places)"
             myprint(output_file, print_string)
             print_string = "Attendance = number of fights a player was present out of "+str(num_used_fights)+" total fights."
             myprint(output_file, print_string)
-    print_string = "-------------------------------------------------------------------------------"    
+    print_string = "`\n"    
     myprint(output_file, print_string)
 
 
     # print table header
-    print_string = f"    {'Name':<{max_name_length}}" + f"  {'Class':<{profession_length}} "+" Attendance " + " Times Top"
+    print_string = "|thead-dark table-hover|k"    
+    myprint(output_file, print_string)
+    print_string = "|Place |Name |Class | Attendance| Times Top|"
     if stat != "dist":
-        print_string += f" {'Total':>9}"
+        print_string += " Total|"
     if stat in config.buff_ids or stat == 'dmg_taken':
-        print_string += f"  {'Average':>7}"
-        
+        print_string += " Average|"
+    
+    print_string += "h"
     myprint(output_file, print_string)    
 
     
@@ -510,15 +514,15 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
         player = players[top_consistent_players[i]]
         if player.consistency_stats[stat] != last_val:
             place += 1
-        print_string = f"{place:>2}"+f". {player.name:<{max_name_length}} "+f" {profession_strings[i]:<{profession_length}} "+f" {player.num_fights_present:>10} "+f" {round(player.consistency_stats[stat]):>9}"
+        print_string = "|"+str(place)+" |"+player.name+" |"+profession_strings[i]+" | "+str(player.num_fights_present)+"| "+str(round(player.consistency_stats[stat]))+"| "
         if stat != "dist" and stat not in config.buff_ids and stat != 'dmg_taken':
-            print_string += f" {round(player.total_stats[stat]):>9}"
+            print_string += str(round(player.total_stats[stat]))+"|"
         if stat == 'dmg_taken':
-            print_string += f" {player.total_stats[stat]:>9}"+f" {player.average_stats[stat]:>8}"
+            print_string += str(player.total_stats[stat])+"| "+str(player.average_stats[stat])+"|"
         elif stat in config.buffs_stacking_intensity:
-            print_string += f" {player.total_stats[stat]:>8}s"+f" {player.average_stats[stat]:>8}"
+            print_string += str(player.total_stats[stat])+"s| "+str(player.average_stats[stat])+"|"
         elif stat in config.buffs_stacking_duration:
-            print_string += f" {player.total_stats[stat]:>8}s"+f" {player.average_stats[stat]:>7}%"            
+            print_string += str(player.total_stats[stat])+"s| "+str(player.average_stats[stat])+"%|"            
 
         myprint(output_file, print_string)
         last_val = player.consistency_stats[stat]
@@ -597,21 +601,27 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
     profession_strings, profession_length = get_professions_and_length(players, top_total_players, config)
     profession_length = max(profession_length, 5)
     
-    print_string = "Top overall "+config.stat_names[stat]+" awards (Max. "+str(config.num_players_listed[stat])+" places, min. "+str(round(config.portion_of_top_for_total*100.))+"% of 1st place)"
+    print_string = "`Top overall "+config.stat_names[stat]+" awards (Max. "+str(config.num_players_listed[stat])+" places, min. "+str(round(config.portion_of_top_for_total*100.))+"% of 1st place)"
     myprint(output_file, print_string)
     print_string = "Attendance = total duration of fights attended out of "
     if total_fight_duration["h"] > 0:
         print_string += str(total_fight_duration["h"])+"h "
     print_string += str(total_fight_duration["m"])+"m "+str(total_fight_duration["s"])+"s."    
     myprint(output_file, print_string)
-    print_string = "------------------------------------------------------------------------"
+    print_string = "`\n"
     myprint(output_file, print_string)
 
-
+    #JEL - Adjust for TW5 table output
+    #print_string = "|Place |Name |Class | Attendance| Total| "
+    #    print_string += " Average|h"
     # print table header
-    print_string = f"    {'Name':<{max_name_length}}" + f"  {'Class':<{profession_length}} "+f" {'Attendance':>11}"+f" {'Total':>9}"
+    print_string = "|thead-dark table-hover|k"
+    myprint(output_file, print_string)
+    print_string = "|Place |Name |Class | Attendance| Total|"
     if stat in config.buff_ids:
-        print_string += f"  {'Average':>7}"
+        print_string += " Average|"
+    
+    print_string += "h"
     myprint(output_file, print_string)    
 
     place = 0
@@ -626,21 +636,23 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
         fight_time_m = int((player.duration_fights_present - fight_time_h*3600)/60)
         fight_time_s = int(player.duration_fights_present - fight_time_h*3600 - fight_time_m*60)
 
-        print_string = f"{place:>2}"+f". {player.name:<{max_name_length}} "+f" {profession_strings[i]:<{profession_length}} "
+        #JEL - Adjust for TW5 table output
+        print_string = "|"+str(place)+" |"+player.name+" |"+profession_strings[i]+" | "
+        #print_string = f"{place:>2}"+f". {player.name:<{max_name_length}} "+f" {profession_strings[i]:<{profession_length}} "
 
         if fight_time_h > 0:
-            print_string += f" {fight_time_h:>2}h {fight_time_m:>2}m {fight_time_s:>2}s"
+            print_string += f" {fight_time_h:>2}h {fight_time_m:>2}m {fight_time_s:>2}s|"
         else:
-            print_string += f" {fight_time_m:>6}m {fight_time_s:>2}s"
+            print_string += f" {fight_time_m:>6}m {fight_time_s:>2}s|"
 
         if stat in config.buffs_stacking_duration:
-            print_string += f" {round(player.total_stats[stat]):>8}s"
-            print_string += f" {player.average_stats[stat]:>7}%"
+            print_string += f" {round(player.total_stats[stat]):>8}s|"
+            print_string += f" {player.average_stats[stat]:>7}%|"
         elif stat in config.buffs_stacking_intensity:
-            print_string += f" {round(player.total_stats[stat]):>8}s"
-            print_string += f" {player.average_stats[stat]:>8}"
+            print_string += f" {round(player.total_stats[stat]):>8}s|"
+            print_string += f" {player.average_stats[stat]:>8}|"
         else:
-            print_string += f" {round(player.total_stats[stat]):>9}"
+            print_string += f" {round(player.total_stats[stat]):>9}|"
         myprint(output_file, print_string)
         last_val = player.total_stats[stat]
     myprint(output_file, "\n")
@@ -693,15 +705,19 @@ def write_sorted_top_percentage(players, top_players, comparison_percentage, con
     profession_length = max(profession_length, 5)
 
     # print table header
-    print_string = "Top "+config.stat_names[stat]+" percentage (Minimum percentage = "+f"{comparison_percentage*100:.0f}%)"
+    print_string = "`Top "+config.stat_names[stat]+" percentage (Minimum percentage = "+f"{comparison_percentage*100:.0f}%)"
     myprint(output_file, print_string)
-    print_string = "------------------------------------------------------------------------"     
+    print_string = "`\n"     
     myprint(output_file, print_string)                
 
     # print table header
-    print_string = f"    {'Name':<{max_name_length}}" + f"  {'Class':<{profession_length}} "+f"  Percentage "+f" {'Times Top':>9} " + f" {'Out of':>6}"
+    print_string = "|thead-dark table-hover|k"
+    myprint(output_file, print_string)
+    print_string = "|Place |Name |Class | Percentage | Times Top | Out of |"
     if stat != "dist":
-        print_string += f" {'Total':>8}"
+        print_string += " Total|h"
+    else:
+        print_string += "h"
     myprint(output_file, print_string)    
 
     # print stats for top players
@@ -714,10 +730,10 @@ def write_sorted_top_percentage(players, top_players, comparison_percentage, con
             place += 1
 
         percentage = int(player.portion_top_stats[stat]*100)
-        print_string = f"{place:>2}"+f". {player.name:<{max_name_length}} "+f" {profession_strings[i]:<{profession_length}} " +f" {percentage:>10}% " +f" {round(player.consistency_stats[stat]):>9} "+f" {player.num_fights_present:>6} "
+        print_string = f"|{place:>2}"+f".|{player.name:<{max_name_length}} "+f"|{profession_strings[i]:<{profession_length}} " +f"| {percentage:>10}% |" +f" {round(player.consistency_stats[stat]):>9} "+f"| {player.num_fights_present:>6} |"
 
         if stat != "dist":
-            print_string += f" {round(player.total_stats[stat]):>7}"
+            print_string += f" {round(player.total_stats[stat]):>7} |"
         myprint(output_file, print_string)
         last_val = player.portion_top_stats[stat]
     myprint(output_file, "\n")
