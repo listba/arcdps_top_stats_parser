@@ -77,15 +77,16 @@ if __name__ == '__main__':
 
     # print overall stats
     overall_squad_stats = get_overall_squad_stats(fights, config)
-    total_fight_duration = print_total_squad_stats(fights, overall_squad_stats, found_healing, found_barrier, config, output)
+    overall_raid_stats = get_overall_raid_stats(fights)
+    total_fight_duration = print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, found_healing, found_barrier, config, output)
 
-    print_fights_overview(fights, overall_squad_stats, config, output)
-    write_fights_overview_xls(fights, overall_squad_stats, config, args.xls_output_filename)
+    print_fights_overview(fights, overall_squad_stats, overall_raid_stats, config, output)
+    write_fights_overview_xls(fights, overall_squad_stats, overall_raid_stats, config, args.xls_output_filename)
     
     # print top x players for all stats. If less then x
     # players, print all. If x-th place doubled, print all with the
     # same amount of top x achieved.
-    num_used_fights = len([f for f in fights if not f.skipped])
+    num_used_fights = overall_raid_stats['num_used_fights']
 
     top_total_stat_players = {key: list() for key in config.stats_to_compute}
     top_consistent_stat_players = {key: list() for key in config.stats_to_compute}
@@ -121,7 +122,7 @@ if __name__ == '__main__':
         #JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
         myprint(output, "\n'>>\n")
 
-    write_to_json(overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, args.json_output_filename)
+        write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, args.json_output_filename)
 
     for stat in config.stats_to_compute:
         if stat == 'dist':
