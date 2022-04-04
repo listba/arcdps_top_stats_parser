@@ -514,7 +514,8 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
         player = players[top_consistent_players[i]]
         if player.consistency_stats[stat] != last_val:
             place += 1
-        print_string = f"|{place:>2}"+f". |{player.name:<{max_name_length}} "+f" |{profession_strings[i]:<{profession_length}} "+f"| {player.num_fights_present:>10} "+f"| {round(player.consistency_stats[stat]):>9} |"
+        #print_string = f"|{place:>2}"+f". |{player.name:<{max_name_length}} "+f" |{profession_strings[i]:<{profession_length}} "+f"| {player.num_fights_present:>10} "+f"| {round(player.consistency_stats[stat]):>9} |"
+        print_string = f"|{place:>2}"+f". |{player.name:<{max_name_length}} "+" | {{"+profession_strings[i]+"}} "+f"| {player.num_fights_present:>10} "+f"| {round(player.consistency_stats[stat]):>9} |"
         if stat != "dist" and stat not in config.buff_ids and stat != 'dmg_taken':
             print_string += my_value(round(player.total_stats[stat]))+"|"
         if stat == 'dmg_taken':
@@ -637,19 +638,19 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
         fight_time_s = int(player.duration_fights_present - fight_time_h*3600 - fight_time_m*60)
 
         #JEL - Adjust for TW5 table output
-        print_string = "|"+str(place)+". |"+player.name+" |"+profession_strings[i]+" | "
+        print_string = "|"+str(place)+". |"+player.name+" | {{"+profession_strings[i]+"}} | "
         #print_string = f"{place:>2}"+f". {player.name:<{max_name_length}} "+f" {profession_strings[i]:<{profession_length}} "
 
         if fight_time_h > 0:
-            print_string += f" {fight_time_h:>2}h {fight_time_m:>2}m {fight_time_s:>2}s|"
+            print_string += f" {fight_time_h:>2}h {fight_time_m:>2}m {fight_time_s:>2}s| "
         else:
-            print_string += f" {fight_time_m:>6}m {fight_time_s:>2}s|"
+            print_string += f" {fight_time_m:>6}m {fight_time_s:>2}s| "
 
         if stat in config.buffs_stacking_duration:
-            print_string += f" {round(player.total_stats[stat]):>8}s|"
+            print_string += f" {round(player.total_stats[stat]):>8}s| "
             print_string += f" {player.average_stats[stat]:>7}%|"
         elif stat in config.buffs_stacking_intensity:
-            print_string += f" {round(player.total_stats[stat]):>8}s|"
+            print_string += f" {round(player.total_stats[stat]):>8}s| "
             print_string += f" {player.average_stats[stat]:>8}|"
         else:
             print_string += my_value(round(player.total_stats[stat]))+"|"
@@ -1381,8 +1382,8 @@ def get_overall_raid_stats(fights):
     overall_raid_stats['num_used_fights'] = len([f for f in fights if not f.skipped])
     overall_raid_stats['used_fights_duration'] = sum([f.duration for f in used_fights])
     overall_raid_stats['date'] = min([f.start_time.split()[0] for f in used_fights])
-    overall_raid_stats['start_time'] = min([f.start_time.split()[1] for f in used_fights]) +" "+ used_fights[0].start_time.split()[2]
-    overall_raid_stats['end_time'] = max([f.end_time.split()[1] for f in used_fights]) +" "+ used_fights[0].end_time.split()[2]
+    overall_raid_stats['start_time'] = min([f.start_time.split()[1] for f in used_fights]) +"<br>,,UTC "+ used_fights[0].start_time.split()[2]+",,"
+    overall_raid_stats['end_time'] = max([f.end_time.split()[1] for f in used_fights]) +"<br>,,UTC "+ used_fights[0].end_time.split()[2]+",,"
     overall_raid_stats['num_skipped_fights'] = len([f for f in fights if f.skipped])
     overall_raid_stats['min_allies'] = min([f.allies for f in used_fights])
     overall_raid_stats['max_allies'] = max([f.allies for f in used_fights])    
