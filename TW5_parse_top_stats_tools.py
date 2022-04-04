@@ -930,7 +930,7 @@ def collect_stat_data(args, config, log, anonymize=False):
     players = []        # list of all player/profession combinations
     player_index = {}   # dictionary that matches each player/profession combo to its index in players list
     account_index = {}  # dictionary that matches each account name to a list of its indices in players list
-
+    squad_comp = {}     # dictionary that contains count of professions by fight_num
     used_fights = 0
     fights = []
     first = True
@@ -981,7 +981,7 @@ def collect_stat_data(args, config, log, anonymize=False):
         
         used_fights += 1
         fight_number = used_fights-1
-
+        squad_comp[fight_number]={}
         # get stats for each player
         #for player_data in (xml_root.iter('players') if args.filetype == "xml" else json_data['players']):
         for player_data in json_data['players']:
@@ -992,6 +992,10 @@ def collect_stat_data(args, config, log, anonymize=False):
             #    account, name, profession = get_basic_player_data_from_xml(player_data)
             #else:
             account, name, profession = get_basic_player_data_from_json(player_data)                
+            if profession not in squad_comp[fight_number]:
+                squad_comp[fight_number][profession] = 1
+            else:
+                squad_comp[fight_number][profession] = squad_comp[fight_number][profession]+1
 
             # if this combination of charname + profession is not in the player index yet, create a new entry
             name_and_prof = name+" "+profession
@@ -1127,7 +1131,7 @@ def collect_stat_data(args, config, log, anonymize=False):
     if anonymize:
         anonymize_players(players, account_index)
     
-    return players, fights, found_healing, found_barrier
+    return players, fights, found_healing, found_barrier, squad_comp
             
 
 
@@ -1377,15 +1381,15 @@ def get_overall_raid_stats(fights):
     overall_raid_stats['num_used_fights'] = len([f for f in fights if not f.skipped])
     overall_raid_stats['used_fights_duration'] = sum([f.duration for f in used_fights])
     overall_raid_stats['date'] = min([f.start_time.split()[0] for f in used_fights])
-    overall_raid_stats['start_time'] = min([f.start_time.split()[1] for f in used_fights])
-    overall_raid_stats['end_time'] = max([f.end_time.split()[1] for f in used_fights])
+    overall_raid_stats['start_time'] = min([f.start_time.split()[1] for f in used_fights]) +" "+ used_fights[0].start_time.split()[2]
+    overall_raid_stats['end_time'] = max([f.end_time.split()[1] for f in used_fights]) +" "+ used_fights[0].end_time.split()[2]
     overall_raid_stats['num_skipped_fights'] = len([f for f in fights if f.skipped])
     overall_raid_stats['min_allies'] = min([f.allies for f in used_fights])
     overall_raid_stats['max_allies'] = max([f.allies for f in used_fights])    
-    overall_raid_stats['mean_allies'] = sum([f.allies for f in used_fights])/len(used_fights)
+    overall_raid_stats['mean_allies'] = round(sum([f.allies for f in used_fights])/len(used_fights), 1)
     overall_raid_stats['min_enemies'] = min([f.enemies for f in used_fights])
     overall_raid_stats['max_enemies'] = max([f.enemies for f in used_fights])        
-    overall_raid_stats['mean_enemies'] = sum([f.enemies for f in used_fights])/len(used_fights)
+    overall_raid_stats['mean_enemies'] = round(sum([f.enemies for f in used_fights])/len(used_fights), 1)
     overall_raid_stats['total_kills'] = sum([f.kills for f in used_fights])
     return overall_raid_stats
 
