@@ -83,6 +83,39 @@ if __name__ == '__main__':
     print_fights_overview(fights, overall_squad_stats, overall_raid_stats, config, output)
     write_fights_overview_xls(fights, overall_squad_stats, overall_raid_stats, config, args.xls_output_filename)
     
+    #Move Squad Composition here so it is first under the fight summaries
+    #Squad Composition Testing
+    print_string = "<<slider label:'SQUAD COMPOSITION' labelClass:'' srcClass:'' src:'"
+    myprint(output, print_string)    
+
+    sort_order = ['Firebrand', 'Scrapper', 'Spellbreaker', "Herald", "Chronomancer", "Reaper", "Scourge", "Dragonhunter", "Guardian", "Elementalist", "Tempest", "Revenant", "Weaver", "Willbender", "Renegade", "Vindicator", "Warrior", "Berserker", "Bladesworn", "Engineer", "Holosmith", "Mechanist", "Ranger", "Druid", "Soulbeast", "Untamed", "Thief", "Daredevil", "Deadeye", "Specter", "Catalyst", "Mesmer", "Mirage", "Virtuoso", "Necromancer", "Harbinger"]
+
+    output_string = ""
+
+    for fight in squad_comp:
+        output_string1 = "\n|thead-dark|k\n"
+        output_string2 = ""
+        output_string1 += "|Fight |"
+        output_string2 += "|"+str(fight+1)
+        for prof in sort_order:
+            if prof in squad_comp[fight]:
+                output_string1 += " {{"+str(prof)+"}} |"
+                output_string2 += " | "+str(squad_comp[fight][prof])
+                
+        output_string1 += "h"
+        output_string2 += " |\n"
+        
+        myprint(output, output_string1)
+        myprint(output, output_string2)
+
+    #'>>
+    print_string = "'>>\n"
+    myprint(output, print_string)     
+
+
+    # end Squad Composition insert
+
+
     # print top x players for all stats. If less then x
     # players, print all. If x-th place doubled, print all with the
     # same amount of top x achieved.
@@ -137,31 +170,3 @@ if __name__ == '__main__':
             write_stats_xls(players, top_consistent_stat_players[stat], stat, args.xls_output_filename)
         else:
             write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
-               
-    #Squad Composition Testing
-    print_string = "<<slider label:'SQUAD COMPOSITION' labelClass:'' srcClass:'' src:'"
-    myprint(output, print_string)    
-
-    sort_order = ['Firebrand', 'Scrapper', 'Spellbreaker', "Herald", "Chronomancer", "Reaper", "Scourge", "Dragonhunter", "Guardian", "Elementalist", "Tempest", "Revenant", "Weaver", "Willbender", "Renegade", "Vindicator", "Warrior", "Berserker", "Bladesworn", "Engineer", "Holosmith", "Mechanist", "Ranger", "Druid", "Soulbeast", "Untamed", "Thief", "Daredevil", "Deadeye", "Specter", "Catalyst", "Mesmer", "Mirage", "Virtuoso", "Necromancer", "Harbinger"]
-
-    output_string = ""
-
-    for fight in squad_comp:
-        output_string1 = "\n|thead-dark|k\n"
-        output_string2 = ""
-        output_string1 += "|Fight |"
-        output_string2 += "|"+str(fight+1)
-        for prof in sort_order:
-            if prof in squad_comp[fight]:
-                output_string1 += " {{"+str(prof)+"}} |"
-                output_string2 += " | "+str(squad_comp[fight][prof])
-                
-        output_string1 += "h"
-        output_string2 += " |\n"
-        
-        myprint(output, output_string1)
-        myprint(output, output_string2)
-
-    #'>>
-    print_string = "'>>"
-    myprint(output, print_string)     
