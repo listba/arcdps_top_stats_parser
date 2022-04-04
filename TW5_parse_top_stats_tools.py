@@ -1557,7 +1557,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
     #mean_enemies = round(sum([f.enemies for f in used_fights])/num_used_fights, 1)
     #total_kills = sum([f.kills for f in used_fights])
 
-    print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['start_time']:>10}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{overall_raid_stats['mean_allies']:>11}"+" | "+f"{overall_raid_stats['mean_enemies']:>12}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
+    print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['start_time']:>10}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
     for stat in overall_squad_stats:
         print_string += " "+my_value(round(overall_squad_stats[stat]))+"|"
     print_string += "f\n\n"

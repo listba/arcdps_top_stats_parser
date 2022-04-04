@@ -910,6 +910,7 @@ def collect_stat_data(args, config, log, anonymize=False):
     players = []        # list of all player/profession combinations
     player_index = {}   # dictionary that matches each player/profession combo to its index in players list
     account_index = {}  # dictionary that matches each account name to a list of its indices in players list
+    squad_comp = {}     # dictionary that contains count of professions by fight_num
 
     used_fights = 0
     fights = []
@@ -961,6 +962,7 @@ def collect_stat_data(args, config, log, anonymize=False):
         
         used_fights += 1
         fight_number = used_fights-1
+        squad_comp[fight_number]={}
 
         # get stats for each player
         #for player_data in (xml_root.iter('players') if args.filetype == "xml" else json_data['players']):
@@ -971,7 +973,11 @@ def collect_stat_data(args, config, log, anonymize=False):
             #if args.filetype == "xml":
             #    account, name, profession = get_basic_player_data_from_xml(player_data)
             #else:
-            account, name, profession = get_basic_player_data_from_json(player_data)                
+            account, name, profession = get_basic_player_data_from_json(player_data)
+            if profession not in squad_comp[fight_number]:
+                squad_comp[fight_number][profession] = 1
+            else:
+                squad_comp[fight_number][profession] = squad_comp[fight_number][profession]+1
 
             # if this combination of charname + profession is not in the player index yet, create a new entry
             name_and_prof = name+" "+profession
@@ -1107,7 +1113,7 @@ def collect_stat_data(args, config, log, anonymize=False):
     if anonymize:
         anonymize_players(players, account_index)
     
-    return players, fights, found_healing, found_barrier
+    return players, fights, found_healing, found_barrier, squad_comp
             
 
 
