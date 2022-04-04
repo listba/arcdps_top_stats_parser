@@ -132,8 +132,18 @@ if __name__ == '__main__':
         else:
             write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
     
-    print_string = "Squad Composition\n"
+    print_string = "!!!Squad Composition\n\n"
     myprint(output, print_string)    
-    for x in squad_comp:
-        myprint(output, str(squad_comp[x]))
-        myprint(output, " \n")
+    for fight in squad_comp:
+        output_string1 = "|thead-dark|k\n"
+        output_string2 = ""
+        output_string1 += "|Fight |"
+        output_string2 += "|"+str(fight)+" |"
+        for x in squad_comp[fight]:
+            output_string1 += str(x)+" |"
+            output_string2 += str(squad_comp[fight][x])+" |"
+        output_string1 += "h"
+        output_string2 += "\n"
+        myprint(output, output_string1)
+        myprint(output, output_string2)
+
