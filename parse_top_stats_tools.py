@@ -155,6 +155,8 @@ def fill_config(config_input):
     config.buff_abbrev["Aegis"] = 'aegis'
     config.buff_abbrev["Might"] = 'might'
     config.buff_abbrev["Fury"] = 'fury'
+    config.buff_abbrev["Superspeed"] = 'ss'
+    config.buff_abbrev["Regeneration"] = 'regen'
     
     return config
     

@@ -159,6 +159,8 @@ def fill_config(config_input):
     config.buff_abbrev["Aegis"] = 'aegis'
     config.buff_abbrev["Might"] = 'might'
     config.buff_abbrev["Fury"] = 'fury'
+    config.buff_abbrev["Superspeed"] = 'ss'
+    config.buff_abbrev["Regeneration"] = 'regen'
     
     return config
     
@@ -1538,8 +1540,9 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
     
     print_string = "| Fight # | Date | Start Time | End Time | Duration | Skipped | Num. Allies | Num. Enemies| Kills |"
     for stat in overall_squad_stats:
-        stat_len[stat] = max(len(config.stat_names[stat]), len(str(overall_squad_stats[stat])))
-        print_string += " "+config.stat_names[stat]+"|"
+        if stat is not "dist":
+            stat_len[stat] = max(len(config.stat_names[stat]), len(str(overall_squad_stats[stat])))
+            print_string += " "+config.stat_names[stat]+"|"
     print_string += "h"
     myprint(output, print_string)
     for i in range(len(fights)):
@@ -1550,8 +1553,9 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
         end_time = fight.end_time.split()[1]        
         print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(start_time)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.kills)+" |"
         for stat in overall_squad_stats:
-            #JEL - added my_value formatting
-            print_string += " "+my_value(round(fight.total_stats[stat]))+"|"
+            if stat is not "dist":
+                #JEL - added my_value formatting
+                print_string += " "+my_value(round(fight.total_stats[stat]))+"|"
         myprint(output, print_string)
 
     #used_fights = [f for f in fights if not f.skipped]
@@ -1564,7 +1568,8 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 
     print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['start_time']:>10}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
     for stat in overall_squad_stats:
-        print_string += " "+my_value(round(overall_squad_stats[stat]))+"|"
+        if stat is not "dist":
+            print_string += " "+my_value(round(overall_squad_stats[stat]))+"|"
     print_string += "f\n\n"
     myprint(output, print_string)
 
