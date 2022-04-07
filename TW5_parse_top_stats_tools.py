@@ -733,7 +733,7 @@ def write_sorted_top_percentage(players, top_players, comparison_percentage, con
             place += 1
 
         percentage = int(player.portion_top_stats[stat]*100)
-        print_string = f"|{place:>2}"+f". |{player.name:<{max_name_length}} "+f"|{profession_strings[i]:<{profession_length}} " +f"| {percentage:>10}% " +f" | {round(player.consistency_stats[stat]):>9} "+f" | {player.num_fights_present:>6} |"
+        print_string = f"|{place:>2}"+f". |{player.name:<{max_name_length}} "+" | {{"+profession_strings[i]+"}} | "+f"| {percentage:>10}% " +f" | {round(player.consistency_stats[stat]):>9} "+f" | {player.num_fights_present:>6} |"
 
         if stat != "dist":
             print_string += f" {round(player.total_stats[stat]):>7} |"
