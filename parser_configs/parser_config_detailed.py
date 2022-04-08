@@ -14,12 +14,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-stats_to_compute = ['dmg', 'rips', 'cleanses', 'dist', 'stab', 'prot', 'aegis', 'might', 'fury', 'dmg_taken', 'deaths', 'ss', 'regen']
+stats_to_compute = ['deaths', 'dmg', 'dmg_taken', 'rips', 'cleanses', 'ss', 'dist', 'stab', 'prot', 'aegis', 'might', 'fury', 'resist', 'resol', 'quick', 'swift', 'alac', 'vig', 'regen']
 
 # How many players will be listed who achieved top stats most often for each stat?
-num_players_listed = {'dmg': 1000, 'rips': 1000, 'stab': 1000, 'prot': 1000, 'aegis': 1000, 'might': 1000, 'fury': 1000, 'cleanses': 1000, 'dist': 1000, 'dmg_taken': 1000, 'deaths': 1000, 'ss': 1000, 'regen': 1000}
+num_players_listed = {'dmg': 1000, 'rips': 1000, 'cleanses': 1000, 'dist': 1000, 'stab': 1000, 'prot': 1000, 'aegis': 1000, 'might': 1000, 'fury': 1000, 'dmg_taken': 1000, 'deaths': 1000, 'ss': 1000, 'resist': 1000, 'resol': 1000, 'quick': 1000, 'swift': 1000, 'alac': 1000, 'vig': 1000, 'regen': 1000}
 # How many players are considered to be "top" in each fight for each stat?
-num_players_considered_top = {'dmg': 5, 'rips': 5, 'stab': 5, 'prot': 5, 'aegis': 5, 'might': 5, 'fury': 5, 'cleanses': 5, 'dist': 5, 'dmg_taken': 5, 'deaths': 1, 'ss': 5, 'regen': 5}
+num_players_considered_top = {'dmg': 5, 'rips': 5, 'cleanses': 5, 'dist': 5, 'stab': 5, 'prot': 5, 'aegis': 5, 'might': 5, 'fury': 5, 'dmg_taken': 5, 'deaths': 1, 'ss': 5, 'resist': 5, 'resol': 5, 'quick': 5, 'swift': 5, 'alac': 5, 'vig': 5, 'regen': 5}
 
 
 # For what portion of all fights does a player need to be there to be considered for "consistency percentage" awards?
@@ -99,17 +99,23 @@ profession_abbreviations["Harbinger"] = "Harbinger"
 # name each stat will be written as
 stat_names = {}
 stat_names["dmg"] = "Damage"
-stat_names["rips"] = "Strips"
-stat_names["stab"] = "Stab"
-stat_names["prot"] = "Prot"
+stat_names["dmg_taken"] = "Damage Taken"
+stat_names["rips"] = "Boon Strips"
+stat_names["stab"] = "Stability"
+stat_names["prot"] = "Protection"
 stat_names["aegis"] = "Aegis"
 stat_names["might"] = "Might"
 stat_names["fury"] = "Fury"
-stat_names["cleanses"] = "Cleanses"
+stat_names["cleanses"] = "Condition Cleanses"
 stat_names["heal"] = "Healing"
 stat_names["barrier"] = "Barrier"
-stat_names["dist"] = "Dist Tag"
-stat_names["dmg_taken"] = "Dam_Taken"
+stat_names["dist"] = "Distance to Tag"
 stat_names["deaths"] = "Deaths"
-stat_names["ss"] = "S_speed"
-stat_names["regen"] = "Regen"
+stat_names["ss"] = "Superspeed"
+stat_names["regen"] = "Regeneration"
+stat_names["resist"] = "Resistance"
+stat_names["resol"] = "Resolution"
+stat_names["quick"] = "Quickness"
+stat_names["swift"] = "Swiftness"
+stat_names["alac"] = "Alacrity"
+stat_names["vig"] = "Vigor"
