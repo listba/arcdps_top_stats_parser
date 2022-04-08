@@ -26,7 +26,7 @@ from enum import Enum
 import importlib
 import xlwt
 
-from test_TW5_parse_top_stats_tools import *
+from TW5_parse_top_stats_tools import *
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='This reads a set of arcdps reports in xml format and generates top stats.')
@@ -80,14 +80,50 @@ if __name__ == '__main__':
     overall_raid_stats = get_overall_raid_stats(fights)
     total_fight_duration = print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, found_healing, found_barrier, config, output)
 
+    #Start nav_bar_menu for TW5
+    Nav_Bar_Items= ('<$button set="!!curTab" setTo="Overview" selectedClass="" class="btn btn-sm btn-dark" style=""> Session Overview </$button>',
+                    '<$button set="!!curTab" setTo="Squad Composition" selectedClass="" class="btn btn-sm btn-dark" style=""> Squad Composition </$button>',
+                    '<$button set="!!curTab" setTo="Deaths" selectedClass="" class="btn btn-sm btn-dark" style=""> Deaths </$button>',
+                    '<$button set="!!curTab" setTo="Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage </$button>',
+                    '<$button set="!!curTab" setTo="Damage Taken" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage Taken</$button>',
+                    '<$button set="!!curTab" setTo="Boon Strips" selectedClass="" class="btn btn-sm btn-dark" style=""> Boon Strips </$button>',
+                    '<$button set="!!curTab" setTo="Condition Cleanses" selectedClass="" class="btn btn-sm btn-dark" style=""> Condition Cleanses</$button>',
+                    '<$button set="!!curTab" setTo="Superspeed" selectedClass="" class="btn btn-sm btn-dark" style=""> Superspeed </$button>',
+                    '<$button set="!!curTab" setTo="Stability" selectedClass="" class="btn btn-sm btn-dark" style=""> Stability </$button>',
+                    '<$button set="!!curTab" setTo="Protection" selectedClass="" class="btn btn-sm btn-dark" style=""> Protection </$button>',
+                    '<$button set="!!curTab" setTo="Aegis" selectedClass="" class="btn btn-sm btn-dark" style=""> Aegis </$button>',
+                    '<$button set="!!curTab" setTo="Might" selectedClass="" class="btn btn-sm btn-dark" style=""> Might </$button>',
+                    '<$button set="!!curTab" setTo="Fury" selectedClass="" class="btn btn-sm btn-dark" style=""> Fury </$button>',
+                    '<$button set="!!curTab" setTo="Resistance" selectedClass="" class="btn btn-sm btn-dark" style=""> Resistance </$button>',
+                    '<$button set="!!curTab" setTo="Resolution" selectedClass="" class="btn btn-sm btn-dark" style=""> Resolution </$button>',
+                    '<$button set="!!curTab" setTo="Quickness" selectedClass="" class="btn btn-sm btn-dark" style=""> Quickness </$button>',
+                    '<$button set="!!curTab" setTo="Swiftness" selectedClass="" class="btn btn-sm btn-dark" style=""> Swiftness </$button>',
+                    '<$button set="!!curTab" setTo="Alacrity" selectedClass="" class="btn btn-sm btn-dark" style=""> Alacrity </$button>',
+                    '<$button set="!!curTab" setTo="Vigor" selectedClass="" class="btn btn-sm btn-dark" style=""> Vigor </$button>',
+                    '<$button set="!!curTab" setTo="Regeneration" selectedClass="" class="btn btn-sm btn-dark" style=""> Regeneration </$button>'
+    )
+    for item in Nav_Bar_Items:
+        myprint(output, item)
+    
+    myprint(output, '\n---\n')
+
+    #End nav_bar_menu for TW5
+
+    #Overview reveal
+    myprint(output, '<$reveal type="match" state="!!curTab" text="Overview">')
+    myprint(output, '\n!!!OVERVIEW\n')
+
     print_fights_overview(fights, overall_squad_stats, overall_raid_stats, config, output)
+
+    #End reveal
+    myprint(output, '</$reveal>')
+
     write_fights_overview_xls(fights, overall_squad_stats, overall_raid_stats, config, args.xls_output_filename)
     
     #Move Squad Composition here so it is first under the fight summaries
     #Squad Composition Testing
-    print_string = "<<slider label:'SQUAD COMPOSITION' labelClass:'' srcClass:'' src:'"
-    myprint(output, print_string)    
-
+    myprint(output, '<$reveal type="match" state="!!curTab" text="Squad Composition">')    
+    myprint(output, '\n!!!SQUAD COMPOSITION\n')    
     sort_order = ['Firebrand', 'Scrapper', 'Spellbreaker', "Herald", "Chronomancer", "Reaper", "Scourge", "Dragonhunter", "Guardian", "Elementalist", "Tempest", "Revenant", "Weaver", "Willbender", "Renegade", "Vindicator", "Warrior", "Berserker", "Bladesworn", "Engineer", "Holosmith", "Mechanist", "Ranger", "Druid", "Soulbeast", "Untamed", "Thief", "Daredevil", "Deadeye", "Specter", "Catalyst", "Mesmer", "Mirage", "Virtuoso", "Necromancer", "Harbinger"]
 
     output_string = ""
@@ -108,8 +144,8 @@ if __name__ == '__main__':
         myprint(output, output_string1)
         myprint(output, output_string2)
 
-    #'>>
-    print_string = "'>>\n"
+    #end reveal
+    print_string = "</$reveal>\n"
     myprint(output, print_string)     
 
 
@@ -134,8 +170,9 @@ if __name__ == '__main__':
             continue
 
         #JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
-        myprint(output, "<<slider label:'"+config.stat_names[stat].upper()+"' labelClass:'' srcClass:'' src:'\n")
-        
+        myprint(output,'<$reveal type="match" state="!!curTab" text="'+config.stat_names[stat]+'">')
+        myprint(output, "\n!!!"+config.stat_names[stat].upper()+"\n")
+
         if stat == 'dist':
             top_consistent_stat_players[stat] = get_top_players(players, config, stat, StatType.CONSISTENT)
             top_total_stat_players[stat] = get_top_players(players, config, stat, StatType.TOTAL)
@@ -153,7 +190,7 @@ if __name__ == '__main__':
             top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
         
         #JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
-        myprint(output, "\n'>>\n")
+        myprint(output, "</$reveal>\n")
 
         write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, args.json_output_filename)
 

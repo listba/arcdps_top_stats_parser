@@ -32,11 +32,11 @@ attendance_percentage_for_buildswap = 30
 attendance_percentage_for_average = 33
 
 # What portion of the top total player stat does someone need to reach to be considered for total awards?
-percentage_of_top_for_consistent = 20
+percentage_of_top_for_consistent = 25
 # What portion of the total stat of the top consistent player does someone need to reach to be considered for consistency awards?
-percentage_of_top_for_total = 20
+percentage_of_top_for_total = 25
 # What portion of the percentage the top consistent player reached top does someone need to reach to be considered for percentage awards?
-percentage_of_top_for_percentage = 20
+percentage_of_top_for_percentage = 25
 # What portion of the percentage the top consistent player reached top does someone need to reach to be considered for late but great awards?
 percentage_of_top_for_late = 100
 # What portion of the percentage the top consistent player reached top does someone need to reach to be considered for jack of all trades awards?
