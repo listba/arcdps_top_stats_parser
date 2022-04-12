@@ -154,19 +154,19 @@ def fill_config(config_input):
     config.empty_stats['time_active'] = -1
     config.empty_stats['time_in_combat'] = -1
 
-    config.buff_abbrev["Stability"] = 'stab'
-    config.buff_abbrev["Protection"] = 'prot'
+    config.buff_abbrev["Stability"] = 'stability'
+    config.buff_abbrev["Protection"] = 'protection'
     config.buff_abbrev["Aegis"] = 'aegis'
     config.buff_abbrev["Might"] = 'might'
     config.buff_abbrev["Fury"] = 'fury'
-    config.buff_abbrev["Superspeed"] = 'ss'
-    config.buff_abbrev["Regeneration"] = 'regen'
-    config.buff_abbrev["Resistance"] = 'resist'
-    config.buff_abbrev["Resolution"] = 'resol'
-    config.buff_abbrev["Quickness"] = 'quick'
-    config.buff_abbrev["Swiftness"] = 'swift'
-    config.buff_abbrev["Alacrity"] = 'alac'
-    config.buff_abbrev["Vigor"] = 'vig'
+    config.buff_abbrev["Superspeed"] = 'superspeed'
+    config.buff_abbrev["Regeneration"] = 'regeneration'
+    config.buff_abbrev["Resistance"] = 'resistance'
+    config.buff_abbrev["Resolution"] = 'resolution'
+    config.buff_abbrev["Quickness"] = 'quickness'
+    config.buff_abbrev["Swiftness"] = 'swiftness'
+    config.buff_abbrev["Alacrity"] = 'alacrity'
+    config.buff_abbrev["Vigor"] = 'vigor'
         
     return config
     

@@ -18,6 +18,7 @@
 
 
 import argparse
+import datetime
 import os.path
 from os import listdir
 import sys
@@ -44,7 +45,7 @@ if __name__ == '__main__':
         print("Directory ",args.input_directory," is not a directory or does not exist!")
         sys.exit()
     if args.output_filename is None:
-        args.output_filename = args.input_directory+"/TW5_top_stats_detailed.txt"
+        args.output_filename = args.input_directory+"/TW5_top_stats_detailed.tid"
     if args.xls_output_filename is None:
         args.xls_output_filename = args.input_directory+"/top_stats_detailed.xls"
     if args.json_output_filename is None:
@@ -52,7 +53,7 @@ if __name__ == '__main__':
     if args.log_file is None:
         args.log_file = args.input_directory+"/log_detailed.txt"
 
-    output = open(args.output_filename, "w")
+    output = open(args.output_filename, "w",encoding="utf-8")
     log = open(args.log_file, "w")
 
     parser_config = importlib.import_module("parser_configs."+args.config_file , package=None) 
@@ -70,7 +71,17 @@ if __name__ == '__main__':
     book = xlwt.Workbook(encoding="utf-8")
     book.add_sheet("fights overview")
     book.save(args.xls_output_filename)
-    
+
+    #Create Tid file header to support drag and drop onto html page
+    myDate = datetime.datetime.now()
+
+    myprint(output, 'created: '+myDate.strftime("%Y%m%d%H%M%S"))
+    myprint(output, 'creator: Drevarr')
+    myprint(output, 'curTab: Overview')
+    myprint(output, 'tags: Logs [['+myDate.strftime("%Y")+'-'+myDate.strftime("%m")+' Log Reviews]]')
+    myprint(output, 'title: '+myDate.strftime("%Y%m%d")+' WvW Log Review\n')
+    #End Tid file header
+
     #JEL-Tweaked to output TW5 formatting (https://drevarr.github.io/FluxCapacity.html)
     print_string = "__''Flux Capacity Node Farmers - WVW Log Review''__\n"
     myprint(output, print_string)

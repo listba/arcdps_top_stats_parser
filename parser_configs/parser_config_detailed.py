@@ -14,12 +14,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-stats_to_compute = ['deaths', 'dmg', 'dmg_taken', 'rips', 'cleanses', 'ss', 'dist', 'stab', 'prot', 'aegis', 'might', 'fury', 'resist', 'resol', 'quick', 'swift', 'alac', 'vig', 'regen']
+stats_to_compute = ['deaths', 'dmg', 'dmg_taken', 'rips', 'cleanses', 'superspeed', 'dist', 'stability', 'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration']
 
 # How many players will be listed who achieved top stats most often for each stat?
-num_players_listed = {'dmg': 1000, 'rips': 1000, 'cleanses': 1000, 'dist': 1000, 'stab': 1000, 'prot': 1000, 'aegis': 1000, 'might': 1000, 'fury': 1000, 'dmg_taken': 1000, 'deaths': 1000, 'ss': 1000, 'resist': 1000, 'resol': 1000, 'quick': 1000, 'swift': 1000, 'alac': 1000, 'vig': 1000, 'regen': 1000}
+num_players_listed = {'dmg': 1000, 'rips': 1000, 'cleanses': 1000, 'dist': 1000, 'stability': 1000, 'protection': 1000, 'aegis': 1000, 'might': 1000, 'fury': 1000, 'dmg_taken': 1000, 'deaths': 1000, 'superspeed': 1000, 'resistance': 1000, 'resolution': 1000, 'quickness': 1000, 'swiftness': 1000, 'alacrity': 1000, 'vigor': 1000, 'regeneration': 1000}
 # How many players are considered to be "top" in each fight for each stat?
-num_players_considered_top = {'dmg': 5, 'rips': 5, 'cleanses': 5, 'dist': 5, 'stab': 5, 'prot': 5, 'aegis': 5, 'might': 5, 'fury': 5, 'dmg_taken': 5, 'deaths': 1, 'ss': 5, 'resist': 5, 'resol': 5, 'quick': 5, 'swift': 5, 'alac': 5, 'vig': 5, 'regen': 5}
+num_players_considered_top = {'dmg': 5, 'rips': 5, 'cleanses': 5, 'dist': 5, 'stability': 5, 'protection': 5, 'aegis': 5, 'might': 5, 'fury': 5, 'dmg_taken': 5, 'deaths': 1, 'superspeed': 5, 'resistance': 5, 'resolution': 5, 'quickness': 5, 'swiftness': 5, 'alacrity': 5, 'vigor': 5, 'regeneration': 5}
 
 
 # For what portion of all fights does a player need to be there to be considered for "consistency percentage" awards?
@@ -101,8 +101,8 @@ stat_names = {}
 stat_names["dmg"] = "Damage"
 stat_names["dmg_taken"] = "Damage Taken"
 stat_names["rips"] = "Boon Strips"
-stat_names["stab"] = "Stability"
-stat_names["prot"] = "Protection"
+stat_names["stability"] = "Stability"
+stat_names["protection"] = "Protection"
 stat_names["aegis"] = "Aegis"
 stat_names["might"] = "Might"
 stat_names["fury"] = "Fury"
@@ -111,11 +111,11 @@ stat_names["heal"] = "Healing"
 stat_names["barrier"] = "Barrier"
 stat_names["dist"] = "Distance to Tag"
 stat_names["deaths"] = "Deaths"
-stat_names["ss"] = "Superspeed"
-stat_names["regen"] = "Regeneration"
-stat_names["resist"] = "Resistance"
-stat_names["resol"] = "Resolution"
-stat_names["quick"] = "Quickness"
-stat_names["swift"] = "Swiftness"
-stat_names["alac"] = "Alacrity"
-stat_names["vig"] = "Vigor"
+stat_names["superspeed"] = "Superspeed"
+stat_names["regeneration"] = "Regeneration"
+stat_names["resistance"] = "Resistance"
+stat_names["resolution"] = "Resolution"
+stat_names["quickness"] = "Quickness"
+stat_names["swiftness"] = "Swiftness"
+stat_names["alacrity"] = "Alacrity"
+stat_names["vigor"] = "Vigor"
