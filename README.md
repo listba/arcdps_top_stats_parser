@@ -2,6 +2,8 @@
 ```TW5_parse_top_stats_overview.py``` and ```TW5_parse_top_stats_tools.py``` provide alternative output to support posting to a TW5 wiki with shiraz plugin.
 Example available at (https://drevarr.github.io/FluxCapacity.html)
 
+Follow the ``` Preparation ``` steps further down in this document then utilize the ```TW5 Top Stats Generation Steps ``` to generate the wiki for online hosting.
+
 ![Example Output](ExampleOutput.PNG)
 
 # What is it all about? #
@@ -39,7 +41,37 @@ To be able to generate the top stats, you need to install/download a few things.
 3. Get the Elite Insights parser for arcdps logs (https://github.com/baaron4/GW2-Elite-Insights-Parser/releases). For parsing including barrier, you will need version 2.41 or higher. In the following, we assume the path to it is ```C:\Users\Example\Downloads\EliteInsights\```.
 4. Download this repository if you don't have it yet. We here assume the path is ```C:\Users\Example\Downloads\arcdps_top_stats_parser\```.
 
-There are two methods for generating the top stats, one requires more manual control, the other is more automated.
+There are three methods for generating the top stats.
+## TW5 Top Stats Generation Steps ##
+1. Generate .json files from your arcdps logs by using Elite Insights. Enable detailed wvw parsing and combat replay computation. You can also use the EI settings file stored in this repository under ```EI_config\EI_detailed_json_combat_replay.conf```, which will generate .json files with detailed wvw parsing and combat replay.
+2. Put all .json files you want included in the top stats into one folder. We use the folder ```C:\Users\Example\Documents\json_folder``` as an example here. Note that different file types will be ignored, so no need to move your .evtc/.zevtc logs elsewhere if you have them in the same folder.
+3. Open a terminal / windows command line (press Windows key + r, type "cmd", enter).
+4. Navigate to where the script is located using "cd", in our case this means ```cd Downloads\arcdps_top_stats_parser```.
+5. Type ```python TW5_parse_top_stats_overview.py <folder>```, where \<folder> is the path to your folder with json files. In our example case, we run ```python parse_top_stats_overview.py C:\Users\Example\Documents\json_folder```. For the detailed version, use ```parse_top_stats_detailed.py``` instead of ```parse_top_stats_overview.py```.
+6. Open ```TW5_Top_Stat_Parse.html``` in your browser of choice
+7. Drag and Drop the resulting file "TW5_top_stats_detailed.tid" located in <folder> with your json files onto the top of the web page.
+  
+  ![Screenshot_1](Screenshot_1.png)
+
+8. Click the Import button on the popup
+  
+  ![Screenshot_2](Screenshot_2.png)
+
+9. Log file link will be added to the WVW Log Review
+  
+  ![Screenshot_3](Screenshot_3.png)
+  
+10. Click the ![Save Button](Screenshot_4.png) button upper left side, complete the save dialog.
+  
+11. Upload to hosting site of choice
+
+## TW5 Customization ##
+TW5_Top_Stat_Parse.html is a single page application wiki that you can host to share the output of TW5_parse_top_stats_detailed.py
+
+  * Detailed info regarding the wiki is available at https://tiddlywiki.com
+  * You can rename TW5_Top_Stat_Parse.html to meet your hosting needs.
+  * Replace TW5_Top_Stat_Parse.html#index.png with an appropriate image
+  
 ## Manual Top Stats Generation ##
 1. Generate .json files from your arcdps logs by using Elite Insights. Enable detailed wvw parsing and combat replay computation. You can also use the EI settings file stored in this repository under ```EI_config\EI_detailed_json_combat_replay.conf```, which will generate .json files with detailed wvw parsing and combat replay.
 2. Put all .json files you want included in the top stats into one folder. We use the folder ```C:\Users\Example\Documents\json_folder``` as an example here. Note that different file types will be ignored, so no need to move your .evtc/.zevtc logs elsewhere if you have them in the same folder.
