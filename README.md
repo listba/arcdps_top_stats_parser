@@ -49,7 +49,7 @@ There are three methods for generating the top stats.
 4. Navigate to where the script is located using "cd", in our case this means ```cd Downloads\arcdps_top_stats_parser```.
 5. Type ```python TW5_parse_top_stats_overview.py <folder>```, where \<folder> is the path to your folder with json files. In our example case, we run ```python parse_top_stats_overview.py C:\Users\Example\Documents\json_folder```. For the detailed version, use ```parse_top_stats_detailed.py``` instead of ```parse_top_stats_overview.py```.
 6. Open ```TW5_Top_Stat_Parse.html``` in your browser of choice
-7. Drag and Drop the resulting file "TW5_top_stats_detailed.tid" located in <folder> with your json files onto the top of the web page.
+7. Drag and Drop the resulting file ```TW5_top_stats_detailed.tid``` located in the \<folder> with your json files onto the top of the web page.
   
   ![Screenshot_1](Screenshot_1.png)
 
