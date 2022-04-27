@@ -37,7 +37,7 @@ if __name__ == '__main__':
     parser.add_argument('-x', '--xls_output', dest="xls_output_filename", help="xls file to write the computed top stats")    
     parser.add_argument('-j', '--json_output', dest="json_output_filename", help="json file to write the computed top stats to")    
     parser.add_argument('-l', '--log_file', dest="log_file", help="Logging file with all the output")
-    parser.add_argument('-c', '--config_file', dest="config_file", help="Config file with all the settings", default="parser_config_detailed")
+    parser.add_argument('-c', '--config_file', dest="config_file", help="Config file with all the settings", default="TW5_parser_config_detailed")
     parser.add_argument('-a', '--anonymized', dest="anonymize", help="Create an anonymized version of the top stats. All account and character names will be replaced.", default=False, action='store_true')
     args = parser.parse_args()
 
@@ -47,9 +47,9 @@ if __name__ == '__main__':
     if args.output_filename is None:
         args.output_filename = args.input_directory+"/TW5_top_stats_detailed.tid"
     if args.xls_output_filename is None:
-        args.xls_output_filename = args.input_directory+"/top_stats_detailed.xls"
+        args.xls_output_filename = args.input_directory+"/TW5_top_stats_detailed.xls"
     if args.json_output_filename is None:
-        args.json_output_filename = args.input_directory+"/top_stats_detailed.json"                
+        args.json_output_filename = args.input_directory+"/TW5_top_stats_detailed.json"                
     if args.log_file is None:
         args.log_file = args.input_directory+"/log_detailed.txt"
 
@@ -72,11 +72,12 @@ if __name__ == '__main__':
     book.add_sheet("fights overview")
     book.save(args.xls_output_filename)
 
+    
     #Create Tid file header to support drag and drop onto html page
     myDate = datetime.datetime.now()
 
     myprint(output, 'created: '+myDate.strftime("%Y%m%d%H%M%S"))
-    myprint(output, 'creator: Drevarr')
+    myprint(output, 'creator: Drevarr ')
     myprint(output, 'curTab: Overview')
     myprint(output, 'tags: Logs [['+myDate.strftime("%Y")+'-'+myDate.strftime("%m")+' Log Reviews]]')
     myprint(output, 'title: '+myDate.strftime("%Y%m%d")+' WvW Log Review\n')
@@ -112,7 +113,8 @@ if __name__ == '__main__':
                     '<$button set="!!curTab" setTo="Swiftness" selectedClass="" class="btn btn-sm btn-dark" style=""> Swiftness </$button>',
                     '<$button set="!!curTab" setTo="Alacrity" selectedClass="" class="btn btn-sm btn-dark" style=""> Alacrity </$button>',
                     '<$button set="!!curTab" setTo="Vigor" selectedClass="" class="btn btn-sm btn-dark" style=""> Vigor </$button>',
-                    '<$button set="!!curTab" setTo="Regeneration" selectedClass="" class="btn btn-sm btn-dark" style=""> Regeneration </$button>'
+                    '<$button set="!!curTab" setTo="Regeneration" selectedClass="" class="btn btn-sm btn-dark" style=""> Regeneration </$button>',
+                    '<$button set="!!curTab" setTo="Support" selectedClass="" class="btn btn-sm btn-dark" style=""> Support Players </$button>'
     )
     for item in Nav_Bar_Items:
         myprint(output, item)
@@ -213,6 +215,22 @@ if __name__ == '__main__':
 
         write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, args.json_output_filename)
 
+    #print table of accounts that fielded support characters
+    myprint(output,'<$reveal type="match" state="!!curTab" text="Support">')
+    myprint(output, "\n")
+    # print table header
+    print_string = "|thead-dark table-hover sortable|k"    
+    myprint(output, print_string)
+    print_string = "|!Account |!Name |!Profession | !Fights| !Duration|!Support |!Guild Status |h"
+    myprint(output, print_string)    
+
+    for stat in config.stats_to_compute:
+        if (stat == 'rips' or stat == 'cleanses' or stat == 'stability'):
+            write_support_players(players, top_total_stat_players[stat], stat, output)
+
+    myprint(output, "</$reveal>\n")
+
+    supportCount=0
     for stat in config.stats_to_compute:
         if stat == 'dist':
             write_stats_xls(players, top_percentage_stat_players[stat], stat, args.xls_output_filename)
@@ -226,3 +244,5 @@ if __name__ == '__main__':
             write_stats_xls(players, top_consistent_stat_players[stat], stat, args.xls_output_filename)
         else:
             write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
+            if stat == 'rips' or stat == 'cleanses' or stat == 'stability':
+                supportCount = write_support_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename, supportCount)

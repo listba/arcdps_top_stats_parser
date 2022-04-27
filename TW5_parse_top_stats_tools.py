@@ -29,6 +29,8 @@ from xlutils.copy import copy
 import json
 import jsons
 import math
+import requests
+import Guild_Data
 
 debug = False # enable / disable debug output
 
@@ -112,8 +114,24 @@ class Config:
     buffs_stacking_intensity: list = field(default_factory=list)
     buff_abbrev: dict = field(default_factory=dict)
     
+#fetch Guild Data and Check Guild Status function
+Guild_ID = Guild_Data.Guild_ID
+API_Key = Guild_Data.API_Key
+api_url = "https://api.guildwars2.com/v2/guild/"+Guild_ID+"/members?access_token="+API_Key
+response = requests.get(api_url)
+members = json.loads(response.text)
+print("response code: "+str(response.status_code))
 
-    
+
+def findMember(json_object, name):
+    guildStatus = "--==Non Member==--"
+    for dict in json_object:
+        if dict['name'] == name:
+            guildStatus = dict['rank']
+    return guildStatus
+# End fetch Guild Data and Check Guild Status
+
+
 # prints output_string to the console and the output_file, with a linebreak at the end
 def myprint(output_file, output_string):
     print(output_string)
@@ -538,6 +556,20 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
     myprint(output_file, "\n")
         
                 
+# Write out accounts that played support classes
+def write_support_players(players, top_players, stat, output_file):
+    for i in range(len(top_players)):
+        player = players[top_players[i]]
+        guildStatus = findMember(members, player.account)
+        if stat == 'rips' and (player.profession == 'Chronomancer' or player.profession == 'Spellbreaker'):
+            print_string = "|"+player.account+" |"+player.name+" |"+player.profession+" | "+str(player.num_fights_present)+"| "+str(player.duration_fights_present)+"| "+stat+" |"+guildStatus+" |"
+            myprint(output_file, print_string)
+        if stat == 'cleanses' and (player.profession == 'Scrapper' or player.profession == 'Tempest' or player.profession == 'Druid'):
+            print_string = "|"+player.account+" |"+player.name+" |"+player.profession+" | "+str(player.num_fights_present)+"| "+str(player.duration_fights_present)+"| "+stat+" |"+guildStatus+" |"
+            myprint(output_file, print_string)
+        if stat == 'stability' and (player.profession == 'Firebrand'):
+            print_string = "|"+player.account+" |"+player.name+" |"+player.profession+" | "+str(player.num_fights_present)+"| "+str(player.duration_fights_present)+"| "+stat+" |"+guildStatus+" |"
+            myprint(output_file, print_string)
 
 # Write the top x people who achieved top total stat.
 # Input:
@@ -549,7 +581,7 @@ def write_stats_xls(players, top_players, stat, xls_output_filename):
     book = xlrd.open_workbook(xls_output_filename)
     wb = copy(book)
     sheet1 = wb.add_sheet(stat)
-
+    
     sheet1.write(0, 0, "Account")
     sheet1.write(0, 1, "Name")
     sheet1.write(0, 2, "Profession")
@@ -577,6 +609,56 @@ def write_stats_xls(players, top_players, stat, xls_output_filename):
 
     wb.save(xls_output_filename)
 
+def write_support_xls(players, top_players, stat, xls_output_filename, supportCount):
+    book = xlrd.open_workbook(xls_output_filename)
+    wb = copy(book)
+    supportCount = supportCount
+        
+    try:
+        wb.add_sheet('Support')
+    except:
+        pass
+
+    sheet2 = wb.get_sheet('Support')
+
+    sheet2.write(0, 0, "Account")
+    sheet2.write(0, 1, "Name")
+    sheet2.write(0, 2, "Profession")
+    sheet2.write(0, 3, "Attendance (number of fights)")
+    sheet2.write(0, 4, "Attendance (duration fights)")
+    sheet2.write(0, 5, "Support Stat")
+
+    for i in range(len(top_players)):
+        player = players[top_players[i]]
+        if stat == 'rips' and (player.profession == 'Chronomancer' or player.profession == 'Spellbreaker'):
+            sheet2.write(supportCount+1, 0, player.account)
+            sheet2.write(supportCount+1, 1, player.name)
+            sheet2.write(supportCount+1, 2, player.profession)
+            sheet2.write(supportCount+1, 3, player.num_fights_present)
+            sheet2.write(supportCount+1, 4, player.duration_fights_present)
+            sheet2.write(supportCount+1, 5, stat)
+            supportCount +=1
+
+        if stat == 'cleanses' and (player.profession == 'Scrapper' or player.profession == 'Tempest' or player.profession == 'Druid'):
+            sheet2.write(supportCount+1, 0, player.account)
+            sheet2.write(supportCount+1, 1, player.name)
+            sheet2.write(supportCount+1, 2, player.profession)
+            sheet2.write(supportCount+1, 3, player.num_fights_present)
+            sheet2.write(supportCount+1, 4, player.duration_fights_present)
+            sheet2.write(supportCount+1, 5, stat)
+            supportCount +=1
+
+        if stat == 'stability' and (player.profession == 'Firebrand'):
+            sheet2.write(supportCount+1, 0, player.account)
+            sheet2.write(supportCount+1, 1, player.name)
+            sheet2.write(supportCount+1, 2, player.profession)
+            sheet2.write(supportCount+1, 3, player.num_fights_present)
+            sheet2.write(supportCount+1, 4, player.duration_fights_present)
+            sheet2.write(supportCount+1, 5, stat)
+            supportCount +=1
+            
+    wb.save(xls_output_filename)
+    return supportCount
 
 # Get and write the top x people who achieved top total stat.
 # Input:
@@ -1595,3 +1677,4 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
     json_dict["top_jack_of_all_trades_players"] =  {key: value for key, value in top_jack_of_all_trades_players.items()}        
     with open(output_file, 'w') as json_file:
         json.dump(json_dict, json_file, indent=4)
+
