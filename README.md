@@ -2,6 +2,14 @@
 ```TW5_parse_top_stats_overview.py``` and ```TW5_parse_top_stats_tools.py``` provide alternative output to support posting to a TW5 wiki with shiraz plugin.
 Example available at (https://drevarr.github.io/FluxCapacity.html)
 
+Edit ```Example_Guild_Data.py``` to update with your guild id and API token then rename as ```Guild_Data.py```
+      
+      
+      Guild_ID = 'Input_Your_Guild_ID_Here'
+      
+      API_Key = 'Input_Your_API_Token_Here'
+      
+
 Follow the ``` Preparation ``` steps further down in this document then utilize the ```TW5 Top Stats Generation Steps ``` to generate the wiki for online hosting.
 
 ![Example Output](ExampleOutput.PNG)
