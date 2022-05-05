@@ -185,7 +185,7 @@ def fill_config(config_input):
     config.buff_abbrev["Swiftness"] = 'swiftness'
     config.buff_abbrev["Alacrity"] = 'alacrity'
     config.buff_abbrev["Vigor"] = 'vigor'
-        
+            
     return config
     
         
@@ -821,7 +821,7 @@ def write_sorted_top_percentage(players, top_players, comparison_percentage, con
             place += 1
 
         percentage = int(player.portion_top_stats[stat]*100)
-        print_string = f"|{place:>2}"+f". |{player.name:<{max_name_length}} "+" | {{"+profession_strings[i]+"}} | "+f"| {percentage:>10}% " +f" | {round(player.consistency_stats[stat]):>9} "+f" | {player.num_fights_present:>6} |"
+        print_string = f"|{place:>2}"+f". |{player.name:<{max_name_length}} "+" | {{"+profession_strings[i]+"}} "+f"| {percentage:>10}% " +f" | {round(player.consistency_stats[stat]):>9} "+f" | {player.num_fights_present:>6} |"
 
         if stat != "dist":
             print_string += f" {round(player.total_stats[stat]):>7} |"
@@ -1324,6 +1324,11 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
             return 0
         return int(player_json['dpsAll'][0]['damage'])            
 
+    if stat == 'res':
+        if 'support' not in player_json or len(player_json['support']) != 1 or 'resurrects' not in player_json['support'][0]:
+            return 0
+        return int(player_json['support'][0]['resurrects'])
+
     if stat == 'rips':
         if 'support' not in player_json or len(player_json['support']) != 1 or 'boonStrips' not in player_json['support'][0]:
             return 0
@@ -1626,9 +1631,9 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
     print_string = "|thead-dark table-hover|k"
     myprint(output, print_string)
     
-    print_string = "| Fight # | Date | Start Time | End Time | Duration | Skipped | Num. Allies | Num. Enemies| Kills |"
+    print_string = "| Fight # | Date | Start Time | End Time | Duration | Skipped | Num. Allies | Num. Enemies | Kills |"
     for stat in overall_squad_stats:
-        if stat != "dist":
+        if stat != "dist" and stat !="res":
             stat_len[stat] = max(len(config.stat_names[stat]), len(str(overall_squad_stats[stat])))
             print_string += " {{"+config.stat_names[stat]+"}}|"
     print_string += "h"
@@ -1641,7 +1646,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
         end_time = fight.end_time.split()[1]        
         print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(start_time)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.kills)+" |"
         for stat in overall_squad_stats:
-            if stat != "dist":
+            if stat != "dist" and stat !="res":
                 #JEL - added my_value formatting
                 print_string += " "+my_value(round(fight.total_stats[stat]))+"|"
         myprint(output, print_string)
@@ -1656,7 +1661,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 
     print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['start_time']:>10}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
     for stat in overall_squad_stats:
-        if stat != "dist":
+        if stat != "dist" and stat !="res":
             print_string += " "+my_value(round(overall_squad_stats[stat]))+"|"
     print_string += "f\n\n"
     myprint(output, print_string)
