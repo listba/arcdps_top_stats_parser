@@ -185,6 +185,7 @@ def fill_config(config_input):
     config.buff_abbrev["Swiftness"] = 'swiftness'
     config.buff_abbrev["Alacrity"] = 'alacrity'
     config.buff_abbrev["Vigor"] = 'vigor'
+    config.buff_abbrev["Illusion of Life"] = 'iol'
             
     return config
     
@@ -983,6 +984,10 @@ def get_buff_ids_from_json(json_data, config):
                 config.buffs_stacking_intensity.append(abbrev_name)
             else:
                 config.buffs_stacking_duration.append(abbrev_name)
+    #Quick fix for Buffs not found in the initial fight log buffMap
+    if 'iol' not in config.buff_ids:
+        config.buff_ids['iol'] = 10346
+        config.buffs_stacking_duration.append('iol')
 
             
 
@@ -1356,9 +1361,9 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
             buffId = buff['id']
             if buffId == int(config.buff_ids[stat]):
                 if 'generation' not in buff['buffData'][0]:
-                    return 0.
+                    return 0
                 return float(buff['buffData'][0]['generation'])
-        return 0.
+        return 0
 
     if stat == 'heal':
         # check if healing was logged, save it
