@@ -113,6 +113,7 @@ class Config:
     buffs_stacking_duration: list = field(default_factory=list)
     buffs_stacking_intensity: list = field(default_factory=list)
     buff_abbrev: dict = field(default_factory=dict)
+    condition_ids: dict = field(default_factory=dict)
     
 #fetch Guild Data and Check Guild Status function
 Guild_ID = Guild_Data.Guild_ID
@@ -186,6 +187,8 @@ def fill_config(config_input):
     config.buff_abbrev["Alacrity"] = 'alacrity'
     config.buff_abbrev["Vigor"] = 'vigor'
     config.buff_abbrev["Illusion of Life"] = 'iol'
+
+    config.condition_ids = {'immobilize': 727, 'cripple': 721, 'weakness': 742, 'daze': 833}
             
     return config
     
@@ -1365,6 +1368,23 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
                 return float(buff['buffData'][0]['generation'])
         return 0
 
+    ### Conditions ###
+    if stat in config.condition_ids:
+        if 'buffUptimesActive' not in player_json:
+            return 0
+        # get buffs in squad generation -> need to loop over all buffs
+        for buff in player_json['buffUptimesActive']:
+            if 'id' not in buff:
+                continue 
+            # find right buff
+            buffId = buff['id']
+            if buffId == int(config.condition_ids[stat]):
+                if 'uptime' not in buff['buffData'][0]:
+                    return 0
+                return float(buff['buffData'][0]['uptime'])
+        return 0
+		
+
     if stat == 'heal':
         # check if healing was logged, save it
         heal = -1
@@ -1418,10 +1438,12 @@ def get_stats_from_fight_json(fight_json, config, log):
 
     num_allies = len(fight_json['players'])
     num_enemies = 0
+    #enemy_list = []
     num_kills = 0
     for enemy in fight_json['targets']:
         if 'enemyPlayer' in enemy and enemy['enemyPlayer'] == True:
             num_enemies += 1
+            #append enemy['name'] to enemy_list
             if 'combatReplayData' in enemy:
                 num_kills += len(enemy['combatReplayData']['dead'])
                 
@@ -1511,7 +1533,7 @@ def print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, fou
     i = 0
     printed_kills = False
     for stat in config.stats_to_compute:
-        if stat == 'dist':
+        if stat == 'dist' or stat in config.condition_ids:
             continue
         
         if i == 0:
@@ -1636,7 +1658,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
     print_string = "|thead-dark table-hover|k"
     myprint(output, print_string)
     
-    print_string = "| Fight # | Date | Start Time | End Time | Duration | Skipped | Num. Allies | Num. Enemies | Kills |"
+    print_string = "| Fight # | Date | Start Time | End Time | Secs | Skip | Allies | Enemies | Kills |"
     for stat in overall_squad_stats:
         if stat != "dist" and stat !="res":
             stat_len[stat] = max(len(config.stat_names[stat]), len(str(overall_squad_stats[stat])))

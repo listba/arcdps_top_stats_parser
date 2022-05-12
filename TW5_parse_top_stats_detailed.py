@@ -116,6 +116,10 @@ if __name__ == '__main__':
                     '<$button set="!!curTab" setTo="Alacrity" selectedClass="" class="btn btn-sm btn-dark" style=""> Alacrity </$button>',
                     '<$button set="!!curTab" setTo="Vigor" selectedClass="" class="btn btn-sm btn-dark" style=""> Vigor </$button>',
                     '<$button set="!!curTab" setTo="Regeneration" selectedClass="" class="btn btn-sm btn-dark" style=""> Regeneration </$button>',
+                    '<$button set="!!curTab" setTo="Cripple" selectedClass="" class="btn btn-sm btn-dark" style=""> Cripple </$button>',
+                    '<$button set="!!curTab" setTo="Weakness" selectedClass="" class="btn btn-sm btn-dark" style=""> Weakness </$button>',
+                    '<$button set="!!curTab" setTo="Daze" selectedClass="" class="btn btn-sm btn-dark" style=""> Daze </$button>',
+                    '<$button set="!!curTab" setTo="Immobilize" selectedClass="" class="btn btn-sm btn-dark" style=""> Immobilize </$button>',
                     '<$button set="!!curTab" setTo="Support" selectedClass="" class="btn btn-sm btn-dark" style=""> Support Players </$button>'
     )
     for item in Nav_Bar_Items:
