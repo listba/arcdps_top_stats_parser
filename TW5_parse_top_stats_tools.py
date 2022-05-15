@@ -80,6 +80,7 @@ class Fight:
     allies: int = 0
     kills: int = 0
     start_time: str = ""
+    enemy_squad: dict = field(default_factory=dict) #profession and count of enemies
     
     
 # This class stores the configuration for running the top stats.
@@ -549,7 +550,7 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
         if stat != "dist" and stat not in config.buff_ids and stat != 'dmg_taken':
             print_string += my_value(round(player.total_stats[stat]))+"|"
         if stat == 'dmg_taken':
-            print_string += f" {player.total_stats[stat]:>9}| "+f" {player.average_stats[stat]:>8}|"
+            print_string += f" {my_value(player.total_stats[stat]):>9}| "+f" {my_value(player.average_stats[stat]):>8}|"
         elif stat in config.buffs_stacking_intensity:
             print_string += f" {player.total_stats[stat]:>8}s| "+f" {player.average_stats[stat]:>8}|"
         elif stat in config.buffs_stacking_duration:
@@ -715,6 +716,8 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
     print_string = "|Place |Name |Class | Attendance| Total|"
     if stat in config.buff_ids:
         print_string += " Average|"
+    if stat == 'dmg':
+        print_string += " DPS|"
     
     print_string += "h"
     myprint(output_file, print_string)    
@@ -736,9 +739,9 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
         #print_string = f"{place:>2}"+f". {player.name:<{max_name_length}} "+f" {profession_strings[i]:<{profession_length}} "
 
         if fight_time_h > 0:
-            print_string += f" {fight_time_h:>2}h {fight_time_m:>2}m {fight_time_s:>2}s| "
+            print_string += f" {fight_time_h:>2}h {fight_time_m:>2}m {fight_time_s:>2}s | "
         else:
-            print_string += f" {fight_time_m:>6}m {fight_time_s:>2}s| "
+            print_string += f" {fight_time_m:>6}m {fight_time_s:>2}s | "
 
         if stat in config.buffs_stacking_duration:
             print_string += f" {round(player.total_stats[stat]):>8}s| "
@@ -746,6 +749,9 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
         elif stat in config.buffs_stacking_intensity:
             print_string += f" {round(player.total_stats[stat]):>8}s| "
             print_string += f" {player.average_stats[stat]:>8}|"
+        elif stat == 'dmg':
+            print_string += f" {my_value(round(player.total_stats[stat])):>8}| "
+            print_string += f" {my_value(player.average_stats[stat]):>8}|"        
         else:
             print_string += my_value(round(player.total_stats[stat]))+"|"
         myprint(output_file, print_string)
@@ -1438,12 +1444,18 @@ def get_stats_from_fight_json(fight_json, config, log):
 
     num_allies = len(fight_json['players'])
     num_enemies = 0
-    #enemy_list = []
+    enemy_name = ''
+    enemy_squad = {}
     num_kills = 0
     for enemy in fight_json['targets']:
         if 'enemyPlayer' in enemy and enemy['enemyPlayer'] == True:
             num_enemies += 1
             #append enemy['name'] to enemy_list
+            enemy_name = enemy['name'].split(' pl')[0]
+            if enemy_name not in enemy_squad:
+                enemy_squad[enemy_name] = 1
+            else:
+                enemy_squad[enemy_name] = enemy_squad[enemy_name] + 1
             if 'combatReplayData' in enemy:
                 num_kills += len(enemy['combatReplayData']['dead'])
                 
@@ -1451,12 +1463,13 @@ def get_stats_from_fight_json(fight_json, config, log):
     fight = Fight()
     fight.duration = duration
     fight.enemies = num_enemies
+    fight.enemy_squad = enemy_squad
     fight.allies = num_allies
     fight.kills = num_kills
     fight.start_time = fight_json['timeStartStd']
     fight.end_time = fight_json['timeEndStd']        
     fight.total_stats = {key: 0 for key in config.stats_to_compute}
-        
+            
     # skip fights that last less than min_fight_duration seconds
     if(duration < config.min_fight_duration):
         fight.skipped = True

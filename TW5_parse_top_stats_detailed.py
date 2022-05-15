@@ -143,6 +143,8 @@ if __name__ == '__main__':
     #Move Squad Composition here so it is first under the fight summaries
     #Squad Composition Testing
     myprint(output, '<$reveal type="match" state="!!curTab" text="Squad Composition">')    
+    myprint(output, '\n<<alert dark "Excludes skipped fights in the overview" width:60%>>\n')
+    myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
     myprint(output, '\n!!!SQUAD COMPOSITION\n')    
     sort_order = ['Firebrand', 'Scrapper', 'Spellbreaker', "Herald", "Chronomancer", "Reaper", "Scourge", "Dragonhunter", "Guardian", "Elementalist", "Tempest", "Revenant", "Weaver", "Willbender", "Renegade", "Vindicator", "Warrior", "Berserker", "Bladesworn", "Engineer", "Holosmith", "Mechanist", "Ranger", "Druid", "Soulbeast", "Untamed", "Thief", "Daredevil", "Deadeye", "Specter", "Catalyst", "Mesmer", "Mirage", "Virtuoso", "Necromancer", "Harbinger"]
 
@@ -163,9 +165,30 @@ if __name__ == '__main__':
         
         myprint(output, output_string1)
         myprint(output, output_string2)
+    myprint(output, '\n</div>\n    <div class="flex-col border">\n')
+    myprint(output, '\n!!!ENEMY COMPOSITION\n')    
+    enemy_squad_num = 0
+    for fight in fights:
+        if fight.skipped:
+            continue
+        enemy_squad_num += 1
+        output_string1 = "\n|thead-dark|k\n"
+        output_string2 = ""
+        output_string1 += "|Fight |"
+        output_string2 += "|"+str(enemy_squad_num)
+        for prof in sort_order:
+            if prof in fight.enemy_squad:
+                output_string1 += " {{"+str(prof)+"}} |"
+                output_string2 += " | "+str(fight.enemy_squad[prof])
 
+        output_string1 += "h"
+        output_string2 += " |\n"
+
+        myprint(output, output_string1)
+        myprint(output, output_string2)
+    myprint(output, '\n</div>\n</div>\n')
     #end reveal
-    print_string = "</$reveal>\n"
+    print_string = "\n</$reveal>\n"
     myprint(output, print_string)     
 
 
