@@ -78,6 +78,7 @@ class Fight:
     allies: int = 0
     kills: int = 0
     start_time: str = ""
+    squad_composition: dict = field(default_factory=dict)
     
     
 # This class stores the configuration for running the top stats.
@@ -155,8 +156,6 @@ def fill_config(config_input):
     config.buff_abbrev["Aegis"] = 'aegis'
     config.buff_abbrev["Might"] = 'might'
     config.buff_abbrev["Fury"] = 'fury'
-    config.buff_abbrev["Superspeed"] = 'ss'
-    config.buff_abbrev["Regeneration"] = 'regen'
     
     return config
     
@@ -912,7 +911,6 @@ def collect_stat_data(args, config, log, anonymize=False):
     players = []        # list of all player/profession combinations
     player_index = {}   # dictionary that matches each player/profession combo to its index in players list
     account_index = {}  # dictionary that matches each account name to a list of its indices in players list
-    squad_comp = {}     # dictionary that contains count of professions by fight_num
 
     used_fights = 0
     fights = []
@@ -956,6 +954,7 @@ def collect_stat_data(args, config, log, anonymize=False):
         for player in players:
             player.stats_per_fight.append({key: value for key, value in config.empty_stats.items()})   
 
+        fight_number = int(len(fights))
         # don't compute anything for skipped fights
         if fight.skipped:
             fights.append(fight)
@@ -963,9 +962,8 @@ def collect_stat_data(args, config, log, anonymize=False):
             continue
         
         used_fights += 1
-        fight_number = used_fights-1
-        squad_comp[fight_number]={}
-
+        #fight_number = used_fights-1
+        
         # get stats for each player
         #for player_data in (xml_root.iter('players') if args.filetype == "xml" else json_data['players']):
         for player_data in json_data['players']:
@@ -976,10 +974,10 @@ def collect_stat_data(args, config, log, anonymize=False):
             #    account, name, profession = get_basic_player_data_from_xml(player_data)
             #else:
             account, name, profession = get_basic_player_data_from_json(player_data)
-            if profession not in squad_comp[fight_number]:
-                squad_comp[fight_number][profession] = 1
+            if profession in fight.squad_composition:
+                fight.squad_composition[profession] += 1
             else:
-                squad_comp[fight_number][profession] = squad_comp[fight_number][profession]+1
+                fight.squad_composition[profession] = 1
 
             # if this combination of charname + profession is not in the player index yet, create a new entry
             name_and_prof = name+" "+profession
@@ -1003,7 +1001,8 @@ def collect_stat_data(args, config, log, anonymize=False):
                 player.initialize(config)
                 player_index[name_and_prof] = len(players)
                 # fill up fights where the player wasn't there yet with empty stats
-                while len(player.stats_per_fight) < used_fights:
+                #while len(player.stats_per_fight) < used_fights:
+                while len(player.stats_per_fight) <= fight_number:
                     player.stats_per_fight.append({key: value for key, value in config.empty_stats.items()})                
                 players.append(player)
 
@@ -1115,7 +1114,7 @@ def collect_stat_data(args, config, log, anonymize=False):
     if anonymize:
         anonymize_players(players, account_index)
     
-    return players, fights, found_healing, found_barrier, squad_comp
+    return players, fights, found_healing, found_barrier
             
 
 
@@ -1366,8 +1365,8 @@ def get_overall_raid_stats(fights):
     overall_raid_stats['num_used_fights'] = len([f for f in fights if not f.skipped])
     overall_raid_stats['used_fights_duration'] = sum([f.duration for f in used_fights])
     overall_raid_stats['date'] = min([f.start_time.split()[0] for f in used_fights])
-    overall_raid_stats['start_time'] = min([f.start_time.split()[1] for f in used_fights]) +" "+ used_fights[0].start_time.split()[2]
-    overall_raid_stats['end_time'] = max([f.end_time.split()[1] for f in used_fights]) +" "+ used_fights[0].end_time.split()[2]
+    overall_raid_stats['start_time'] = min([f.start_time.split()[1] for f in used_fights])# +" "+ used_fights[0].start_time.split()[2]
+    overall_raid_stats['end_time'] = max([f.end_time.split()[1] for f in used_fights])# +" "+ used_fights[0].end_time.split()[2]
     overall_raid_stats['num_skipped_fights'] = len([f for f in fights if f.skipped])
     overall_raid_stats['min_allies'] = min([f.allies for f in used_fights])
     overall_raid_stats['max_allies'] = max([f.allies for f in used_fights])    
@@ -1376,6 +1375,16 @@ def get_overall_raid_stats(fights):
     overall_raid_stats['max_enemies'] = max([f.enemies for f in used_fights])        
     overall_raid_stats['mean_enemies'] = round(sum([f.enemies for f in used_fights])/len(used_fights), 1)
     overall_raid_stats['total_kills'] = sum([f.kills for f in used_fights])
+    overall_raid_stats['avg_squad_composition'] = {}
+    for f in used_fights:
+        for prof in f.squad_composition:
+            if prof in overall_raid_stats['avg_squad_composition']:
+                overall_raid_stats['avg_squad_composition'][prof] += f.squad_composition[prof]
+            else:
+                overall_raid_stats['avg_squad_composition'][prof] = 1
+    for prof in overall_raid_stats['avg_squad_composition']:
+        overall_raid_stats['avg_squad_composition'][prof] /= len(used_fights) 
+                
     return overall_raid_stats
 
 
@@ -1562,3 +1571,4 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
     json_dict["top_jack_of_all_trades_players"] =  {key: value for key, value in top_jack_of_all_trades_players.items()}        
     with open(output_file, 'w') as json_file:
         json.dump(json_dict, json_file, indent=4)
+

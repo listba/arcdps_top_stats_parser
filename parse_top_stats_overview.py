@@ -140,3 +140,4 @@ if __name__ == '__main__':
         myprint(output, 'JACK OF ALL TRADES (swapped build at least once)\n')
         for stat in config.stats_to_compute:
             write_sorted_top_percentage(players, top_jack_of_all_trades_players[stat], top_jack_comparison_percentage[stat], config, num_used_fights, stat, output, StatType.SWAPPED_PERCENTAGE, top_consistent_stat_players[stat], top_total_stat_players[stat], top_late_players[stat])
+    
