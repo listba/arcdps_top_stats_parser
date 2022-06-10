@@ -27,7 +27,7 @@ from enum import Enum
 import importlib
 import xlwt
 
-from test_parse_top_stats_tools import *
+from TW5_parse_top_stats_tools import *
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='This reads a set of arcdps reports in xml format and generates top stats.')
