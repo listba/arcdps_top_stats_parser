@@ -1448,6 +1448,7 @@ def get_stats_from_fight_json(fight_json, config, log):
     enemy_name = ''
     enemy_squad = {}
     num_kills = 0
+    num_downs = 0
     for enemy in fight_json['targets']:
         if 'enemyPlayer' in enemy and enemy['enemyPlayer'] == True:
             num_enemies += 1
@@ -1459,6 +1460,7 @@ def get_stats_from_fight_json(fight_json, config, log):
                 enemy_squad[enemy_name] = enemy_squad[enemy_name] + 1
             if 'combatReplayData' in enemy:
                 num_kills += len(enemy['combatReplayData']['dead'])
+                num_downs += len(enemy['combatReplayData']['down'])
                 
     # initialize fight         
     fight = Fight()
@@ -1467,6 +1469,7 @@ def get_stats_from_fight_json(fight_json, config, log):
     fight.enemy_squad = enemy_squad
     fight.allies = num_allies
     fight.kills = num_kills
+    fight.downs = num_downs
     fight.start_time = fight_json['timeStartStd']
     fight.end_time = fight_json['timeEndStd']        
     fight.total_stats = {key: 0 for key in config.stats_to_compute}
@@ -1527,7 +1530,8 @@ def get_overall_raid_stats(fights):
     overall_raid_stats['min_enemies'] = min([f.enemies for f in used_fights])
     overall_raid_stats['max_enemies'] = max([f.enemies for f in used_fights])        
     overall_raid_stats['mean_enemies'] = round(sum([f.enemies for f in used_fights])/len(used_fights), 1)
-    overall_raid_stats['total_kills'] = sum([f.kills for f in used_fights])
+    overall_raid_stats['total_downs'] = sum([f.downs for f in used_fights])
+    overall_raid_stats['total_kills'] = sum([f.kills for f in used_fights])    
     return overall_raid_stats
 
 
@@ -1672,7 +1676,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
     print_string = "|thead-dark table-hover|k"
     myprint(output, print_string)
     
-    print_string = "| Fight # | Date | Start Time | End Time | Secs | Skip | Allies | Enemies | Kills |"
+    print_string = "| Fight # | Date | Start Time | End Time | Secs | Skip | Allies | Enemies | Downs | Kills |"
     for stat in overall_squad_stats:
         if stat != "dist" and stat !="res":
             stat_len[stat] = max(len(config.stat_names[stat]), len(str(overall_squad_stats[stat])))
@@ -1685,7 +1689,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
         date = fight.start_time.split()[0]
         start_time = fight.start_time.split()[1]
         end_time = fight.end_time.split()[1]        
-        print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(start_time)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.kills)+" |"
+        print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(start_time)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
         for stat in overall_squad_stats:
             if stat != "dist" and stat !="res":
                 #JEL - added my_value formatting
@@ -1700,7 +1704,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
     #mean_enemies = round(sum([f.enemies for f in used_fights])/num_used_fights, 1)
     #total_kills = sum([f.kills for f in used_fights])
 
-    print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['start_time']:>10}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
+    print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['start_time']:>10}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
     for stat in overall_squad_stats:
         if stat != "dist" and stat !="res":
             print_string += " "+my_value(round(overall_squad_stats[stat]))+"|"
