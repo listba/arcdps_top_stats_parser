@@ -1,5 +1,5 @@
 # TW5 Modifications #
-```TW5_parse_top_stats_overview.py``` and ```TW5_parse_top_stats_tools.py``` provide alternative output to support posting to a TW5 wiki with shiraz plugin.
+```TW5_parse_top_stats_detailed.py``` and ```TW5_parse_top_stats_tools.py``` provide alternative output to support posting to a TW5 wiki with shiraz plugin.
 Example available at (https://drevarr.github.io/FluxCapacity.html)
 
 Edit ```Example_Guild_Data.py``` to update with your guild id and API token then rename as ```Guild_Data.py```
@@ -74,7 +74,7 @@ There are three methods for generating the top stats.
 11. Upload to hosting site of choice
 
 ## TW5 Customization ##
-TW5_Top_Stat_Parse.html is a single page application wiki that you can host to share the output of TW5_parse_top_stats_detailed.py
+![TW5_Top_Stat_Parse.html]https://github.com/Drevarr/arcdps_top_stats_parser/example_output/TW5_Top_Stat_Parse.html is a single page application wiki that you can host to share the output of TW5_parse_top_stats_detailed.py
 
   * Detailed info regarding the wiki is available at https://tiddlywiki.com
   * You can rename TW5_Top_Stat_Parse.html to meet your hosting needs.
