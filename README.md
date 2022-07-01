@@ -55,7 +55,7 @@ There are three methods for generating the top stats.
 2. Put all .json files you want included in the top stats into one folder. We use the folder ```C:\Users\Example\Documents\json_folder``` as an example here. Note that different file types will be ignored, so no need to move your .evtc/.zevtc logs elsewhere if you have them in the same folder.
 3. Open a terminal / windows command line (press Windows key + r, type "cmd", enter).
 4. Navigate to where the script is located using "cd", in our case this means ```cd Downloads\arcdps_top_stats_parser```.
-5. Type ```python TW5_parse_top_stats_overview.py <folder>```, where \<folder> is the path to your folder with json files. In our example case, we run ```python parse_top_stats_overview.py C:\Users\Example\Documents\json_folder```. For the detailed version, use ```parse_top_stats_detailed.py``` instead of ```parse_top_stats_overview.py```.
+5. Type ```python TW5_parse_top_stats_detailed.py <folder>```, where \<folder> is the path to your folder with json files. In our example case, we run ```python parse_top_stats_detailed.py C:\Users\Example\Documents\json_folder```. 
 6. Open ```TW5_Top_Stat_Parse.html``` in your browser of choice
 7. Drag and Drop the resulting file ```TW5_top_stats_detailed.tid``` located in the \<folder> with your json files onto the top of the web page.
   
