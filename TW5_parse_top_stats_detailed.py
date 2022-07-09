@@ -120,7 +120,9 @@ if __name__ == '__main__':
                     '<$button set="!!curTab" setTo="Weakness" selectedClass="" class="btn btn-sm btn-dark" style=""> Weakness </$button>',
                     '<$button set="!!curTab" setTo="Daze" selectedClass="" class="btn btn-sm btn-dark" style=""> Daze </$button>',
                     '<$button set="!!curTab" setTo="Immobilize" selectedClass="" class="btn btn-sm btn-dark" style=""> Immobilize </$button>',
-                    '<$button set="!!curTab" setTo="Support" selectedClass="" class="btn btn-sm btn-dark" style=""> Support Players </$button>'
+                    '<$button set="!!curTab" setTo="Support" selectedClass="" class="btn btn-sm btn-dark" style=""> Support Players </$button>',
+                    '<$button set="!!curTab" setTo="Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Healing </$button>',
+                    '<$button set="!!curTab" setTo="Barrier" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier </$button>'
     )
     for item in Nav_Bar_Items:
         myprint(output, item)
