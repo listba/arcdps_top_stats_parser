@@ -56,7 +56,7 @@ There are three methods for generating the top stats.
 3. Open a terminal / windows command line (press Windows key + r, type "cmd", enter).
 4. Navigate to where the script is located using "cd", in our case this means ```cd Downloads\arcdps_top_stats_parser```.
 5. Type ```python TW5_parse_top_stats_detailed.py <folder>```, where \<folder> is the path to your folder with json files. In our example case, we run ```python parse_top_stats_detailed.py C:\Users\Example\Documents\json_folder```. 
-6. Open ```TW5_Top_Stat_Parse.html``` in your browser of choice
+6. Open ```/example_output/TW5_Top_Stat_Parse.html``` in your browser of choice
 7. Drag and Drop the resulting file ```TW5_top_stats_detailed.tid``` located in the \<folder> with your json files onto the top of the web page.
   
   ![Screenshot_1](Screenshot_1.png)
@@ -74,7 +74,7 @@ There are three methods for generating the top stats.
 11. Upload to hosting site of choice
 
 ## TW5 Customization ##
-![TW5_Top_Stat_Parse.html]https://github.com/Drevarr/arcdps_top_stats_parser/example_output/TW5_Top_Stat_Parse.html is a single page application wiki that you can host to share the output of TW5_parse_top_stats_detailed.py
+![TW5_Top_Stat_Parse.html](https://github.com/Drevarr/arcdps_top_stats_parser/example_output/TW5_Top_Stat_Parse.html) is a single page application wiki that you can host to share the output of TW5_parse_top_stats_detailed.py
 
   * Detailed info regarding the wiki is available at https://tiddlywiki.com
   * You can rename TW5_Top_Stat_Parse.html to meet your hosting needs.
@@ -101,9 +101,3 @@ Output files containing the tops stats are also generated in the json folder. By
 
 ## Settings ##
 For changing any of the default settings, check out the wiki pages on ![command line options](https://github.com/Freyavf/arcdps_top_stats_parser/wiki/Command-line-options) and ![configuration options](https://github.com/Freyavf/arcdps_top_stats_parser/wiki/Configuration-options).
-
-# Getting involved
-
-If you find this tool helpful, you can make a donation to support it: [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate/?hosted_button_id=C5CSPXYHBGR2U) 
-
-Ingame donations are also welcome on the account Freya.1384. If you have any ideas or suggestions for further improvements, let me know ingame or by email (freya.arcdps.topstats@gmail.com). Please note that I might not have time to reply right away, but I will try to come back to you. Thank you :)
