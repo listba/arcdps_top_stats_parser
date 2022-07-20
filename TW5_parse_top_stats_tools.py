@@ -533,7 +533,6 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
         print_string += " Total|"
     if stat in config.buff_ids or stat == 'dmg_taken':
         print_string += " Average|"
-    
     print_string += "h"
     myprint(output_file, print_string)    
 
@@ -1338,6 +1337,16 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
         if 'dpsAll' not in player_json or len(player_json['dpsAll']) != 1 or 'damage' not in player_json['dpsAll'][0]:
             return 0
         return int(player_json['dpsAll'][0]['damage'])            
+    #Add Power and Condition Damage Tracking
+    if stat == 'Cdmg':
+        if 'dpsAll' not in player_json or len(player_json['dpsAll']) != 1 or 'condiDamage' not in player_json['dpsAll'][0]:
+            return 0
+        return int(player_json['dpsAll'][0]['condiDamage'])    
+	
+    if stat == 'Pdmg':
+        if 'dpsAll' not in player_json or len(player_json['dpsAll']) != 1 or 'powerDamage' not in player_json['dpsAll'][0]:
+            return 0
+        return int(player_json['dpsAll'][0]['powerDamage'])  
 
     if stat == 'res':
         if 'support' not in player_json or len(player_json['support']) != 1 or 'resurrects' not in player_json['support'][0]:
@@ -1358,6 +1367,11 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
         if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'distToCom' not in player_json['statsAll'][0]:
             return -1
         return float(player_json['statsAll'][0]['distToCom'])
+
+    if stat == 'swaps':
+        if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'swapCount' not in player_json['statsAll'][0]:
+            return -1
+        return float(player_json['statsAll'][0]['swapCount'])
 
     ### Buffs ###
     if stat in config.buff_ids:
@@ -1551,7 +1565,7 @@ def print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, fou
     i = 0
     printed_kills = False
     for stat in config.stats_to_compute:
-        if stat == 'dist' or stat in config.condition_ids:
+        if stat == 'dist' or stat in config.condition_ids or stat == 'res' or stat == 'Pdmg' or stat == 'Cdmg':
             continue
         
         if i == 0:
@@ -1579,9 +1593,9 @@ def print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, fou
                 print_string += str(total_buff_duration["h"])+"h "
             print_string += str(total_buff_duration["m"])+"m "+str(total_buff_duration["s"])+"s of "+stat
         elif stat == 'heal' and found_healing:
-            print_string += "healed for "+str(round(overall_squad_stats['heal']))
+            print_string += "healed for "+str(my_value(round(overall_squad_stats['heal'])))
         elif stat == 'barrier' and found_barrier:
-            print_string += "generated "+str(round(overall_squad_stats['barrier']))+" barrier"
+            print_string += "generated "+str(my_value(round(overall_squad_stats['barrier'])))+" barrier"
         elif stat == 'dmg_taken':
             print_string += "took "+my_value(round(overall_squad_stats['dmg_taken']))+" damage"
         elif stat == 'deaths':
@@ -1594,8 +1608,13 @@ def print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, fou
     if total_fight_duration["h"] > 0:
         print_string += str(total_fight_duration["h"])+"h "
     print_string += str(total_fight_duration["m"])+"m "+str(total_fight_duration["s"])+"s in "+str(overall_raid_stats['num_used_fights'])+" fights.\n"
-    #JEL - Added Kill Death Ratio 
-    print_string += "\nKill Death Ratio for the session was ''"+str(round((overall_raid_stats['total_kills']/(round(overall_squad_stats['deaths']))),2))+"''.\n"
+    #JEL - Added Kill Death Ratio
+    try:
+        Raid_KDR = (round((overall_raid_stats['total_kills']/(round(overall_squad_stats['deaths']))),2))
+    except:
+        Raid_KDR = overall_raid_stats['total_kills']
+
+    print_string += "\nKill Death Ratio for the session was ''"+str(Raid_KDR)+"''.\n"
     #JEL - Added beginning newline for TW5 spacing
     print_string += "\nThere were between "+str(overall_raid_stats['min_allies'])+" and "+str(overall_raid_stats['max_allies'])+" allied players involved (average "+str(round(overall_raid_stats['mean_allies'], 1))+" players).\n"
     print_string += "\nThe squad faced between "+str(overall_raid_stats['min_enemies'])+" and "+str(overall_raid_stats['max_enemies'])+" enemy players (average "+str(round(overall_raid_stats['mean_enemies'], 1))+" players).\n"    
@@ -1678,7 +1697,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
     
     print_string = "| Fight # | Date | Start Time | End Time | Secs | Skip | Allies | Enemies | Downs | Kills |"
     for stat in overall_squad_stats:
-        if stat != "dist" and stat !="res":
+        if stat != "dist" and stat !="res" and stat !="Cdmg" and stat !="Pdmg":
             stat_len[stat] = max(len(config.stat_names[stat]), len(str(overall_squad_stats[stat])))
             print_string += " {{"+config.stat_names[stat]+"}}|"
     print_string += "h"
@@ -1691,7 +1710,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
         end_time = fight.end_time.split()[1]        
         print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(start_time)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
         for stat in overall_squad_stats:
-            if stat != "dist" and stat !="res":
+            if stat != "dist" and stat !="res" and stat !="Cdmg" and stat !="Pdmg":
                 #JEL - added my_value formatting
                 print_string += " "+my_value(round(fight.total_stats[stat]))+"|"
         myprint(output, print_string)
@@ -1706,7 +1725,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 
     print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['start_time']:>10}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
     for stat in overall_squad_stats:
-        if stat != "dist" and stat !="res":
+        if stat != "dist" and stat !="res" and stat !="Cdmg" and stat !="Pdmg":
             print_string += " "+my_value(round(overall_squad_stats[stat]))+"|"
     print_string += "f\n\n"
     myprint(output, print_string)

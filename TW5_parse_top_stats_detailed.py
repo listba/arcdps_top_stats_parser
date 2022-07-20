@@ -99,6 +99,8 @@ if __name__ == '__main__':
                     '<$button set="!!curTab" setTo="Illusion of Life" selectedClass="" class="btn btn-sm btn-dark" style=""> IOL </$button>',
                     '<$button set="!!curTab" setTo="Resurrect" selectedClass="" class="btn btn-sm btn-dark" style=""> Resurrect </$button>',                    
                     '<$button set="!!curTab" setTo="Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage </$button>',
+                    '<$button set="!!curTab" setTo="Power Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Power Damage </$button>',
+                    '<$button set="!!curTab" setTo="Condi Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Condi Damage </$button>',
                     '<$button set="!!curTab" setTo="Damage Taken" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage Taken</$button>',
                     '<$button set="!!curTab" setTo="Boon Strips" selectedClass="" class="btn btn-sm btn-dark" style=""> Boon Strips </$button>',
                     '<$button set="!!curTab" setTo="Condition Cleanses" selectedClass="" class="btn btn-sm btn-dark" style=""> Condition Cleanses</$button>',
@@ -116,13 +118,10 @@ if __name__ == '__main__':
                     '<$button set="!!curTab" setTo="Alacrity" selectedClass="" class="btn btn-sm btn-dark" style=""> Alacrity </$button>',
                     '<$button set="!!curTab" setTo="Vigor" selectedClass="" class="btn btn-sm btn-dark" style=""> Vigor </$button>',
                     '<$button set="!!curTab" setTo="Regeneration" selectedClass="" class="btn btn-sm btn-dark" style=""> Regeneration </$button>',
-                    '<$button set="!!curTab" setTo="Cripple" selectedClass="" class="btn btn-sm btn-dark" style=""> Cripple </$button>',
-                    '<$button set="!!curTab" setTo="Weakness" selectedClass="" class="btn btn-sm btn-dark" style=""> Weakness </$button>',
-                    '<$button set="!!curTab" setTo="Daze" selectedClass="" class="btn btn-sm btn-dark" style=""> Daze </$button>',
-                    '<$button set="!!curTab" setTo="Immobilize" selectedClass="" class="btn btn-sm btn-dark" style=""> Immobilize </$button>',
                     '<$button set="!!curTab" setTo="Support" selectedClass="" class="btn btn-sm btn-dark" style=""> Support Players </$button>',
                     '<$button set="!!curTab" setTo="Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Healing </$button>',
-                    '<$button set="!!curTab" setTo="Barrier" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier </$button>'
+                    '<$button set="!!curTab" setTo="Barrier" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier </$button>',
+                    '<$button set="!!curTab" setTo="Weapon Swaps" selectedClass="" class="btn btn-sm btn-dark" style=""> Weapon Swaps </$button>'
     )
     for item in Nav_Bar_Items:
         myprint(output, item)
