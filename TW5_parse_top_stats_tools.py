@@ -550,9 +550,11 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
             print_string += my_value(round(player.total_stats[stat]))+"|"
         if stat == 'dmg_taken':
             print_string += f" {my_value(player.total_stats[stat]):>9}| "+f" {my_value(player.average_stats[stat]):>8}|"
-        elif stat in config.buffs_stacking_intensity:
+        if stat == 'iol':
+            print_string += f" {player.total_stats[stat]:>8}| "+f" {player.average_stats[stat]:>7}|"
+        elif stat in config.buffs_stacking_intensity and stat != 'iol':
             print_string += f" {player.total_stats[stat]:>8}s| "+f" {player.average_stats[stat]:>8}|"
-        elif stat in config.buffs_stacking_duration:
+        elif stat in config.buffs_stacking_duration and stat != 'iol':
             print_string += f" {player.total_stats[stat]:>8}s| "+f" {player.average_stats[stat]:>7}%|"
 
         myprint(output_file, print_string)
@@ -741,11 +743,10 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
             print_string += f" {fight_time_h:>2}h {fight_time_m:>2}m {fight_time_s:>2}s | "
         else:
             print_string += f" {fight_time_m:>6}m {fight_time_s:>2}s | "
-
-        if stat in config.buffs_stacking_duration:
+        if stat in config.buffs_stacking_duration and stat != 'iol':
             print_string += f" {round(player.total_stats[stat]):>8}s| "
             print_string += f" {player.average_stats[stat]:>7}%|"
-        elif stat in config.buffs_stacking_intensity:
+        elif stat in config.buffs_stacking_intensity and stat != 'iol':
             print_string += f" {round(player.total_stats[stat]):>8}s| "
             print_string += f" {player.average_stats[stat]:>8}|"
         elif stat == 'dmg':
@@ -753,6 +754,8 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
             print_string += f" {my_value(player.average_stats[stat]):>8}|"        
         else:
             print_string += my_value(round(player.total_stats[stat]))+"|"
+            if stat == 'iol':
+                print_string += f" {player.average_stats[stat]:>7}|"            
         myprint(output_file, print_string)
         last_val = player.total_stats[stat]
     myprint(output_file, "\n")
@@ -839,141 +842,6 @@ def write_sorted_top_percentage(players, top_players, comparison_percentage, con
     myprint(output_file, "\n")
 
 
-
-## get value of stat from player_xml
-#def get_stat_from_player_xml(player_xml, players_running_healing_addon, stat, config):
-#    if stat == 'time_active':
-#        return round(int(player_xml.find('activeTimes').text)/1000)
-#        
-#    if stat == 'dmg_taken':
-#        return int(player_xml.find('defenses').find('damageTaken').text)+int(player_xml.find('defenses').find('damageBarrier').text)
-#
-#    if stat == 'deaths':
-#        return int(player_xml.find('defenses').find('deadCount').text)
-#
-#    #if stat == 'kills':
-#    #    return int(player_xml.find('statsAll').find('killed').text)
-#
-#    if stat == 'dmg':
-#        return int(player_xml.find('dpsAll').find('damage').text)            
-#
-#    if stat == 'rips':
-#        return int(player_xml.find('support').find('boonStrips').text)
-#    
-#    if stat == 'cleanses':
-#        return int(player_xml.find('support').find('condiCleanse').text)            
-#
-#    if stat == 'dist':
-#        return float(player_xml.find('statsAll').find('distToCom').text)
-#
-#    ### Buffs ###
-#    if stat in config.buff_ids:
-#        # get buffs in squad generation -> need to loop over all buffs
-#        for buff in player_xml.iter('squadBuffs'):
-#            # find right buff
-#            buffId = buff.find('id').text
-#            if buffId == config.buff_ids[stat]:
-#                return float(buff.find('buffData').find('generation').text) 
-#        return 0.
-#
-#    if stat == 'heal':
-#        # check if healing was logged, save it
-#        heal = -1
-#        if player_xml.find('name').text not in players_running_healing_addon:
-#            return heal
-#        ext_healing_xml = player_xml.find('extHealingStats')
-#        if(ext_healing_xml != None):
-#            heal = 0
-#            for outgoing_healing_xml in ext_healing_xml.iter('outgoingHealingAllies'):
-#                outgoing_healing_xml2 = outgoing_healing_xml.find('outgoingHealingAllies')
-#                # TODO why is this in the xml twice?
-#                if not outgoing_healing_xml2 is None:
-#                    heal += int(outgoing_healing_xml2.find('healing').text)
-#        return heal
-#
-#    if stat == 'barrier':
-#        # check if barrier was logged, save it
-#        barrier = -1
-#        if player_xml.find('name').text not in players_running_healing_addon:
-#            return barrier        
-#        ext_barrier_xml = player_xml.find('extBarrierStats')
-#        if(ext_barrier_xml != None):
-#            barrier = 0
-#            for outgoing_barrier_xml in ext_barrier_xml.iter('outgoingBarrierAllies'):
-#                outgoing_barrier_xml2 = outgoing_barrier_xml.find('outgoingBarrierAllies')
-#                # TODO why is this in the xml twice?                
-#                if not outgoing_barrier_xml2 is None:
-#                    barrier += int(outgoing_barrier_xml2.find('barrier').text)
-#        return barrier
-
-
-
-## get stats for this fight from fight_xml
-## Input:
-## fight_xml = xml object including one fight
-## config = the config to use
-## log = log file to write to
-#def get_stats_from_fight_xml(fight_xml, config, log):
-#    # get fight duration
-#    fight_duration_xml = fight_xml.find('duration')
-#    split_duration = fight_duration_xml.text.split('m ', 1)
-#    mins = int(split_duration[0])
-#    split_duration = split_duration[1].split('s', 1)
-#    secs = int(split_duration[0])
-#    if debug:
-#        print("duration: ", mins, "m", secs, "s")
-#    duration = mins*60 + secs
-#
-#    num_allies = len(fight_xml.findall('players'))
-#    num_enemies = 0
-#    for enemy in fight_xml.iter('targets'):
-#        is_enemy_player_xml = enemy.find('enemyPlayer')
-#        if is_enemy_player_xml != None and is_enemy_player_xml.text == "true":
-#            num_enemies += 1
-#                
-#    # initialize fight         
-#    fight = Fight()
-#    fight.duration = duration
-#    fight.enemies = num_enemies
-#    fight.allies = num_allies
-#    fight.start_time = fight_xml.find('timeStartStd').text
-#    fight.end_time = fight_xml.find('timeEndStd').text        
-#    fight.total_stats = {key: 0 for key in config.stats_to_compute}
-#        
-#    # skip fights that last less than min_fight_duration seconds
-#    if(duration < config.min_fight_duration):
-#        fight.skipped = True
-#        print_string = "\nFight only took "+str(mins)+"m "+str(secs)+"s. Skipping fight."
-#        myprint(log, print_string)
-#        
-#    # skip fights with less than min_allied_players allies
-#    if num_allies < config.min_allied_players:
-#        fight.skipped = True
-#        print_string = "\nOnly "+str(num_allies)+" allied players involved. Skipping fight."
-#        myprint(log, print_string)
-#
-#    # skip fights with less than min_enemy_players enemies
-#    if num_enemies < config.min_enemy_players:
-#        fight.skipped = True
-#        print_string = "\nOnly "+str(num_enemies)+" enemies involved. Skipping fight."
-#        myprint(log, print_string)
-#
-#    for extension in fight_xml.iter('usedExtensions'):
-#        if extension.find('name').text == "Healing Stats":
-#            players_running_healing_addon = [player.text for player in extension.iter('runningExtension')]
-#
-#    return fight, players_running_healing_addon
-#
-#
-## get account, character name and profession from xml object
-#def get_basic_player_data_from_xml(player_xml):
-#    account = player_xml.find('account').text
-#    name = player_xml.find('name').text
-#    profession = player_xml.find('profession').text
-#    return account, name, profession
-
-
-
 # get account, character name and profession from json object
 def get_basic_player_data_from_json(player_json):
     account = player_json['account']
@@ -998,22 +866,6 @@ def get_buff_ids_from_json(json_data, config):
         config.buffs_stacking_duration.append('iol')
 
             
-
-#def get_buff_ids_from_xml(xml_data, config):
-#    buffs = xml_data.find('buffMap')
-#    for buff in buffs:
-#        buff_xml = buffs.find(buff.tag)
-#        buffname = buff_xml.find('name').text
-#        if buffname in config.buff_abbrev:
-#            abbrev_name = config.buff_abbrev[buffname]
-#            config.buff_ids[abbrev_name] = buff.tag[1:]
-#
-#            if buff_xml.find('stacking').text == "true":
-#                config.buffs_stacking_intensity.append(abbrev_name)
-#            else:
-#                config.buffs_stacking_duration.append(abbrev_name)
-            
-    
 # Collect the top stats data.
 # Input:
 # args = cmd line arguments
@@ -1158,11 +1010,11 @@ def collect_stat_data(args, config, log, anonymize=False):
                 # add stats of this fight and player to total stats of this fight and player
                 if player.stats_per_fight[fight_number][stat] > 0:
                     # buff are generation squad values, using total over time
-                    if stat in config.buffs_stacking_duration:
+                    if stat in config.buffs_stacking_duration and stat != 'iol':
                         #value is generated boon time on all squad players / fight duration / (players-1)" in percent, we want generated boon time on all squad players / (players-1)
                         fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration, 2)
                         player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration, 2)
-                    elif stat in config.buffs_stacking_intensity:
+                    elif stat in config.buffs_stacking_intensity and stat != 'iol':
                         #value is generated boon time on all squad players / fight duration / (players-1)", we want generated boon time on all squad players / (players-1)
                         fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration, 2)
                         player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration, 2)
@@ -1386,7 +1238,10 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
             if buffId == int(config.buff_ids[stat]):
                 if 'generation' not in buff['buffData'][0]:
                     return 0
-                return float(buff['buffData'][0]['generation'])
+                if stat == 'iol':
+                    return 1
+                else:
+                    return float(buff['buffData'][0]['generation'])
         return 0
 
     ### Conditions ###
@@ -1582,7 +1437,9 @@ def print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, fou
             print_string += "ripped "+my_value(round(overall_squad_stats['rips']))+" boons"
         elif stat == 'cleanses':
             print_string += "cleansed "+my_value(round(overall_squad_stats['cleanses']))+" conditions"
-        elif stat in config.buff_ids:
+        elif stat == 'iol':
+            print_string += "Illusioned "+my_value(round(overall_squad_stats['iol']))+" downs"
+        elif stat in config.buff_ids and stat != 'iol':
             total_buff_duration = {}
             total_buff_duration["h"] = int(overall_squad_stats[stat]/3600)
             total_buff_duration["m"] = int((overall_squad_stats[stat] - total_buff_duration["h"]*3600)/60)
