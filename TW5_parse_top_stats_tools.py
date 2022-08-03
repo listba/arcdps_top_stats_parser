@@ -83,6 +83,10 @@ class Fight:
     enemy_squad: dict = field(default_factory=dict) #profession and count of enemies
     enemy_Dps: dict = field(default_factory=dict) #enemy name and amount of damage output
     squad_Dps: dict = field(default_factory=dict) #squad player name and amount of damage output
+    skill_Dict: dict = field(default_factory=dict) #skill id's and skill_names from fight
+    enemy_skill_dmg: dict = field(default_factory=dict) #enemy skill_name and amount of damage output
+    squad_skill_dmg: dict = field(default_factory=dict) #squad skill_name and amount of damage output
+
     
     
 # This class stores the configuration for running the top stats.
@@ -1323,10 +1327,26 @@ def get_stats_from_fight_json(fight_json, config, log):
     enemy_Dps = {}
     enemyDps_name = ''
     enemyDps_damage = 0
+    enemy_skill_dmg = {}
+    squad_skill_dmg = {}
     squad_Dps = {}
     squadDps_name = ''
     squadDps_profession = ''
     squadDps_damage = 0
+
+#creat dictionary of skill_ids and skill_names
+    skill_Dict = {}
+
+    skills = fight_json['skillMap']
+    for skill_id, skill in skills.items():
+        x_id=skill_id[1:]
+        if x_id not in skill_Dict:
+            skill_Dict[x_id] = skill['name']
+
+#[targets][[#][totalDamageDist][#][totaldamage] -Damage Output for Skill Id
+#[targets][[#][totalDamageDist][#][id] -Skill Id
+
+
     for enemy in fight_json['targets']:
         if 'enemyPlayer' in enemy and enemy['enemyPlayer'] == True:
             num_enemies += 1
@@ -1335,19 +1355,46 @@ def get_stats_from_fight_json(fight_json, config, log):
             enemyDps_name = "{{"+enemy_name+"}} "+enemy['name']
             enemyDps_damage = enemy['dpsAll'][0]['damage']
             enemy_Dps[enemyDps_name] = enemyDps_damage
+            
+            for skill_used in enemy['totalDamageDist'][0]:
+                skill_id = skill_used['id']
+                if str(skill_id) in skill_Dict:
+                    skill_name = skill_Dict[str(skill_id)]
+                else:
+                    skill_name = 'Skill-'+str(skill_id)
+                #skill_name = skill_Dict[skill_id]
+                skill_dmg = skill_used['totalDamage']
+                if skill_name not in enemy_skill_dmg:
+                    enemy_skill_dmg[skill_name] = skill_dmg
+                else:
+                    enemy_skill_dmg[skill_name] = enemy_skill_dmg[skill_name] +skill_dmg
+
             if enemy_name not in enemy_squad:
                 enemy_squad[enemy_name] = 1
             else:
                 enemy_squad[enemy_name] = enemy_squad[enemy_name] + 1
+            
             if 'combatReplayData' in enemy:
                 num_kills += len(enemy['combatReplayData']['dead'])
                 num_downs += len(enemy['combatReplayData']['down'])
+
     for player in fight_json['players']:
         squadDps_name = player['name']
         squadDps_profession = player['profession']
         squadDps_prof_name = "{{"+squadDps_profession+"}} "+squadDps_name
         squadDps_damage = player['dpsAll'][0]['damage']
         squad_Dps[squadDps_prof_name] = squadDps_damage
+        for skill_used in player['totalDamageDist'][0]:
+            skill_id = skill_used['id']
+            if str(skill_id) in skill_Dict:
+                skill_name = skill_Dict[str(skill_id)]
+            else:
+                skill_name = 'Skill-'+str(skill_id)            
+            skill_dmg = skill_used['totalDamage']
+            if skill_name not in squad_skill_dmg:
+                squad_skill_dmg[skill_name] = skill_dmg
+            else:
+                squad_skill_dmg[skill_name] = squad_skill_dmg[skill_name] +skill_dmg        
 
     # initialize fight         
     fight = Fight()
@@ -1356,6 +1403,9 @@ def get_stats_from_fight_json(fight_json, config, log):
     fight.enemy_squad = enemy_squad
     fight.enemy_Dps = enemy_Dps
     fight.squad_Dps = squad_Dps
+    fight.enemy_skill_dmg = enemy_skill_dmg
+    fight.squad_skill_dmg = squad_skill_dmg
+    fight.skill_Dict = skill_Dict
     fight.allies = num_allies
     fight.kills = num_kills
     fight.downs = num_downs
