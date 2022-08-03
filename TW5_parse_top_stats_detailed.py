@@ -27,6 +27,7 @@ from enum import Enum
 import importlib
 import xlwt
 
+from collections import OrderedDict
 from TW5_parse_top_stats_tools import *
 
 if __name__ == '__main__':
@@ -79,6 +80,7 @@ if __name__ == '__main__':
     myprint(output, 'created: '+myDate.strftime("%Y%m%d%H%M%S"))
     myprint(output, 'creator: Drevarr ')
     myprint(output, 'curTab: Overview')
+    myprint(output, 'curFight: Fight-1')
     myprint(output, 'tags: Logs [['+myDate.strftime("%Y")+'-'+myDate.strftime("%m")+' Log Reviews]]')
     myprint(output, 'title: '+myDate.strftime("%Y%m%d")+' WvW Log Review\n')
     #End Tid file header
@@ -95,6 +97,7 @@ if __name__ == '__main__':
     #Start nav_bar_menu for TW5
     Nav_Bar_Items= ('<$button set="!!curTab" setTo="Overview" selectedClass="" class="btn btn-sm btn-dark" style=""> Session Overview </$button>',
                     '<$button set="!!curTab" setTo="Squad Composition" selectedClass="" class="btn btn-sm btn-dark" style=""> Squad Composition </$button>',
+                    '<$button set="!!curTab" setTo="Fight Review" selectedClass="" class="btn btn-sm btn-dark" style=""> Fight Review </$button>',
                     '<$button set="!!curTab" setTo="Deaths" selectedClass="" class="btn btn-sm btn-dark" style=""> Deaths </$button>',
                     '<$button set="!!curTab" setTo="Illusion of Life" selectedClass="" class="btn btn-sm btn-dark" style=""> IOL </$button>',
                     '<$button set="!!curTab" setTo="Resurrect" selectedClass="" class="btn btn-sm btn-dark" style=""> Resurrect </$button>',                    
@@ -195,6 +198,53 @@ if __name__ == '__main__':
 
     # end Squad Composition insert
 
+    #start Fight DPS Review insert
+    myprint(output, '<$reveal type="match" state="!!curTab" text="Fight Review">')    
+    myprint(output, '\n<<alert dark "Excludes skipped fights in the overview" width:60%>>\n')
+    myprint(output, '\n!!!Damage Output Review by Fight-#\n\n')
+    FightNum=0
+    for fight in fights:
+        FightNum = FightNum+1
+        if not fight.skipped:
+            myprint(output, '<$button set="!!curFight" setTo="Fight-'+str(FightNum)+'" selectedClass="" class="btn btn-sm btn-dark" style=""> Fight-'+str(FightNum)+' </$button>')
+    
+    myprint(output, '\n---\n')
+    
+    FightNum = 0
+    for fight in fights:
+        FightNum = FightNum+1
+        if not fight.skipped:
+            myprint(output, '<$reveal type="match" state="!!curFight" text="Fight-'+str(FightNum)+'">')
+            myprint(output, '\n<div class="flex-row">\n    <div class="flex-col">\n')
+            #begin fight summary
+            myprint(output, "|thead-dark table-hover sortable|k")
+            myprint(output, "|Fight Summary:|<|h")
+            myprint(output, '|Squad Members: |'+str(fight.allies)+' |')
+            myprint(output, '|Squad Deaths: |'+str(fight.total_stats['deaths'])+' |')
+            myprint(output, '|Enemies: |'+str(fight.enemies)+' |')
+            myprint(output, '|Enemies Downed: |'+str(fight.downs)+' |')
+            myprint(output, '|Enemies Killed: |'+str(fight.kills)+' |')
+            myprint(output, '|Fight Duration: |'+str(fight.duration)+' |')
+            myprint(output, '|Fight End Time: |'+str(fight.end_time)+' |')
+            myprint(output, '</div></div>\n\n')
+            #end fight Summary
+            myprint(output, '\n<div class="flex-row">\n    <div class="flex-col-1">\n')
+            myprint(output, "|thead-dark table-hover sortable|k")
+            myprint(output, "|!Squad Member | !Damage Output|h")
+            sorted_squad_Dps = dict(sorted(fight.squad_Dps.items(), key=lambda x: x[1], reverse=True))
+            for name in sorted_squad_Dps:
+                myprint(output, '|'+name+'|'+my_value(sorted_squad_Dps[name])+'|')
+            myprint(output, '\n</div>\n    <div class="flex-col-1">\n')
+            myprint(output, "|thead-dark table-hover sortable|k")
+            myprint(output, "|!Enemy Player | !Damage Output|h")
+            sorted_enemy_Dps = dict(sorted(fight.enemy_Dps.items(), key=lambda x: x[1], reverse=True))
+            for name in sorted_enemy_Dps:
+                myprint(output, '|'+name+'|'+my_value(sorted_enemy_Dps[name])+'|')
+            myprint(output, '\n</div>\n</div>\n')
+            myprint(output, "</$reveal>\n")
+    myprint(output, "</$reveal>\n")
+
+    #end Fight DPS Review insert
 
     # print top x players for all stats. If less then x
     # players, print all. If x-th place doubled, print all with the

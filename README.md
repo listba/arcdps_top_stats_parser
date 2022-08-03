@@ -1,6 +1,6 @@
 # TW5 Modifications #
 ```TW5_parse_top_stats_detailed.py``` and ```TW5_parse_top_stats_tools.py``` provide alternative output to support posting to a TW5 wiki with shiraz plugin.
-Example available at (https://drevarr.github.io/FluxCapacity.html)
+Example available at (https://flux-capacity.tiddlyhost.com)
 
 Edit ```Example_Guild_Data.py``` to update with your guild id and API token then rename as ```Guild_Data.py```
       

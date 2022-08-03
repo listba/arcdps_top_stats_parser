@@ -81,6 +81,8 @@ class Fight:
     kills: int = 0
     start_time: str = ""
     enemy_squad: dict = field(default_factory=dict) #profession and count of enemies
+    enemy_Dps: dict = field(default_factory=dict) #enemy name and amount of damage output
+    squad_Dps: dict = field(default_factory=dict) #squad player name and amount of damage output
     
     
 # This class stores the configuration for running the top stats.
@@ -1318,11 +1320,21 @@ def get_stats_from_fight_json(fight_json, config, log):
     enemy_squad = {}
     num_kills = 0
     num_downs = 0
+    enemy_Dps = {}
+    enemyDps_name = ''
+    enemyDps_damage = 0
+    squad_Dps = {}
+    squadDps_name = ''
+    squadDps_profession = ''
+    squadDps_damage = 0
     for enemy in fight_json['targets']:
         if 'enemyPlayer' in enemy and enemy['enemyPlayer'] == True:
             num_enemies += 1
             #append enemy['name'] to enemy_list
             enemy_name = enemy['name'].split(' pl')[0]
+            enemyDps_name = "{{"+enemy_name+"}} "+enemy['name']
+            enemyDps_damage = enemy['dpsAll'][0]['damage']
+            enemy_Dps[enemyDps_name] = enemyDps_damage
             if enemy_name not in enemy_squad:
                 enemy_squad[enemy_name] = 1
             else:
@@ -1330,12 +1342,20 @@ def get_stats_from_fight_json(fight_json, config, log):
             if 'combatReplayData' in enemy:
                 num_kills += len(enemy['combatReplayData']['dead'])
                 num_downs += len(enemy['combatReplayData']['down'])
-                
+    for player in fight_json['players']:
+        squadDps_name = player['name']
+        squadDps_profession = player['profession']
+        squadDps_prof_name = "{{"+squadDps_profession+"}} "+squadDps_name
+        squadDps_damage = player['dpsAll'][0]['damage']
+        squad_Dps[squadDps_prof_name] = squadDps_damage
+
     # initialize fight         
     fight = Fight()
     fight.duration = duration
     fight.enemies = num_enemies
     fight.enemy_squad = enemy_squad
+    fight.enemy_Dps = enemy_Dps
+    fight.squad_Dps = squad_Dps
     fight.allies = num_allies
     fight.kills = num_kills
     fight.downs = num_downs
