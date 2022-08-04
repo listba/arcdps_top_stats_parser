@@ -1342,10 +1342,16 @@ def get_stats_from_fight_json(fight_json, config, log):
         x_id=skill_id[1:]
         if x_id not in skill_Dict:
             skill_Dict[x_id] = skill['name']
+    skillBuffs = fight_json['buffMap']
+    for skill_id, skill in skillBuffs.items():
+        x_id=skill_id[1:]
+        if x_id not in skill_Dict:
+            skill_Dict[x_id] = skill['name']    
 
 #[targets][[#][totalDamageDist][#][totaldamage] -Damage Output for Skill Id
 #[targets][[#][totalDamageDist][#][id] -Skill Id
 
+    SiegeSkills = {14627: "Punch", 14639: "Whirling Assualt", 14709: "Rocket Punch", 14710: "Whirling Inferno", 14708: "Rocket Salvo"}
 
     for enemy in fight_json['targets']:
         if 'enemyPlayer' in enemy and enemy['enemyPlayer'] == True:
@@ -1358,6 +1364,8 @@ def get_stats_from_fight_json(fight_json, config, log):
             
             for skill_used in enemy['totalDamageDist'][0]:
                 skill_id = skill_used['id']
+                if str(skill_id) in SiegeSkills:
+                    continue
                 if str(skill_id) in skill_Dict:
                     skill_name = skill_Dict[str(skill_id)]
                 else:
@@ -1386,6 +1394,8 @@ def get_stats_from_fight_json(fight_json, config, log):
         squad_Dps[squadDps_prof_name] = squadDps_damage
         for skill_used in player['totalDamageDist'][0]:
             skill_id = skill_used['id']
+            if skill_id in SiegeSkills:
+                continue            
             if str(skill_id) in skill_Dict:
                 skill_name = skill_Dict[str(skill_id)]
             else:
