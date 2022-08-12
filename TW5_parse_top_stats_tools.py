@@ -725,6 +725,8 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
         print_string += " Average|"
     if stat == 'dmg':
         print_string += " DPS|"
+    if stat == 'heal':
+        print_string += " HPS|"
     
     print_string += "h"
     myprint(output_file, print_string)    
@@ -758,6 +760,9 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
         elif stat == 'dmg':
             print_string += f" {my_value(round(player.total_stats[stat])):>8}| "
             print_string += f" {my_value(player.average_stats[stat]):>8}|"        
+        elif stat == 'heal':
+            print_string += f" {my_value(round(player.total_stats[stat])):>8}| "
+            print_string += f" {my_value(player.average_stats[stat]):>8}|"                    
         else:
             print_string += my_value(round(player.total_stats[stat]))+"|"
             if stat == 'iol':
