@@ -1236,6 +1236,24 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
             return -1
         return float(player_json['statsAll'][0]['swapCount'])
 
+    if stat == 'kills':
+        countKills = 0
+        for target in player_json['statsTargets']:
+            countKills = countKills + int(target[0]['killed'])
+        return int(countKills)
+        #if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'killed' not in player_json['statsAll'][0]:
+        #    return -1
+        #return float(player_json['statsAll'][0]['killed'])
+
+    if stat == 'downs':
+        countDowns = 0
+        for target in player_json['statsTargets']:
+            countDowns = countDowns + int(target[0]['downed'])
+        return int(countDowns)
+        #if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'downed' not in player_json['statsAll'][0]:
+        #    return -1
+        #return float(player_json['statsAll'][0]['downed'])
+
     ### Buffs ###
     if stat in config.buff_ids:
         if 'squadBuffs' not in player_json:
@@ -1505,7 +1523,7 @@ def print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, fou
     i = 0
     printed_kills = False
     for stat in config.stats_to_compute:
-        if stat == 'dist' or stat in config.condition_ids or stat == 'res' or stat == 'Pdmg' or stat == 'Cdmg':
+        if stat == 'dist' or stat in config.condition_ids or stat == 'res' or stat == 'Pdmg' or stat == 'Cdmg' or stat == 'kills' or stat == 'downs':
             continue
         
         if i == 0:
@@ -1639,7 +1657,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
     
     print_string = "| Fight # | Date | Start Time | End Time | Secs | Skip | Allies | Enemies | Downs | Kills |"
     for stat in overall_squad_stats:
-        if stat != "dist" and stat !="res" and stat !="Cdmg" and stat !="Pdmg":
+        if stat != "dist" and stat !="res" and stat !="Cdmg" and stat !="Pdmg" and stat !="kills" and stat !="downs":
             stat_len[stat] = max(len(config.stat_names[stat]), len(str(overall_squad_stats[stat])))
             print_string += " {{"+config.stat_names[stat]+"}}|"
     print_string += "h"
@@ -1652,7 +1670,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
         end_time = fight.end_time.split()[1]        
         print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(start_time)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
         for stat in overall_squad_stats:
-            if stat != "dist" and stat !="res" and stat !="Cdmg" and stat !="Pdmg":
+            if stat != "dist" and stat !="res" and stat !="Cdmg" and stat !="Pdmg" and stat !="kills" and stat !="downs":
                 #JEL - added my_value formatting
                 print_string += " "+my_value(round(fight.total_stats[stat]))+"|"
         myprint(output, print_string)
@@ -1667,7 +1685,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 
     print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['start_time']:>10}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
     for stat in overall_squad_stats:
-        if stat != "dist" and stat !="res" and stat !="Cdmg" and stat !="Pdmg":
+        if stat != "dist" and stat !="res" and stat !="Cdmg" and stat !="Pdmg" and stat !="kills" and stat !="downs":
             print_string += " "+my_value(round(overall_squad_stats[stat]))+"|"
     print_string += "f\n\n"
     myprint(output, print_string)
