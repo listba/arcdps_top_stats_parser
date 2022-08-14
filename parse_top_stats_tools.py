@@ -78,8 +78,14 @@ class Fight:
     allies: int = 0
     kills: int = 0
     start_time: str = ""
-    squad_composition: dict = field(default_factory=dict)
-    
+    enemy_squad: dict = field(default_factory=dict) #profession and count of enemies
+    enemy_Dps: dict = field(default_factory=dict) #enemy name and amount of damage output
+    squad_Dps: dict = field(default_factory=dict) #squad player name and amount of damage output
+    skill_Dict: dict = field(default_factory=dict) #skill id's and skill_names from fight
+    enemy_skill_dmg: dict = field(default_factory=dict) #enemy skill_name and amount of damage output
+    squad_skill_dmg: dict = field(default_factory=dict) #squad skill_name and amount of damage output
+
+        
     
 # This class stores the configuration for running the top stats.
 @dataclass
@@ -112,7 +118,7 @@ class Config:
     buffs_stacking_duration: list = field(default_factory=list)
     buffs_stacking_intensity: list = field(default_factory=list)
     buff_abbrev: dict = field(default_factory=dict)
-    
+    condition_ids: dict = field(default_factory=dict)    
 
     
 # prints output_string to the console and the output_file, with a linebreak at the end
@@ -120,7 +126,9 @@ def myprint(output_file, output_string):
     print(output_string)
     output_file.write(output_string+"\n")
 
-
+# JEL - format a number with commas every thousand
+def my_value(number):
+    return ("{:,}".format(number))
 
 # fills a Config with the given input    
 def fill_config(config_input):
@@ -151,11 +159,23 @@ def fill_config(config_input):
     config.empty_stats['time_active'] = -1
     config.empty_stats['time_in_combat'] = -1
 
-    config.buff_abbrev["Stability"] = 'stab'
-    config.buff_abbrev["Protection"] = 'prot'
+    config.buff_abbrev["Stability"] = 'stability'
+    config.buff_abbrev["Protection"] = 'protection'
     config.buff_abbrev["Aegis"] = 'aegis'
     config.buff_abbrev["Might"] = 'might'
     config.buff_abbrev["Fury"] = 'fury'
+    config.buff_abbrev["Superspeed"] = 'superspeed'
+    config.buff_abbrev["Regeneration"] = 'regeneration'
+    config.buff_abbrev["Resistance"] = 'resistance'
+    config.buff_abbrev["Resolution"] = 'resolution'
+    config.buff_abbrev["Quickness"] = 'quickness'
+    config.buff_abbrev["Swiftness"] = 'swiftness'
+    config.buff_abbrev["Alacrity"] = 'alacrity'
+    config.buff_abbrev["Vigor"] = 'vigor'
+    config.buff_abbrev["Illusion of Life"] = 'iol'
+
+    config.condition_ids = {'immobilize': 727, 'cripple': 721, 'weakness': 742, 'daze': 833}
+ 
     
     return config
     
@@ -873,6 +893,10 @@ def get_buff_ids_from_json(json_data, config):
                 config.buffs_stacking_intensity.append(abbrev_name)
             else:
                 config.buffs_stacking_duration.append(abbrev_name)
+    #Quick fix for Buffs not found in the initial fight log buffMap
+    if 'iol' not in config.buff_ids:
+        config.buff_ids['iol'] = 10346
+        config.buffs_stacking_duration.append('iol')                
 
             
 
@@ -911,7 +935,7 @@ def collect_stat_data(args, config, log, anonymize=False):
     players = []        # list of all player/profession combinations
     player_index = {}   # dictionary that matches each player/profession combo to its index in players list
     account_index = {}  # dictionary that matches each account name to a list of its indices in players list
-
+    squad_comp = {}     # dictionary that contains count of professions by fight_num
     used_fights = 0
     fights = []
     first = True
@@ -962,8 +986,8 @@ def collect_stat_data(args, config, log, anonymize=False):
             continue
         
         used_fights += 1
-        #fight_number = used_fights-1
-        
+        fight_number = used_fights-1
+        squad_comp[fight_number]={}        
         # get stats for each player
         #for player_data in (xml_root.iter('players') if args.filetype == "xml" else json_data['players']):
         for player_data in json_data['players']:
@@ -974,10 +998,10 @@ def collect_stat_data(args, config, log, anonymize=False):
             #    account, name, profession = get_basic_player_data_from_xml(player_data)
             #else:
             account, name, profession = get_basic_player_data_from_json(player_data)
-            if profession in fight.squad_composition:
-                fight.squad_composition[profession] += 1
+            if profession not in squad_comp[fight_number]:
+                squad_comp[fight_number][profession] = 1
             else:
-                fight.squad_composition[profession] = 1
+                squad_comp[fight_number][profession] = squad_comp[fight_number][profession]+1
 
             # if this combination of charname + profession is not in the player index yet, create a new entry
             name_and_prof = name+" "+profession
@@ -1036,11 +1060,11 @@ def collect_stat_data(args, config, log, anonymize=False):
                 # add stats of this fight and player to total stats of this fight and player
                 if player.stats_per_fight[fight_number][stat] > 0:
                     # buff are generation squad values, using total over time
-                    if stat in config.buffs_stacking_duration:
+                    if stat in config.buffs_stacking_duration and stat != 'iol':
                         #value is generated boon time on all squad players / fight duration / (players-1)" in percent, we want generated boon time on all squad players / (players-1)
                         fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration, 2)
                         player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration, 2)
-                    elif stat in config.buffs_stacking_intensity:
+                    elif stat in config.buffs_stacking_intensity and stat != 'iol':
                         #value is generated boon time on all squad players / fight duration / (players-1)", we want generated boon time on all squad players / (players-1)
                         fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration, 2)
                         player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration, 2)
@@ -1114,7 +1138,7 @@ def collect_stat_data(args, config, log, anonymize=False):
     if anonymize:
         anonymize_players(players, account_index)
     
-    return players, fights, found_healing, found_barrier
+    return players, fights, found_healing, found_barrier, squad_comp
             
 
 
@@ -1214,7 +1238,22 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
     if stat == 'dmg':
         if 'dpsAll' not in player_json or len(player_json['dpsAll']) != 1 or 'damage' not in player_json['dpsAll'][0]:
             return 0
-        return int(player_json['dpsAll'][0]['damage'])            
+        return int(player_json['dpsAll'][0]['damage'])
+    #Add Power and Condition Damage Tracking
+    if stat == 'Cdmg':
+        if 'dpsAll' not in player_json or len(player_json['dpsAll']) != 1 or 'condiDamage' not in player_json['dpsAll'][0]:
+            return 0
+        return int(player_json['dpsAll'][0]['condiDamage'])    
+	
+    if stat == 'Pdmg':
+        if 'dpsAll' not in player_json or len(player_json['dpsAll']) != 1 or 'powerDamage' not in player_json['dpsAll'][0]:
+            return 0
+        return int(player_json['dpsAll'][0]['powerDamage'])  
+
+    if stat == 'res':
+        if 'support' not in player_json or len(player_json['support']) != 1 or 'resurrects' not in player_json['support'][0]:
+            return 0
+        return int(player_json['support'][0]['resurrects'])                 
 
     if stat == 'rips':
         if 'support' not in player_json or len(player_json['support']) != 1 or 'boonStrips' not in player_json['support'][0]:
@@ -1231,6 +1270,29 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
             return -1
         return float(player_json['statsAll'][0]['distToCom'])
 
+    if stat == 'swaps':
+        if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'swapCount' not in player_json['statsAll'][0]:
+            return -1
+        return float(player_json['statsAll'][0]['swapCount'])
+
+    if stat == 'kills':
+        countKills = 0
+        for target in player_json['statsTargets']:
+            countKills = countKills + int(target[0]['killed'])
+        return int(countKills)
+        #if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'killed' not in player_json['statsAll'][0]:
+        #    return -1
+        #return float(player_json['statsAll'][0]['killed'])
+
+    if stat == 'downs':
+        countDowns = 0
+        for target in player_json['statsTargets']:
+            countDowns = countDowns + int(target[0]['downed'])
+        return int(countDowns)
+        #if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'downed' not in player_json['statsAll'][0]:
+        #    return -1
+        #return float(player_json['statsAll'][0]['downed'])
+
     ### Buffs ###
     if stat in config.buff_ids:
         if 'squadBuffs' not in player_json:
@@ -1244,8 +1306,28 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
             if buffId == int(config.buff_ids[stat]):
                 if 'generation' not in buff['buffData'][0]:
                     return 0.
-                return float(buff['buffData'][0]['generation'])
+                if stat == 'iol':
+                    return 1
+                else:
+                    return float(buff['buffData'][0]['generation'])
         return 0.
+
+    ### Conditions ###
+    if stat in config.condition_ids:
+        if 'buffUptimesActive' not in player_json:
+            return 0
+        # get buffs in squad generation -> need to loop over all buffs
+        for buff in player_json['buffUptimesActive']:
+            if 'id' not in buff:
+                continue 
+            # find right buff
+            buffId = buff['id']
+            if buffId == int(config.condition_ids[stat]):
+                if 'uptime' not in buff['buffData'][0]:
+                    return 0
+                return float(buff['buffData'][0]['uptime'])
+        return 0
+		        
 
     if stat == 'heal':
         # check if healing was logged, save it
@@ -1300,19 +1382,106 @@ def get_stats_from_fight_json(fight_json, config, log):
 
     num_allies = len(fight_json['players'])
     num_enemies = 0
+    enemy_name = ''
+    enemy_squad = {}    
     num_kills = 0
+    num_downs = 0
+    enemy_Dps = {}
+    enemyDps_name = ''
+    enemyDps_damage = 0
+    enemy_skill_dmg = {}
+    squad_skill_dmg = {}
+    squad_Dps = {}
+    squadDps_name = ''
+    squadDps_profession = ''
+    squadDps_damage = 0    
+
+#creat dictionary of skill_ids and skill_names
+    skill_Dict = {}
+
+    skills = fight_json['skillMap']
+    for skill_id, skill in skills.items():
+        x_id=skill_id[1:]
+        if x_id not in skill_Dict:
+            skill_Dict[x_id] = skill['name']
+    skillBuffs = fight_json['buffMap']
+    for skill_id, skill in skillBuffs.items():
+        x_id=skill_id[1:]
+        if x_id not in skill_Dict:
+            skill_Dict[x_id] = skill['name']    
+
+#[targets][[#][totalDamageDist][#][totaldamage] -Damage Output for Skill Id
+#[targets][[#][totalDamageDist][#][id] -Skill Id
+
+    SiegeSkills = {14627: "Punch", 14639: "Whirling Assualt", 14709: "Rocket Punch", 14710: "Whirling Inferno", 14708: "Rocket Salvo"}
+
     for enemy in fight_json['targets']:
         if 'enemyPlayer' in enemy and enemy['enemyPlayer'] == True:
             num_enemies += 1
+            #append enemy['name'] to enemy_list
+            enemy_name = enemy['name'].split(' pl')[0]
+            enemyDps_name = "{{"+enemy_name+"}} "+enemy['name']
+            enemyDps_damage = enemy['dpsAll'][0]['damage']
+            enemy_Dps[enemyDps_name] = enemyDps_damage
+            
+            for skill_used in enemy['totalDamageDist'][0]:
+                skill_id = skill_used['id']
+                if str(skill_id) in SiegeSkills:
+                    continue
+                if str(skill_id) in skill_Dict:
+                    skill_name = skill_Dict[str(skill_id)]
+                else:
+                    skill_name = 'Skill-'+str(skill_id)
+                #skill_name = skill_Dict[skill_id]
+                skill_dmg = skill_used['totalDamage']
+                if skill_name not in enemy_skill_dmg:
+                    enemy_skill_dmg[skill_name] = skill_dmg
+                else:
+                    enemy_skill_dmg[skill_name] = enemy_skill_dmg[skill_name] +skill_dmg
+
+            if enemy_name not in enemy_squad:
+                enemy_squad[enemy_name] = 1
+            else:
+                enemy_squad[enemy_name] = enemy_squad[enemy_name] + 1
+                        
             if 'combatReplayData' in enemy:
                 num_kills += len(enemy['combatReplayData']['dead'])
+                num_downs += len(enemy['combatReplayData']['down'])
+
+    for player in fight_json['players']:
+        squadDps_name = player['name']
+        squadDps_profession = player['profession']
+        squadDps_prof_name = "{{"+squadDps_profession+"}} "+squadDps_name
+        squadDps_damage = player['dpsAll'][0]['damage']
+        squad_Dps[squadDps_prof_name] = squadDps_damage
+        for skill_used in player['totalDamageDist'][0]:
+            skill_id = skill_used['id']
+            if skill_id in SiegeSkills:
+                continue            
+            if str(skill_id) in skill_Dict:
+                skill_name = skill_Dict[str(skill_id)]
+            else:
+                skill_name = 'Skill-'+str(skill_id)            
+            skill_dmg = skill_used['totalDamage']
+            if skill_name not in squad_skill_dmg:
+                squad_skill_dmg[skill_name] = skill_dmg
+            else:
+                squad_skill_dmg[skill_name] = squad_skill_dmg[skill_name] +skill_dmg        
+
                 
     # initialize fight         
     fight = Fight()
     fight.duration = duration
     fight.enemies = num_enemies
+    fight.enemy_squad = enemy_squad
+    fight.enemy_Dps = enemy_Dps
+    fight.squad_Dps = squad_Dps
+    fight.enemy_skill_dmg = enemy_skill_dmg
+    fight.squad_skill_dmg = squad_skill_dmg
+    fight.skill_Dict = skill_Dict    
     fight.allies = num_allies
     fight.kills = num_kills
+    fight.downs = num_downs    
     fight.start_time = fight_json['timeStartStd']
     fight.end_time = fight_json['timeEndStd']        
     fight.total_stats = {key: 0 for key in config.stats_to_compute}
@@ -1374,17 +1543,8 @@ def get_overall_raid_stats(fights):
     overall_raid_stats['min_enemies'] = min([f.enemies for f in used_fights])
     overall_raid_stats['max_enemies'] = max([f.enemies for f in used_fights])        
     overall_raid_stats['mean_enemies'] = round(sum([f.enemies for f in used_fights])/len(used_fights), 1)
+    overall_raid_stats['total_downs'] = sum([f.downs for f in used_fights])    
     overall_raid_stats['total_kills'] = sum([f.kills for f in used_fights])
-    overall_raid_stats['avg_squad_composition'] = {}
-    for f in used_fights:
-        for prof in f.squad_composition:
-            if prof in overall_raid_stats['avg_squad_composition']:
-                overall_raid_stats['avg_squad_composition'][prof] += f.squad_composition[prof]
-            else:
-                overall_raid_stats['avg_squad_composition'][prof] = 1
-    for prof in overall_raid_stats['avg_squad_composition']:
-        overall_raid_stats['avg_squad_composition'][prof] /= len(used_fights) 
-                
     return overall_raid_stats
 
 
@@ -1404,7 +1564,7 @@ def print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, fou
     i = 0
     printed_kills = False
     for stat in config.stats_to_compute:
-        if stat == 'dist':
+        if stat == 'dist' or stat in config.condition_ids or stat == 'res' or stat == 'Pdmg' or stat == 'Cdmg' or stat == 'kills' or stat == 'downs':
             continue
         
         if i == 0:
@@ -1421,7 +1581,9 @@ def print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, fou
             print_string += "ripped "+str(round(overall_squad_stats['rips']))+" boons"
         elif stat == 'cleanses':
             print_string += "cleansed "+str(round(overall_squad_stats['cleanses']))+" conditions"
-        elif stat in config.buff_ids:
+        elif stat == 'iol':
+            print_string += "Illusioned "+my_value(round(overall_squad_stats['iol']))+" downs"
+        elif stat in config.buff_ids and stat != 'iol':            
             total_buff_duration = {}
             total_buff_duration["h"] = int(overall_squad_stats[stat]/3600)
             total_buff_duration["m"] = int((overall_squad_stats[stat] - total_buff_duration["h"]*3600)/60)
@@ -1447,6 +1609,14 @@ def print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, fou
     if total_fight_duration["h"] > 0:
         print_string += str(total_fight_duration["h"])+"h "
     print_string += str(total_fight_duration["m"])+"m "+str(total_fight_duration["s"])+"s in "+str(overall_raid_stats['num_used_fights'])+" fights.\n"
+    #JEL - Added Kill Death Ratio
+    try:
+        Raid_KDR = (round((overall_raid_stats['total_kills']/(round(overall_squad_stats['deaths']))),2))
+    except:
+        Raid_KDR = overall_raid_stats['total_kills']
+
+    print_string += "\nKill Death Ratio for the session was ''"+str(Raid_KDR)+"''.\n"
+
     print_string += "There were between "+str(overall_raid_stats['min_allies'])+" and "+str(overall_raid_stats['max_allies'])+" allied players involved (average "+str(round(overall_raid_stats['mean_allies'], 1))+" players).\n"
     print_string += "The squad faced between "+str(overall_raid_stats['min_enemies'])+" and "+str(overall_raid_stats['max_enemies'])+" enemy players (average "+str(round(overall_raid_stats['mean_enemies'], 1))+" players).\n"    
         

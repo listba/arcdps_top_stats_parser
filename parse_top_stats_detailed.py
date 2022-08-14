@@ -18,6 +18,7 @@
 
 
 import argparse
+import datetime
 import os.path
 from os import listdir
 import sys
@@ -26,6 +27,7 @@ from enum import Enum
 import importlib
 import xlwt
 
+from collections import OrderedDict
 from parse_top_stats_tools import *
 
 if __name__ == '__main__':
@@ -52,7 +54,7 @@ if __name__ == '__main__':
     if args.log_file is None:
         args.log_file = args.input_directory+"/log_detailed.txt"
 
-    output = open(args.output_filename, "w")
+    output = open(args.output_filename, "w",encoding="utf-8")
     log = open(args.log_file, "w")
 
     parser_config = importlib.import_module("parser_configs."+args.config_file , package=None) 
@@ -64,7 +66,7 @@ if __name__ == '__main__':
     print_string = "Considering fights with at least "+str(config.min_allied_players)+" allied players and at least "+str(config.min_enemy_players)+" enemies that took longer than "+str(config.min_fight_duration)+" s."
     myprint(log, print_string)
 
-    players, fights, found_healing, found_barrier = collect_stat_data(args, config, log, args.anonymize)    
+    players, fights, found_healing, found_barrier, squad_comp = collect_stat_data(args, config, log, args.anonymize)    
 
     # create xls file if it doesn't exist
     book = xlwt.Workbook(encoding="utf-8")
