@@ -86,6 +86,7 @@ class Fight:
     skill_Dict: dict = field(default_factory=dict) #skill id's and skill_names from fight
     enemy_skill_dmg: dict = field(default_factory=dict) #enemy skill_name and amount of damage output
     squad_skill_dmg: dict = field(default_factory=dict) #squad skill_name and amount of damage output
+    #squad_Control: dict = field(default_factory=dict) #squad skill_name and amount of damage output
 
     
     
@@ -121,6 +122,9 @@ class Config:
     buffs_stacking_intensity: list = field(default_factory=list)
     buff_abbrev: dict = field(default_factory=dict)
     condition_ids: dict = field(default_factory=dict)
+
+#Control Effects Tracking
+squad_Control = {} 
     
 #fetch Guild Data and Check Guild Status function
 Guild_ID = Guild_Data.Guild_ID
@@ -195,7 +199,7 @@ def fill_config(config_input):
     config.buff_abbrev["Vigor"] = 'vigor'
     config.buff_abbrev["Illusion of Life"] = 'iol'
 
-    config.condition_ids = {'immobilize': 727, 'cripple': 721, 'weakness': 742, 'daze': 833}
+    config.condition_ids = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt'}
             
     return config
     
@@ -901,7 +905,7 @@ def collect_stat_data(args, config, log, anonymize=False):
     used_fights = 0
     fights = []
     first = True
-    
+
     # iterating over all fights in directory
     files = listdir(args.input_directory)
     sorted_files = sorted(files)
@@ -927,7 +931,7 @@ def collect_stat_data(args, config, log, anonymize=False):
         json_datafile = open(file_path, encoding='utf-8')
         json_data = json.load(json_datafile)
         # get fight stats
-        fight, players_running_healing_addon = get_stats_from_fight_json(json_data, config, log)
+        fight, players_running_healing_addon, squad_Control = get_stats_from_fight_json(json_data, config, log)
             
         if first:
             first = False
@@ -1100,7 +1104,7 @@ def collect_stat_data(args, config, log, anonymize=False):
     if anonymize:
         anonymize_players(players, account_index)
     
-    return players, fights, found_healing, found_barrier, squad_comp
+    return players, fights, found_healing, found_barrier, squad_comp, squad_Control
             
 
 
@@ -1401,6 +1405,23 @@ def get_stats_from_fight_json(fight_json, config, log):
                 else:
                     enemy_skill_dmg[skill_name] = enemy_skill_dmg[skill_name] +skill_dmg
 
+            Control_Effects = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt'}
+            for item in enemy['buffs']:
+                conditionId = int(item['id'])
+                if str(conditionId) in skill_Dict:
+                    skill_name = skill_Dict[str(conditionId)]
+                else:
+                    skill_name = 'Skill-'+str(conditionId)
+
+                if skill_name not in squad_Control:
+                    squad_Control[skill_name] = {}
+                for cc in item['buffData']:
+                    for key, value in cc['generated'].items():
+                        if key not in squad_Control[skill_name]:
+                            squad_Control[skill_name][key] = float(value)
+                        else:
+                            squad_Control[skill_name][key] = squad_Control[skill_name][key] + float(value)
+
             if enemy_name not in enemy_squad:
                 enemy_squad[enemy_name] = 1
             else:
@@ -1473,7 +1494,7 @@ def get_stats_from_fight_json(fight_json, config, log):
             if extension['name'] == "Healing Stats":
                 players_running_healing_addon = extension['runningExtension']
         
-    return fight, players_running_healing_addon
+    return fight, players_running_healing_addon, squad_Control
 
 
 
@@ -1693,7 +1714,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 
 
     
-def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, output_file):
+def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, output_file):
     json_dict = {}
     json_dict["overall_raid_stats"] = {key: value for key, value in overall_raid_stats.items()}
     json_dict["overall_squad_stats"] = {key: value for key, value in overall_squad_stats.items()}
@@ -1704,7 +1725,9 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
     json_dict["top_consistent_players"] =  {key: value for key, value in top_consistent_stat_players.items()}
     json_dict["top_percentage_players"] =  {key: value for key, value in top_percentage_stat_players.items()}
     json_dict["top_late_players"] =  {key: value for key, value in top_late_players.items()}
-    json_dict["top_jack_of_all_trades_players"] =  {key: value for key, value in top_jack_of_all_trades_players.items()}        
+    json_dict["top_jack_of_all_trades_players"] =  {key: value for key, value in top_jack_of_all_trades_players.items()}
+    #squad_Control        
+    json_dict["squad_Control"] =  {key: value for key, value in squad_Control.items()}
     with open(output_file, 'w') as json_file:
         json.dump(json_dict, json_file, indent=4)
 

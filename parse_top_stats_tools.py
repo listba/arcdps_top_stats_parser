@@ -174,9 +174,8 @@ def fill_config(config_input):
     config.buff_abbrev["Vigor"] = 'vigor'
     config.buff_abbrev["Illusion of Life"] = 'iol'
 
-    config.condition_ids = {'immobilize': 727, 'cripple': 721, 'weakness': 742, 'daze': 833}
+    config.condition_ids = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt'}
  
-    
     return config
     
         
@@ -1394,7 +1393,8 @@ def get_stats_from_fight_json(fight_json, config, log):
     squad_Dps = {}
     squadDps_name = ''
     squadDps_profession = ''
-    squadDps_damage = 0    
+    squadDps_damage = 0
+    squad_Control = {}    
 
 #creat dictionary of skill_ids and skill_names
     skill_Dict = {}
@@ -1439,6 +1439,20 @@ def get_stats_from_fight_json(fight_json, config, log):
                 else:
                     enemy_skill_dmg[skill_name] = enemy_skill_dmg[skill_name] +skill_dmg
 
+            for item in enemy['buffs']:
+                conditionId = item['id']
+                if conditionId not in config.condition_ids:
+                    continue
+                if 'generated' not in item['buffData']:
+                    continue
+                for key, value in item['buffData']['generated']:
+                    if key not in squad_Control:
+                        squad_Control[key][conditionId] = float(value)
+                    if conditionId not in squad_Control[key]:
+                        squad_Control[key][conditionId] = float(value)
+                    else:
+                        squad_Control[key][conditionId] = squad_Control[key][conditionId] + float(value)
+
             if enemy_name not in enemy_squad:
                 enemy_squad[enemy_name] = 1
             else:
@@ -1476,6 +1490,7 @@ def get_stats_from_fight_json(fight_json, config, log):
     fight.enemy_squad = enemy_squad
     fight.enemy_Dps = enemy_Dps
     fight.squad_Dps = squad_Dps
+    fight.squad_Control = squad_Control
     fight.enemy_skill_dmg = enemy_skill_dmg
     fight.squad_skill_dmg = squad_skill_dmg
     fight.skill_Dict = skill_Dict    
