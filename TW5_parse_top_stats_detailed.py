@@ -127,8 +127,9 @@ if __name__ == '__main__':
 					'<$button set="!!curTab" setTo="Support" selectedClass="" class="btn btn-sm btn-dark" style=""> Support Players </$button>',
 					'<$button set="!!curTab" setTo="Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Healing </$button>',
 					'<$button set="!!curTab" setTo="Barrier" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier </$button>',
-					'<$button set="!!curTab" setTo="Weapon Swaps" selectedClass="" class="btn btn-sm btn-dark" style=""> Weapon Swaps </$button>'
-					'<$button set="!!curTab" setTo="Control Effects" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects </$button>'					
+					'<$button set="!!curTab" setTo="Weapon Swaps" selectedClass="" class="btn btn-sm btn-dark" style=""> Weapon Swaps </$button>',
+					'<$button set="!!curTab" setTo="Control Effects" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects </$button>',
+					'<$button set="!!curTab" setTo="Spike Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Spike Damage </$button>'
 	)
 	for item in Nav_Bar_Items:
 		myprint(output, item)
@@ -148,7 +149,38 @@ if __name__ == '__main__':
 
 	write_fights_overview_xls(fights, overall_squad_stats, overall_raid_stats, config, args.xls_output_filename)
 	
-	#Move Squad Composition here so it is first under the fight summaries
+	#Move Squad Composition and Spike Damage here so it is first under the fight summaries
+
+	#Squad Spike Damage
+	myprint(output, '<$reveal type="match" state="!!curTab" text="Spike Damage">\n')    
+	myprint(output, '\n!!!SPIKE DAMAGE\n')
+	myprint(output, '\n---\n')    
+
+	output_string = "\nCumulative Squad Damage output by second, limited to first 20 seconds of the engagement\n"
+	output_string = "\n|thead-dark table-hover|k\n"
+	output_string += "|Fight Ending @|"
+
+	for i in range(21):
+		output_string += " "+str(i)+"s |"
+		
+	output_string += "h\n"
+	for fight in fights:
+		output_string += "|"+str(fight.end_time.split(' ')[1])+" |"
+		for phase in fight.squad_spike_dmg:
+			if phase <= 20:
+				output_string += " "+my_value(fight.squad_spike_dmg[phase])+" |"
+				
+		output_string += "\n"
+		
+	myprint(output, output_string)
+
+	#end reveal
+	print_string = "</$reveal>\n"
+	myprint(output, print_string)     
+
+
+	# end Squad Spike Damage
+
 	#Squad Composition Testing
 	myprint(output, '<$reveal type="match" state="!!curTab" text="Squad Composition">')    
 	myprint(output, '\n<<alert dark "Excludes skipped fights in the overview" width:60%>>\n')
@@ -381,7 +413,6 @@ if __name__ == '__main__':
 
 			myprint(output, "</$reveal>\n")
 	#end Control Effects Outgoing insert
-
 
 	for stat in config.stats_to_compute:
 		if stat == 'dist':

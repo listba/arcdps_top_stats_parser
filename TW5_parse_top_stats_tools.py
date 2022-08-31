@@ -86,6 +86,7 @@ class Fight:
     skill_Dict: dict = field(default_factory=dict) #skill id's and skill_names from fight
     enemy_skill_dmg: dict = field(default_factory=dict) #enemy skill_name and amount of damage output
     squad_skill_dmg: dict = field(default_factory=dict) #squad skill_name and amount of damage output
+    squad_spike_dmg: dict = field(default_factory=dict) #squad skill_name and amount of damage output
     #squad_Control: dict = field(default_factory=dict) #squad skill_name and amount of damage output
 
     
@@ -1361,6 +1362,7 @@ def get_stats_from_fight_json(fight_json, config, log):
     squadDps_name = ''
     squadDps_profession = ''
     squadDps_damage = 0
+    squad_spike_dmg = {}
 
 #creat dictionary of skill_ids and skill_names
     skill_Dict = {}
@@ -1450,6 +1452,12 @@ def get_stats_from_fight_json(fight_json, config, log):
                 squad_skill_dmg[skill_name] = skill_dmg
             else:
                 squad_skill_dmg[skill_name] = squad_skill_dmg[skill_name] +skill_dmg        
+        for spike_target in player['targetDamage1S']:
+            for PHASE, DAMAGE1S in enumerate(spike_target[0]):
+                if PHASE not in squad_spike_dmg:
+                    squad_spike_dmg[PHASE] = DAMAGE1S
+                else:
+                    squad_spike_dmg[PHASE] = squad_spike_dmg[PHASE] + DAMAGE1S
 
     # initialize fight         
     fight = Fight()
@@ -1458,6 +1466,7 @@ def get_stats_from_fight_json(fight_json, config, log):
     fight.enemy_squad = enemy_squad
     fight.enemy_Dps = enemy_Dps
     fight.squad_Dps = squad_Dps
+    fight.squad_spike_dmg = squad_spike_dmg
     fight.enemy_skill_dmg = enemy_skill_dmg
     fight.squad_skill_dmg = squad_skill_dmg
     fight.skill_Dict = skill_Dict
