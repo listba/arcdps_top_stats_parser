@@ -191,6 +191,7 @@ def fill_config(config_input):
     config.buff_abbrev["Might"] = 'might'
     config.buff_abbrev["Fury"] = 'fury'
     config.buff_abbrev["Superspeed"] = 'superspeed'
+    config.buff_abbrev["Stealth"] = 'stealth'
     config.buff_abbrev["Regeneration"] = 'regeneration'
     config.buff_abbrev["Resistance"] = 'resistance'
     config.buff_abbrev["Resolution"] = 'resolution'
@@ -1161,18 +1162,12 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
         for death in replay['dead']:
             time_of_death = death[0]
             time_of_revive = death[1]
-            #if player_json['name'] == "Mo Qu Ta":
-            #    print("started combat "+str(start_combat)+", died "+str(time_of_death)+", rezzed "+str(time_of_revive))
             if start_combat != -1:
                 combat_time += (time_of_death - start_combat)
-                #if player_json['name'] == "Mo Qu Ta":
-                #    print("combat time until death: "+str(combat_time))
             start_combat = get_combat_start_from_player_json(time_of_revive, player_json)
         end_combat = len(player_json['damage1S'][0]*1000)
         if start_combat != -1:
             combat_time += end_combat - start_combat
-        #if player_json['name'] == "Mo Qu Ta":
-        #    print("combat time until end: "+str(combat_time))            
         combat_time /= 1000
         #print(player_json['name']+": in combat for "+str(combat_time)+"s")
         return round(combat_time)
