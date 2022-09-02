@@ -886,7 +886,11 @@ def get_buff_ids_from_json(json_data, config):
     if 'HiS' not in config.buff_ids:
         config.buff_ids['HiS'] = 10269
         config.buffs_stacking_duration.append('HiS')
-            
+    #Quick fix for Buffs not found in the initial fight log buffMap
+    if 'stealth' not in config.buff_ids:
+        config.buff_ids['HiS'] = 13017
+        config.buffs_stacking_duration.append('stealth')
+
 # Collect the top stats data.
 # Input:
 # args = cmd line arguments
@@ -958,7 +962,7 @@ def collect_stat_data(args, config, log, anonymize=False):
             continue
         
         used_fights += 1
-        fight_number = used_fights-1
+        #fight_number = used_fights-1
         squad_comp[fight_number]={}
         # get stats for each player
         #for player_data in (xml_root.iter('players') if args.filetype == "xml" else json_data['players']):
@@ -997,8 +1001,8 @@ def collect_stat_data(args, config, log, anonymize=False):
                 player.initialize(config)
                 player_index[name_and_prof] = len(players)
                 # fill up fights where the player wasn't there yet with empty stats
-                # while len(player.stats_per_fight) <= fight_number:                
-                while len(player.stats_per_fight) <= used_fights:
+                while len(player.stats_per_fight) <= fight_number:                
+                #while len(player.stats_per_fight) <= used_fights:
                     player.stats_per_fight.append({key: value for key, value in config.empty_stats.items()})                
                 players.append(player)
 

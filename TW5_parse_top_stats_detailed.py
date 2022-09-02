@@ -212,6 +212,7 @@ if __name__ == '__main__':
 	enemy_squad_num = 0
 	for fight in fights:
 		if fight.skipped:
+			enemy_squad_num += 1
 			continue
 		enemy_squad_num += 1
 		output_string1 = "\n|thead-dark|k\n"
