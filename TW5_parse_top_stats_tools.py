@@ -192,6 +192,7 @@ def fill_config(config_input):
     config.buff_abbrev["Fury"] = 'fury'
     config.buff_abbrev["Superspeed"] = 'superspeed'
     config.buff_abbrev["Stealth"] = 'stealth'
+    config.buff_abbrev["Hide in Shadows"] = 'HiS'
     config.buff_abbrev["Regeneration"] = 'regeneration'
     config.buff_abbrev["Resistance"] = 'resistance'
     config.buff_abbrev["Resolution"] = 'resolution'
@@ -881,7 +882,10 @@ def get_buff_ids_from_json(json_data, config):
     if 'iol' not in config.buff_ids:
         config.buff_ids['iol'] = 10346
         config.buffs_stacking_duration.append('iol')
-
+    #Quick fix for Buffs not found in the initial fight log buffMap
+    if 'HiS' not in config.buff_ids:
+        config.buff_ids['HiS'] = 10269
+        config.buffs_stacking_duration.append('HiS')
             
 # Collect the top stats data.
 # Input:
