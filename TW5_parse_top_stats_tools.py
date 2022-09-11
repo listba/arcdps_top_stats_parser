@@ -205,7 +205,7 @@ def fill_config(config_input):
     config.buff_abbrev["Vigor"] = 'vigor'
     config.buff_abbrev["Illusion of Life"] = 'iol'
 
-    config.condition_ids = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt'}
+    config.condition_ids = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: "Hunter's Mark"}
             
     return config
     
@@ -1413,7 +1413,7 @@ def get_stats_from_fight_json(fight_json, config, log):
                 else:
                     enemy_skill_dmg[skill_name] = enemy_skill_dmg[skill_name] +skill_dmg
 
-            Control_Effects = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt'}
+            #Control_Effects = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: 'Hunters Mark'}
             for item in enemy['buffs']:
                 conditionId = int(item['id'])
                 if str(conditionId) in skill_Dict:
