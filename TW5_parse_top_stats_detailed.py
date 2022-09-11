@@ -415,6 +415,8 @@ if __name__ == '__main__':
 					i=i+1
 
 			myprint(output, "</$reveal>\n")
+
+		write_control_effects_xls(sorted_squadControl, key, players, args.xls_output_filename)
 	#end Control Effects Outgoing insert
 
 	for stat in config.stats_to_compute:
