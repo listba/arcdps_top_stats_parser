@@ -129,6 +129,7 @@ exclude_Stat = ["dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealt
 
 #Control Effects Tracking
 squad_Control = {} 
+enemy_Control = {} 
 	
 #fetch Guild Data and Check Guild Status function
 Guild_ID = Guild_Data.Guild_ID
@@ -908,17 +909,15 @@ def get_buff_ids_from_json(json_data, config):
 			else:
 				config.buffs_stacking_duration.append(abbrev_name)
 	#Quick fix for Buffs not found in the initial fight log buffMap
-	if 'iol' not in config.buff_ids:
-		config.buff_ids['iol'] = 10346
-		config.buffs_stacking_duration.append('iol')
-	#Quick fix for Buffs not found in the initial fight log buffMap
-	if 'HiS' not in config.buff_ids:
-		config.buff_ids['HiS'] = 10269
-		config.buffs_stacking_duration.append('HiS')
-	#Quick fix for Buffs not found in the initial fight log buffMap
-	if 'stealth' not in config.buff_ids:
-		config.buff_ids['HiS'] = 13017
-		config.buffs_stacking_duration.append('stealth')
+	BuffIdFix = { 'iol': 10346, 'superspeed': 5974,  'stealth': 13017,  'HiS': 10269,  'stability': 1122,  'protection': 717,  'aegis': 743,  'might': 740,  'fury': 725,  'resistance': 26980,  'resolution': 873,  'quickness': 1187,  'swiftness': 719,  'alacrity': 30328,  'vigor': 726,  'regeneration': 718}
+	for buff in BuffIdFix:
+		if buff not in config.buff_ids:
+			config.buff_ids[buff] = BuffIdFix[buff]
+			if buff == 'might' or buff == 'stability':
+				config.buffs_stacking_intensity.append(buff)
+			else:
+				config.buffs_stacking_duration.append(buff)
+
 
 # Collect the top stats data.
 # Input:
@@ -1061,7 +1060,8 @@ def collect_stat_data(args, config, log, anonymize=False):
 					if player.stats_per_fight[fight_number]['time_in_combat'] == 0:
 						player.stats_per_fight[fight_number]['time_in_combat'] = 1
 					player.stats_per_fight[fight_number][stat] = player.stats_per_fight[fight_number][stat]/player.stats_per_fight[fight_number]['time_in_combat']
-					
+
+				print(stat)
 				# add stats of this fight and player to total stats of this fight and player
 				if player.stats_per_fight[fight_number][stat] > 0:
 					# buff are generation squad values, using total over time
@@ -1085,10 +1085,11 @@ def collect_stat_data(args, config, log, anonymize=False):
 						player.total_stats[stat] += player.stats_per_fight[fight_number][stat]
 					
 			if debug:
+				print("\n")
 				print(name)
 				for stat in player.stats_per_fight[fight_number].keys():
-					print(stat+": "+player.stats_per_fight[fight_number][stat])
-				print("\n")
+					print(stat+": "+str(player.stats_per_fight[fight_number][stat]))
+				print("\n\n")
 
 			player.num_fights_present += 1
 			player.duration_fights_present += fight.duration
@@ -1103,7 +1104,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 
 		if debug:
 			for stat in config.stats_to_compute:
-				print("sorted "+stat+": "+sortedStats[stat])
+				print("sorted "+stat+": "+str(sortedStats[stat]))
 		
 		# increase number of times top x was achieved for top x players in each stat
 		for stat in config.stats_to_compute:
