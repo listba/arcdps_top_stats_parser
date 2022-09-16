@@ -43,11 +43,11 @@ percentage_of_top_for_late = 75
 percentage_of_top_for_buildswap = 75
 
 # minimum number of allied players to consider a fight in the stats
-min_allied_players = 1
+min_allied_players = 10
 # minimum duration of a fight to be considered in the stats
-min_fight_duration = 1
+min_fight_duration = 30
 # minimum number of enemies to consider a fight in the stats
-min_enemy_players = 1
+min_enemy_players = 10
 
 # names as which each specialization will show up in the stats
 profession_abbreviations = {}
