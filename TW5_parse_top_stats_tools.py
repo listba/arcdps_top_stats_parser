@@ -129,6 +129,9 @@ exclude_Stat = ["dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealt
 #Control Effects Tracking
 squad_Control = {} 
 enemy_Control = {} 
+
+#Uptime Tracking Table
+uptime_Table = {}
 	
 #fetch Guild Data and Check Guild Status function
 Guild_ID = Guild_Data.Guild_ID
@@ -683,6 +686,52 @@ def write_control_effects_in_xls(sorted_enemyControl, stat, players, xls_output_
 			i=i+1
 	wb.save(xls_output_filename)
 
+def write_buff_uptimes_in_xls(uptime_Table, players, uptime_Order, xls_output_filename):
+	book = xlrd.open_workbook(xls_output_filename)
+	wb = copy(book)
+	sheet1 = wb.add_sheet("Buff Uptimes")
+	
+	sheet1.write(0, 0, "Name")
+	sheet1.write(0, 1, "Profession")
+	sheet1.write(0, 2, "Attendance")
+	sheet1.write(0, 3, "Stability")
+	sheet1.write(0, 4, "Protection")
+	sheet1.write(0, 5, "Aegis")
+	sheet1.write(0, 6, "Might")
+	sheet1.write(0, 7, "Fury")
+	sheet1.write(0, 8, "Resistance")
+	sheet1.write(0, 9, "Resolution")
+	sheet1.write(0, 10, "Quickness")
+	sheet1.write(0, 11, "Swiftness")
+	sheet1.write(0, 12, "Alacrity")
+	sheet1.write(0, 13, "Vigor")
+	sheet1.write(0, 14, "Regeneration")
+	
+	i = 0
+	
+	for name in uptime_Table:
+		prof = "Not Found"
+		fightTime = uptime_Table[name]['duration']
+		sheet1.write(i+1, 0, name)
+
+		for nameIndex in players:
+			if nameIndex.name == name:
+				prof = nameIndex.profession
+				
+		sheet1.write(i+1, 1, prof)
+		sheet1.write(i+1, 2, fightTime)
+
+		x = 0
+		for item in uptime_Order:
+			if item in uptime_Table[name]:
+				buff_Time = uptime_Table[name][item]
+				sheet1.write(i+1, 3+x, round(((buff_Time / fightTime) * 100), 2))
+			else:
+				sheet1.write(i+1, 3+x, 0.00)
+			x=x+1
+		i=i+1
+	wb.save(xls_output_filename)
+
 def write_support_xls(players, top_players, stat, xls_output_filename, supportCount):
 	book = xlrd.open_workbook(xls_output_filename)
 	wb = copy(book)
@@ -994,7 +1043,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 		json_datafile = open(file_path, encoding='utf-8')
 		json_data = json.load(json_datafile)
 		# get fight stats
-		fight, players_running_healing_addon, squad_Control, enemy_Control = get_stats_from_fight_json(json_data, config, log)
+		fight, players_running_healing_addon, squad_Control, enemy_Control, uptime_Table = get_stats_from_fight_json(json_data, config, log)
 			
 		if first:
 			first = False
@@ -1169,7 +1218,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 	if anonymize:
 		anonymize_players(players, account_index)
 	
-	return players, fights, found_healing, found_barrier, squad_comp, squad_Control, enemy_Control
+	return players, fights, found_healing, found_barrier, squad_comp, squad_Control, enemy_Control, uptime_Table
 			
 
 
@@ -1533,6 +1582,29 @@ def get_stats_from_fight_json(fight_json, config, log):
 					else:
 						enemy_Control[skill_name][player['name']] = enemy_Control[skill_name][player['name']] + float(value)
 
+		#Track Total Buff Uptimes
+		uptime_Buff_Ids = {1122: 'stability', 717: 'protection', 743: 'aegis', 740: 'might', 725: 'fury', 26980: 'resistance', 873: 'resolution', 1187: 'quickness', 719: 'swiftness', 30328: 'alacrity', 726: 'vigor', 718: 'regeneration'}
+		#uptime_Buff_Names = { 'stability': 1122,  'protection': 717,  'aegis': 743,  'might': 740,  'fury': 725,  'resistance': 26980,  'resolution': 873,  'quickness': 1187,  'swiftness': 719,  'alacrity': 30328,  'vigor': 726,  'regeneration': 718}
+		for item in player['buffUptimes']:
+			buffId = int(item['id'])	
+			if buffId not in uptime_Buff_Ids:
+				continue
+			buff_name = uptime_Buff_Ids[buffId]
+			if buff_name == 'stability' or buff_name == 'might':
+				uptime_value = float(item['buffData'][0]['presence'])
+			else:
+				uptime_value = float(item['buffData'][0]['uptime'])
+			uptime_duration = float(duration * (uptime_value/100))
+			if player['name'] not in uptime_Table:
+				uptime_Table[player['name']]={}
+				uptime_Table[player['name']]['duration'] = 0
+				print('Added player to uptime_Table: '+ player['name'])
+			if buff_name not in uptime_Table[player['name']]:
+				uptime_Table[player['name']][buff_name] = uptime_duration
+			else:
+				uptime_Table[player['name']][buff_name] = uptime_Table[player['name']][buff_name] + uptime_duration
+		uptime_Table[player['name']]['duration'] = uptime_Table[player['name']]['duration'] + duration
+
 	# initialize fight         
 	fight = Fight()
 	fight.duration = duration
@@ -1577,7 +1649,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 			if extension['name'] == "Healing Stats":
 				players_running_healing_addon = extension['runningExtension']
 		
-	return fight, players_running_healing_addon, squad_Control, enemy_Control
+	return fight, players_running_healing_addon, squad_Control, enemy_Control, uptime_Table
 
 
 
@@ -1797,7 +1869,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 
 
 	
-def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, output_file):
+def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, uptime_Table, output_file):
 	json_dict = {}
 	json_dict["overall_raid_stats"] = {key: value for key, value in overall_raid_stats.items()}
 	json_dict["overall_squad_stats"] = {key: value for key, value in overall_squad_stats.items()}
@@ -1812,6 +1884,7 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	#Control Effects Tracking
 	json_dict["squad_Control"] =  {key: value for key, value in squad_Control.items()}
 	json_dict["enemy_Control"] =  {key: value for key, value in enemy_Control.items()}
+	json_dict["uptime_Table"] =  {key: value for key, value in uptime_Table.items()}	
 	with open(output_file, 'w') as json_file:
 		json.dump(json_dict, json_file, indent=4)
 
