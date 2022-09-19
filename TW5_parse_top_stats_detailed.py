@@ -483,10 +483,6 @@ if __name__ == '__main__':
 			if nameIndex.name == name:
 				prof = nameIndex.profession
 				output_string = "|"+name+" |"
-				prof = "Not Found"
-				for nameIndex in players:
-					if nameIndex.name == name:
-						prof = nameIndex.profession
 				output_string += " {{"+prof+"}} | "+str(fightTime)+"|"
 				for item in uptime_Order:
 					if item in uptime_Table[name]:
