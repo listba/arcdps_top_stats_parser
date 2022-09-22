@@ -1603,7 +1603,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 				uptime_Table[player['name']][buff_name] = uptime_duration
 			else:
 				uptime_Table[player['name']][buff_name] = uptime_Table[player['name']][buff_name] + uptime_duration
-		uptime_Table[player['name']]['duration'] = uptime_Table[player['name']]['duration'] + duration
+
 
 	# initialize fight         
 	fight = Fight()

@@ -467,7 +467,7 @@ if __name__ == '__main__':
 	#start Buff Uptime Table insert
 	uptime_Order = ['stability',  'protection',  'aegis',  'might',  'fury',  'resistance',  'resolution',  'quickness',  'swiftness',  'alacrity',  'vigor',  'regeneration']
 	myprint(output, '<$reveal type="match" state="!!curTab" text="Buff Uptime">')    
-	myprint(output, '\n<<alert-leftbar light "Total Buff Uptime % across all fights attended\n Current Formula: ((uptime_Table[Buff][uptimeDuration]/Attendance)*100)" width:60%, class:"font-weight-bold">>\n\n')
+	myprint(output, '\n<<alert-leftbar light "Total Buff Uptime % across all fights attended.\n Current Formula: (((Sum of (fight duration * Uptime%))/Attendance)*100)" width:60%, class:"font-weight-bold">>\n\n')
 	
 	myprint(output, '\n---\n')
 	myprint(output, '\n---\n')
