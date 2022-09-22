@@ -725,7 +725,10 @@ def write_buff_uptimes_in_xls(uptime_Table, players, uptime_Order, xls_output_fi
 		for item in uptime_Order:
 			if item in uptime_Table[name]:
 				buff_Time = uptime_Table[name][item]
-				sheet1.write(i+1, 3+x, round(((buff_Time / fightTime) * 100), 2))
+				try:
+					sheet1.write(i+1, 3+x, round(((buff_Time / fightTime) * 100), 2))
+				except:
+					sheet1.write(i+1, 3+x, 0.00)
 			else:
 				sheet1.write(i+1, 3+x, 0.00)
 			x=x+1
@@ -1603,6 +1606,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 				uptime_Table[player['name']][buff_name] = uptime_duration
 			else:
 				uptime_Table[player['name']][buff_name] = uptime_Table[player['name']][buff_name] + uptime_duration
+		uptime_Table[player['name']]['duration'] = uptime_Table[player['name']]['duration'] + duration
+
 
 
 	# initialize fight         

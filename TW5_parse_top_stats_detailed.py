@@ -486,6 +486,10 @@ if __name__ == '__main__':
 				output_string += " {{"+prof+"}} | "+str(fightTime)+"|"
 				for item in uptime_Order:
 					if item in uptime_Table[name]:
+						print("\nPlayer: "+str(name))
+						print("Uptime Table Item: "+str(item))
+						print("Uptime Table Data: "+str(uptime_Table[name][item]))
+						print("Fight Time: "+str(fightTime))
 						output_string += " "+str(round(((uptime_Table[name][item]/fightTime)*100), 2))+"|"
 					else:
 						output_string += " 0.00|"
