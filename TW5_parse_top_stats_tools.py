@@ -1589,6 +1589,10 @@ def get_stats_from_fight_json(fight_json, config, log):
 		uptime_Buff_Ids = {1122: 'stability', 717: 'protection', 743: 'aegis', 740: 'might', 725: 'fury', 26980: 'resistance', 873: 'resolution', 1187: 'quickness', 719: 'swiftness', 30328: 'alacrity', 726: 'vigor', 718: 'regeneration'}
 		#uptime_Buff_Names = { 'stability': 1122,  'protection': 717,  'aegis': 743,  'might': 740,  'fury': 725,  'resistance': 26980,  'resolution': 873,  'quickness': 1187,  'swiftness': 719,  'alacrity': 30328,  'vigor': 726,  'regeneration': 718}
 		for item in player['buffUptimes']:
+			if player['name'] not in uptime_Table:
+				uptime_Table[player['name']]={}
+				uptime_Table[player['name']]['duration'] = 0
+				print('Added player to uptime_Table: '+ player['name'])
 			buffId = int(item['id'])	
 			if buffId not in uptime_Buff_Ids:
 				continue
@@ -1598,10 +1602,6 @@ def get_stats_from_fight_json(fight_json, config, log):
 			else:
 				uptime_value = float(item['buffData'][0]['uptime'])
 			uptime_duration = float(duration * (uptime_value/100))
-			if player['name'] not in uptime_Table:
-				uptime_Table[player['name']]={}
-				uptime_Table[player['name']]['duration'] = 0
-				print('Added player to uptime_Table: '+ player['name'])
 			if buff_name not in uptime_Table[player['name']]:
 				uptime_Table[player['name']][buff_name] = uptime_duration
 			else:
