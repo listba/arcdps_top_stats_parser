@@ -122,6 +122,7 @@ class Config:
 	buffs_stacking_intensity: list = field(default_factory=list)
 	buff_abbrev: dict = field(default_factory=dict)
 	condition_ids: dict = field(default_factory=dict)
+	auras_ids: dict = field(default_factory=dict)
 
 #Stats to exlucde from overview summary
 exclude_Stat = ["dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealth", "superspeed", "swaps"]
@@ -130,7 +131,11 @@ exclude_Stat = ["dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealt
 squad_Control = {} 
 enemy_Control = {} 
 
-#Uptime Tracking Table
+#Aura Tracking 
+auras_TableIn = {}
+auras_TableOut = {}
+
+#Uptime Tracking
 uptime_Table = {}
 	
 #fetch Guild Data and Check Guild Status function
@@ -209,6 +214,7 @@ def fill_config(config_input):
 	config.buff_abbrev["Illusion of Life"] = 'iol'
 
 	config.condition_ids = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: "Hunter's Mark"}
+	config.auras_ids = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic'}
 			
 	return config
 	
@@ -986,7 +992,7 @@ def get_buff_ids_from_json(json_data, config):
 			else:
 				config.buffs_stacking_duration.append(abbrev_name)
 	#Quick fix for Buffs not found in the initial fight log buffMap
-	BuffIdFix = { 'iol': 10346, 'superspeed': 5974,  'stealth': 13017,  'HiS': 10269,  'stability': 1122,  'protection': 717,  'aegis': 743,  'might': 740,  'fury': 725,  'resistance': 26980,  'resolution': 873,  'quickness': 1187,  'swiftness': 719,  'alacrity': 30328,  'vigor': 726,  'regeneration': 718}
+	BuffIdFix = { 'iol': 10346, 'superspeed': 5974,  'stealth': 13017,  'HiS': 10269,  'stability': 1122,  'protection': 717,  'aegis': 743,  'might': 740,  'fury': 725,  'resistance': 26980,  'resolution': 873,  'quickness': 1187,  'swiftness': 719,  'alacrity': 30328,  'vigor': 726,  'regeneration': 718, 'Fire': 5677, 'Shocking': 5577, 'Frost': 5579, 'Magnetic':5684}
 	for buff in BuffIdFix:
 		if buff not in config.buff_ids:
 			config.buff_ids[buff] = BuffIdFix[buff]
@@ -1046,7 +1052,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 		json_datafile = open(file_path, encoding='utf-8')
 		json_data = json.load(json_datafile)
 		# get fight stats
-		fight, players_running_healing_addon, squad_Control, enemy_Control, uptime_Table = get_stats_from_fight_json(json_data, config, log)
+		fight, players_running_healing_addon, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut = get_stats_from_fight_json(json_data, config, log)
 			
 		if first:
 			first = False
@@ -1221,7 +1227,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 	if anonymize:
 		anonymize_players(players, account_index)
 	
-	return players, fights, found_healing, found_barrier, squad_comp, squad_Control, enemy_Control, uptime_Table
+	return players, fights, found_healing, found_barrier, squad_comp, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut
 			
 
 
@@ -1389,23 +1395,6 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 					return float(buff['buffData'][0]['generation'])
 		return 0
 
-	### Conditions ###
-	if stat in config.condition_ids:
-		if 'buffUptimesActive' not in player_json:
-			return 0
-		# get buffs in squad generation -> need to loop over all buffs
-		for buff in player_json['buffUptimesActive']:
-			if 'id' not in buff:
-				continue 
-			# find right buff
-			buffId = buff['id']
-			if buffId == int(config.condition_ids[stat]):
-				if 'uptime' not in buff['buffData'][0]:
-					return 0
-				return float(buff['buffData'][0]['uptime'])
-		return 0
-		
-
 	if stat == 'heal':
 		# check if healing was logged, save it
 		heal = -1
@@ -1533,7 +1522,6 @@ def get_stats_from_fight_json(fight_json, config, log):
 							squad_Control[skill_name][key] = float(value)
 						else:
 							squad_Control[skill_name][key] = squad_Control[skill_name][key] + float(value)
-
 			if enemy_name not in enemy_squad:
 				enemy_squad[enemy_name] = 1
 			else:
@@ -1584,6 +1572,28 @@ def get_stats_from_fight_json(fight_json, config, log):
 						enemy_Control[skill_name][player['name']] = float(value)
 					else:
 						enemy_Control[skill_name][player['name']] = enemy_Control[skill_name][player['name']] + float(value)
+
+		#Track Aura Output		
+		Auras_Id = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic'}				
+		for item in player['buffUptimes']:
+			auraId = int(item['id'])
+			if auraId not in Auras_Id:
+				continue
+			skill_name = Auras_Id[auraId]
+			if skill_name not in auras_TableIn:
+				auras_TableIn[skill_name] = {}
+			if skill_name not in auras_TableOut:
+				auras_TableOut[skill_name] = {}				
+			for cc in item['buffData']:
+				for key, value in cc['generated'].items():
+					if player['name'] not in auras_TableIn[skill_name]:
+						auras_TableIn[skill_name][player['name']] = float(value)
+					else:
+						auras_TableIn[skill_name][player['name']] = auras_TableIn[skill_name][player['name']] + float(value)
+					if key not in auras_TableOut[skill_name]:
+						auras_TableOut[skill_name][key] = float(value)
+					else:
+						auras_TableOut[skill_name][key] = auras_TableOut[skill_name][key] + float(value)
 
 		#Track Total Buff Uptimes
 		uptime_Buff_Ids = {1122: 'stability', 717: 'protection', 743: 'aegis', 740: 'might', 725: 'fury', 26980: 'resistance', 873: 'resolution', 1187: 'quickness', 719: 'swiftness', 30328: 'alacrity', 726: 'vigor', 718: 'regeneration'}
@@ -1654,7 +1664,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 			if extension['name'] == "Healing Stats":
 				players_running_healing_addon = extension['runningExtension']
 		
-	return fight, players_running_healing_addon, squad_Control, enemy_Control, uptime_Table
+	return fight, players_running_healing_addon, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut
 
 
 
@@ -1874,7 +1884,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 
 
 	
-def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, uptime_Table, output_file):
+def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut, output_file):
 	json_dict = {}
 	json_dict["overall_raid_stats"] = {key: value for key, value in overall_raid_stats.items()}
 	json_dict["overall_squad_stats"] = {key: value for key, value in overall_squad_stats.items()}
@@ -1889,7 +1899,10 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	#Control Effects Tracking
 	json_dict["squad_Control"] =  {key: value for key, value in squad_Control.items()}
 	json_dict["enemy_Control"] =  {key: value for key, value in enemy_Control.items()}
-	json_dict["uptime_Table"] =  {key: value for key, value in uptime_Table.items()}	
+	json_dict["uptime_Table"] =  {key: value for key, value in uptime_Table.items()}
+	json_dict["auras_TableIn"] =  {key: value for key, value in auras_TableIn.items()}
+	json_dict["auras_TableOut"] =  {key: value for key, value in auras_TableOut.items()}
+	
 	with open(output_file, 'w') as json_file:
 		json.dump(json_dict, json_file, indent=4)
 

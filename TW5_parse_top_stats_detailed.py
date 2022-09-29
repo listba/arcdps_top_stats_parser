@@ -66,7 +66,7 @@ if __name__ == '__main__':
 	print_string = "Considering fights with at least "+str(config.min_allied_players)+" allied players and at least "+str(config.min_enemy_players)+" enemies that took longer than "+str(config.min_fight_duration)+" s."
 	myprint(log, print_string)
 
-	players, fights, found_healing, found_barrier, squad_comp, squad_Control, enemy_Control, uptime_Table = collect_stat_data(args, config, log, args.anonymize)    
+	players, fights, found_healing, found_barrier, squad_comp, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut = collect_stat_data(args, config, log, args.anonymize)    
 
 	# create xls file if it doesn't exist
 	book = xlwt.Workbook(encoding="utf-8")
@@ -83,6 +83,8 @@ if __name__ == '__main__':
 	myprint(output, 'curFight: Fight-1')
 	myprint(output, 'curControl-In: Blinded')
 	myprint(output, 'curControl-Out: Blinded')
+	myprint(output, 'curAuras-Out: Fire')
+	myprint(output, 'curAuras-In: Fire')
 	myprint(output, 'tags: Logs [['+myDate.strftime("%Y")+'-'+myDate.strftime("%m")+' Log Reviews]]')
 	myprint(output, 'title: '+myDate.strftime("%Y%m%d")+' WvW Log Review\n')
 	#End Tid file header
@@ -134,7 +136,9 @@ if __name__ == '__main__':
 					'<$button set="!!curTab" setTo="Control Effects - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Outgoing </$button>',
 					'<$button set="!!curTab" setTo="Control Effects - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Incoming </$button>',					
 					'<$button set="!!curTab" setTo="Spike Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Spike Damage </$button>',
-					'<$button set="!!curTab" setTo="Buff Uptime" selectedClass="" class="btn btn-sm btn-dark" style=""> Buff Uptime </$button>'
+					'<$button set="!!curTab" setTo="Buff Uptime" selectedClass="" class="btn btn-sm btn-dark" style=""> Buff Uptime </$button>',
+					'<$button set="!!curTab" setTo="Auras - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - In </$button>',
+					'<$button set="!!curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - Out </$button>'
 	)
 	for item in Nav_Bar_Items:
 		myprint(output, item)
@@ -363,7 +367,7 @@ if __name__ == '__main__':
 		#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
 		myprint(output, "</$reveal>\n")
 
-		write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, uptime_Table, args.json_output_filename)
+		write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut, args.json_output_filename)
 
 	#print table of accounts that fielded support characters
 	myprint(output,'<$reveal type="match" state="!!curTab" text="Support">')
@@ -463,6 +467,88 @@ if __name__ == '__main__':
 			write_control_effects_in_xls(sorted_enemyControl, key, players, args.xls_output_filename)
 	myprint(output, "</$reveal>\n")
 	#end Control Effects Incoming insert
+
+	#start Aura Effects Incoming insert
+	myprint(output, '<$reveal type="match" state="!!curTab" text="Auras - In">')    
+	myprint(output, '\n<<alert-leftbar danger "Auras by receiving Player" width:60%, class:"font-weight-bold">>\n\n')
+	Auras_Order = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic'}
+	for Aura in Auras_Order:
+		myprint(output, '<$button set="!!curAuras-In" setTo="'+Auras_Order[Aura]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Auras_Order[Aura]+' Aura </$button>')
+	
+	myprint(output, '\n---\n')
+	
+
+	for Aura in Auras_Order:
+		key = Auras_Order[Aura]
+		if key in auras_TableIn:
+			sorted_auras_TableIn = dict(sorted(auras_TableIn[key].items(), key=lambda x: x[1], reverse=True))
+
+			i=1
+		
+			myprint(output, '<$reveal type="match" state="!!curAuras-In" text="'+key+'">\n')
+			myprint(output, '\n---\n')
+			myprint(output, "|table-caption-top|k")
+			myprint(output, "|{{"+key+"}} "+key+" Aura received by Squad Player Descending [TOP 25 Max]|c")
+			myprint(output, "|thead-dark table-hover|k")
+			myprint(output, "|Place |Name | Profession | Total|h")
+			
+			for name in sorted_auras_TableIn:
+				prof = "Not Found"
+				counter = 0
+				for nameIndex in players:
+					if nameIndex.name == name:
+						prof = nameIndex.profession
+
+				if i <=25:
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_auras_TableIn[name], 1))+"|")
+					i=i+1
+
+			myprint(output, "</$reveal>\n")
+
+			#write_control_effects_in_xls(sorted_enemyControl, key, players, args.xls_output_filename)
+	myprint(output, "</$reveal>\n")
+	#end Auras Incoming insert
+
+	#start Aura Effects Out insert
+	myprint(output, '<$reveal type="match" state="!!curTab" text="Auras - Out">')    
+	myprint(output, '\n<<alert-leftbar info "Auras output by Player" width:60%, class:"font-weight-bold">>\n\n')
+	Auras_Order = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic'}
+	for Aura in Auras_Order:
+		myprint(output, '<$button set="!!curAuras-Out" setTo="'+Auras_Order[Aura]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Auras_Order[Aura]+' Aura </$button>')
+	
+	myprint(output, '\n---\n')
+	
+
+	for Aura in Auras_Order:
+		key = Auras_Order[Aura]
+		if key in auras_TableOut:
+			sorted_auras_TableOut = dict(sorted(auras_TableOut[key].items(), key=lambda x: x[1], reverse=True))
+
+			i=1
+		
+			myprint(output, '<$reveal type="match" state="!!curAuras-Out" text="'+key+'">\n')
+			myprint(output, '\n---\n')
+			myprint(output, "|table-caption-top|k")
+			myprint(output, "|{{"+key+"}} "+key+" Aura output by Squad Player Descending [TOP 10 Max]|c")
+			myprint(output, "|thead-dark table-hover|k")
+			myprint(output, "|Place |Name | Profession | Total|h")
+			
+			for name in sorted_auras_TableOut:
+				prof = "Not Found"
+				counter = 0
+				for nameIndex in players:
+					if nameIndex.name == name:
+						prof = nameIndex.profession
+
+				if i <=10:
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_auras_TableOut[name], 1))+"|")
+					i=i+1
+
+			myprint(output, "</$reveal>\n")
+
+			#write_control_effects_in_xls(sorted_enemyControl, key, players, args.xls_output_filename)
+	myprint(output, "</$reveal>\n")
+	#end Auras Out insert
 
 	#start Buff Uptime Table insert
 	uptime_Order = ['stability',  'protection',  'aegis',  'might',  'fury',  'resistance',  'resolution',  'quickness',  'swiftness',  'alacrity',  'vigor',  'regeneration']
