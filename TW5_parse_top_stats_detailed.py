@@ -505,7 +505,7 @@ if __name__ == '__main__':
 
 			myprint(output, "</$reveal>\n")
 
-			#write_control_effects_in_xls(sorted_enemyControl, key, players, args.xls_output_filename)
+			write_auras_in_xls(sorted_auras_TableIn, key, players, args.xls_output_filename)
 	myprint(output, "</$reveal>\n")
 	#end Auras Incoming insert
 
@@ -546,7 +546,7 @@ if __name__ == '__main__':
 
 			myprint(output, "</$reveal>\n")
 
-			#write_control_effects_in_xls(sorted_enemyControl, key, players, args.xls_output_filename)
+			write_auras_out_xls(sorted_auras_TableOut, key, players, args.xls_output_filename)
 	myprint(output, "</$reveal>\n")
 	#end Auras Out insert
 

@@ -692,6 +692,58 @@ def write_control_effects_in_xls(sorted_enemyControl, stat, players, xls_output_
 			i=i+1
 	wb.save(xls_output_filename)
 
+def write_auras_in_xls(sorted_auras_TableIn, stat, players, xls_output_filename):
+	book = xlrd.open_workbook(xls_output_filename)
+	wb = copy(book)
+	sheet1 = wb.add_sheet(stat+" Aura-In")
+	
+	sheet1.write(0, 0, "Place")
+	sheet1.write(0, 1, "Name")
+	sheet1.write(0, 2, "Profession")
+	sheet1.write(0, 3, "Total "+stat+" Aura-In")
+	
+	i = 0
+
+	for name in sorted_auras_TableIn:
+		prof = "Not Found"
+		
+		for nameIndex in players:
+			if nameIndex.name == name:
+				prof = nameIndex.profession
+		if i < 25:
+			sheet1.write(i+1, 0, i+1)
+			sheet1.write(i+1, 1, name)
+			sheet1.write(i+1, 2, prof)
+			sheet1.write(i+1, 3, round(sorted_auras_TableIn[name], 1))
+			i=i+1
+	wb.save(xls_output_filename)
+
+def write_auras_out_xls(sorted_auras_TableOut, stat, players, xls_output_filename):
+	book = xlrd.open_workbook(xls_output_filename)
+	wb = copy(book)
+	sheet1 = wb.add_sheet(stat+" Aura-Out")
+	
+	sheet1.write(0, 0, "Place")
+	sheet1.write(0, 1, "Name")
+	sheet1.write(0, 2, "Profession")
+	sheet1.write(0, 3, "Total "+stat+" Aura-Out")
+	
+	i = 0
+
+	for name in sorted_auras_TableOut:
+		prof = "Not Found"
+		
+		for nameIndex in players:
+			if nameIndex.name == name:
+				prof = nameIndex.profession
+		if i < 25:
+			sheet1.write(i+1, 0, i+1)
+			sheet1.write(i+1, 1, name)
+			sheet1.write(i+1, 2, prof)
+			sheet1.write(i+1, 3, round(sorted_auras_TableOut[name], 1))
+			i=i+1
+	wb.save(xls_output_filename)
+
 def write_buff_uptimes_in_xls(uptime_Table, players, uptime_Order, xls_output_filename):
 	book = xlrd.open_workbook(xls_output_filename)
 	wb = copy(book)
