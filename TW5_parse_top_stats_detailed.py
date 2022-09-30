@@ -66,7 +66,7 @@ if __name__ == '__main__':
 	print_string = "Considering fights with at least "+str(config.min_allied_players)+" allied players and at least "+str(config.min_enemy_players)+" enemies that took longer than "+str(config.min_fight_duration)+" s."
 	myprint(log, print_string)
 
-	players, fights, found_healing, found_barrier, squad_comp, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut = collect_stat_data(args, config, log, args.anonymize)    
+	players, fights, found_healing, found_barrier, squad_comp, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag = collect_stat_data(args, config, log, args.anonymize)    
 
 	# create xls file if it doesn't exist
 	book = xlwt.Workbook(encoding="utf-8")
@@ -138,7 +138,8 @@ if __name__ == '__main__':
 					'<$button set="!!curTab" setTo="Spike Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Spike Damage </$button>',
 					'<$button set="!!curTab" setTo="Buff Uptime" selectedClass="" class="btn btn-sm btn-dark" style=""> Buff Uptime </$button>',
 					'<$button set="!!curTab" setTo="Auras - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - In </$button>',
-					'<$button set="!!curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - Out </$button>'
+					'<$button set="!!curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - Out </$button>',
+					'<$button set="!!curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> Death_OnTag </$button>'
 	)
 	for item in Nav_Bar_Items:
 		myprint(output, item)
@@ -367,7 +368,7 @@ if __name__ == '__main__':
 		#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
 		myprint(output, "</$reveal>\n")
 
-		write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut, args.json_output_filename)
+		write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, args.json_output_filename)
 
 	#print table of accounts that fielded support characters
 	myprint(output,'<$reveal type="match" state="!!curTab" text="Support">')
@@ -583,6 +584,34 @@ if __name__ == '__main__':
 	write_buff_uptimes_in_xls(uptime_Table, players, uptime_Order, args.xls_output_filename)
 	myprint(output, "</$reveal>\n")
 	#end Buff Uptime Table insert
+
+	#start On Tag Death insert
+	myprint(output, '<$reveal type="match" state="!!curTab" text="Death_OnTag">')    
+	myprint(output, '\n<<alert-leftbar light "On Tag Death Review \n Current Formula: (On Tag <= 600 Range, Off Tag >600 and <=5000, Run Back Death > 5000)" width:60%, class:"font-weight-bold">>\n\n')
+	
+	myprint(output, '\n---\n')
+	myprint(output, '\n---\n')
+
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|Sortable table - Click header item to sort table |c")
+	myprint(output, "|thead-dark table-hover sortable|k")
+	myprint(output, "|!Name | !Profession | !Attendance | !On_Tag |  !Off_Tag |  !Run_Back |  !Total |h")
+	for name in Death_OnTag:
+		prof = "Not Found"
+		fightTime = uptime_Table[name]['duration']
+		for nameIndex in players:
+			if nameIndex.name == name:
+				prof = nameIndex.profession
+				output_string = "|"+name+" |"
+				output_string += " {{"+prof+"}} | "+str(fightTime)+" | "+str(Death_OnTag[name]['On_Tag'])+" | "+str(Death_OnTag[name]['Off_Tag'])+" | "+str(Death_OnTag[name]['Run_Back'])+" | "+str(Death_OnTag[name]['Total'])+" |"
+	
+
+
+		myprint(output, output_string)
+
+	#write_Death_OnTag_in_xls(uptime_Table, players, uptime_Order, args.xls_output_filename)
+	myprint(output, "</$reveal>\n")
+	#end On Tag Death insert
 
 	for stat in config.stats_to_compute:
 		if stat == 'dist':

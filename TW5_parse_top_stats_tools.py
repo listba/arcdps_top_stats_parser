@@ -124,6 +124,7 @@ class Config:
 	condition_ids: dict = field(default_factory=dict)
 	auras_ids: dict = field(default_factory=dict)
 
+
 #Stats to exlucde from overview summary
 exclude_Stat = ["dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealth", "superspeed", "swaps"]
 
@@ -137,7 +138,12 @@ auras_TableOut = {}
 
 #Uptime Tracking
 uptime_Table = {}
-	
+
+#Calculate On Tag Death Variables
+On_Tag = 600
+Run_Back = 5000
+Death_OnTag = {}
+
 #fetch Guild Data and Check Guild Status function
 Guild_ID = Guild_Data.Guild_ID
 API_Key = Guild_Data.API_Key
@@ -1104,7 +1110,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 		json_datafile = open(file_path, encoding='utf-8')
 		json_data = json.load(json_datafile)
 		# get fight stats
-		fight, players_running_healing_addon, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut = get_stats_from_fight_json(json_data, config, log)
+		fight, players_running_healing_addon, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag = get_stats_from_fight_json(json_data, config, log)
 			
 		if first:
 			first = False
@@ -1279,7 +1285,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 	if anonymize:
 		anonymize_players(players, account_index)
 	
-	return players, fights, found_healing, found_barrier, squad_comp, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut
+	return players, fights, found_healing, found_barrier, squad_comp, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag
 			
 
 
@@ -1670,6 +1676,52 @@ def get_stats_from_fight_json(fight_json, config, log):
 				uptime_Table[player['name']][buff_name] = uptime_Table[player['name']][buff_name] + uptime_duration
 		uptime_Table[player['name']]['duration'] = uptime_Table[player['name']]['duration'] + duration
 
+	tagPositions = {}
+	dead_Tag = 0
+	dead_Tag_Mark = ""
+	i=0
+	for id in fight_json['players']:
+		if id['hasCommanderTag']:
+			#Tag = id['name']
+			positionId = 0
+			if id['combatReplayData']['dead']:
+				dead_Tag = 1
+				dead_Tag_Mark = id['combatReplayData']['dead'][0][0]
+			for position in id['combatReplayData']['positions']:
+				tagPositions[positionId] = position
+				positionId = positionId + 1
+
+	for id in fight_json['players']:
+		if id['combatReplayData']['dead']:
+			if id['name'] not in Death_OnTag:
+				Death_OnTag[id['name']] = {}
+				Death_OnTag[id['name']]["On_Tag"] = 0
+				Death_OnTag[id['name']]["Off_Tag"] = 0
+				Death_OnTag[id['name']]["Run_Back"] = 0
+				Death_OnTag[id['name']]["Total"] = 0
+			playerDeaths = dict(id['combatReplayData']['dead'])
+			playerDowns = dict(id['combatReplayData']['down'])
+			for deathKey, deathValue in playerDeaths.items():
+				for downKey, downValue in playerDowns.items():
+					if dead_Tag and int(downKey) > int(dead_Tag_Mark):
+						continue
+					if deathKey == downValue:
+						#process data for downKey
+						positionMark = int(downKey/150)
+						positionDown = id['combatReplayData']['positions'][positionMark]
+						x1 = positionDown[0]
+						y1 = positionDown[1]
+						x2 = tagPositions[positionMark][0]
+						y2 = tagPositions[positionMark][1]
+						deathDistance = math.sqrt((x1-x2)**2 + (y1-y2)**2)
+						deathRange = deathDistance/0.01
+						Death_OnTag[id['name']]["Total"] = Death_OnTag[id['name']]["Total"] + 1
+						if deathRange <= On_Tag:
+							Death_OnTag[id['name']]["On_Tag"] = Death_OnTag[id['name']]["On_Tag"] + 1
+						if deathRange > Run_Back:
+							Death_OnTag[id['name']]["Run_Back"] = Death_OnTag[id['name']]["Run_Back"] + 1
+						if deathRange > On_Tag and deathRange <= Run_Back:
+							Death_OnTag[id['name']]["Off_Tag"] = Death_OnTag[id['name']]["Off_Tag"] + 1
 
 
 	# initialize fight         
@@ -1716,7 +1768,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 			if extension['name'] == "Healing Stats":
 				players_running_healing_addon = extension['runningExtension']
 		
-	return fight, players_running_healing_addon, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut
+	return fight, players_running_healing_addon, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag
 
 
 
@@ -1936,7 +1988,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 
 
 	
-def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut, output_file):
+def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, output_file):
 	json_dict = {}
 	json_dict["overall_raid_stats"] = {key: value for key, value in overall_raid_stats.items()}
 	json_dict["overall_squad_stats"] = {key: value for key, value in overall_squad_stats.items()}
@@ -1954,6 +2006,7 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	json_dict["uptime_Table"] =  {key: value for key, value in uptime_Table.items()}
 	json_dict["auras_TableIn"] =  {key: value for key, value in auras_TableIn.items()}
 	json_dict["auras_TableOut"] =  {key: value for key, value in auras_TableOut.items()}
+	json_dict["Death_OnTag"] =  {key: value for key, value in Death_OnTag.items()}
 	
 	with open(output_file, 'w') as json_file:
 		json.dump(json_dict, json_file, indent=4)
