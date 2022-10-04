@@ -30,6 +30,7 @@ import json
 import jsons
 import math
 import requests
+import datetime
 import Guild_Data
 
 debug = False # enable / disable debug output
@@ -615,46 +616,51 @@ def write_support_players(players, top_players, stat, output_file):
 # stat = which stat are we considering
 # xls_output_filename = where to write to
 def write_stats_xls(players, top_players, stat, xls_output_filename):
+	fileDate = datetime.datetime.now()
 	book = xlrd.open_workbook(xls_output_filename)
 	wb = copy(book)
 	sheet1 = wb.add_sheet(stat)
 	
-	sheet1.write(0, 0, "Account")
-	sheet1.write(0, 1, "Name")
-	sheet1.write(0, 2, "Profession")
-	sheet1.write(0, 3, "Attendance (number of fights)")
-	sheet1.write(0, 4, "Attendance (duration fights)")
-	sheet1.write(0, 5, "Times Top")
-	sheet1.write(0, 6, "Percentage Top")
-	sheet1.write(0, 7, "Total "+stat)
+	sheet1.write(0, 0, "Date")
+	sheet1.write(0, 1, "Account")
+	sheet1.write(0, 2, "Name")
+	sheet1.write(0, 3, "Profession")
+	sheet1.write(0, 4, "Attendance (number of fights)")
+	sheet1.write(0, 5, "Attendance (duration fights)")
+	sheet1.write(0, 6, "Times Top")
+	sheet1.write(0, 7, "Percentage Top")
+	sheet1.write(0, 8, "Total "+stat)
 	if stat == 'deaths':
-		sheet1.write(0, 8, "Average "+stat+" per min")
+		sheet1.write(0, 9, "Average "+stat+" per min")
 	else:
-		sheet1.write(0, 8, "Average "+stat+" per s")        
+		sheet1.write(0, 9, "Average "+stat+" per s")        
 
 	for i in range(len(top_players)):
 		player = players[top_players[i]]
-		sheet1.write(i+1, 0, player.account)
-		sheet1.write(i+1, 1, player.name)
-		sheet1.write(i+1, 2, player.profession)
-		sheet1.write(i+1, 3, player.num_fights_present)
-		sheet1.write(i+1, 4, player.duration_fights_present)
-		sheet1.write(i+1, 5, player.consistency_stats[stat])        
-		sheet1.write(i+1, 6, round(player.portion_top_stats[stat]*100))
-		sheet1.write(i+1, 7, round(player.total_stats[stat]))
-		sheet1.write(i+1, 8, player.average_stats[stat])
+		sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
+		sheet1.write(i+1, 1, player.account)
+		sheet1.write(i+1, 2, player.name)
+		sheet1.write(i+1, 3, player.profession)
+		sheet1.write(i+1, 4, player.num_fights_present)
+		sheet1.write(i+1, 5, player.duration_fights_present)
+		sheet1.write(i+1, 6, player.consistency_stats[stat])        
+		sheet1.write(i+1, 7, round(player.portion_top_stats[stat]*100))
+		sheet1.write(i+1, 8, round(player.total_stats[stat]))
+		sheet1.write(i+1, 9, player.average_stats[stat])
 
 	wb.save(xls_output_filename)
 
 def write_control_effects_out_xls(sorted_squadControl, stat, players, xls_output_filename):
+	fileDate = datetime.datetime.now()
 	book = xlrd.open_workbook(xls_output_filename)
 	wb = copy(book)
 	sheet1 = wb.add_sheet(stat+"- Out")
 	
-	sheet1.write(0, 0, "Place")
-	sheet1.write(0, 1, "Name")
-	sheet1.write(0, 2, "Profession")
-	sheet1.write(0, 3, "Total "+stat+" Outbound")
+	sheet1.write(0, 0, "Date")
+	sheet1.write(0, 1, "Place")
+	sheet1.write(0, 2, "Name")
+	sheet1.write(0, 3, "Profession")
+	sheet1.write(0, 4, "Total "+stat+" Outbound")
 	
 	i = 0
 
@@ -665,22 +671,25 @@ def write_control_effects_out_xls(sorted_squadControl, stat, players, xls_output
 			if nameIndex.name == name:
 				prof = nameIndex.profession
 		if i < 25:
-			sheet1.write(i+1, 0, i+1)
-			sheet1.write(i+1, 1, name)
-			sheet1.write(i+1, 2, prof)
-			sheet1.write(i+1, 3, round(sorted_squadControl[name], 1))
+			sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
+			sheet1.write(i+1, 1, i+1)
+			sheet1.write(i+1, 2, name)
+			sheet1.write(i+1, 3, prof)
+			sheet1.write(i+1, 4, round(sorted_squadControl[name], 1))
 			i=i+1
 	wb.save(xls_output_filename)
 
 def write_control_effects_in_xls(sorted_enemyControl, stat, players, xls_output_filename):
+	fileDate = datetime.datetime.now()
 	book = xlrd.open_workbook(xls_output_filename)
 	wb = copy(book)
 	sheet1 = wb.add_sheet(stat+"- In")
 	
-	sheet1.write(0, 0, "Place")
-	sheet1.write(0, 1, "Name")
-	sheet1.write(0, 2, "Profession")
-	sheet1.write(0, 3, "Total "+stat+" Inbound")
+	sheet1.write(0, 0, "Date")
+	sheet1.write(0, 1, "Place")
+	sheet1.write(0, 2, "Name")
+	sheet1.write(0, 3, "Profession")
+	sheet1.write(0, 4, "Total "+stat+" Inbound")
 	
 	i = 0
 
@@ -691,22 +700,25 @@ def write_control_effects_in_xls(sorted_enemyControl, stat, players, xls_output_
 			if nameIndex.name == name:
 				prof = nameIndex.profession
 		if i < 25:
-			sheet1.write(i+1, 0, i+1)
-			sheet1.write(i+1, 1, name)
-			sheet1.write(i+1, 2, prof)
-			sheet1.write(i+1, 3, round(sorted_enemyControl[name], 1))
+			sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
+			sheet1.write(i+1, 1, i+1)
+			sheet1.write(i+1, 2, name)
+			sheet1.write(i+1, 3, prof)
+			sheet1.write(i+1, 4, round(sorted_enemyControl[name], 1))
 			i=i+1
 	wb.save(xls_output_filename)
 
 def write_auras_in_xls(sorted_auras_TableIn, stat, players, xls_output_filename):
+	fileDate = datetime.datetime.now()
 	book = xlrd.open_workbook(xls_output_filename)
 	wb = copy(book)
 	sheet1 = wb.add_sheet(stat+" Aura-In")
 	
-	sheet1.write(0, 0, "Place")
-	sheet1.write(0, 1, "Name")
-	sheet1.write(0, 2, "Profession")
-	sheet1.write(0, 3, "Total "+stat+" Aura-In")
+	sheet1.write(0, 0, "Date")
+	sheet1.write(0, 1, "Place")
+	sheet1.write(0, 2, "Name")
+	sheet1.write(0, 3, "Profession")
+	sheet1.write(0, 4, "Total "+stat+" Aura-In")
 	
 	i = 0
 
@@ -717,22 +729,25 @@ def write_auras_in_xls(sorted_auras_TableIn, stat, players, xls_output_filename)
 			if nameIndex.name == name:
 				prof = nameIndex.profession
 		if i < 25:
-			sheet1.write(i+1, 0, i+1)
-			sheet1.write(i+1, 1, name)
-			sheet1.write(i+1, 2, prof)
-			sheet1.write(i+1, 3, round(sorted_auras_TableIn[name], 1))
+			sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
+			sheet1.write(i+1, 1, i+1)
+			sheet1.write(i+1, 2, name)
+			sheet1.write(i+1, 3, prof)
+			sheet1.write(i+1, 4, round(sorted_auras_TableIn[name], 1))
 			i=i+1
 	wb.save(xls_output_filename)
 
 def write_auras_out_xls(sorted_auras_TableOut, stat, players, xls_output_filename):
+	fileDate = datetime.datetime.now()
 	book = xlrd.open_workbook(xls_output_filename)
 	wb = copy(book)
 	sheet1 = wb.add_sheet(stat+" Aura-Out")
 	
-	sheet1.write(0, 0, "Place")
-	sheet1.write(0, 1, "Name")
-	sheet1.write(0, 2, "Profession")
-	sheet1.write(0, 3, "Total "+stat+" Aura-Out")
+	sheet1.write(0, 0, "Date")
+	sheet1.write(0, 1, "Place")
+	sheet1.write(0, 2, "Name")
+	sheet1.write(0, 3, "Profession")
+	sheet1.write(0, 4, "Total "+stat+" Aura-Out")
 	
 	i = 0
 
@@ -743,63 +758,68 @@ def write_auras_out_xls(sorted_auras_TableOut, stat, players, xls_output_filenam
 			if nameIndex.name == name:
 				prof = nameIndex.profession
 		if i < 25:
-			sheet1.write(i+1, 0, i+1)
-			sheet1.write(i+1, 1, name)
-			sheet1.write(i+1, 2, prof)
-			sheet1.write(i+1, 3, round(sorted_auras_TableOut[name], 1))
+			sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
+			sheet1.write(i+1, 1, i+1)
+			sheet1.write(i+1, 2, name)
+			sheet1.write(i+1, 3, prof)
+			sheet1.write(i+1, 4, round(sorted_auras_TableOut[name], 1))
 			i=i+1
 	wb.save(xls_output_filename)
 
 def write_buff_uptimes_in_xls(uptime_Table, players, uptime_Order, xls_output_filename):
+	fileDate = datetime.datetime.now()
 	book = xlrd.open_workbook(xls_output_filename)
 	wb = copy(book)
 	sheet1 = wb.add_sheet("Buff Uptimes")
 	
-	sheet1.write(0, 0, "Name")
-	sheet1.write(0, 1, "Profession")
-	sheet1.write(0, 2, "Attendance")
-	sheet1.write(0, 3, "Stability")
-	sheet1.write(0, 4, "Protection")
-	sheet1.write(0, 5, "Aegis")
-	sheet1.write(0, 6, "Might")
-	sheet1.write(0, 7, "Fury")
-	sheet1.write(0, 8, "Resistance")
-	sheet1.write(0, 9, "Resolution")
-	sheet1.write(0, 10, "Quickness")
-	sheet1.write(0, 11, "Swiftness")
-	sheet1.write(0, 12, "Alacrity")
-	sheet1.write(0, 13, "Vigor")
-	sheet1.write(0, 14, "Regeneration")
+	sheet1.write(0, 0, "Date")
+	sheet1.write(0, 1, "Name")
+	sheet1.write(0, 2, "Profession")
+	sheet1.write(0, 3, "Attendance")
+	sheet1.write(0, 4, "Stability")
+	sheet1.write(0, 5, "Protection")
+	sheet1.write(0, 6, "Aegis")
+	sheet1.write(0, 7, "Might")
+	sheet1.write(0, 8, "Fury")
+	sheet1.write(0, 9, "Resistance")
+	sheet1.write(0, 10, "Resolution")
+	sheet1.write(0, 11, "Quickness")
+	sheet1.write(0, 12, "Swiftness")
+	sheet1.write(0, 13, "Alacrity")
+	sheet1.write(0, 14, "Vigor")
+	sheet1.write(0, 15, "Regeneration")
 	
 	i = 0
 	
 	for name in uptime_Table:
 		prof = "Not Found"
 		fightTime = uptime_Table[name]['duration']
-		sheet1.write(i+1, 0, name)
+		sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
+		sheet1.write(i+1, 1, name)
 
 		for nameIndex in players:
 			if nameIndex.name == name:
 				prof = nameIndex.profession
 				
-		sheet1.write(i+1, 1, prof)
-		sheet1.write(i+1, 2, fightTime)
+		sheet1.write(i+1, 2, prof)
+		sheet1.write(i+1, 3, fightTime)
 
 		x = 0
 		for item in uptime_Order:
 			if item in uptime_Table[name]:
 				buff_Time = uptime_Table[name][item]
 				try:
-					sheet1.write(i+1, 3+x, round(((buff_Time / fightTime) * 100), 2))
+					sheet1.write(i+1, 4+x, round(((buff_Time / fightTime) * 100), 2))
 				except:
-					sheet1.write(i+1, 3+x, 0.00)
+					sheet1.write(i+1, 4+x, 0.00)
 			else:
-				sheet1.write(i+1, 3+x, 0.00)
+				sheet1.write(i+1, 4+x, 0.00)
 			x=x+1
 		i=i+1
 	wb.save(xls_output_filename)
 
 def write_support_xls(players, top_players, stat, xls_output_filename, supportCount):
+	fileDate = datetime.datetime.now()
 	book = xlrd.open_workbook(xls_output_filename)
 	wb = copy(book)
 	supportCount = supportCount
@@ -811,40 +831,44 @@ def write_support_xls(players, top_players, stat, xls_output_filename, supportCo
 
 	sheet2 = wb.get_sheet('Support')
 
-	sheet2.write(0, 0, "Account")
-	sheet2.write(0, 1, "Name")
-	sheet2.write(0, 2, "Profession")
-	sheet2.write(0, 3, "Attendance (number of fights)")
-	sheet2.write(0, 4, "Attendance (duration fights)")
-	sheet2.write(0, 5, "Support Stat")
+	sheet2.write(0, 0, "Date")
+	sheet2.write(0, 1, "Account")
+	sheet2.write(0, 2, "Name")
+	sheet2.write(0, 3, "Profession")
+	sheet2.write(0, 4, "Attendance (number of fights)")
+	sheet2.write(0, 5, "Attendance (duration fights)")
+	sheet2.write(0, 6, "Support Stat")
 
 	for i in range(len(top_players)):
 		player = players[top_players[i]]
 		if stat == 'rips' and (player.profession == 'Chronomancer' or player.profession == 'Spellbreaker'):
-			sheet2.write(supportCount+1, 0, player.account)
-			sheet2.write(supportCount+1, 1, player.name)
-			sheet2.write(supportCount+1, 2, player.profession)
-			sheet2.write(supportCount+1, 3, player.num_fights_present)
-			sheet2.write(supportCount+1, 4, player.duration_fights_present)
-			sheet2.write(supportCount+1, 5, stat)
+			sheet2.write(supportCount+1, 0, fileDate.strftime("%Y-%m-%d"))
+			sheet2.write(supportCount+1, 1, player.account)
+			sheet2.write(supportCount+1, 2, player.name)
+			sheet2.write(supportCount+1, 3, player.profession)
+			sheet2.write(supportCount+1, 4, player.num_fights_present)
+			sheet2.write(supportCount+1, 5, player.duration_fights_present)
+			sheet2.write(supportCount+1, 6, stat)
 			supportCount +=1
 
 		if stat == 'cleanses' and (player.profession == 'Scrapper' or player.profession == 'Tempest' or player.profession == 'Druid'):
-			sheet2.write(supportCount+1, 0, player.account)
-			sheet2.write(supportCount+1, 1, player.name)
-			sheet2.write(supportCount+1, 2, player.profession)
-			sheet2.write(supportCount+1, 3, player.num_fights_present)
-			sheet2.write(supportCount+1, 4, player.duration_fights_present)
-			sheet2.write(supportCount+1, 5, stat)
+			sheet2.write(supportCount+1, 0, fileDate.strftime("%Y-%m-%d"))
+			sheet2.write(supportCount+1, 1, player.account)
+			sheet2.write(supportCount+1, 2, player.name)
+			sheet2.write(supportCount+1, 3, player.profession)
+			sheet2.write(supportCount+1, 4, player.num_fights_present)
+			sheet2.write(supportCount+1, 5, player.duration_fights_present)
+			sheet2.write(supportCount+1, 6, stat)
 			supportCount +=1
 
 		if stat == 'stability' and (player.profession == 'Firebrand'):
-			sheet2.write(supportCount+1, 0, player.account)
-			sheet2.write(supportCount+1, 1, player.name)
-			sheet2.write(supportCount+1, 2, player.profession)
-			sheet2.write(supportCount+1, 3, player.num_fights_present)
-			sheet2.write(supportCount+1, 4, player.duration_fights_present)
-			sheet2.write(supportCount+1, 5, stat)
+			sheet2.write(supportCount+1, 0, fileDate.strftime("%Y-%m-%d"))
+			sheet2.write(supportCount+1, 1, player.account)
+			sheet2.write(supportCount+1, 2, player.name)
+			sheet2.write(supportCount+1, 3, player.profession)
+			sheet2.write(supportCount+1, 4, player.num_fights_present)
+			sheet2.write(supportCount+1, 5, player.duration_fights_present)
+			sheet2.write(supportCount+1, 6, stat)
 			supportCount +=1
 			
 	wb.save(xls_output_filename)

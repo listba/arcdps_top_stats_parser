@@ -79,6 +79,7 @@ if __name__ == '__main__':
 
 	myprint(output, 'created: '+myDate.strftime("%Y%m%d%H%M%S"))
 	myprint(output, 'creator: Drevarr ')
+	myprint(output, 'caption: '+myDate.strftime("%Y%m%d")+'-WvW-Log-Review')
 	myprint(output, 'curTab: Overview')
 	myprint(output, 'curFight: Fight-1')
 	myprint(output, 'curControl-In: Blinded')
@@ -86,7 +87,7 @@ if __name__ == '__main__':
 	myprint(output, 'curAuras-Out: Fire')
 	myprint(output, 'curAuras-In: Fire')
 	myprint(output, 'tags: Logs [['+myDate.strftime("%Y")+'-'+myDate.strftime("%m")+' Log Reviews]]')
-	myprint(output, 'title: '+myDate.strftime("%Y%m%d")+' WvW Log Review\n')
+	myprint(output, 'title: '+myDate.strftime("%Y%m%d")+'-WvW-Log-Review\n')
 	#End Tid file header
 
 	#JEL-Tweaked to output TW5 formatting (https://drevarr.github.io/FluxCapacity.html)
