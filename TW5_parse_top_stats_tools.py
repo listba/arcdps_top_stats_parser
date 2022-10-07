@@ -933,7 +933,12 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 		print_string += " DPS|"
 	if stat == 'heal':
 		print_string += " HPS|"
-	
+	if stat == 'rips':
+		print_string += " SPS|"
+	if stat == 'cleanses':
+		print_string += " CPS|"
+	if stat == 'barrier':
+		print_string += " BPS|"					
 	print_string += "h"
 	myprint(output_file, print_string)    
 
@@ -963,16 +968,16 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 		elif stat in config.buffs_stacking_intensity and stat != 'iol':
 			print_string += f" {round(player.total_stats[stat]):>8}s| "
 			print_string += f" {player.average_stats[stat]:>8}|"
-		elif stat == 'dmg':
+		elif stat == 'dmg' or stat == 'cleanses' or stat == 'barrier' or stat == 'rips' or stat == 'heal' or stat == 'iol':
 			print_string += f" {my_value(round(player.total_stats[stat])):>8}| "
 			print_string += f" {my_value(player.average_stats[stat]):>8}|"        
-		elif stat == 'heal':
-			print_string += f" {my_value(round(player.total_stats[stat])):>8}| "
-			print_string += f" {my_value(player.average_stats[stat]):>8}|"                    
+		#elif stat == 'heal':
+			#print_string += f" {my_value(round(player.total_stats[stat])):>8}| "
+			#print_string += f" {my_value(player.average_stats[stat]):>8}|"                    
 		else:
 			print_string += my_value(round(player.total_stats[stat]))+"|"
-			if stat == 'iol':
-				print_string += f" {player.average_stats[stat]:>7}|"            
+			#if stat == 'iol':
+				#print_string += f" {player.average_stats[stat]:>7}|"            
 		myprint(output_file, print_string)
 		last_val = player.total_stats[stat]
 	myprint(output_file, "\n")
@@ -1666,7 +1671,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 						enemy_Control[skill_name][player['name']] = enemy_Control[skill_name][player['name']] + float(value)
 
 		#Instant Revive tracking of downed healing
-		instant_Revive = {14419: 'Battle Standard', 9163: 'Signet of Mercy'}
+		instant_Revive = {14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Renewal of Water', 5762: 'Renewal of Fire', 5760: 'Renewal of Air', 5761: 'Renewal of Earth'}
 		if 'extHealingStats' in player:
 			for target in player['extHealingStats']['totalHealingDist'][0]:
 				if 'totalDownedHealing' in target:
