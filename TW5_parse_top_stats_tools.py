@@ -132,6 +132,10 @@ exclude_Stat = ["dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealt
 #Control Effects Tracking
 squad_Control = {} 
 enemy_Control = {} 
+enemy_Control_Player = {} 
+
+#Downed Healing from Instant Revive skills
+downed_Healing = {}
 
 #Aura Tracking 
 auras_TableIn = {}
@@ -1134,7 +1138,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 		json_datafile = open(file_path, encoding='utf-8')
 		json_data = json.load(json_datafile)
 		# get fight stats
-		fight, players_running_healing_addon, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag = get_stats_from_fight_json(json_data, config, log)
+		fight, players_running_healing_addon, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag = get_stats_from_fight_json(json_data, config, log)
 			
 		if first:
 			first = False
@@ -1309,7 +1313,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 	if anonymize:
 		anonymize_players(players, account_index)
 	
-	return players, fights, found_healing, found_barrier, squad_comp, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag
+	return players, fights, found_healing, found_barrier, squad_comp, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag
 			
 
 
@@ -1648,13 +1652,41 @@ def get_stats_from_fight_json(fight_json, config, log):
 			skill_name = Control_Effects[conditionId]
 			if skill_name not in enemy_Control:
 				enemy_Control[skill_name] = {}
+			if skill_name not in enemy_Control_Player:
+				enemy_Control_Player[skill_name] = {}
 			for cc in item['buffData']:
 				for key, value in cc['generated'].items():
+					if key not in enemy_Control_Player[skill_name]:
+						enemy_Control_Player[skill_name][key] = float(value)
+					else:
+						enemy_Control_Player[skill_name][key] = enemy_Control_Player[skill_name][key] + float(value)
 					if player['name'] not in enemy_Control[skill_name]:
 						enemy_Control[skill_name][player['name']] = float(value)
 					else:
 						enemy_Control[skill_name][player['name']] = enemy_Control[skill_name][player['name']] + float(value)
 
+		#Instant Revive tracking of downed healing
+		instant_Revive = {14419: 'Battle Standard', 9163: 'Signet of Mercy'}
+		if 'extHealingStats' in player:
+			for target in player['extHealingStats']['totalHealingDist'][0]:
+				if 'totalDownedHealing' in target:
+					if int(target['totalDownedHealing']) > 0:
+						if target['id'] in instant_Revive:
+							reviveSkill = instant_Revive[target['id']]
+
+							if player['name'] not in downed_Healing:
+								downed_Healing[player['name']]={}
+							if reviveSkill not in downed_Healing[player['name']]:
+								downed_Healing[player['name']][reviveSkill] = {}
+								downed_Healing[player['name']][reviveSkill]['Heals'] = {}
+								downed_Healing[player['name']][reviveSkill]['Hits'] = {}
+								downed_Healing[player['name']][reviveSkill]['Heals'] = int(target['totalDownedHealing'])
+								downed_Healing[player['name']][reviveSkill]['Hits'] = int(target['hits'])
+							else:
+								downed_Healing[player['name']][reviveSkill]['Heals'] = downed_Healing[player['name']][reviveSkill]['Heals'] + int(target['totalDownedHealing'])
+								downed_Healing[player['name']][reviveSkill]['Hits'] = downed_Healing[player['name']][reviveSkill]['Hits'] + int(target['hits'])	
+		#End Instant Revive tracking
+									
 		#Track Aura Output		
 		Auras_Id = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic'}				
 		for item in player['buffUptimes']:
@@ -1792,7 +1824,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 			if extension['name'] == "Healing Stats":
 				players_running_healing_addon = extension['runningExtension']
 		
-	return fight, players_running_healing_addon, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag
+	return fight, players_running_healing_addon, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag
 
 
 
@@ -2012,7 +2044,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 
 
 	
-def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, output_file):
+def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, output_file):
 	json_dict = {}
 	json_dict["overall_raid_stats"] = {key: value for key, value in overall_raid_stats.items()}
 	json_dict["overall_squad_stats"] = {key: value for key, value in overall_squad_stats.items()}
@@ -2027,10 +2059,13 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	#Control Effects Tracking
 	json_dict["squad_Control"] =  {key: value for key, value in squad_Control.items()}
 	json_dict["enemy_Control"] =  {key: value for key, value in enemy_Control.items()}
+	json_dict["enemy_Control_Player"] =  {key: value for key, value in enemy_Control_Player.items()}
 	json_dict["uptime_Table"] =  {key: value for key, value in uptime_Table.items()}
 	json_dict["auras_TableIn"] =  {key: value for key, value in auras_TableIn.items()}
 	json_dict["auras_TableOut"] =  {key: value for key, value in auras_TableOut.items()}
 	json_dict["Death_OnTag"] =  {key: value for key, value in Death_OnTag.items()}
+	json_dict["downed_Healing"] =  {key: value for key, value in downed_Healing.items()}
+	
 	
 	with open(output_file, 'w') as json_file:
 		json.dump(json_dict, json_file, indent=4)

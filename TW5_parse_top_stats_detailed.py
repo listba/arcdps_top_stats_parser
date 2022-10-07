@@ -66,7 +66,7 @@ if __name__ == '__main__':
 	print_string = "Considering fights with at least "+str(config.min_allied_players)+" allied players and at least "+str(config.min_enemy_players)+" enemies that took longer than "+str(config.min_fight_duration)+" s."
 	myprint(log, print_string)
 
-	players, fights, found_healing, found_barrier, squad_comp, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag = collect_stat_data(args, config, log, args.anonymize)    
+	players, fights, found_healing, found_barrier, squad_comp, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag = collect_stat_data(args, config, log, args.anonymize)    
 
 	# create xls file if it doesn't exist
 	book = xlwt.Workbook(encoding="utf-8")
@@ -140,7 +140,8 @@ if __name__ == '__main__':
 					'<$button set="!!curTab" setTo="Buff Uptime" selectedClass="" class="btn btn-sm btn-dark" style=""> Buff Uptime </$button>',
 					'<$button set="!!curTab" setTo="Auras - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - In </$button>',
 					'<$button set="!!curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - Out </$button>',
-					'<$button set="!!curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> Death_OnTag </$button>'
+					'<$button set="!!curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> Death_OnTag </$button>',
+					'<$button set="!!curTab" setTo="Downed_Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Downed_Healing </$button>'
 	)
 	for item in Nav_Bar_Items:
 		myprint(output, item)
@@ -369,7 +370,7 @@ if __name__ == '__main__':
 		#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
 		myprint(output, "</$reveal>\n")
 
-		write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, args.json_output_filename)
+		write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, args.json_output_filename)
 
 	#print table of accounts that fielded support characters
 	myprint(output,'<$reveal type="match" state="!!curTab" text="Support">')
@@ -445,9 +446,10 @@ if __name__ == '__main__':
 			sorted_enemyControl = dict(sorted(enemy_Control[key].items(), key=lambda x: x[1], reverse=True))
 
 			i=1
-		
+			
 			myprint(output, '<$reveal type="match" state="!!curControl-In" text="'+key+'">\n')
 			myprint(output, '\n---\n')
+			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" impacted Squad Player Descending [TOP 25 Max]|c")
 			myprint(output, "|thead-dark table-hover|k")
@@ -464,9 +466,33 @@ if __name__ == '__main__':
 					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControl[name], 1))+"|")
 					i=i+1
 
-			myprint(output, "</$reveal>\n")
+			#myprint(output, "</$reveal>\n")
 
 			write_control_effects_in_xls(sorted_enemyControl, key, players, args.xls_output_filename)
+
+		if key in enemy_Control_Player:
+			sorted_enemyControlPlayer = dict(sorted(enemy_Control_Player[key].items(), key=lambda x: x[1], reverse=True))
+
+			i=1
+	
+			myprint(output, '\n---\n')
+			myprint(output, '\n</div>\n    <div class="flex-col border">\n')
+			myprint(output, "|table-caption-top|k")
+			myprint(output, "|{{"+key+"}} "+key+" output by Enemy Player Descending [TOP 25 Max]|c")
+			myprint(output, "|thead-dark table-hover|k")
+			myprint(output, "|Place |Name | Profession | Total|h")
+		
+			for name in sorted_enemyControlPlayer:
+				prof = name.split(' pl')[0]
+				counter = 0
+
+				if i <=25:
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControlPlayer[name], 1))+"|")
+					i=i+1
+
+			myprint(output, '\n</div>\n</div>\n')
+			myprint(output, "</$reveal>\n")
+
 	myprint(output, "</$reveal>\n")
 	#end Control Effects Incoming insert
 
@@ -613,6 +639,67 @@ if __name__ == '__main__':
 	#write_Death_OnTag_in_xls(uptime_Table, players, uptime_Order, args.xls_output_filename)
 	myprint(output, "</$reveal>\n")
 	#end On Tag Death insert
+
+	#Downed Healing
+	down_Heal_Order = {14419: 'Battle Standard', 9163: 'Signet of Mercy'}
+	myprint(output, '<$reveal type="match" state="!!curTab" text="Downed_Healing">')    
+	myprint(output, '\n<<alert-leftbar light "Healing to downed players (Instant Revive Skills) - requires Heal Stat addon for ARCDPS to track" width:60%, class:"font-weight-bold">>\n\n')
+	
+	myprint(output, '\n---\n')
+	myprint(output, '\n---\n')
+
+	myprint(output, '\n<div class="flex-row">\n<div class="flex-col border">\n')
+	myprint(output, "\n!!Healing done\nWork in Progress more skills to be added when logs available\n")
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|Sortable table - Click header item to sort table |c")
+	myprint(output, "|thead-dark table-hover sortable|k")
+	output_string = "|!Name | !Profession | !Attendance |"
+	for item in down_Heal_Order:
+		output_string += "!{{"+down_Heal_Order[item]+"}}|"
+	output_string += "h"
+	myprint(output, output_string)
+	for name in downed_Healing:
+		prof = "Not Found"
+		fightTime = uptime_Table[name]['duration']
+		for nameIndex in players:
+			if nameIndex.name == name:
+				prof = nameIndex.profession
+				output_string = "|"+name+" |{{"+prof+"}}|"+str(fightTime)+"| "
+				for skill in down_Heal_Order:
+					if down_Heal_Order[skill] in downed_Healing[name]:
+						output_string += str(downed_Healing[name][down_Heal_Order[skill]]['Heals'])+"|"
+					else:
+						output_string += " |"
+				myprint(output, output_string)
+	
+	myprint(output, '\n</div>\n<div class="flex-col border">\n')
+	myprint(output, "\n!!Number of Skill Hits\nWork in Progress more skills to be added when logs available\n")
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|Sortable table - Click header item to sort table |c")
+	myprint(output, "|thead-dark table-hover sortable|k")
+	output_string = "|!Name | !Profession | !Attendance |"
+	for item in down_Heal_Order:
+		output_string += "!{{"+down_Heal_Order[item]+"}}|"
+	output_string += "h"
+	myprint(output, output_string)
+	for name in downed_Healing:
+		prof = "Not Found"
+		fightTime = uptime_Table[name]['duration']
+		for nameIndex in players:
+			if nameIndex.name == name:
+				prof = nameIndex.profession
+				output_string = "|"+name+" |{{"+prof+"}}|"+str(fightTime)+"| "
+				for skill in down_Heal_Order:
+					if down_Heal_Order[skill] in downed_Healing[name]:
+						output_string += str(downed_Healing[name][down_Heal_Order[skill]]['Hits'])+"|"
+					else:
+						output_string += " |"
+				myprint(output, output_string)
+
+
+
+	myprint(output, '\n</div>\n</div>\n</$reveal>\n')
+	#End Downed Healing
 
 	for stat in config.stats_to_compute:
 		if stat == 'dist':
