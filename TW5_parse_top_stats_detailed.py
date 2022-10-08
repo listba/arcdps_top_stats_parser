@@ -622,17 +622,15 @@ if __name__ == '__main__':
 	myprint(output, "|table-caption-top|k")
 	myprint(output, "|Sortable table - Click header item to sort table |c")
 	myprint(output, "|thead-dark table-hover sortable|k")
-	myprint(output, "|!Name | !Profession | !Attendance | !On_Tag |  !Off_Tag |  !Run_Back |  !Total |h")
+	myprint(output, "|!Name | !Profession | !Attendance | !On_Tag |  !Off_Tag | !After_Tag_Death |  !Run_Back |  !Total |h")
 	for name in Death_OnTag:
-		if Death_OnTag[name]['Total'] < 1:
-			continue
 		prof = "Not Found"
 		fightTime = uptime_Table[name]['duration']
 		for nameIndex in players:
 			if nameIndex.name == name:
 				prof = nameIndex.profession
 				output_string = "|"+name+" |"
-				output_string += " {{"+prof+"}} | "+str(fightTime)+" | "+str(Death_OnTag[name]['On_Tag'])+" | "+str(Death_OnTag[name]['Off_Tag'])+" | "+str(Death_OnTag[name]['Run_Back'])+" | "+str(Death_OnTag[name]['Total'])+" |"
+				output_string += " {{"+prof+"}} | "+str(fightTime)+" | "+str(Death_OnTag[name]['On_Tag'])+" | "+str(Death_OnTag[name]['Off_Tag'])+" | "+str(Death_OnTag[name]['After_Tag_Death'])+" | "+str(Death_OnTag[name]['Run_Back'])+" | "+str(Death_OnTag[name]['Total'])+" |"
 	
 
 

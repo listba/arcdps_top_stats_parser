@@ -1743,16 +1743,14 @@ def get_stats_from_fight_json(fight_json, config, log):
 	i=0
 	for id in fight_json['players']:
 		if id['hasCommanderTag']:
-			#Tag = id['name']
 			positionId = 0
-			if id['combatReplayData']['dead']:
-				for death in player['combatReplayData']['dead']:
-					dead_Tag = 1
-					dead_Tag_Mark = death[0]
-		
 			for position in id['combatReplayData']['positions']:
 				tagPositions[positionId] = position
 				positionId = positionId + 1
+			if id['combatReplayData']['dead']:
+				for death in id['combatReplayData']['dead']:
+					dead_Tag_Mark = death[0]
+					dead_Tag = 1
 
 	for id in fight_json['players']:
 		if id['combatReplayData']['dead']:
@@ -1761,15 +1759,13 @@ def get_stats_from_fight_json(fight_json, config, log):
 				Death_OnTag[id['name']]["On_Tag"] = 0
 				Death_OnTag[id['name']]["Off_Tag"] = 0
 				Death_OnTag[id['name']]["Run_Back"] = 0
+				Death_OnTag[id['name']]["After_Tag_Death"] = 0
 				Death_OnTag[id['name']]["Total"] = 0
 			playerDeaths = dict(id['combatReplayData']['dead'])
 			playerDowns = dict(id['combatReplayData']['down'])
 			for deathKey, deathValue in playerDeaths.items():
 				for downKey, downValue in playerDowns.items():
 					if deathKey == downValue:
-						print(downKey, dead_Tag_Mark)
-						if deathKey > int(dead_Tag_Mark):
-							continue
 						#process data for downKey
 						positionMark = int(downKey/150)
 						positionDown = id['combatReplayData']['positions'][positionMark]
@@ -1779,12 +1775,18 @@ def get_stats_from_fight_json(fight_json, config, log):
 						y2 = tagPositions[positionMark][1]
 						deathDistance = math.sqrt((x1-x2)**2 + (y1-y2)**2)
 						deathRange = deathDistance/0.01
-						Death_OnTag[id['name']]["Total"] = Death_OnTag[id['name']]["Total"] + 1
+						if int(downKey) > int(dead_Tag_Mark) and dead_Tag:
+							Death_OnTag[id['name']]["Total"] = Death_OnTag[id['name']]["Total"] + 1
+							Death_OnTag[id['name']]["After_Tag_Death"] = Death_OnTag[id['name']]["After_Tag_Death"] + 1
+							continue
 						if deathRange <= On_Tag:
+							Death_OnTag[id['name']]["Total"] = Death_OnTag[id['name']]["Total"] + 1
 							Death_OnTag[id['name']]["On_Tag"] = Death_OnTag[id['name']]["On_Tag"] + 1
 						if deathRange > Run_Back:
+							Death_OnTag[id['name']]["Total"] = Death_OnTag[id['name']]["Total"] + 1
 							Death_OnTag[id['name']]["Run_Back"] = Death_OnTag[id['name']]["Run_Back"] + 1
 						if deathRange > On_Tag and deathRange <= Run_Back:
+							Death_OnTag[id['name']]["Total"] = Death_OnTag[id['name']]["Total"] + 1
 							Death_OnTag[id['name']]["Off_Tag"] = Death_OnTag[id['name']]["Off_Tag"] + 1
 
 
