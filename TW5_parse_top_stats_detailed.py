@@ -624,6 +624,8 @@ if __name__ == '__main__':
 	myprint(output, "|thead-dark table-hover sortable|k")
 	myprint(output, "|!Name | !Profession | !Attendance | !On_Tag |  !Off_Tag |  !Run_Back |  !Total |h")
 	for name in Death_OnTag:
+		if Death_OnTag[name]['Total'] < 1:
+			continue
 		prof = "Not Found"
 		fightTime = uptime_Table[name]['duration']
 		for nameIndex in players:

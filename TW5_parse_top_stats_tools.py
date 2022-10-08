@@ -1739,15 +1739,17 @@ def get_stats_from_fight_json(fight_json, config, log):
 
 	tagPositions = {}
 	dead_Tag = 0
-	dead_Tag_Mark = ""
+	dead_Tag_Mark = 0
 	i=0
 	for id in fight_json['players']:
 		if id['hasCommanderTag']:
 			#Tag = id['name']
 			positionId = 0
 			if id['combatReplayData']['dead']:
-				dead_Tag = 1
-				dead_Tag_Mark = id['combatReplayData']['dead'][0][0]
+				for death in player['combatReplayData']['dead']:
+					dead_Tag = 1
+					dead_Tag_Mark = death[0]
+		
 			for position in id['combatReplayData']['positions']:
 				tagPositions[positionId] = position
 				positionId = positionId + 1
@@ -1764,9 +1766,10 @@ def get_stats_from_fight_json(fight_json, config, log):
 			playerDowns = dict(id['combatReplayData']['down'])
 			for deathKey, deathValue in playerDeaths.items():
 				for downKey, downValue in playerDowns.items():
-					if dead_Tag and int(downKey) > int(dead_Tag_Mark):
-						continue
 					if deathKey == downValue:
+						print(downKey, dead_Tag_Mark)
+						if deathKey > int(dead_Tag_Mark):
+							continue
 						#process data for downKey
 						positionMark = int(downKey/150)
 						positionDown = id['combatReplayData']['positions'][positionMark]
