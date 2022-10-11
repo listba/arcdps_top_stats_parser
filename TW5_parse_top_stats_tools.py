@@ -17,6 +17,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+from cgi import test
 from dataclasses import dataclass,field
 import os.path
 from os import listdir
@@ -111,6 +112,8 @@ class Config:
 	min_allied_players: int = 0   # minimum number of allied players to consider a fight in the stats
 	min_fight_duration: int = 0   # minimum duration of a fight to be considered in the stats
 	min_enemy_players: int = 0    # minimum number of enemies to consider a fight in the stats
+
+	charts: bool = False	# produce charts for stats_to_compute
 
 	stat_names: dict = field(default_factory=dict)
 	profession_abbreviations: dict = field(default_factory=dict)
@@ -226,6 +229,8 @@ def fill_config(config_input):
 
 	config.condition_ids = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: "Hunter's Mark"}
 	config.auras_ids = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic'}
+
+	config.charts = config_input.charts
 			
 	return config
 	
@@ -938,7 +943,11 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 	if stat == 'cleanses':
 		print_string += " CPS|"
 	if stat == 'barrier':
-		print_string += " BPS|"					
+		print_string += " BPS|"
+	if stat == 'downs':
+		print_string += " Downs/Min|"
+	if stat == 'kills':
+		print_string += " Kills/Min|"		
 	print_string += "h"
 	myprint(output_file, print_string)    
 
@@ -971,9 +980,9 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 		elif stat == 'dmg' or stat == 'cleanses' or stat == 'barrier' or stat == 'rips' or stat == 'heal' or stat == 'iol':
 			print_string += f" {my_value(round(player.total_stats[stat])):>8}| "
 			print_string += f" {my_value(player.average_stats[stat]):>8}|"        
-		#elif stat == 'heal':
-			#print_string += f" {my_value(round(player.total_stats[stat])):>8}| "
-			#print_string += f" {my_value(player.average_stats[stat]):>8}|"                    
+		elif stat == 'downs' or stat == 'kills':
+			print_string += f" {my_value(round(player.total_stats[stat])):>8}| "
+			print_string += f" {my_value(round(player.average_stats[stat]*60, 3)):>8}|"                    
 		else:
 			print_string += my_value(round(player.total_stats[stat]))+"|"
 			#if stat == 'iol':
@@ -1307,6 +1316,8 @@ def collect_stat_data(args, config, log, anonymize=False):
 				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_in_combat)                
 			elif stat == 'deaths':
 				player.average_stats[stat] = round(player.total_stats[stat]/(player.duration_fights_present/60), 2)
+			elif stat == 'downs' or stat == 'kills':
+				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present, 4)
 			elif stat in config.buffs_stacking_duration:
 				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present*100, 2)
 			else:
@@ -1751,6 +1762,9 @@ def get_stats_from_fight_json(fight_json, config, log):
 				for death in id['combatReplayData']['dead']:
 					dead_Tag_Mark = death[0]
 					dead_Tag = 1
+			else:
+				dead_Tag_Mark = 999999999
+				dead_Tag = 0
 
 	for id in fight_json['players']:
 		if id['combatReplayData']['dead']:
@@ -1775,18 +1789,15 @@ def get_stats_from_fight_json(fight_json, config, log):
 						y2 = tagPositions[positionMark][1]
 						deathDistance = math.sqrt((x1-x2)**2 + (y1-y2)**2)
 						deathRange = deathDistance/0.01
+						Death_OnTag[id['name']]["Total"] = Death_OnTag[id['name']]["Total"] + 1
 						if int(downKey) > int(dead_Tag_Mark) and dead_Tag:
-							Death_OnTag[id['name']]["Total"] = Death_OnTag[id['name']]["Total"] + 1
 							Death_OnTag[id['name']]["After_Tag_Death"] = Death_OnTag[id['name']]["After_Tag_Death"] + 1
 							continue
 						if deathRange <= On_Tag:
-							Death_OnTag[id['name']]["Total"] = Death_OnTag[id['name']]["Total"] + 1
 							Death_OnTag[id['name']]["On_Tag"] = Death_OnTag[id['name']]["On_Tag"] + 1
 						if deathRange > Run_Back:
-							Death_OnTag[id['name']]["Total"] = Death_OnTag[id['name']]["Total"] + 1
 							Death_OnTag[id['name']]["Run_Back"] = Death_OnTag[id['name']]["Run_Back"] + 1
 						if deathRange > On_Tag and deathRange <= Run_Back:
-							Death_OnTag[id['name']]["Total"] = Death_OnTag[id['name']]["Total"] + 1
 							Death_OnTag[id['name']]["Off_Tag"] = Death_OnTag[id['name']]["Off_Tag"] + 1
 
 
@@ -2053,7 +2064,105 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 	myprint(output, print_string)
 
 
+#JEL - Attempt to write TW5 Chart tids
+def write_stats_chart(players, top_players, stat, input_directory, config):
+	#args.input_directory+"/
+	stat_Name = config.stat_names[stat]
+	fileDate = datetime.datetime.now()
+	fileTid = input_directory+"/"+fileDate.strftime('%Y%m%d%H%M')+"_"+stat+"_TW5_Chart.tid"
+	chart_Output = open(fileTid, "w",encoding="utf-8")
+	minStatSec= 1000
+	maxStatSec = 0
 	
+	print_string = 'created: '+fileDate.strftime("%Y%m%d%H%M%S")
+	print_string +="\ncreator: Drevarr\n"
+	print_string +="tags: ChartData\n"
+	print_string +='title: '+fileDate.strftime("%Y%m%d%H")+'_'+stat+'_ChartData\n'
+	print_string +="type: application/javascript\n\n\n"
+
+	print_string += "option = {\n\tlegend: {},\n\ttooltip: {},\n\tdataset: [\n\t\t{\n\t\tsource: [\n\t\t\t["
+	
+	if stat == 'deaths' or stat == 'kills' or stat == 'downs':
+		print_string += "'"+stat_Name+"/Min',"
+	else:
+		print_string += "'"+stat_Name+"/Sec',"
+
+	print_string += "'Total "+stat_Name+"', 'Name', 'Profession', 'Fights', 'Duration' ],\n"
+	
+	for i in range(len(top_players)):
+		player = players[top_players[i]]
+		if stat == 'kills' or stat == 'downs':
+			print_string += "\t\t\t["+str(round(player.average_stats[stat]*60, 3))+", "+str(round(player.total_stats[stat]))+", '"+player.name+"', '{{"+player.profession+"}}', '"+str(player.num_fights_present)+"', '"+str(player.duration_fights_present)+"'"
+		else: 
+			print_string += "\t\t\t["+str(player.average_stats[stat])+", "+str(round(player.total_stats[stat]))+", '"+player.name+"', '{{"+player.profession+"}}', '"+str(player.num_fights_present)+"', '"+str(player.duration_fights_present)+"'"
+		if i >= len(top_players)-1:
+			print_string +="]\n"
+		else:
+			print_string +="],\n"
+		#Set minStatSec and maxStatSec
+		if stat == 'kills' or stat == 'downs':
+			if (player.average_stats[stat]*60) > maxStatSec:
+				maxStatSec = round((player.average_stats[stat]*60), 3)
+			if (player.average_stats[stat]*60) < minStatSec:
+				minStatSec = round((player.average_stats[stat]*60), 3)
+		else:
+			if player.average_stats[stat] < minStatSec:
+				minStatSec = player.average_stats[stat]
+			if player.average_stats[stat] > maxStatSec:
+				maxStatSec = player.average_stats[stat]
+
+
+	print_string += "\t\t\t]\n\t\t},\n\t],\n"
+	print_string += "    xAxis: [\n"
+	print_string += "    {},\n"
+	print_string += "  ],\n"
+	print_string += "  yAxis: { \n"
+	print_string += "    type: 'category'\n"
+	print_string += "  },\n"
+	print_string += "  visualMap: {\n"
+	print_string += "    orient: 'horizontal',\n"
+	print_string += "    left: 'center',\n"
+	print_string += "    min: "+str(minStatSec)+",\n"
+	print_string += "    max: "+str(maxStatSec)+",\n"
+	print_string += "    precision: 2,\n"
+	print_string += "    text: ['High "+stat_Name+" /Sec', 'Low "+stat_Name+"/Sec'],\n"
+	print_string += "    // Map the score column to color\n"
+	print_string += "    dimension: 0,\n"
+	print_string += "    inRange: {\n"
+	print_string += "      color: ['#FD665F', '#FFCE34', '#65B581']\n"
+	print_string += "    }\n"
+	print_string += "  },\n"
+	print_string += "  series: [\n"
+	print_string += "    {\n"
+	print_string += "      name: 'Total "+stat_Name+"',\n"
+	print_string += "      type: 'bar',\n"
+	print_string += "      encode: {\n"
+	print_string += "        // Map 'Total Stat' column to x-axis.\n"
+	print_string += "        x: 'Total "+stat_Name+"',\n"
+	print_string += "        // Map 'Name' row to y-axis.\n"
+	print_string += "        y: 'Name',\n"
+	print_string += "        tooltip: [3, 4, 5, 1, 0]\n"
+	print_string += "      }\n"
+	print_string += "    },\n"
+	print_string += "    {\n"
+	print_string += "      name: '"+stat_Name+"/Sec',\n"
+	print_string += "      type: 'bar',\n"
+	print_string += "      encode: {\n"
+	print_string += "        // Map 'Total Stat' column to x-axis.\n"
+	print_string += "        x: 'Total "+stat_Name+"/Sec',\n"
+	print_string += "        // Map 'Name' row to y-axis.\n"
+	print_string += "        y: 'Name',\n"
+	print_string += "        tooltip: [3, 4, 5, 1, 0]\n"
+	print_string += "      }\n"
+	print_string += "    }\n"
+	print_string += "  ]\n"
+	print_string += "};\n"
+
+	myprint(chart_Output, print_string)
+
+	chart_Output.close()
+# 	end write TW5 Chart tids
+
 def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, output_file):
 	json_dict = {}
 	json_dict["overall_raid_stats"] = {key: value for key, value in overall_raid_stats.items()}
