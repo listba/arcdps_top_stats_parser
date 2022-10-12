@@ -653,8 +653,8 @@ def write_stats_xls(players, top_players, stat, xls_output_filename):
 		sheet1.write(i+1, 4, player.num_fights_present)
 		sheet1.write(i+1, 5, player.duration_fights_present)
 		sheet1.write(i+1, 6, player.consistency_stats[stat])        
-		sheet1.write(i+1, 7, round(player.portion_top_stats[stat]*100))
-		sheet1.write(i+1, 8, round(player.total_stats[stat]))
+		sheet1.write(i+1, 7, round(player.portion_top_stats[stat]*100, 4))
+		sheet1.write(i+1, 8, round(player.total_stats[stat], 4))
 		sheet1.write(i+1, 9, player.average_stats[stat])
 
 	wb.save(xls_output_filename)
@@ -713,7 +713,7 @@ def write_control_effects_in_xls(sorted_enemyControl, stat, players, xls_output_
 			sheet1.write(i+1, 1, i+1)
 			sheet1.write(i+1, 2, name)
 			sheet1.write(i+1, 3, prof)
-			sheet1.write(i+1, 4, round(sorted_enemyControl[name], 1))
+			sheet1.write(i+1, 4, round(sorted_enemyControl[name], 4))
 			i=i+1
 	wb.save(xls_output_filename)
 
@@ -742,7 +742,7 @@ def write_auras_in_xls(sorted_auras_TableIn, stat, players, xls_output_filename)
 			sheet1.write(i+1, 1, i+1)
 			sheet1.write(i+1, 2, name)
 			sheet1.write(i+1, 3, prof)
-			sheet1.write(i+1, 4, round(sorted_auras_TableIn[name], 1))
+			sheet1.write(i+1, 4, round(sorted_auras_TableIn[name], 4))
 			i=i+1
 	wb.save(xls_output_filename)
 
@@ -771,7 +771,7 @@ def write_auras_out_xls(sorted_auras_TableOut, stat, players, xls_output_filenam
 			sheet1.write(i+1, 1, i+1)
 			sheet1.write(i+1, 2, name)
 			sheet1.write(i+1, 3, prof)
-			sheet1.write(i+1, 4, round(sorted_auras_TableOut[name], 1))
+			sheet1.write(i+1, 4, round(sorted_auras_TableOut[name], 4))
 			i=i+1
 	wb.save(xls_output_filename)
 
@@ -818,7 +818,7 @@ def write_buff_uptimes_in_xls(uptime_Table, players, uptime_Order, xls_output_fi
 			if item in uptime_Table[name]:
 				buff_Time = uptime_Table[name][item]
 				try:
-					sheet1.write(i+1, 4+x, round(((buff_Time / fightTime) * 100), 2))
+					sheet1.write(i+1, 4+x, round(((buff_Time / fightTime) * 100), 4))
 				except:
 					sheet1.write(i+1, 4+x, 0.00)
 			else:
@@ -982,7 +982,7 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			print_string += f" {my_value(player.average_stats[stat]):>8}|"        
 		elif stat == 'downs' or stat == 'kills':
 			print_string += f" {my_value(round(player.total_stats[stat])):>8}| "
-			print_string += f" {my_value(round(player.average_stats[stat]*60, 3)):>8}|"                    
+			print_string += f" {my_value(round(player.average_stats[stat]*60, 4)):>8}|"                    
 		else:
 			print_string += my_value(round(player.total_stats[stat]))+"|"
 			#if stat == 'iol':
@@ -1250,12 +1250,12 @@ def collect_stat_data(args, config, log, anonymize=False):
 					# buff are generation squad values, using total over time
 					if stat in config.buffs_stacking_duration and stat != 'iol':
 						#value is generated boon time on all squad players / fight duration / (players-1)" in percent, we want generated boon time on all squad players / (players-1)
-						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration, 2)
-						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration, 2)
+						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration, 4)
+						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration, 4)
 					elif stat in config.buffs_stacking_intensity and stat != 'iol':
 						#value is generated boon time on all squad players / fight duration / (players-1)", we want generated boon time on all squad players / (players-1)
-						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration, 2)
-						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration, 2)
+						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration, 4)
+						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration, 4)
 					elif stat == 'dist':
 						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration)
 						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration)
@@ -1308,20 +1308,20 @@ def collect_stat_data(args, config, log, anonymize=False):
 		# round total and portion top stats
 		for stat in config.stats_to_compute:
 			player.portion_top_stats[stat] = round(player.consistency_stats[stat]/player.num_fights_present, 4)
-			player.total_stats[stat] = round(player.total_stats[stat], 2)
+			player.total_stats[stat] = round(player.total_stats[stat], 4)
 			if stat == 'dmg' or stat == 'heal' or stat == 'barrier':
 				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present)
 			elif stat == 'dmg_taken':
 				#player.average_stats[stat] = round(player.total_stats[stat]/player.duration_active)
 				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_in_combat)                
 			elif stat == 'deaths':
-				player.average_stats[stat] = round(player.total_stats[stat]/(player.duration_fights_present/60), 2)
+				player.average_stats[stat] = round(player.total_stats[stat]/(player.duration_fights_present/60), 4)
 			elif stat == 'downs' or stat == 'kills':
 				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present, 4)
 			elif stat in config.buffs_stacking_duration:
-				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present*100, 2)
+				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present*100, 4)
 			else:
-				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present, 2)
+				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present, 4)
 
 				
 	myprint(log, "\n")
@@ -2092,7 +2092,7 @@ def write_stats_chart(players, top_players, stat, input_directory, config):
 	for i in range(len(top_players)):
 		player = players[top_players[i]]
 		if stat == 'kills' or stat == 'downs':
-			print_string += "\t\t\t["+str(round(player.average_stats[stat]*60, 3))+", "+str(round(player.total_stats[stat]))+", '"+player.name+"', '{{"+player.profession+"}}', '"+str(player.num_fights_present)+"', '"+str(player.duration_fights_present)+"'"
+			print_string += "\t\t\t["+str(round(player.average_stats[stat]*60, 4))+", "+str(round(player.total_stats[stat]))+", '"+player.name+"', '{{"+player.profession+"}}', '"+str(player.num_fights_present)+"', '"+str(player.duration_fights_present)+"'"
 		else: 
 			print_string += "\t\t\t["+str(player.average_stats[stat])+", "+str(round(player.total_stats[stat]))+", '"+player.name+"', '{{"+player.profession+"}}', '"+str(player.num_fights_present)+"', '"+str(player.duration_fights_present)+"'"
 		if i >= len(top_players)-1:
@@ -2102,9 +2102,9 @@ def write_stats_chart(players, top_players, stat, input_directory, config):
 		#Set minStatSec and maxStatSec
 		if stat == 'kills' or stat == 'downs':
 			if (player.average_stats[stat]*60) > maxStatSec:
-				maxStatSec = round((player.average_stats[stat]*60), 3)
+				maxStatSec = round((player.average_stats[stat]*60), 4)
 			if (player.average_stats[stat]*60) < minStatSec:
-				minStatSec = round((player.average_stats[stat]*60), 3)
+				minStatSec = round((player.average_stats[stat]*60), 4)
 		else:
 			if player.average_stats[stat] < minStatSec:
 				minStatSec = player.average_stats[stat]

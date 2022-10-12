@@ -426,7 +426,7 @@ if __name__ == '__main__':
 						prof = nameIndex.profession
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_squadControl[name], 1))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_squadControl[name], 4))+"|")
 					i=i+1
 
 			myprint(output, "</$reveal>\n")
@@ -468,7 +468,7 @@ if __name__ == '__main__':
 						prof = nameIndex.profession
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControl[name], 1))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControl[name], 4))+"|")
 					i=i+1
 
 			#myprint(output, "</$reveal>\n")
@@ -492,7 +492,7 @@ if __name__ == '__main__':
 				counter = 0
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControlPlayer[name], 1))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControlPlayer[name], 4))+"|")
 					i=i+1
 
 			myprint(output, '\n</div>\n</div>\n')
@@ -533,7 +533,7 @@ if __name__ == '__main__':
 						prof = nameIndex.profession
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_auras_TableIn[name], 1))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_auras_TableIn[name], 4))+"|")
 					i=i+1
 
 			myprint(output, "</$reveal>\n")
@@ -574,7 +574,7 @@ if __name__ == '__main__':
 						prof = nameIndex.profession
 
 				if i <=10:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_auras_TableOut[name], 1))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_auras_TableOut[name], 4))+"|")
 					i=i+1
 
 			myprint(output, "</$reveal>\n")
@@ -605,7 +605,7 @@ if __name__ == '__main__':
 				output_string += " {{"+prof+"}} | "+str(fightTime)+"|"
 				for item in uptime_Order:
 					if item in uptime_Table[name]:
-						output_string += " "+str(round(((uptime_Table[name][item]/fightTime)*100), 2))+"|"
+						output_string += " "+str(round(((uptime_Table[name][item]/fightTime)*100), 4))+"|"
 					else:
 						output_string += " 0.00|"
 				
