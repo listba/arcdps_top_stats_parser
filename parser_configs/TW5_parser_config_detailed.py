@@ -50,7 +50,7 @@ min_fight_duration = 30
 min_enemy_players = 10
 
 # Produce Charts for stats_to_compute
-charts = False
+charts = True
 
 # names as which each specialization will show up in the stats
 profession_abbreviations = {}

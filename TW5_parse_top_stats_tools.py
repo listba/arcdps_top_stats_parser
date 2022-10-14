@@ -1751,6 +1751,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 	tagPositions = {}
 	dead_Tag = 0
 	dead_Tag_Mark = 0
+	commanderMissing = False
 	i=0
 	for id in fight_json['players']:
 		if id['hasCommanderTag']:
@@ -1765,8 +1766,12 @@ def get_stats_from_fight_json(fight_json, config, log):
 			else:
 				dead_Tag_Mark = 999999999
 				dead_Tag = 0
+		else:
+			commanderMissing = True
 
 	for id in fight_json['players']:
+		if commanderMissing:
+			continue
 		if id['combatReplayData']['dead']:
 			if id['name'] not in Death_OnTag:
 				Death_OnTag[id['name']] = {}
