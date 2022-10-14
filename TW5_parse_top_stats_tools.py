@@ -1751,10 +1751,12 @@ def get_stats_from_fight_json(fight_json, config, log):
 	tagPositions = {}
 	dead_Tag = 0
 	dead_Tag_Mark = 0
-	commanderMissing = False
+	commanderMissing = True
+	commanderFound = False
 	i=0
 	for id in fight_json['players']:
 		if id['hasCommanderTag']:
+			commanderFound = True
 			positionId = 0
 			for position in id['combatReplayData']['positions']:
 				tagPositions[positionId] = position
@@ -1766,8 +1768,9 @@ def get_stats_from_fight_json(fight_json, config, log):
 			else:
 				dead_Tag_Mark = 999999999
 				dead_Tag = 0
-		else:
-			commanderMissing = True
+
+	if commanderFound:
+			commanderMissing = False
 
 	for id in fight_json['players']:
 		if commanderMissing:
@@ -1780,6 +1783,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 				Death_OnTag[id['name']]["Run_Back"] = 0
 				Death_OnTag[id['name']]["After_Tag_Death"] = 0
 				Death_OnTag[id['name']]["Total"] = 0
+				Death_OnTag[id['name']]["Ranges"] = []
 			playerDeaths = dict(id['combatReplayData']['dead'])
 			playerDowns = dict(id['combatReplayData']['down'])
 			for deathKey, deathValue in playerDeaths.items():
@@ -1804,6 +1808,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 							Death_OnTag[id['name']]["Run_Back"] = Death_OnTag[id['name']]["Run_Back"] + 1
 						if deathRange > On_Tag and deathRange <= Run_Back:
 							Death_OnTag[id['name']]["Off_Tag"] = Death_OnTag[id['name']]["Off_Tag"] + 1
+							Death_OnTag[id['name']]["Ranges"] += [deathRange]
 
 
 	# initialize fight         
