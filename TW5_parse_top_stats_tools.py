@@ -570,9 +570,9 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 	print_string = "|thead-dark table-hover|k"    
 	myprint(output_file, print_string)
 	print_string = "|Place |Name |Class | Attendance| Times Top|"
-	if stat == "dist":
-		print_string += " Average|"
-	if stat in config.buff_ids or stat == 'dmg_taken':
+	if stat != "dist":
+		print_string += " Total|"
+	if stat in config.buff_ids or stat == 'dmg_taken' or stat == 'dist':
 		print_string += " Average|"
 	print_string += "h"
 	myprint(output_file, print_string)    
