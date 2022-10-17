@@ -1626,9 +1626,11 @@ def get_stats_from_fight_json(fight_json, config, log):
 				for cc in item['buffData']:
 					for key, value in cc['generated'].items():
 						if key not in squad_Control[skill_name]:
-							squad_Control[skill_name][key] = float(value)
+							#squad_Control[skill_name][key] = float(value)
+							squad_Control[skill_name][key] = float((value/100)*duration)
 						else:
-							squad_Control[skill_name][key] = squad_Control[skill_name][key] + float(value)
+							#squad_Control[skill_name][key] = squad_Control[skill_name][key] + float(value)
+							squad_Control[skill_name][key] = squad_Control[skill_name][key] + float((value/100)*duration)
 			if enemy_name not in enemy_squad:
 				enemy_squad[enemy_name] = 1
 			else:
@@ -1678,13 +1680,13 @@ def get_stats_from_fight_json(fight_json, config, log):
 			for cc in item['buffData']:
 				for key, value in cc['generated'].items():
 					if key not in enemy_Control_Player[skill_name]:
-						enemy_Control_Player[skill_name][key] = float(value)
+						enemy_Control_Player[skill_name][key] = float((value/100)*duration)
 					else:
-						enemy_Control_Player[skill_name][key] = enemy_Control_Player[skill_name][key] + float(value)
+						enemy_Control_Player[skill_name][key] = enemy_Control_Player[skill_name][key] + float((value/100)*duration)
 					if player['name'] not in enemy_Control[skill_name]:
-						enemy_Control[skill_name][player['name']] = float(value)
+						enemy_Control[skill_name][player['name']] = float((value/100)*duration)
 					else:
-						enemy_Control[skill_name][player['name']] = enemy_Control[skill_name][player['name']] + float(value)
+						enemy_Control[skill_name][player['name']] = enemy_Control[skill_name][player['name']] + float((value/100)*duration)
 
 		#Instant Revive tracking of downed healing
 		instant_Revive = {14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Renewal of Water', 5762: 'Renewal of Fire', 5760: 'Renewal of Air', 5761: 'Renewal of Earth'}
@@ -1709,7 +1711,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 		#End Instant Revive tracking
 									
 		#Track Aura Output		
-		Auras_Id = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic'}				
+		Auras_Id = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic', 25518: 'Light', 39978: 'Dark', 10332: 'Chaos'}				
 		for item in player['buffUptimes']:
 			auraId = int(item['id'])
 			if auraId not in Auras_Id:
@@ -1722,13 +1724,13 @@ def get_stats_from_fight_json(fight_json, config, log):
 			for cc in item['buffData']:
 				for key, value in cc['generated'].items():
 					if player['name'] not in auras_TableIn[skill_name]:
-						auras_TableIn[skill_name][player['name']] = float(value)
+						auras_TableIn[skill_name][player['name']] = float((value/100)*duration)
 					else:
-						auras_TableIn[skill_name][player['name']] = auras_TableIn[skill_name][player['name']] + float(value)
+						auras_TableIn[skill_name][player['name']] = auras_TableIn[skill_name][player['name']] + float((value/100)*duration)
 					if key not in auras_TableOut[skill_name]:
-						auras_TableOut[skill_name][key] = float(value)
+						auras_TableOut[skill_name][key] = float((value/100)*duration)
 					else:
-						auras_TableOut[skill_name][key] = auras_TableOut[skill_name][key] + float(value)
+						auras_TableOut[skill_name][key] = auras_TableOut[skill_name][key] + float((value/100)*duration)
 
 		#Track Total Buff Uptimes
 		uptime_Buff_Ids = {1122: 'stability', 717: 'protection', 743: 'aegis', 740: 'might', 725: 'fury', 26980: 'resistance', 873: 'resolution', 1187: 'quickness', 719: 'swiftness', 30328: 'alacrity', 726: 'vigor', 718: 'regeneration'}

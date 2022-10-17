@@ -429,7 +429,7 @@ if __name__ == '__main__':
 						prof = nameIndex.profession
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_squadControl[name], 4))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_squadControl[name]))+"|")
 					i=i+1
 
 			myprint(output, "</$reveal>\n")
@@ -471,7 +471,7 @@ if __name__ == '__main__':
 						prof = nameIndex.profession
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControl[name], 4))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControl[name]))+"|")
 					i=i+1
 
 			#myprint(output, "</$reveal>\n")
@@ -495,7 +495,7 @@ if __name__ == '__main__':
 				counter = 0
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControlPlayer[name], 4))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControlPlayer[name]))+"|")
 					i=i+1
 
 			myprint(output, '\n</div>\n</div>\n')
@@ -507,7 +507,7 @@ if __name__ == '__main__':
 	#start Aura Effects Incoming insert
 	myprint(output, '<$reveal type="match" state="!!curTab" text="Auras - In">')    
 	myprint(output, '\n<<alert-leftbar danger "Auras by receiving Player" width:60%, class:"font-weight-bold">>\n\n')
-	Auras_Order = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic'}
+	Auras_Order = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic', 25518: 'Light', 39978: 'Dark', 10332: 'Chaos'}
 	for Aura in Auras_Order:
 		myprint(output, '<$button set="!!curAuras-In" setTo="'+Auras_Order[Aura]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Auras_Order[Aura]+' Aura </$button>')
 	
@@ -548,7 +548,7 @@ if __name__ == '__main__':
 	#start Aura Effects Out insert
 	myprint(output, '<$reveal type="match" state="!!curTab" text="Auras - Out">')    
 	myprint(output, '\n<<alert-leftbar info "Auras output by Player" width:60%, class:"font-weight-bold">>\n\n')
-	Auras_Order = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic'}
+	Auras_Order = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic', 25518: 'Light', 39978: 'Dark', 10332: 'Chaos'}
 	for Aura in Auras_Order:
 		myprint(output, '<$button set="!!curAuras-Out" setTo="'+Auras_Order[Aura]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Auras_Order[Aura]+' Aura </$button>')
 	
