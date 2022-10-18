@@ -2094,7 +2094,7 @@ def write_stats_chart(players, top_players, stat, input_directory, config):
 	print_string = 'created: '+fileDate.strftime("%Y%m%d%H%M%S")
 	print_string +="\ncreator: Drevarr\n"
 	print_string +="tags: ChartData\n"
-	print_string +='title: '+fileDate.strftime("%Y%m%d%H")+'_'+stat+'_ChartData\n'
+	print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData\n'
 	print_string +="type: application/javascript\n\n\n"
 
 	print_string += "option = {\n\tlegend: {},\n\ttooltip: {},\n\tdataset: [\n\t\t{\n\t\tsource: [\n\t\t\t["

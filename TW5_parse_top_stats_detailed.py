@@ -373,7 +373,7 @@ if __name__ == '__main__':
 			top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
 			
 			myprint(output, '<div>')
-			myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H")+'_'+stat+'_ChartData}} $height="600px" $theme="dark"/>')
+			myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="600px" $theme="dark"/>')
 			myprint(output, '</div>')
 		#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
 		myprint(output, "</$reveal>\n")
