@@ -133,6 +133,7 @@ class Config:
 exclude_Stat = ["dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealth", "superspeed", "swaps"]
 
 #Control Effects Tracking
+squad_offensive = {}
 squad_Control = {} 
 enemy_Control = {} 
 enemy_Control_Player = {} 
@@ -1155,7 +1156,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 		json_datafile = open(file_path, encoding='utf-8')
 		json_data = json.load(json_datafile)
 		# get fight stats
-		fight, players_running_healing_addon, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag = get_stats_from_fight_json(json_data, config, log)
+		fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag = get_stats_from_fight_json(json_data, config, log)
 			
 		if first:
 			first = False
@@ -1332,7 +1333,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 	if anonymize:
 		anonymize_players(players, account_index)
 	
-	return players, fights, found_healing, found_barrier, squad_comp, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag
+	return players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag
 			
 
 
@@ -1567,6 +1568,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 	squadDps_profession = ''
 	squadDps_damage = 0
 	squad_spike_dmg = {}
+	squad_offensive = {}
 
 #creat dictionary of skill_ids and skill_names
 	skill_Dict = {}
@@ -1687,6 +1689,25 @@ def get_stats_from_fight_json(fight_json, config, log):
 						enemy_Control[skill_name][player['name']] = float((value/100)*duration)
 					else:
 						enemy_Control[skill_name][player['name']] = enemy_Control[skill_name][player['name']] + float((value/100)*duration)
+
+		#Track Offensive stats from [statsAll]
+		statAll = ["totalDamageCount", "directDamageCount", "connectedDirectDamageCount", "connectedDamageCount", "critableDirectDamageCount", "criticalRate", "criticalDmg", "flankingRate", "againstMovingRate", "glanceRate", "missed", "evaded", "blocked", "interrupts", "invulned"]
+		#squadDps_prof_name = player['name']
+		#squadDps_profession = player['profession']
+		#squadDps_prof_name = "{{"+squadDps_profession+"}} "+squadDps_name		
+
+		if squadDps_prof_name not in squad_offensive:
+			squad_offensive[squadDps_prof_name]={}
+			squad_offensive[squadDps_prof_name]['name']= squadDps_prof_name.split(' ')[1]
+			squad_offensive[squadDps_prof_name]['prof']= squadDps_profession
+			squad_offensive[squadDps_prof_name]['stats']= {}
+            
+		for stat in statAll:
+			if stat not in squad_offensive[squadDps_prof_name]['stats']:
+				squad_offensive[squadDps_prof_name]['stats'][stat] = player['statsAll'][0][stat]
+			else:
+				squad_offensive[squadDps_prof_name]['stats'][stat] += player['statsAll'][0][stat]
+
 
 		#Instant Revive tracking of downed healing
 		instant_Revive = {14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Renewal of Water', 5762: 'Renewal of Fire', 5760: 'Renewal of Air', 5761: 'Renewal of Earth'}
@@ -1862,7 +1883,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 			if extension['name'] == "Healing Stats":
 				players_running_healing_addon = extension['runningExtension']
 		
-	return fight, players_running_healing_addon, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag
+	return fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag
 
 
 
@@ -2180,7 +2201,7 @@ def write_stats_chart(players, top_players, stat, input_directory, config):
 	chart_Output.close()
 # 	end write TW5 Chart tids
 
-def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, output_file):
+def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, output_file):
 	json_dict = {}
 	json_dict["overall_raid_stats"] = {key: value for key, value in overall_raid_stats.items()}
 	json_dict["overall_squad_stats"] = {key: value for key, value in overall_squad_stats.items()}
@@ -2192,7 +2213,7 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	json_dict["top_percentage_players"] =  {key: value for key, value in top_percentage_stat_players.items()}
 	json_dict["top_late_players"] =  {key: value for key, value in top_late_players.items()}
 	json_dict["top_jack_of_all_trades_players"] =  {key: value for key, value in top_jack_of_all_trades_players.items()}
-	#Control Effects Tracking
+	json_dict["squad_offensive"] =  {key: value for key, value in squad_offensive.items()}
 	json_dict["squad_Control"] =  {key: value for key, value in squad_Control.items()}
 	json_dict["enemy_Control"] =  {key: value for key, value in enemy_Control.items()}
 	json_dict["enemy_Control_Player"] =  {key: value for key, value in enemy_Control_Player.items()}

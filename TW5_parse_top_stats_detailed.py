@@ -66,7 +66,7 @@ if __name__ == '__main__':
 	print_string = "Considering fights with at least "+str(config.min_allied_players)+" allied players and at least "+str(config.min_enemy_players)+" enemies that took longer than "+str(config.min_fight_duration)+" s."
 	myprint(log, print_string)
 
-	players, fights, found_healing, found_barrier, squad_comp, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag = collect_stat_data(args, config, log, args.anonymize)    
+	players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag = collect_stat_data(args, config, log, args.anonymize)    
 
 	# create xls file if it doesn't exist
 	book = xlwt.Workbook(encoding="utf-8")
@@ -140,8 +140,9 @@ if __name__ == '__main__':
 					'<$button set="!!curTab" setTo="Buff Uptime" selectedClass="" class="btn btn-sm btn-dark" style=""> Buff Uptime </$button>',
 					'<$button set="!!curTab" setTo="Auras - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - In </$button>',
 					'<$button set="!!curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - Out </$button>',
-					'<$button set="!!curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> Death_OnTag </$button>',
-					'<$button set="!!curTab" setTo="Downed_Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Downed_Healing </$button>'
+					'<$button set="!!curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> Death OnTag </$button>',
+					'<$button set="!!curTab" setTo="Downed_Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Downed Healing </$button>',
+					'<$button set="!!curTab" setTo="Offensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Offensive Stats </$button>'
 	)
 	for item in Nav_Bar_Items:
 		myprint(output, item)
@@ -378,7 +379,7 @@ if __name__ == '__main__':
 		#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
 		myprint(output, "</$reveal>\n")
 
-		write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, args.json_output_filename)
+		write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, args.json_output_filename)
 
 	#print table of accounts that fielded support characters
 	myprint(output,'<$reveal type="match" state="!!curTab" text="Support">')
@@ -713,6 +714,111 @@ if __name__ == '__main__':
 
 	myprint(output, '\n</div>\n</div>\n</$reveal>\n')
 	#End Downed Healing
+
+	#start Offensive Stat Table insert
+	offensive_Order = ['Critical',  'Flanking',  'Glancing',  'Moving',  'Blinded',  'Interupt',  'Invulnerable',  'Evaded',  'Blocked']
+	myprint(output, '<$reveal type="match" state="!!curTab" text="Offensive Stats">')    
+	myprint(output, '\n<<alert-leftbar light "Offensive Stats across all fights attended." width:60%, class:"font-weight-bold">>\n\n')
+	
+	myprint(output, '\n---\n')
+	myprint(output, '\n---\n')
+
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|Sortable table - Click header item to sort table |c")
+	myprint(output, "|thead-dark table-hover sortable|k")
+	myprint(output, "|!Name | !Profession | !{{Critical}}% |  !{{Flanking}}% |  !{{Glancing}}% |  !{{Moving}}% |  !{{Blind}} |  !{{Interupt}} |  !{{Invulnerable}} |  !{{Evaded}} |  !{{Blocked}} |h")
+	for squadDps_prof_name in squad_offensive:
+		name = squad_offensive[squadDps_prof_name]['name']
+		prof = squad_offensive[squadDps_prof_name]['prof']
+
+		output_string = "|"+name+" | {{"+prof+"}} | "
+
+		#Calculate Critical_Hits_Rate
+		if squad_offensive[squadDps_prof_name]['stats']['criticalRate']:
+			Critical_Rate = round((squad_offensive[squadDps_prof_name]['stats']['criticalRate']/squad_offensive[squadDps_prof_name]['stats']['critableDirectDamageCount'])*100, 4)
+		else:
+			Critical_Rate = 0.0000
+		Critical_Rate_TT = '<span data-tooltip="'+str(squad_offensive[squadDps_prof_name]['stats']['criticalRate'])+' out of '+str(squad_offensive[squadDps_prof_name]['stats']['critableDirectDamageCount'])+' critable hits">'+str(Critical_Rate)+'</span>'
+		
+		output_string += str(Critical_Rate_TT)+" | "
+		
+		#Calculate Flanking_Rate
+		if squad_offensive[squadDps_prof_name]['stats']['flankingRate']:
+			Flanking_Rate = round((squad_offensive[squadDps_prof_name]['stats']['flankingRate']/squad_offensive[squadDps_prof_name]['stats']['connectedDirectDamageCount'])*100, 4)
+		else:
+			Flanking_Rate = 0.0000
+		Flanking_Rate_TT = '<span data-tooltip="'+str(squad_offensive[squadDps_prof_name]['stats']['flankingRate'])+' out of '+str(squad_offensive[squadDps_prof_name]['stats']['connectedDirectDamageCount'])+' connected direct hit(s)">'+str(Flanking_Rate)+'</span>'
+		
+		output_string += str(Flanking_Rate_TT)+" | "
+		
+		#Calculate Glancing Rate
+		if squad_offensive[squadDps_prof_name]['stats']['glanceRate']:
+			Glancing_Rate = round((squad_offensive[squadDps_prof_name]['stats']['glanceRate']/squad_offensive[squadDps_prof_name]['stats']['connectedDirectDamageCount'])*100, 4)
+		else:
+			Glancing_Rate = 0.0000
+		Glancing_Rate_TT = '<span data-tooltip="'+str(squad_offensive[squadDps_prof_name]['stats']['glanceRate'])+' out of '+str(squad_offensive[squadDps_prof_name]['stats']['connectedDirectDamageCount'])+' connected direct hit(s)">'+str(Glancing_Rate)+'</span>'
+		
+		output_string += str(Glancing_Rate_TT)+" | "
+		
+		#Calculate Moving_Rate
+		if squad_offensive[squadDps_prof_name]['stats']['againstMovingRate']:
+			Moving_Rate = round((squad_offensive[squadDps_prof_name]['stats']['againstMovingRate']/squad_offensive[squadDps_prof_name]['stats']['totalDamageCount'])*100, 4)
+		else:
+			Moving_Rate = 0.0000
+		Moving_Rate_TT = '<span data-tooltip="'+str(squad_offensive[squadDps_prof_name]['stats']['againstMovingRate'])+' out of '+str(squad_offensive[squadDps_prof_name]['stats']['totalDamageCount'])+' direct hit(s)">'+str(Moving_Rate)+'</span>'
+		
+		output_string += str(Moving_Rate_TT)+" | "
+		
+		#Calculate Blinded_Rate
+		if squad_offensive[squadDps_prof_name]['stats']['missed']:
+			Blinded_Rate = squad_offensive[squadDps_prof_name]['stats']['missed']
+		else:
+			Blinded_Rate = 0
+		Blinded_Rate_TT = '<span data-tooltip="'+str(squad_offensive[squadDps_prof_name]['stats']['missed'])+' out of '+str(squad_offensive[squadDps_prof_name]['stats']['totalDamageCount'])+' direct hit(s)">'+str(Blinded_Rate)+'</span>'
+		
+		output_string += str(Blinded_Rate_TT)+" | "
+		
+		#Calculate Interupt_Rate
+		if squad_offensive[squadDps_prof_name]['stats']['interrupts']:
+			Interupt_Rate = squad_offensive[squadDps_prof_name]['stats']['interrupts']
+		else:
+			Interupt_Rate = 0		
+		Interupt_Rate_TT = '<span data-tooltip="Interupted enemy players '+str(Interupt_Rate)+' time(s)">'+str(Interupt_Rate)+'</span>'
+		
+		output_string += str(Interupt_Rate_TT)+" | "
+		
+		#Calculate Invulnerable_Rate
+		if squad_offensive[squadDps_prof_name]['stats']['invulned']:
+			Invulnerable_Rate = squad_offensive[squadDps_prof_name]['stats']['invulned']
+		else:
+			Invulnerable_Rate = 0
+		Invulnerable_Rate_TT = '<span data-tooltip="'+str(squad_offensive[squadDps_prof_name]['stats']['invulned'])+' out of '+str(squad_offensive[squadDps_prof_name]['stats']['totalDamageCount'])+' hit(s)">'+str(Invulnerable_Rate)+'</span>'
+		
+		output_string += str(Invulnerable_Rate_TT)+" | "
+		
+		#Calculate Evaded_Rate
+		if squad_offensive[squadDps_prof_name]['stats']['evaded']:
+			Evaded_Rate = squad_offensive[squadDps_prof_name]['stats']['evaded']
+		else:
+			Evaded_Rate = 0
+		Evaded_Rate_TT = '<span data-tooltip="'+str(squad_offensive[squadDps_prof_name]['stats']['evaded'])+' out of '+str(squad_offensive[squadDps_prof_name]['stats']['connectedDirectDamageCount'])+' direct hit(s)">'+str(Evaded_Rate)+'</span>'
+		
+		output_string += str(Evaded_Rate_TT)+" | "
+		
+		#Calculate Blocked_Rate
+		if squad_offensive[squadDps_prof_name]['stats']['blocked']:
+			Blocked_Rate = squad_offensive[squadDps_prof_name]['stats']['blocked']
+		else:
+			Blocked_Rate = 0		
+		Blocked_Rate_TT = '<span data-tooltip="'+str(squad_offensive[squadDps_prof_name]['stats']['blocked'])+' out of '+str(squad_offensive[squadDps_prof_name]['stats']['connectedDirectDamageCount'])+' direct hit(s)">'+str(Blocked_Rate)+'</span>'
+		
+		output_string += str(Blocked_Rate_TT)+" |"
+		
+		myprint(output, output_string)
+
+	#write_squad_offensive_in_xls(squad_offensive, players, args.xls_output_filename)
+	myprint(output, "</$reveal>\n")
+	#end Offensive Stat Table insert
 
 	for stat in config.stats_to_compute:
 		if stat == 'dist':
