@@ -430,7 +430,7 @@ if __name__ == '__main__':
 						prof = nameIndex.profession
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_squadControl[name]))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_squadControl[name], 4))+"|")
 					i=i+1
 
 			myprint(output, "</$reveal>\n")
@@ -472,7 +472,7 @@ if __name__ == '__main__':
 						prof = nameIndex.profession
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControl[name]))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControl[name], 4))+"|")
 					i=i+1
 
 			#myprint(output, "</$reveal>\n")
@@ -496,7 +496,7 @@ if __name__ == '__main__':
 				counter = 0
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControlPlayer[name]))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControlPlayer[name],4 ))+"|")
 					i=i+1
 
 			myprint(output, '\n</div>\n</div>\n')
