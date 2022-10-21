@@ -650,7 +650,7 @@ if __name__ == '__main__':
 
 		myprint(output, output_string)
 
-	#write_Death_OnTag_in_xls(uptime_Table, players, uptime_Order, args.xls_output_filename)
+	write_Death_OnTag_xls(Death_OnTag, uptime_Table, players, args.xls_output_filename)
 	myprint(output, "</$reveal>\n")
 	#end On Tag Death insert
 
@@ -816,7 +816,7 @@ if __name__ == '__main__':
 		
 		myprint(output, output_string)
 
-	#write_squad_offensive_in_xls(squad_offensive, players, args.xls_output_filename)
+	write_squad_offensive_xls(squad_offensive, args.xls_output_filename)
 	myprint(output, "</$reveal>\n")
 	#end Offensive Stat Table insert
 

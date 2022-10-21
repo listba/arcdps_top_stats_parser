@@ -719,6 +719,122 @@ def write_control_effects_in_xls(sorted_enemyControl, stat, players, xls_output_
 			i=i+1
 	wb.save(xls_output_filename)
 
+def write_Death_OnTag_xls(Death_OnTag, uptime_Table, players, xls_output_filename):
+	fileDate = datetime.datetime.now()
+	book = xlrd.open_workbook(xls_output_filename)
+	wb = copy(book)
+	sheet1 = wb.add_sheet("Death_OnTag")
+	
+	sheet1.write(0, 0, "Date")
+	sheet1.write(0, 1, "Name")
+	sheet1.write(0, 2, "Profession")
+	sheet1.write(0, 3, "Attendance")
+	sheet1.write(0, 4, "On_Tag")
+	sheet1.write(0, 5, "Off_Tag")
+	sheet1.write(0, 6, "After_Tag_Death")
+	sheet1.write(0, 7, "Run_Back")
+	sheet1.write(0, 8, "Total")
+	sheet1.write(0, 9, "Off Tag Ranges")
+
+		
+	i = 0
+
+	for name in Death_OnTag:
+		prof = "Not Found"
+		fightTime = uptime_Table[name]['duration']
+		if Death_OnTag[name]['Off_Tag']:
+			converted_list = [str(round(element)) for element in Death_OnTag[name]['Ranges']]
+			Ranges_string = ",".join(converted_list)
+		else:
+			Ranges_string = " "
+		for nameIndex in players:
+			if nameIndex.name == name:
+				prof = nameIndex.profession	
+
+		sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
+		sheet1.write(i+1, 1, name)
+		sheet1.write(i+1, 2, prof)
+		sheet1.write(i+1, 3, fightTime)
+		sheet1.write(i+1, 4, Death_OnTag[name]['On_Tag'])
+		sheet1.write(i+1, 5, Death_OnTag[name]['Off_Tag'])
+		sheet1.write(i+1, 6, Death_OnTag[name]['After_Tag_Death'])
+		sheet1.write(i+1, 7, Death_OnTag[name]['Run_Back'])
+		sheet1.write(i+1, 8, Death_OnTag[name]['Total'])
+		sheet1.write(i+1, 9, Ranges_string)
+		i=i+1
+	wb.save(xls_output_filename)
+
+def write_squad_offensive_xls(squad_offensive, xls_output_filename):
+	fileDate = datetime.datetime.now()
+	book = xlrd.open_workbook(xls_output_filename)
+	wb = copy(book)
+	sheet1 = wb.add_sheet("Squad_Offensive")
+	
+	sheet1.write(0, 0, "Date")
+	sheet1.write(0, 1, "Name")
+	sheet1.write(0, 2, "Profession")
+	sheet1.write(0, 3, "Critical %")
+	sheet1.write(0, 4, "Flanking %")
+	sheet1.write(0, 5, "Glancing %")
+	sheet1.write(0, 6, "Moving %")
+	sheet1.write(0, 7, "Blind #")
+	sheet1.write(0, 8, "Interupt #")
+	sheet1.write(0, 9, "Invulnerable #")
+	sheet1.write(0, 10, "Evaded #")
+	sheet1.write(0, 11, "Blocked #")
+	sheet1.write(0, 12, "Critable Direct Damage Count'")
+	sheet1.write(0, 13, "Connected Direct Damage Count")
+	sheet1.write(0, 14, "Total Damage Count")
+		
+	i = 0
+
+	for squadDps_prof_name in squad_offensive:
+
+		sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
+		sheet1.write(i+1, 1, squad_offensive[squadDps_prof_name]['name'])
+		sheet1.write(i+1, 2, squad_offensive[squadDps_prof_name]['prof'])
+		if squad_offensive[squadDps_prof_name]['stats']['criticalRate']:
+			sheet1.write(i+1, 3, round((squad_offensive[squadDps_prof_name]['stats']['criticalRate']/squad_offensive[squadDps_prof_name]['stats']['critableDirectDamageCount']), 4))
+		else:
+			sheet1.write(i+1, 3, 0.0000)
+		if squad_offensive[squadDps_prof_name]['stats']['flankingRate']:
+			sheet1.write(i+1, 4, round((squad_offensive[squadDps_prof_name]['stats']['flankingRate']/squad_offensive[squadDps_prof_name]['stats']['connectedDirectDamageCount']), 4))
+		else:
+			sheet1.write(i+1, 4, 0.0000)
+		if squad_offensive[squadDps_prof_name]['stats']['glanceRate']:
+			sheet1.write(i+1, 5, round((squad_offensive[squadDps_prof_name]['stats']['glanceRate']/squad_offensive[squadDps_prof_name]['stats']['connectedDirectDamageCount']), 4))
+		else:
+			sheet1.write(i+1, 5, 0.0000)
+		if squad_offensive[squadDps_prof_name]['stats']['againstMovingRate']:
+			sheet1.write(i+1, 6, round((squad_offensive[squadDps_prof_name]['stats']['againstMovingRate']/squad_offensive[squadDps_prof_name]['stats']['totalDamageCount']), 4))
+		else:
+			sheet1.write(i+1, 6, 0.0000)
+		if squad_offensive[squadDps_prof_name]['stats']['missed']:
+			sheet1.write(i+1, 7, squad_offensive[squadDps_prof_name]['stats']['missed'])
+		else:
+			sheet1.write(i+1, 7, 0)
+		if squad_offensive[squadDps_prof_name]['stats']['interrupts']:
+			sheet1.write(i+1, 8, squad_offensive[squadDps_prof_name]['stats']['interrupts'])
+		else:
+			sheet1.write(i+1, 8, 0)
+		if squad_offensive[squadDps_prof_name]['stats']['invulned']:
+			sheet1.write(i+1, 9, squad_offensive[squadDps_prof_name]['stats']['invulned'])
+		else:
+			sheet1.write(i+1, 9, 0)
+		if squad_offensive[squadDps_prof_name]['stats']['evaded']:
+			sheet1.write(i+1, 10, squad_offensive[squadDps_prof_name]['stats']['evaded'])
+		else:
+			sheet1.write(i+1, 10, 0)
+		if squad_offensive[squadDps_prof_name]['stats']['blocked']:
+			sheet1.write(i+1, 11, squad_offensive[squadDps_prof_name]['stats']['blocked'])
+		else:
+			sheet1.write(i+1, 11, 0)
+		sheet1.write(i+1, 12, squad_offensive[squadDps_prof_name]['stats']['critableDirectDamageCount'])
+		sheet1.write(i+1, 13, squad_offensive[squadDps_prof_name]['stats']['connectedDirectDamageCount'])
+		sheet1.write(i+1, 14, squad_offensive[squadDps_prof_name]['stats']['totalDamageCount'])
+		i=i+1
+	wb.save(xls_output_filename)
+
 def write_auras_in_xls(sorted_auras_TableIn, stat, players, xls_output_filename):
 	fileDate = datetime.datetime.now()
 	book = xlrd.open_workbook(xls_output_filename)
@@ -1698,7 +1814,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 
 		if squadDps_prof_name not in squad_offensive:
 			squad_offensive[squadDps_prof_name]={}
-			squad_offensive[squadDps_prof_name]['name']= squadDps_prof_name.split(' ')[1]
+			squad_offensive[squadDps_prof_name]['name']= squadDps_name
 			squad_offensive[squadDps_prof_name]['prof']= squadDps_profession
 			squad_offensive[squadDps_prof_name]['stats']= {}
             
