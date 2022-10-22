@@ -130,7 +130,7 @@ class Config:
 
 
 #Stats to exlucde from overview summary
-exclude_Stat = ["dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealth", "superspeed", "swaps"]
+exclude_Stat = ["iol", "dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealth", "superspeed", "swaps"]
 
 #Control Effects Tracking
 squad_offensive = {}
@@ -1834,17 +1834,19 @@ def get_stats_from_fight_json(fight_json, config, log):
 						if target['id'] in instant_Revive:
 							reviveSkill = instant_Revive[target['id']]
 
-							if player['name'] not in downed_Healing:
-								downed_Healing[player['name']]={}
-							if reviveSkill not in downed_Healing[player['name']]:
-								downed_Healing[player['name']][reviveSkill] = {}
-								downed_Healing[player['name']][reviveSkill]['Heals'] = {}
-								downed_Healing[player['name']][reviveSkill]['Hits'] = {}
-								downed_Healing[player['name']][reviveSkill]['Heals'] = int(target['totalDownedHealing'])
-								downed_Healing[player['name']][reviveSkill]['Hits'] = int(target['hits'])
+							if squadDps_prof_name not in downed_Healing:
+								downed_Healing[squadDps_prof_name]={}
+								downed_Healing[squadDps_prof_name]['name'] = squadDps_name
+								downed_Healing[squadDps_prof_name]['prof'] = squadDps_profession
+							if reviveSkill not in downed_Healing[squadDps_prof_name]:
+								downed_Healing[squadDps_prof_name][reviveSkill] = {}
+								downed_Healing[squadDps_prof_name][reviveSkill]['Heals'] = {}
+								downed_Healing[squadDps_prof_name][reviveSkill]['Hits'] = {}
+								downed_Healing[squadDps_prof_name][reviveSkill]['Heals'] = int(target['totalDownedHealing'])
+								downed_Healing[squadDps_prof_name][reviveSkill]['Hits'] = int(target['hits'])
 							else:
-								downed_Healing[player['name']][reviveSkill]['Heals'] = downed_Healing[player['name']][reviveSkill]['Heals'] + int(target['totalDownedHealing'])
-								downed_Healing[player['name']][reviveSkill]['Hits'] = downed_Healing[player['name']][reviveSkill]['Hits'] + int(target['hits'])	
+								downed_Healing[squadDps_prof_name][reviveSkill]['Heals'] = downed_Healing[squadDps_prof_name][reviveSkill]['Heals'] + int(target['totalDownedHealing'])
+								downed_Healing[squadDps_prof_name][reviveSkill]['Hits'] = downed_Healing[squadDps_prof_name][reviveSkill]['Hits'] + int(target['hits'])	
 		#End Instant Revive tracking
 									
 		#Track Aura Output		
@@ -2181,12 +2183,12 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 	stat_len = {}
 	print_string = "|thead-dark table-hover|k"
 	myprint(output, print_string)
-	
-	print_string = "| Fight # | Date | Start Time | End Time | Secs | Skip | Allies | Enemies | Downs | Kills |"
+	#print_string = "| Fight # | Date | Start Time | End Time | Secs | Skip | Allies | Enemies | Downs | Kills |"
+	print_string = "| Fight # | Date | Ending | Secs | Skip | Allies | Enemies | Downs | Kills |"
 	for stat in overall_squad_stats:
 		if stat not in exclude_Stat:
 			stat_len[stat] = max(len(config.stat_names[stat]), len(str(overall_squad_stats[stat])))
-			print_string += " {{"+config.stat_names[stat]+"}}|"
+			print_string += " {{"+config.stat_names[stat]+"}} |"
 	print_string += "h"
 	myprint(output, print_string)
 	for i in range(len(fights)):
@@ -2195,7 +2197,8 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 		date = fight.start_time.split()[0]
 		start_time = fight.start_time.split()[1]
 		end_time = fight.end_time.split()[1]        
-		print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(start_time)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
+		#print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(start_time)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
+		print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
 		for stat in overall_squad_stats:
 			if stat not in exclude_Stat:
 				#JEL - added my_value formatting
@@ -2210,7 +2213,8 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 	#mean_enemies = round(sum([f.enemies for f in used_fights])/num_used_fights, 1)
 	#total_kills = sum([f.kills for f in used_fights])
 
-	print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['start_time']:>10}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
+	#print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['start_time']:>10}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
+	print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
 	for stat in overall_squad_stats:
 		if stat not in exclude_Stat:
 			print_string += " "+my_value(round(overall_squad_stats[stat]))+"|"

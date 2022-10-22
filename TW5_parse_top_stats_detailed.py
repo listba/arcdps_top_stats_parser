@@ -672,19 +672,18 @@ if __name__ == '__main__':
 		output_string += "!{{"+down_Heal_Order[item]+"}}|"
 	output_string += "h"
 	myprint(output, output_string)
-	for name in downed_Healing:
-		prof = "Not Found"
+	for squadDps_prof_name in downed_Healing:
+		name = downed_Healing[squadDps_prof_name]['name']
+		prof = downed_Healing[squadDps_prof_name]['prof']
 		fightTime = uptime_Table[name]['duration']
-		for nameIndex in players:
-			if nameIndex.name == name:
-				prof = nameIndex.profession
-				output_string = "|"+name+" |{{"+prof+"}}|"+str(fightTime)+"| "
-				for skill in down_Heal_Order:
-					if down_Heal_Order[skill] in downed_Healing[name]:
-						output_string += str(downed_Healing[name][down_Heal_Order[skill]]['Heals'])+"|"
-					else:
-						output_string += " |"
-				myprint(output, output_string)
+
+		output_string = "|"+name+" |{{"+prof+"}}|"+str(fightTime)+"| "
+		for skill in down_Heal_Order:
+			if down_Heal_Order[skill] in downed_Healing[squadDps_prof_name]:
+				output_string += str(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Heals'])+"|"
+			else:
+				output_string += " |"
+		myprint(output, output_string)
 	
 	myprint(output, '\n</div>\n<div class="flex-col border">\n')
 	myprint(output, "\n!!Number of Skill Hits\nWork in Progress more skills to be added when logs available\n")
@@ -696,19 +695,18 @@ if __name__ == '__main__':
 		output_string += "!{{"+down_Heal_Order[item]+"}}|"
 	output_string += "h"
 	myprint(output, output_string)
-	for name in downed_Healing:
-		prof = "Not Found"
+	for squadDps_prof_name in downed_Healing:
+		name = downed_Healing[squadDps_prof_name]['name']
+		prof = downed_Healing[squadDps_prof_name]['prof']
 		fightTime = uptime_Table[name]['duration']
-		for nameIndex in players:
-			if nameIndex.name == name:
-				prof = nameIndex.profession
-				output_string = "|"+name+" |{{"+prof+"}}|"+str(fightTime)+"| "
-				for skill in down_Heal_Order:
-					if down_Heal_Order[skill] in downed_Healing[name]:
-						output_string += str(downed_Healing[name][down_Heal_Order[skill]]['Hits'])+"|"
-					else:
-						output_string += " |"
-				myprint(output, output_string)
+
+		output_string = "|"+name+" |{{"+prof+"}}|"+str(fightTime)+"| "
+		for skill in down_Heal_Order:
+			if down_Heal_Order[skill] in downed_Healing[squadDps_prof_name]:
+				output_string += str(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Hits'])+" |"
+			else:
+				output_string += " |"
+		myprint(output, output_string)
 
 
 
