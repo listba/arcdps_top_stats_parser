@@ -599,19 +599,18 @@ if __name__ == '__main__':
 	myprint(output, "|Sortable table - Click header item to sort table |c")
 	myprint(output, "|thead-dark table-hover sortable|k")
 	myprint(output, "|!Name | !Profession | !Attendance| !{{Stability}}|  !{{Protection}}|  !{{Aegis}}|  !{{Might}}|  !{{Fury}}|  !{{Resistance}}|  !{{Resolution}}|  !{{Quickness}}|  !{{Swiftness}}|  !{{Alacrity}}|  !{{Vigor}}|  !{{Regeneration}}|h")
-	for name in uptime_Table:
-		prof = "Not Found"
-		fightTime = uptime_Table[name]['duration']
-		for nameIndex in players:
-			if nameIndex.name == name:
-				prof = nameIndex.profession
-				output_string = "|"+name+" |"
-				output_string += " {{"+prof+"}} | "+str(fightTime)+"|"
-				for item in uptime_Order:
-					if item in uptime_Table[name]:
-						output_string += " "+str(round(((uptime_Table[name][item]/fightTime)*100), 4))+"|"
-					else:
-						output_string += " 0.00|"
+	for squadDps_prof_name in uptime_Table:
+		fightTime = uptime_Table[squadDps_prof_name]['duration']
+		name = uptime_Table[squadDps_prof_name]['name']
+		prof = uptime_Table[squadDps_prof_name]['prof']
+
+		output_string = "|"+name+" |"
+		output_string += " {{"+prof+"}} | "+str(fightTime)+"|"
+		for item in uptime_Order:
+			if item in uptime_Table[squadDps_prof_name]:
+				output_string += " "+str(round(((uptime_Table[squadDps_prof_name][item]/fightTime)*100), 4))+"|"
+			else:
+				output_string += " 0.00|"
 				
 
 
@@ -632,19 +631,19 @@ if __name__ == '__main__':
 	myprint(output, "|Sortable table - Click header item to sort table |c")
 	myprint(output, "|thead-dark table-hover sortable|k")
 	myprint(output, "|!Name | !Profession | !Attendance | !On_Tag |  !Off_Tag | !After_Tag_Death |  !Run_Back |  !Total | Off Tag Ranges |h")
-	for name in Death_OnTag:
-		prof = "Not Found"
-		fightTime = uptime_Table[name]['duration']
-		if Death_OnTag[name]['Off_Tag']:
-			converted_list = [str(round(element)) for element in Death_OnTag[name]['Ranges']]
+	for deathOnTag_prof_name in Death_OnTag:
+		name = Death_OnTag[deathOnTag_prof_name]['name']
+		prof = Death_OnTag[deathOnTag_prof_name]['profession']
+		fightTime = uptime_Table[deathOnTag_prof_name]['duration']
+
+		if Death_OnTag[deathOnTag_prof_name]['Off_Tag']:
+			converted_list = [str(round(element)) for element in Death_OnTag[deathOnTag_prof_name]['Ranges']]
 			Ranges_string = ",".join(converted_list)
 		else:
 			Ranges_string = " "
-		for nameIndex in players:
-			if nameIndex.name == name:
-				prof = nameIndex.profession
-				output_string = "|"+name+" |"
-				output_string += " {{"+prof+"}} | "+str(fightTime)+" | "+str(Death_OnTag[name]['On_Tag'])+" | "+str(Death_OnTag[name]['Off_Tag'])+" | "+str(Death_OnTag[name]['After_Tag_Death'])+" | "+str(Death_OnTag[name]['Run_Back'])+" | "+str(Death_OnTag[name]['Total'])+" |"+Ranges_string+" |"
+
+		output_string = "|"+name+" |"
+		output_string += " {{"+prof+"}} | "+str(fightTime)+" | "+str(Death_OnTag[deathOnTag_prof_name]['On_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Off_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['After_Tag_Death'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Run_Back'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Total'])+" |"+Ranges_string+" |"
 	
 
 
@@ -675,7 +674,7 @@ if __name__ == '__main__':
 	for squadDps_prof_name in downed_Healing:
 		name = downed_Healing[squadDps_prof_name]['name']
 		prof = downed_Healing[squadDps_prof_name]['prof']
-		fightTime = uptime_Table[name]['duration']
+		fightTime = uptime_Table[squadDps_prof_name]['duration']
 
 		output_string = "|"+name+" |{{"+prof+"}}|"+str(fightTime)+"| "
 		for skill in down_Heal_Order:
@@ -698,7 +697,7 @@ if __name__ == '__main__':
 	for squadDps_prof_name in downed_Healing:
 		name = downed_Healing[squadDps_prof_name]['name']
 		prof = downed_Healing[squadDps_prof_name]['prof']
-		fightTime = uptime_Table[name]['duration']
+		fightTime = uptime_Table[squadDps_prof_name]['duration']
 
 		output_string = "|"+name+" |{{"+prof+"}}|"+str(fightTime)+"| "
 		for skill in down_Heal_Order:
