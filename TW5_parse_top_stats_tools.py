@@ -1969,8 +1969,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 						if deathRange > On_Tag and deathRange <= Run_Back:
 							Death_OnTag[deathOnTag_prof_name]["Off_Tag"] = Death_OnTag[deathOnTag_prof_name]["Off_Tag"] + 1
 							Death_OnTag[deathOnTag_prof_name]["Ranges"] += [deathRange]
-					else:
-						Death_OnTag[deathOnTag_prof_name]["Total"] = Death_OnTag[deathOnTag_prof_name]["Total"] + 1
+
 
 
 	# initialize fight         
