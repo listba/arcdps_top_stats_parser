@@ -1684,7 +1684,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 	squadDps_profession = ''
 	squadDps_damage = 0
 	squad_spike_dmg = {}
-	squad_offensive = {}
+
 
 #creat dictionary of skill_ids and skill_names
 	skill_Dict = {}
