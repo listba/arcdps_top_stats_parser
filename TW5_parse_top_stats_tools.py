@@ -1874,34 +1874,29 @@ def get_stats_from_fight_json(fight_json, config, log):
 		#Track Total Buff Uptimes
 		uptime_Buff_Ids = {1122: 'stability', 717: 'protection', 743: 'aegis', 740: 'might', 725: 'fury', 26980: 'resistance', 873: 'resolution', 1187: 'quickness', 719: 'swiftness', 30328: 'alacrity', 726: 'vigor', 718: 'regeneration'}
 		#uptime_Buff_Names = { 'stability': 1122,  'protection': 717,  'aegis': 743,  'might': 740,  'fury': 725,  'resistance': 26980,  'resolution': 873,  'quickness': 1187,  'swiftness': 719,  'alacrity': 30328,  'vigor': 726,  'regeneration': 718}
-		if squadDps_prof_name not in uptime_Table:
-			uptime_Table[squadDps_prof_name]={}
-			uptime_Table[squadDps_prof_name]['name']=squadDps_name
-			uptime_Table[squadDps_prof_name]['prof']=squadDps_profession
-			uptime_Table[squadDps_prof_name]['duration'] = 0
-			print('Added player to uptime_Table: '+ squadDps_prof_name)
-			for item in player['buffUptimes']:
-				if squadDps_prof_name not in uptime_Table:
-					uptime_Table[squadDps_prof_name]={}
-					uptime_Table[squadDps_prof_name]['name']=squadDps_name
-					uptime_Table[squadDps_prof_name]['prof']=squadDps_profession
-					uptime_Table[squadDps_prof_name]['duration'] = 0
-					print('Added player to uptime_Table: '+ squadDps_prof_name)
-				buffId = int(item['id'])	
-				if buffId not in uptime_Buff_Ids:
-					continue
-				buff_name = uptime_Buff_Ids[buffId]
-				if buff_name == 'stability' or buff_name == 'might':
-					uptime_value = float(item['buffData'][0]['presence'])
-				else:
-					uptime_value = float(item['buffData'][0]['uptime'])
-				uptime_duration = float(duration * (uptime_value/100))
-				if buff_name not in uptime_Table[squadDps_prof_name]:
-					uptime_Table[squadDps_prof_name][buff_name] = uptime_duration
-				else:
-					uptime_Table[squadDps_prof_name][buff_name] = uptime_Table[squadDps_prof_name][buff_name] + uptime_duration
+		for item in player['buffUptimes']:
+			if squadDps_prof_name not in uptime_Table:
+				uptime_Table[squadDps_prof_name]={}
+				uptime_Table[squadDps_prof_name]['name']=squadDps_name
+				uptime_Table[squadDps_prof_name]['prof']=squadDps_profession
+				uptime_Table[squadDps_prof_name]['duration'] = 0
+				print('Added player to uptime_Table: '+ squadDps_prof_name)
+			buffId = int(item['id'])	
+			if buffId not in uptime_Buff_Ids:
+				continue
+			buff_name = uptime_Buff_Ids[buffId]
+			if buff_name == 'stability' or buff_name == 'might':
+				uptime_value = float(item['buffData'][0]['presence'])
+			else:
+				uptime_value = float(item['buffData'][0]['uptime'])
+			uptime_duration = float(duration * (uptime_value/100))
+			if buff_name not in uptime_Table[squadDps_prof_name]:
+				uptime_Table[squadDps_prof_name][buff_name] = uptime_duration
+			else:
+				uptime_Table[squadDps_prof_name][buff_name] = uptime_Table[squadDps_prof_name][buff_name] + uptime_duration
 		uptime_Table[squadDps_prof_name]['duration'] = uptime_Table[squadDps_prof_name]['duration'] + duration
 
+	#Death_OnTag Tracking
 	tagPositions = {}
 	dead_Tag = 0
 	dead_Tag_Mark = 0
@@ -1927,13 +1922,13 @@ def get_stats_from_fight_json(fight_json, config, log):
 			commanderMissing = False
 
 	for id in fight_json['players']:
-		deathOnTag_name = id['name']
-		deathOnTag_profession = id['profession']
-		deathOnTag_prof_name = "{{"+deathOnTag_profession+"}} "+deathOnTag_name		
-		
 		if commanderMissing:
 			continue
-		if id['combatReplayData']['dead']:
+		if id['combatReplayData']['dead'] and id['combatReplayData']['down']:
+			deathOnTag_name = id['name']
+			deathOnTag_profession = id['profession']
+			deathOnTag_prof_name = "{{"+deathOnTag_profession+"}} "+deathOnTag_name		
+			
 			if deathOnTag_prof_name not in Death_OnTag:
 				Death_OnTag[deathOnTag_prof_name] = {}
 				Death_OnTag[deathOnTag_prof_name]["name"] = deathOnTag_name
@@ -1947,6 +1942,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 			playerDeaths = dict(id['combatReplayData']['dead'])
 			playerDowns = dict(id['combatReplayData']['down'])
 			for deathKey, deathValue in playerDeaths.items():
+				if deathKey < 0: #Handle death on the field before main squad combat log starts
+					Death_OnTag[deathOnTag_prof_name]["Off_Tag"] = Death_OnTag[deathOnTag_prof_name]["Off_Tag"] + 1
 				for downKey, downValue in playerDowns.items():
 					if deathKey == downValue:
 						#process data for downKey
