@@ -739,27 +739,23 @@ def write_Death_OnTag_xls(Death_OnTag, uptime_Table, players, xls_output_filenam
 		
 	i = 0
 
-	for name in Death_OnTag:
-		prof = "Not Found"
-		fightTime = uptime_Table[name]['duration']
-		if Death_OnTag[name]['Off_Tag']:
-			converted_list = [str(round(element)) for element in Death_OnTag[name]['Ranges']]
+	for prof_name in Death_OnTag:
+		fightTime = uptime_Table[prof_name]['duration']
+		if Death_OnTag[prof_name]['Off_Tag']:
+			converted_list = [str(round(element)) for element in Death_OnTag[prof_name]['Ranges']]
 			Ranges_string = ",".join(converted_list)
 		else:
 			Ranges_string = " "
-		for nameIndex in players:
-			if nameIndex.name == name:
-				prof = nameIndex.profession	
 
 		sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
-		sheet1.write(i+1, 1, name)
-		sheet1.write(i+1, 2, prof)
+		sheet1.write(i+1, 1, Death_OnTag[prof_name]['name'])
+		sheet1.write(i+1, 2, Death_OnTag[prof_name]['profession'])
 		sheet1.write(i+1, 3, fightTime)
-		sheet1.write(i+1, 4, Death_OnTag[name]['On_Tag'])
-		sheet1.write(i+1, 5, Death_OnTag[name]['Off_Tag'])
-		sheet1.write(i+1, 6, Death_OnTag[name]['After_Tag_Death'])
-		sheet1.write(i+1, 7, Death_OnTag[name]['Run_Back'])
-		sheet1.write(i+1, 8, Death_OnTag[name]['Total'])
+		sheet1.write(i+1, 4, Death_OnTag[prof_name]['On_Tag'])
+		sheet1.write(i+1, 5, Death_OnTag[prof_name]['Off_Tag'])
+		sheet1.write(i+1, 6, Death_OnTag[prof_name]['After_Tag_Death'])
+		sheet1.write(i+1, 7, Death_OnTag[prof_name]['Run_Back'])
+		sheet1.write(i+1, 8, Death_OnTag[prof_name]['Total'])
 		sheet1.write(i+1, 9, Ranges_string)
 		i=i+1
 	wb.save(xls_output_filename)
@@ -918,23 +914,17 @@ def write_buff_uptimes_in_xls(uptime_Table, players, uptime_Order, xls_output_fi
 	
 	i = 0
 	
-	for name in uptime_Table:
-		prof = "Not Found"
-		fightTime = uptime_Table[name]['duration']
+	for prof_name in uptime_Table:
+		fightTime = uptime_Table[prof_name]['duration']
 		sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
-		sheet1.write(i+1, 1, name)
-
-		for nameIndex in players:
-			if nameIndex.name == name:
-				prof = nameIndex.profession
-				
-		sheet1.write(i+1, 2, prof)
+		sheet1.write(i+1, 1, uptime_Table[prof_name]['name'])
+		sheet1.write(i+1, 2, uptime_Table[prof_name]['prof'])
 		sheet1.write(i+1, 3, fightTime)
 
 		x = 0
 		for item in uptime_Order:
-			if item in uptime_Table[name]:
-				buff_Time = uptime_Table[name][item]
+			if item in uptime_Table[prof_name]:
+				buff_Time = uptime_Table[prof_name][item]
 				try:
 					sheet1.write(i+1, 4+x, round(((buff_Time / fightTime) * 100), 4))
 				except:
