@@ -341,7 +341,7 @@ if __name__ == '__main__':
 		if (stat == 'heal' and not found_healing) or (stat == 'barrier' and not found_barrier):
 			continue
 		
-		fileDate = datetime.datetime.now()
+		fileDate = myDate
 
 		#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
 		myprint(output,'<$reveal type="match" state="!!curTab" text="'+config.stat_names[stat]+'">')
@@ -821,26 +821,26 @@ if __name__ == '__main__':
 		if stat == 'dist':
 			write_stats_xls(players, top_percentage_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
-				write_stats_chart(players, top_percentage_stat_players[stat], stat, args.input_directory, config)
+				write_stats_chart(players, top_percentage_stat_players[stat], stat, myDate, args.input_directory, config)
 		elif stat == 'dmg_taken':
 			write_stats_xls(players, top_average_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
-				write_stats_chart(players, top_average_stat_players[stat], stat, args.input_directory, config)
+				write_stats_chart(players, top_average_stat_players[stat], stat, myDate, args.input_directory, config)
 		elif stat == 'heal' and found_healing:
 			write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
-				write_stats_chart(players, top_total_stat_players[stat], stat, args.input_directory, config)
+				write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
 		elif stat == 'barrier' and found_barrier:
 			write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
-				write_stats_chart(players, top_total_stat_players[stat], stat, args.input_directory, config)
+				write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
 		elif stat == 'deaths':
 			write_stats_xls(players, top_consistent_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
-				write_stats_chart(players, top_consistent_stat_players[stat], stat, args.input_directory, config)
+				write_stats_chart(players, top_consistent_stat_players[stat], stat, myDate, args.input_directory, config)
 		else:
 			write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
-				write_stats_chart(players, top_total_stat_players[stat], stat, args.input_directory, config)
+				write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
 			if stat == 'rips' or stat == 'cleanses' or stat == 'stability':
 				supportCount = write_support_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename, supportCount)

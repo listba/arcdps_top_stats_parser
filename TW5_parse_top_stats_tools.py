@@ -2225,10 +2225,10 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 
 
 #JEL - Attempt to write TW5 Chart tids
-def write_stats_chart(players, top_players, stat, input_directory, config):
+def write_stats_chart(players, top_players, stat, myDate, input_directory, config):
 	#args.input_directory+"/
 	stat_Name = config.stat_names[stat]
-	fileDate = datetime.datetime.now()
+	fileDate = myDate
 	fileTid = input_directory+"/"+fileDate.strftime('%Y%m%d%H%M')+"_"+stat+"_TW5_Chart.tid"
 	chart_Output = open(fileTid, "w",encoding="utf-8")
 	minStatSec= 1000
