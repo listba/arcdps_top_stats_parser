@@ -1542,12 +1542,20 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 	if stat == 'Cdmg':
 		if 'dpsAll' not in player_json or len(player_json['dpsAll']) != 1 or 'condiDamage' not in player_json['dpsAll'][0]:
 			return 0
-		return int(player_json['dpsAll'][0]['condiDamage'])    
+		sumDamage = 0
+		for target in player_json['dpsTargets']:
+			sumDamage = sumDamage + int(target[0]['condiDps'])
+		return int(sumDamage)
+		#return int(player_json['dpsAll'][0]['condiDamage'])    
 	
 	if stat == 'Pdmg':
 		if 'dpsAll' not in player_json or len(player_json['dpsAll']) != 1 or 'powerDamage' not in player_json['dpsAll'][0]:
 			return 0
-		return int(player_json['dpsAll'][0]['powerDamage'])  
+		sumDamage = 0
+		for target in player_json['dpsTargets']:
+			sumDamage = sumDamage + int(target[0]['powerDamage'])
+		return int(sumDamage)
+		#return int(player_json['dpsAll'][0]['powerDamage'])  
 
 	if stat == 'res':
 		if 'support' not in player_json or len(player_json['support']) != 1 or 'resurrects' not in player_json['support'][0]:
