@@ -1531,7 +1531,7 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 	#    return int(player_json['statsAll'][0]['killed'])
 
 	if stat == 'dmg':
-		if 'dpsAll' not in player_json or len(player_json['dpsAll']) != 1 or 'damage' not in player_json['dpsAll'][0]:
+		if 'dpsTargets' not in player_json or 'damage' not in player_json['dpsTargets'][0]:
 			return 0
 		sumDamage = 0
 		for target in player_json['dpsTargets']:
@@ -1540,7 +1540,7 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		#return int(player_json['dpsAll'][0]['damage'])            
 	#Add Power and Condition Damage Tracking
 	if stat == 'Cdmg':
-		if 'dpsAll' not in player_json or len(player_json['dpsAll']) != 1 or 'condiDamage' not in player_json['dpsAll'][0]:
+		if 'dpsTargets' not in player_json or 'condiDamage' not in player_json['dpsTargets'][0]:
 			return 0
 		sumDamage = 0
 		for target in player_json['dpsTargets']:
@@ -1549,7 +1549,7 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		#return int(player_json['dpsAll'][0]['condiDamage'])    
 	
 	if stat == 'Pdmg':
-		if 'dpsAll' not in player_json or len(player_json['dpsAll']) != 1 or 'powerDamage' not in player_json['dpsAll'][0]:
+		if 'dpsTargets' not in player_json or 'powerDamage' not in player_json['dpsTargets'][0]:
 			return 0
 		sumDamage = 0
 		for target in player_json['dpsTargets']:
