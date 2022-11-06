@@ -1764,7 +1764,9 @@ def get_stats_from_fight_json(fight_json, config, log):
 		squadDps_name = player['name']
 		squadDps_profession = player['profession']
 		squadDps_prof_name = "{{"+squadDps_profession+"}} "+squadDps_name
-		squadDps_damage = player['dpsAll'][0]['damage']
+		squadDps_damage = 0
+		for target in player['dpsTargets']:
+			squadDps_damage = squadDps_damage + int(target[0]['damage'])
 		squad_Dps[squadDps_prof_name] = squadDps_damage
 		for skill_used in player['totalDamageDist'][0]:
 			skill_id = skill_used['id']
