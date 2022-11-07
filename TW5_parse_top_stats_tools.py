@@ -2345,8 +2345,10 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 	Charts = ['kills', 'cleanse', 'rips', 'deaths']
 	Bubble_Chart = {}
 
-	for i in range(len(top_players)):
-		player = players[top_players[i]]
+	#for i in range(len(top_players)):
+	for i in range(len(players)):
+		#player = players[top_players[i]]
+		player = players[i]
 		prof_name = "{{"+player.profession+"}} "+player.name
 		if prof_name not in Bubble_Chart:
 			Bubble_Chart[prof_name]={}
@@ -2459,7 +2461,7 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 		if chart == 'deaths':
 			print_string +='\n    name: "Average Deaths"'		
 		if chart == 'rips':
-			print_string +='\n    name: "Strips per Second"'			
+			print_string +='\n    name: "Control Effect Score"'			
 		print_string +='\n  },'
 		print_string +='\n  yAxis: {'
 		print_string +="\n    type: 'value',"
@@ -2470,7 +2472,7 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 		if chart == 'deaths':
 			print_string +='\n    name: "Average Damage Taken"'		
 		if chart == 'rips':
-			print_string +='\n    name: "Control Effect Score"'
+			print_string +='\n    name: "Strips per Second"'
 		print_string +='\n  },'
 		print_string +='\n  tooltip: {},'
 		print_string +='\n  series: ['
@@ -2485,7 +2487,7 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 		if chart == 'deaths':
 			print_string +="\n        x: 'Deaths',"
 		if chart == 'rips':
-			print_string +="\n        x: 'Strips',"	
+			print_string +="\n        x: 'Control',"	
 		print_string +='\n        // Map "product" row to y-axis.'
 		if chart == 'kills':	
 			print_string +="\n        y: 'Kills',"
@@ -2494,7 +2496,7 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 		if chart == 'deaths':	
 			print_string +="\n        y: 'Damage_Taken',"
 		if chart == 'rips':	
-			print_string +="\n        y: 'Control',"	
+			print_string +="\n        y: 'Strips',"	
 		print_string +='\n        // format tooltip'
 		print_string +='\n        tooltip: [0, 1, 4],'
 		print_string +='\n      },	'
