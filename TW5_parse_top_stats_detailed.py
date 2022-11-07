@@ -142,7 +142,8 @@ if __name__ == '__main__':
 					'<$button set="!!curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - Out </$button>',
 					'<$button set="!!curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> Death OnTag </$button>',
 					'<$button set="!!curTab" setTo="Downed_Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Downed Healing </$button>',
-					'<$button set="!!curTab" setTo="Offensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Offensive Stats </$button>'
+					'<$button set="!!curTab" setTo="Offensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Offensive Stats </$button>',
+					'<$button set="!!curTab" setTo="Dashboard" selectedClass="" class="btn btn-sm btn-dark" style=""> Dashboard </$button>'
 	)
 	for item in Nav_Bar_Items:
 		myprint(output, item)
@@ -817,6 +818,39 @@ if __name__ == '__main__':
 	myprint(output, "</$reveal>\n")
 	#end Offensive Stat Table insert
 
+	#Dashboard - Bubble Charts
+
+	myprint(output, '<$reveal type="match" state="!!curTab" text="Dashboard">')    
+	myprint(output, '\n<<alert-leftbar light "Dashboard for various charts" width:60%, class:"font-weight-bold">>\n\n')
+	
+	myprint(output, '\n---\n')
+	myprint(output, '\n---\n')
+
+	myprint(output, '\n<div class="flex-row">\n<div class="flex-col">\n')
+	
+	myprint(output, "\n!!Kills / Downs / DPS\n")
+	myprint(output, ",,Bubble Size based on DPS output,,\n")
+	myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_kills_BubbleChartData}} $height="400px" $theme="dark"/>')
+	
+	myprint(output, "\n!!Deaths / Damage Taken / Distance from Tag\n")
+	myprint(output, ",,Bubble Size based on Average Distance to Tag,,\n")
+	myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_deaths_BubbleChartData}} $height="400px" $theme="dark"/>')
+
+	myprint(output, '\n</div>\n<div class="flex-col">\n')
+
+	myprint(output, "\n!!Cleanses / Heals / Boon Score\n")
+	myprint(output, ",,Bubble Size based on Boon Score = Sum of all average boon output,,\n")
+	
+	myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_cleanse_BubbleChartData}} $height="400px" $theme="dark"/>')
+	
+	myprint(output, "\n!!Boon Strips / Outgoing Control Score / DPS\n")
+	myprint(output, ",,Bubble Size based on Control Score = Sum of all outgoing control effects,,\n")
+	myprint(output, ",,Bubble Size based on DPS output,,\n")
+	myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_rips_BubbleChartData}} $height="400px" $theme="dark"/>')
+
+	myprint(output, '\n</div>\n</div>\n</$reveal>\n')
+	#End Dashboard - Bubble Charts
+
 	for stat in config.stats_to_compute:
 		if stat == 'dist':
 			write_stats_xls(players, top_percentage_stat_players[stat], stat, args.xls_output_filename)
@@ -844,3 +878,6 @@ if __name__ == '__main__':
 				write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
 			if stat == 'rips' or stat == 'cleanses' or stat == 'stability':
 				supportCount = write_support_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename, supportCount)
+
+	#write out Bubble Charts
+	write_bubble_charts(players, top_total_stat_players[stat], squad_Control, myDate, args.input_directory)

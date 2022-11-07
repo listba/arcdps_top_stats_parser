@@ -1,5 +1,5 @@
 #Color codes for each class
-Profession = {
+ProfessionColor = {
   "Guardian":"#72C1D9",
   "Dragonhunter":"#72C1D9",
   "Firebrand":"#72C1D9",

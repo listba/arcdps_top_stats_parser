@@ -33,6 +33,7 @@ import math
 import requests
 import datetime
 import Guild_Data
+from GW2_Color_Scheme import ProfessionColor
 
 debug = False # enable / disable debug output
 
@@ -2337,6 +2338,184 @@ def write_stats_chart(players, top_players, stat, myDate, input_directory, confi
 	chart_Output.close()
 # 	end write TW5 Chart tids
 
+#JEL - write TW5 Bubble Chart tids
+def write_bubble_charts(players, top_players, squad_Control, myDate, input_directory):
+	get_Stats = ['deaths', 'kills', 'downs', 'dmg_taken', 'dmg', 'rips', 'cleanses', 'heal', 'dist']
+	boon_List = ['stability', 'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration']
+	Charts = ['kills', 'cleanse', 'rips', 'deaths']
+	Bubble_Chart = {}
+
+	for i in range(len(top_players)):
+		player = players[top_players[i]]
+		prof_name = "{{"+player.profession+"}} "+player.name
+		if prof_name not in Bubble_Chart:
+			Bubble_Chart[prof_name]={}
+			Bubble_Chart[prof_name]['name'] = player.name
+			Bubble_Chart[prof_name]['profession'] = player.profession
+			Bubble_Chart[prof_name]['control']=0
+			Bubble_Chart[prof_name]['rips']=0
+			Bubble_Chart[prof_name]['dmg']=0
+			Bubble_Chart[prof_name]['cleanses']=0
+			Bubble_Chart[prof_name]['heal']=0
+			Bubble_Chart[prof_name]['boonScore']=0
+			Bubble_Chart[prof_name]['kills']=0
+			Bubble_Chart[prof_name]['downs']=0
+			Bubble_Chart[prof_name]['deaths']=0
+			Bubble_Chart[prof_name]['dmg_taken']=0
+			Bubble_Chart[prof_name]['dist']=0
+		
+		#gather control score per player
+		sum_Control = 0
+		for effect in squad_Control:
+			if player.name not in squad_Control[effect]:
+				continue
+			else:
+				sum_Control += squad_Control[effect][player.name]
+		Bubble_Chart[prof_name]['control'] = sum_Control
+		
+		#gather boon score per player
+		sum_Boons = 0
+		for boon in boon_List:
+			sum_Boons += player.average_stats[boon]
+		Bubble_Chart[prof_name]['boonScore'] = sum_Boons
+		
+		#gather Stats scores per player
+		for statItem in get_Stats:
+			Bubble_Chart[prof_name][statItem] = player.average_stats[statItem]
+			
+	for chart in Charts:
+		fileDate = myDate
+		bubblefileTid = input_directory+"/"+fileDate.strftime('%Y%m%d%H%M')+"_"+chart+"_TW5_Bubble_Chart.tid"
+		bubble_chart_Output = open(bubblefileTid, "w",encoding="utf-8")
+		minStatSec= 1000
+		maxStatSec = 0
+		
+		print_string = 'created: '+fileDate.strftime("%Y%m%d%H%M%S")
+		print_string +="\ncreator: Drevarr\n"
+		print_string +="tags: ChartData\n"
+		print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_'+chart+'_BubbleChartData\n'
+		print_string +="type: application/javascript\n\n\n"
+
+		print_string +='\nvar option = {\n  dataset: [{\n    source: ['
+		
+		if chart == 'kills':
+			print_string += '\n            ["Name", "Profession", "Kills", "Downs", "DPS", "color"],'
+			for prof_name in Bubble_Chart:
+				color = ProfessionColor[Bubble_Chart[prof_name]['profession']]
+				print_string += '\n            ["'+Bubble_Chart[prof_name]['name']+'", "'+Bubble_Chart[prof_name]['profession']+'", '+str(Bubble_Chart[prof_name]['kills'])+', '+str(Bubble_Chart[prof_name]['downs'])+', '+str(Bubble_Chart[prof_name]['dmg'])+', "'+color+'"],'
+				if Bubble_Chart[prof_name]['dmg'] > maxStatSec:
+					maxStatSec = Bubble_Chart[prof_name]['dmg']
+				if Bubble_Chart[prof_name]['dmg'] < minStatSec:
+					minStatSec = Bubble_Chart[prof_name]['dmg']
+
+		if chart == 'cleanse':
+			print_string += '\n            ["Name", "Profession", "Cleanses", "Heals", "Boon Score", "color"],'
+			for prof_name in Bubble_Chart:
+				color = ProfessionColor[Bubble_Chart[prof_name]['profession']]
+				print_string += '\n            ["'+Bubble_Chart[prof_name]['name']+'", "'+Bubble_Chart[prof_name]['profession']+'", '+str(Bubble_Chart[prof_name]['cleanses'])+', '+str(Bubble_Chart[prof_name]['heal'])+', '+str(Bubble_Chart[prof_name]['boonScore'])+', "'+color+'"],'
+				if Bubble_Chart[prof_name]['boonScore'] > maxStatSec:
+					maxStatSec = Bubble_Chart[prof_name]['boonScore']
+				if Bubble_Chart[prof_name]['boonScore'] < minStatSec:
+					minStatSec = Bubble_Chart[prof_name]['boonScore']
+				
+		if chart == 'rips':
+			print_string += '\n            ["Name", "Profession", "Strips", "Control", "DPS", "color"],'
+			for prof_name in Bubble_Chart:
+				color = ProfessionColor[Bubble_Chart[prof_name]['profession']]
+				print_string += '\n            ["'+Bubble_Chart[prof_name]['name']+'", "'+Bubble_Chart[prof_name]['profession']+'", '+str(Bubble_Chart[prof_name]['rips'])+', '+str(Bubble_Chart[prof_name]['control'])+', '+str(Bubble_Chart[prof_name]['dmg'])+', "'+color+'"],'		
+				if Bubble_Chart[prof_name]['dmg'] > maxStatSec:
+					maxStatSec = Bubble_Chart[prof_name]['dmg']
+				if Bubble_Chart[prof_name]['dmg'] < minStatSec:
+					minStatSec = Bubble_Chart[prof_name]['dmg']
+				
+		if chart == 'deaths':
+			print_string += '\n            ["Name", "Profession", "Deaths", "Damage_Taken", "Distance_to_Tag", "color"],'
+			for prof_name in Bubble_Chart:
+				color = ProfessionColor[Bubble_Chart[prof_name]['profession']]
+				print_string += '\n            ["'+Bubble_Chart[prof_name]['name']+'", "'+Bubble_Chart[prof_name]['profession']+'", '+str(Bubble_Chart[prof_name]['deaths'])+', '+str(Bubble_Chart[prof_name]['dmg_taken'])+', '+str(Bubble_Chart[prof_name]['dist'])+', "'+color+'"],'
+				if Bubble_Chart[prof_name]['dist'] > maxStatSec:
+					maxStatSec = Bubble_Chart[prof_name]['dist']
+				if Bubble_Chart[prof_name]['dist'] < minStatSec:
+					minStatSec = Bubble_Chart[prof_name]['dist']
+				
+		print_string += '\n   ]'
+		print_string += '\n  }],'
+		print_string += '\n  visualMap: {'
+		print_string += '\n    show: true,'
+		print_string += '\n    dimension: 4, // means the 5th column		'
+		print_string +='\n    min: '+str(minStatSec)+', // lower bound'
+		print_string +='\n    max: '+str(maxStatSec)+', // upper bound'
+		print_string +='\n    inRange: {'
+		print_string +='\n      // Size of the bubble.'
+		print_string +='\n      symbolSize: [5, 50]'
+		print_string +='\n    }'
+		print_string +='\n  },			'
+		print_string +=  '\nxAxis: {'
+		print_string +="\n    type: 'value',"
+		if chart == 'kills':
+			print_string +='\n    name: "Downs per Second"'
+		if chart == 'cleanse':
+			print_string +='\n    name: "Cleanses per Second"'	
+		if chart == 'deaths':
+			print_string +='\n    name: "Average Deaths"'		
+		if chart == 'rips':
+			print_string +='\n    name: "Strips per Second"'			
+		print_string +='\n  },'
+		print_string +='\n  yAxis: {'
+		print_string +="\n    type: 'value',"
+		if chart == 'kills':
+			print_string +='\n    name: "Kills per Second"'
+		if chart == 'cleanse':
+			print_string +='\n    name: "Heals per Second"'	
+		if chart == 'deaths':
+			print_string +='\n    name: "Average Damage Taken"'		
+		if chart == 'rips':
+			print_string +='\n    name: "Control Effect Score"'
+		print_string +='\n  },'
+		print_string +='\n  tooltip: {},'
+		print_string +='\n  series: ['
+		print_string +='\n    {'
+		print_string +="\n      type: 'scatter',"
+		print_string +='\n      encode: {'
+		print_string +='\n        // Map "amount" column to x-axis.'
+		if chart == 'kills':
+			print_string +="\n        x: 'Downs',"
+		if chart == 'cleanse':
+			print_string +="\n        x: 'Cleanses',"		
+		if chart == 'deaths':
+			print_string +="\n        x: 'Deaths',"
+		if chart == 'rips':
+			print_string +="\n        x: 'Strips',"	
+		print_string +='\n        // Map "product" row to y-axis.'
+		if chart == 'kills':	
+			print_string +="\n        y: 'Kills',"
+		if chart == 'cleanse':	
+			print_string +="\n        y: 'Heals',"
+		if chart == 'deaths':	
+			print_string +="\n        y: 'Damage_Taken',"
+		if chart == 'rips':	
+			print_string +="\n        y: 'Control',"	
+		print_string +='\n        // format tooltip'
+		print_string +='\n        tooltip: [0, 1, 4],'
+		print_string +='\n      },	'
+		print_string +='\n      itemStyle: {'
+		print_string +='\n        color: function(seriesIndex) {'
+		print_string +='\n          console.log(seriesIndex);'
+		print_string +='\n        	console.log(seriesIndex.color);'
+		print_string +='\n        	console.log(seriesIndex.data[5]);'
+		print_string +='\n        	if (seriesIndex.data[5]){'
+		print_string +='\n        	  return seriesIndex.data[5];'
+		print_string +='\n        	}'
+		print_string +='\n        }'
+		print_string +='\n      }'
+		print_string +='\n    }'
+		print_string +='\n  ]'
+		print_string +='\n};'
+		
+		myprint(bubble_chart_Output, print_string)
+
+		bubble_chart_Output.close()
+#	end write bubble charts
 def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, output_file):
 	json_dict = {}
 	json_dict["overall_raid_stats"] = {key: value for key, value in overall_raid_stats.items()}
