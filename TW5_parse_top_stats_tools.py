@@ -131,7 +131,7 @@ class Config:
 
 
 #Stats to exlucde from overview summary
-exclude_Stat = ["iol", "dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealth", "superspeed", "swaps"]
+exclude_Stat = ["iol", "dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealth", "superspeed", "swaps", "barrierDamage"]
 
 #Control Effects Tracking
 squad_offensive = {}
@@ -1521,6 +1521,11 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 			return 0
 		return int(player_json['defenses'][0]['damageTaken']+player_json['defenses'][0]['damageBarrier'])
 
+	if stat == 'barrierDamage':
+		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'damageBarrier' not in player_json['defenses'][0]:
+			return 0
+		return int(player_json['defenses'][0]['damageBarrier'])
+		
 	if stat == 'deaths':
 		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'deadCount' not in player_json['defenses'][0]:
 			return 0        
