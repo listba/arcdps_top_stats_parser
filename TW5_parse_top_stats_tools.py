@@ -1747,11 +1747,10 @@ def get_stats_from_fight_json(fight_json, config, log):
 				for cc in item['buffData']:
 					for key, value in cc['generated'].items():
 						if key not in squad_Control[skill_name]:
-							#squad_Control[skill_name][key] = float(value)
 							squad_Control[skill_name][key] = float((value/100)*duration)
 						else:
-							#squad_Control[skill_name][key] = squad_Control[skill_name][key] + float(value)
-							squad_Control[skill_name][key] = squad_Control[skill_name][key] + float((value/100)*duration)
+							squad_Control[skill_name][key] = squad_Control[skill_name][key] + float(value)
+
 			if enemy_name not in enemy_squad:
 				enemy_squad[enemy_name] = 1
 			else:
@@ -2474,7 +2473,7 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 		if chart == 'rips':
 			print_string +='\n    name: "Strips per Second"'
 		print_string +='\n  },'
-		print_string +='\n  tooltip: {},'
+		print_string +="\n  tooltip: {trigger: 'axis'},"
 		print_string +='\n  series: ['
 		print_string +='\n    {'
 		print_string +="\n      type: 'scatter',"

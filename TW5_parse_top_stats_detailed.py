@@ -818,38 +818,62 @@ if __name__ == '__main__':
 	myprint(output, "</$reveal>\n")
 	#end Offensive Stat Table insert
 
-	#Dashboard - Bubble Charts
-
+	#start Dashboard insert
 	myprint(output, '<$reveal type="match" state="!!curTab" text="Dashboard">')    
 	myprint(output, '\n<<alert-leftbar light "Dashboard for various charts" width:60%, class:"font-weight-bold">>\n\n')
+	Dashboard_Charts = ["Kills/Downs/DPS", "Deaths/DamageTaken/DistanceFromTag", "Cleanses/Heals/BoonScore", "BoonStrips/OutgoingControlScore/DPS", "Profession_DPS_BoxPlot", "Player_DPS_BoxPlot"]
+	
+	for chart in Dashboard_Charts:
+		myprint(output, '<$button set="!!curChart" setTo="'+chart+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+chart+' </$button>')
 	
 	myprint(output, '\n---\n')
-	myprint(output, '\n---\n')
-
-	myprint(output, '\n<div class="flex-row">\n<div class="flex-col">\n')
 	
-	myprint(output, "\n!!Kills / Downs / DPS\n")
-	myprint(output, ",,Bubble Size based on DPS output,,\n")
-	myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_kills_BubbleChartData}} $height="400px" $theme="dark"/>')
-	
-	myprint(output, "\n!!Deaths / Damage Taken / Distance from Tag\n")
-	myprint(output, ",,Bubble Size based on Average Distance to Tag,,\n")
-	myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_deaths_BubbleChartData}} $height="400px" $theme="dark"/>')
 
-	myprint(output, '\n</div>\n<div class="flex-col">\n')
+	for chart in Dashboard_Charts:
+			myprint(output, '<$reveal type="match" state="!!curChart" text="'+chart+'">\n')
+			myprint(output, '\n---\n')
+			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
 
-	myprint(output, "\n!!Cleanses / Heals / Boon Score\n")
-	myprint(output, ",,Bubble Size based on Boon Score = Sum of all average boon output,,\n")
-	
-	myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_cleanse_BubbleChartData}} $height="400px" $theme="dark"/>')
-	
-	myprint(output, "\n!!Boon Strips / Outgoing Control Score / DPS\n")
-	myprint(output, ",,Bubble Size based on Control Score = Sum of all outgoing control effects,,\n")
-	myprint(output, ",,Bubble Size based on DPS output,,\n")
-	myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_rips_BubbleChartData}} $height="400px" $theme="dark"/>')
+			if chart == "Kills/Downs/DPS":
+				myprint(output, "\n!!Kills / Downs / DPS\n")
+				myprint(output, ",,Bubble Size based on DPS output,,\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_kills_BubbleChartData}} $height="400px" $theme="dark"/>')
+				
+			if chart == "Deaths/DamageTaken/DistanceFromTag":
+				myprint(output, "\n!!Deaths / Damage Taken / Distance from Tag\n")
+				myprint(output, ",,Bubble Size based on Average Distance to Tag,,\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_deaths_BubbleChartData}} $height="400px" $theme="dark"/>')
 
-	myprint(output, '\n</div>\n</div>\n</$reveal>\n')
-	#End Dashboard - Bubble Charts
+			if chart == "Cleanses/Heals/BoonScore":
+				myprint(output, "\n!!Cleanses / Heals / Boon Score\n")
+				myprint(output, ",,Bubble Size based on Boon Score = Sum of all average boon output,,\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_cleanse_BubbleChartData}} $height="400px" $theme="dark"/>')
+
+			if chart == "BoonStrips/OutgoingControlScore/DPS":
+				myprint(output, "\n!!Boon Strips / Outgoing Control Score / DPS\n")
+				myprint(output, ",,Bubble Size based on Control Score = Sum of all outgoing control effects,,\n")
+				myprint(output, ",,Bubble Size based on DPS output,,\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_rips_BubbleChartData}} $height="400px" $theme="dark"/>')
+
+			#Profession_DPS_BoxPlot
+			if chart == "Profession_DPS_BoxPlot":
+				myprint(output, "\n!!DPS Box Plot by Profession\n")
+				myprint(output, ",,under construction,,\n")
+				myprint(output, "Coming soon™\n")
+				#myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_rips_BubbleChartData}} $height="400px" $theme="dark"/>')
+
+			#Player_DPS_BoxPlot
+			if chart == "Player_DPS_BoxPlot":
+				myprint(output, "\n!!DPS Box Plot by Player\n")
+				myprint(output, ",,under construction,,\n")
+				myprint(output, "Coming soon™\n")
+				#myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_rips_BubbleChartData}} $height="400px" $theme="dark"/>')
+
+			myprint(output, '\n</div>\n</div>\n')
+			myprint(output, "</$reveal>\n")
+
+	myprint(output, "</$reveal>\n")
+	#end Dashboard insert
 
 	for stat in config.stats_to_compute:
 		if stat == 'dist':
