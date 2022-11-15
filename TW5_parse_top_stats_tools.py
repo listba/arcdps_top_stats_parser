@@ -1514,7 +1514,6 @@ def collect_stat_data(args, config, log, anonymize=False):
 			if stat == 'dmg' or stat == 'heal' or stat == 'barrier':
 				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present)
 			elif stat == 'dmg_taken':
-				#player.average_stats[stat] = round(player.total_stats[stat]/player.duration_active)
 				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_in_combat)                
 			elif stat == 'deaths':
 				player.average_stats[stat] = round(player.total_stats[stat]/(player.duration_fights_present/60), 4)
@@ -2654,6 +2653,95 @@ def write_stats_chart(players, top_players, stat, myDate, input_directory, confi
 
 	chart_Output.close()
 # 	end write TW5 Chart tids
+
+def write_DPSStats_bubble_charts(uptime_Table, DPSStats, myDate, input_directory):
+	#write Bubble chart tid for DPSStats
+	max_fightTime = 0
+	for squadDps_prof_name in uptime_Table:
+		max_fightTime = max(uptime_Table[squadDps_prof_name]['duration'], max_fightTime)
+
+	fileDate = myDate
+	bubblefileTid = input_directory+"/"+fileDate.strftime('%Y%m%d%H%M')+"_DPSStats_TW5_Bubble_Chart.tid"
+	DPSStats_bubble_chart_Output = open(bubblefileTid, "w",encoding="utf-8")
+	minStatSec= 1000
+	maxStatSec = 0
+	
+	print_string = 'created: '+fileDate.strftime("%Y%m%d%H%M%S")
+	print_string +="\ncreator: Drevarr\n"
+	print_string +="tags: ChartData\n"
+	print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_DPSStats_BubbleChartData\n'
+	print_string +="type: application/javascript\n\n\n"
+
+	print_string +='\nvar option = {\n  dataset: [{\n    source: ['
+	print_string += '\n            ["Name", "Profession", "DPS", "Ch2DPS", "Ch5DPS", "CaDPS", "CDPS", "Downs", "Kills", "color", "Fight Time"],'
+	for DPSStats_prof_name in DPSStats:
+		name = DPSStats[DPSStats_prof_name]['name']
+		prof = DPSStats[DPSStats_prof_name]['profession']
+		fightTime = DPSStats[DPSStats_prof_name]['duration']
+		myDPS = round(DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime)
+		Ch2DPS = round(DPSStats[DPSStats_prof_name]['Chunk_Damage'][2] / fightTime)
+		Ch5DPS = round(DPSStats[DPSStats_prof_name]['Chunk_Damage'][5] / fightTime)
+		CaDPS = round(DPSStats[DPSStats_prof_name]['Carrion_Damage'] / fightTime)
+		myCDPS = round(DPSStats[DPSStats_prof_name]['Coordination_Damage'] / fightTime)
+		Downs = round(DPSStats[DPSStats_prof_name]['Downs'] / (fightTime / 60), 2)
+		Kills = round(DPSStats[DPSStats_prof_name]['Kills'] / (fightTime / 60), 2)
+		color = ProfessionColor[prof]
+		if myCDPS > maxStatSec:
+			maxStatSec = myCDPS
+		if myCDPS < minStatSec:
+			minStatSec = myCDPS
+		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 500 or fightTime * 10 < max_fightTime:
+			continue
+		else:
+			print_string += '\n            ["'+name+'", "'+prof+'", '+str(myDPS)+', '+str(Ch2DPS)+', '+str(Ch5DPS)+', '+str(CaDPS)+', '+str(myCDPS)+', '+str(Downs)+', '+str(Kills)+', "'+color+'", '+str(fightTime)+'],'
+				
+	print_string += '\n   ]'
+	print_string += '\n  }],'
+	print_string += '\n  visualMap: {'
+	print_string += '\n    show: true,'
+	print_string += '\n    dimension: 6, // means the 7th column		'
+	print_string +='\n    min: '+str(minStatSec)+', // lower bound'
+	print_string +='\n    max: '+str(maxStatSec)+', // upper bound'
+	print_string +='\n    inRange: {'
+	print_string +='\n      // Size of the bubble.'
+	print_string +='\n      symbolSize: [5, 50]'
+	print_string +='\n    }'
+	print_string +='\n  },			'
+	print_string +=  '\nxAxis: {'
+	print_string +="\n    type: 'value',"
+	print_string +='\n    name: "Ch5DPS"'
+	print_string +='\n  },'
+	print_string +='\n  yAxis: {'
+	print_string +="\n    type: 'value',"
+	print_string +='\n    name: "CaDPS"'
+	print_string +='\n  },'
+	print_string +="\n  tooltip: {trigger: 'axis'},"
+	print_string +='\n  series: ['
+	print_string +='\n    {'
+	print_string +="\n      type: 'scatter',"
+	print_string +='\n      encode: {'
+	print_string +='\n        // Map "amount" column to x-axis.'
+	print_string +="\n        x: 'Ch5DPS',"
+	print_string +='\n        // Map "product" row to y-axis.'
+	print_string +="\n        y: 'CaDPS',"
+	print_string +='\n        // format tooltip'
+	print_string +='\n        tooltip: [0, 1, 2, 3, 4, 5, 6, 7, 8, 10],'
+	print_string +='\n      },	'
+	print_string +='\n      itemStyle: {'
+	print_string +='\n        color: function(seriesIndex) {'
+	print_string +='\n        	if (seriesIndex.data[9]){'
+	print_string +='\n        	  return seriesIndex.data[9];'
+	print_string +='\n        	}'
+	print_string +='\n        }'
+	print_string +='\n      }'
+	print_string +='\n    }'
+	print_string +='\n  ]'
+	print_string +='\n};'
+		
+	myprint(DPSStats_bubble_chart_Output, print_string)
+
+	DPSStats_bubble_chart_Output.close()
+#	end write bubble charts
 
 #JEL - write TW5 Bubble Chart tids
 def write_bubble_charts(players, top_players, squad_Control, myDate, input_directory):

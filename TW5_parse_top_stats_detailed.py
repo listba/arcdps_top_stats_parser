@@ -88,6 +88,7 @@ if __name__ == '__main__':
 	myprint(output, 'curAuras-In: Fire')
 	myprint(output, 'curBurstTableDamage: Ch5Ca')
 	myprint(output, 'curBurstTableType: Cumulative')
+	myprint(output, 'curChart: Kills/Downs/DPS')
 	myprint(output, 'tags: Logs [['+myDate.strftime("%Y")+'-'+myDate.strftime("%m")+' Log Reviews]]')
 	myprint(output, 'title: '+myDate.strftime("%Y%m%d")+'-WvW-Log-Review\n')
 	#End Tid file header
@@ -929,6 +930,10 @@ if __name__ == '__main__':
 		myprint(output, output_string)
 
 	write_DPSStats_xls(DPSStats, args.xls_output_filename)
+	myprint(output, '\n---\n')
+	myprint(output, "\n!!DPS Stats Bubble Chart\n")
+	myprint(output, "\n,,Bubble size based on CDPS,,\n")
+	myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_DPSStats_BubbleChartData}} $height="400px" $theme="dark"/>')
 	myprint(output, "</$reveal>\n")
 	#end DPS Stats insert
 
@@ -1112,3 +1117,4 @@ if __name__ == '__main__':
 
 	#write out Bubble Charts
 	write_bubble_charts(players, top_total_stat_players[stat], squad_Control, myDate, args.input_directory)
+	write_DPSStats_bubble_charts(uptime_Table, DPSStats, myDate, args.input_directory)
