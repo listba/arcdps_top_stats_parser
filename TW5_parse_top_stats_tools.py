@@ -32,7 +32,6 @@ import jsons
 import math
 import requests
 import datetime
-import importlib
 from collections import OrderedDict
 
 from GW2_Color_Scheme import ProfessionColor
