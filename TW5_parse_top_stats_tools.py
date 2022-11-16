@@ -239,9 +239,13 @@ def find_sub_type(player):
 		sub_type = prof+"_Heal"
 	if cons_0 in Cele_Food:
 		sub_type = prof+"_Cele"
+	if player['healing'] > 0:
+		sub_type = prof+"_Heal"
+	if player['concentration'] > 0:
+		sub_type = prof+"_Heal"		
 	if cons_0 not in Heal_Food and cons_0 not in Cele_Food:
 		sub_type = prof+"_Dps"
-		
+
 	return sub_type
 #end define subtype based on consumables
 
@@ -3086,9 +3090,9 @@ def write_box_plot_charts(DPS_List, myDate, input_directory):
 		print_string += "\n    }"
 		print_string += "\n  ],"
 		if chart == 'Profession':
-			print_string += "\n  dataZoom: [{id: 'dataZoomX', type: 'slider', xAxisIndex: [0], left: 10, filterMode: 'empty', start: 0, end: 100},{id: 'dataZoomY', type: 'slider', yAxisIndex: [0], filterMode: 'empty', start: 0, end: 100}],"
+			print_string += "\n  dataZoom: [{id: 'dataZoomX', type: 'slider', xAxisIndex: [0], left: 10, height: 10, filterMode: 'empty', start: 0, end: 100},{id: 'dataZoomY', type: 'slider', yAxisIndex: [0], filterMode: 'empty', start: 0, end: 100}],"
 		if chart == 'Profession_and_Name':
-			print_string += "\n  dataZoom: [{id: 'dataZoomX', type: 'slider', xAxisIndex: [0], left: 10, filterMode: 'empty', start: 0, end: 100},{id: 'dataZoomY', type: 'slider', yAxisIndex: [0], filterMode: 'empty', start: 0, end: 100}],"
+			print_string += "\n  dataZoom: [{id: 'dataZoomX', type: 'slider', xAxisIndex: [0], left: 10, height: 10, filterMode: 'empty', start: 0, end: 100},{id: 'dataZoomY', type: 'slider', yAxisIndex: [0], filterMode: 'empty', start: 0, end: 100}],"
 		print_string += "\n  tooltip: {trigger: 'item', axisPointer: {type: 'shadow'}},"
 		print_string += "\n  grid: {left: '10%', right: '10%', bottom: '15%'},"
 		print_string += "\n  yAxis: {type: 'category', boundaryGap: true, nameGap: 30, splitArea: {show: true}, splitLine: {show: true}},"
