@@ -32,6 +32,7 @@ import jsons
 import math
 import requests
 import datetime
+from collections import OrderedDict
 import Guild_Data
 from GW2_Color_Scheme import ProfessionColor
 
@@ -154,6 +155,13 @@ On_Tag = 600
 Run_Back = 5000
 Death_OnTag = {}
 
+#Collect DPS Box Plot Data
+DPS_List = {}
+DPS_List['acct'] = {}
+DPS_List['name'] = {}
+DPS_List['prof_name'] = {}
+DPS_List['prof'] = {}
+
 #Calculate DPSStats Variables
 DPSStats = {}
 
@@ -173,6 +181,55 @@ def findMember(json_object, name):
 			guildStatus = dict['rank']
 	return guildStatus
 # End fetch Guild Data and Check Guild Status
+
+#define subtype based on consumables
+
+#consumable dictionaries
+Heal_Utility = {
+    53374: "Potent Lucent Oil", 
+    53304: "Enhanced Lucent Oil", 
+    21827: "Toxic Maintenance Oil", 
+    34187: "Peppermint Oil", 
+    38605: "Magnanimous Maintenance Oil",
+    25879: "Bountiful Maintenance Oil"
+    }
+Heal_Food = {
+    57276: "Bowl of Spiced Fruit Salad",
+    57100: "Bowl of Fruit Salad with Mint Garnish",
+    26529: "Delicious Rice Ball"
+    }
+Cele_Food = {
+    57165: "Spherified Peppercorn-Spiced Oyster Soup",
+    57374: "Spherified Clove-Spiced Oyster Soup",
+    57037: "Spherified Sesame Oyster Soup",
+    57201: "Spherified Oyster Soup with Mint Garnish",
+    19451: "Dragon's Revelry Starcake"
+    }
+
+def find_sub_type(player):
+	sub_type = ""
+	cons_0 = ""
+	cons_1 = ""
+	prof = player['profession']
+	if 'consumables' not in player:
+		sub_type = prof+"_Dps"
+	else:
+		try: cons_0 = player['consumables'][0]['id']
+		except: cons_0 = ""
+		try: cons_1 = player['consumables'][1]['id']
+		except: cons_1 = ""
+		
+	if cons_0 in Heal_Food:
+		sub_type = prof+"_Heal"
+	if cons_1 in Heal_Utility:
+		sub_type = prof+"_Heal"
+	if cons_0 in Cele_Food:
+		sub_type = prof+"_Cele"
+	if cons_0 not in Heal_Food and cons_0 not in Cele_Food:
+		sub_type = prof+"_Dps"
+		
+	return sub_type
+#end define subtype based on consumables
 
 
 # prints output_string to the console and the output_file, with a linebreak at the end
@@ -1354,7 +1411,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 		json_datafile = open(file_path, encoding='utf-8')
 		json_data = json.load(json_datafile)
 		# get fight stats
-		fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPSStats = get_stats_from_fight_json(json_data, config, log)
+		fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, DPSStats = get_stats_from_fight_json(json_data, config, log)
 			
 		if first:
 			first = False
@@ -1530,7 +1587,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 	if anonymize:
 		anonymize_players(players, account_index)
 	
-	return players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPSStats
+	return players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, DPSStats
 			
 
 
@@ -2286,7 +2343,41 @@ def get_stats_from_fight_json(fight_json, config, log):
 							Death_OnTag[deathOnTag_prof_name]["Off_Tag"] = Death_OnTag[deathOnTag_prof_name]["Off_Tag"] + 1
 							Death_OnTag[deathOnTag_prof_name]["Ranges"] += [deathRange]
 
+	#Collect Box Plot DPS data by Profession, Prof_Name, Name, Acct
+	durationMS = fight_json['durationMS']
+	num_enemies = len(fight_json['targets'])
+	num_allies = len(fight_json['players'])
 
+	for player in fight_json['players']:
+		if durationMS < config.min_fight_duration or num_allies < config.min_allied_players or num_enemies < config.min_enemy_players:
+			continue
+		playerDPS = 0
+		playerDamage = 0
+		name = player['name']
+		acct = player['account']
+		sub_type = find_sub_type(player)
+		prof = sub_type
+		prof_name = sub_type+"\n"+name
+		for target in player['dpsTargets']:
+			playerDamage += target[0]['damage']
+			
+		playerDPS = round(playerDamage/(durationMS/1000), 4)
+
+		if playerDPS > 0:
+			if prof_name not in DPS_List['prof_name']:
+				DPS_List['prof_name'][prof_name] = []
+			if prof not in DPS_List['prof']:
+				DPS_List['prof'][prof] = []            
+			if name not in DPS_List['name']:
+				DPS_List['name'][name] = []
+			if acct not in DPS_List['acct']:
+				DPS_List['acct'][acct] = []
+		if playerDPS > 0:
+			DPS_List['acct'][acct].append(playerDPS)
+			DPS_List['name'][name].append(playerDPS)
+			DPS_List['prof_name'][prof_name].append(playerDPS)
+			DPS_List['prof'][prof].append(playerDPS)
+#End DPS Box Plot Data Collection
 
 	# initialize fight         
 	fight = Fight()
@@ -2334,7 +2425,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 
 	calculate_dps_stats(fight_json, fight)
 		
-	return fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPSStats
+	return fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, DPSStats
 
 
 
@@ -2924,7 +3015,93 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 		bubble_chart_Output.close()
 #	end write bubble charts
 
-def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPSStats, output_file):
+def write_box_plot_charts(DPS_List, myDate, input_directory):
+	Charts = ['Profession', 'Profession_and_Name']
+	fileDate = myDate
+	for chart in Charts:
+		boxPlotfileTid = input_directory+"/"+fileDate.strftime('%Y%m%d%H%M')+"_DSP_"+chart+"_TW5_Box_Plot_Chart.tid"
+		boxPlot_chart_Output = open(boxPlotfileTid, "w",encoding="utf-8")
+
+		print_string = 'created: '+fileDate.strftime("%Y%m%d%H%M%S")
+		print_string +="\ncreator: Drevarr\n"
+		print_string +="tags: ChartData\n"
+		print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_DPS_'+chart+'_Box_PlotChartData\n'
+		print_string +="type: application/javascript\n"
+
+		#print_string +='const colors = '
+		print_string +='\nconst professions = '
+		if chart == 'Profession':
+			sorted_DPS_List = OrderedDict(sorted(DPS_List['prof'].items()))
+			print_string += str(list(sorted_DPS_List.keys()))
+		if chart == 'Profession_and_Name':
+			sorted_DPS_List = OrderedDict(sorted(DPS_List['prof_name'].items()))
+			print_string += str(list(sorted_DPS_List.keys()))
+		print_string +='\n'
+		print_string +='\noption = {'
+		print_string +='\n  title: ['
+		print_string +="\n    {text: 'DPS by "+chart+" across all fights', left: 'center'},"
+		print_string +="\n    {text: 'DPS across all fights \\nupper: Q3 + 1.5 * IQR \\nlower: Q1 - 1.5 * IQR', borderColor: '#999', borderWidth: 1, textStyle: {fontSize: 14}, left: '10%', top: '90%'}"
+		print_string +="\n  ],"
+		print_string +="\ndataset: ["
+		print_string +="\n    {"
+		print_string +="\n      // prettier-ignore"
+		print_string +="\n      source: "
+		if chart == 'Profession':
+			sorted_DPS_List = OrderedDict(sorted(DPS_List['prof'].items()))
+			print_string += str(list(sorted_DPS_List.values()))
+		if chart == 'Profession_and_Name':
+			sorted_DPS_List = OrderedDict(sorted(DPS_List['prof_name'].items()))
+			print_string += str(list(sorted_DPS_List.values()))
+		print_string += "\n    },"
+		print_string += "\n    {"
+		print_string += "\n      transform: {"
+		print_string += "\n        type: 'boxplot',"
+		print_string += "\n        config: {"
+		print_string += "\n          itemNameFormatter: function (params) {"
+		print_string += "\n            return professions[params.value];"
+		print_string += "\n          }"
+		print_string += "\n        }"
+		print_string += "\n      },"
+		print_string += "\n    },"
+		print_string += "\n    {"
+		print_string += "\n      fromDatasetIndex: 1,"
+		print_string += "\n      fromTransformResult: 1"
+		print_string += "\n    }"
+		print_string += "\n  ],"
+		if chart == 'Profession':
+			print_string += "\n  dataZoom: [{id: 'dataZoomX', type: 'slider', xAxisIndex: [0], left: 10, filterMode: 'empty', start: 0, end: 100},{id: 'dataZoomY', type: 'slider', yAxisIndex: [0], filterMode: 'empty', start: 0, end: 100}],"
+		if chart == 'Profession_and_Name':
+			print_string += "\n  dataZoom: [{id: 'dataZoomX', type: 'slider', xAxisIndex: [0], left: 10, filterMode: 'empty', start: 0, end: 100},{id: 'dataZoomY', type: 'slider', yAxisIndex: [0], filterMode: 'empty', start: 0, end: 100}],"
+		print_string += "\n  tooltip: {trigger: 'item', axisPointer: {type: 'shadow'}},"
+		print_string += "\n  grid: {left: '10%', right: '10%', bottom: '15%'},"
+		print_string += "\n  yAxis: {type: 'category', boundaryGap: true, nameGap: 30, splitArea: {show: true}, splitLine: {show: true}},"
+		print_string += "\n  xAxis: {type: 'value', name: 'DPS', splitArea: {show: true}},"
+		print_string += "\n  series: ["
+		print_string += "\n    {"
+		print_string += "\n      name: 'boxplot',"
+		print_string += "\n      type: 'boxplot',"
+		print_string += "\n      datasetIndex: 1,"
+		print_string += "\n      itemStyle: {"
+		print_string += "\n        color: function(seriesIndex) {"
+		print_string += "\n        	console.log(datasetIndex);"
+		print_string += "\n          return colors[seriesIndex];"
+		print_string += "\n        }\n      },"
+		print_string += "\n      encode:{tooltip: [ 1, 2, 3, 4, 5]},"
+		print_string += "\n      },\n    {"
+		print_string += "\n      name: 'outlier',"
+		print_string += "\n      type: 'scatter',"
+		print_string += "\n      encode: { x: 1, y: 0 },"
+		print_string += "\n      datasetIndex: 2"
+		print_string += "\n    }\n  ]\n};		"
+
+		
+		myprint(boxPlot_chart_Output, print_string)
+
+		boxPlot_chart_Output.close()
+#	end write bubble charts
+
+
+def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, DPSStats, output_file):
 	json_dict = {}
 	json_dict["overall_raid_stats"] = {key: value for key, value in overall_raid_stats.items()}
 	json_dict["overall_squad_stats"] = {key: value for key, value in overall_squad_stats.items()}
@@ -2944,6 +3121,7 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	json_dict["auras_TableIn"] =  {key: value for key, value in auras_TableIn.items()}
 	json_dict["auras_TableOut"] =  {key: value for key, value in auras_TableOut.items()}
 	json_dict["Death_OnTag"] =  {key: value for key, value in Death_OnTag.items()}
+	json_dict["DPS_List"] =  {key: value for key, value in DPS_List.items()}
 	json_dict["DPSStats"] =  {key: value for key, value in DPSStats.items()}
 	json_dict["downed_Healing"] =  {key: value for key, value in downed_Healing.items()}
 	
