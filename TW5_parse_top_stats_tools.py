@@ -36,7 +36,11 @@ from collections import OrderedDict
 
 from GW2_Color_Scheme import ProfessionColor
 
-Guild_Data = importlib.import_module('Guild_Data')
+try:
+    import Guild_Data
+except ImportError:
+    Guild_Data = None
+
 
 debug = False # enable / disable debug output
 
