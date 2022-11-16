@@ -1646,7 +1646,7 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 			if start_combat != -1:
 				combat_time += (time_of_death - start_combat)
 			start_combat = get_combat_start_from_player_json(time_of_revive, player_json)
-		end_combat = len(player_json['damage1S'][0]*1000)
+		end_combat = len(player_json['damage1S'][0])*1000
 		if start_combat != -1:
 			combat_time += end_combat - start_combat
 		combat_time /= 1000
