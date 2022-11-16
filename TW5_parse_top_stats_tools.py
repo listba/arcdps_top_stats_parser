@@ -32,11 +32,16 @@ import jsons
 import math
 import requests
 import datetime
+import importlib
 from collections import OrderedDict
-import Guild_Data
+
 from GW2_Color_Scheme import ProfessionColor
 
+Guild_Data = importlib.import_module('Guild_Data')
+
 debug = False # enable / disable debug output
+
+API_response = "" #API Response code for Guild_Data
 
 class StatType(Enum):
 	TOTAL = 1
@@ -166,20 +171,26 @@ DPS_List['prof'] = {}
 DPSStats = {}
 
 #fetch Guild Data and Check Guild Status function
-Guild_ID = Guild_Data.Guild_ID
-API_Key = Guild_Data.API_Key
-api_url = "https://api.guildwars2.com/v2/guild/"+Guild_ID+"/members?access_token="+API_Key
-response = requests.get(api_url)
-members = json.loads(response.text)
-print("response code: "+str(response.status_code))
+if Guild_Data:
+	Guild_ID = Guild_Data.Guild_ID
+	API_Key = Guild_Data.API_Key
+	api_url = "https://api.guildwars2.com/v2/guild/"+Guild_ID+"/members?access_token="+API_Key
+	response = requests.get(api_url)
+	members = json.loads(response.text)
+	print("response code: "+str(response.status_code))
+	API_response = response.status_code
 
 
 def findMember(json_object, name):
-	guildStatus = "--==Non Member==--"
-	for dict in json_object:
-		if dict['name'] == name:
-			guildStatus = dict['rank']
-	return guildStatus
+	if API_response == requests.codes.ok:
+		guildStatus = "--==Non Member==--"
+		for dict in json_object:
+			if dict['name'] == name:
+				guildStatus = dict['rank']
+		return guildStatus
+	else:
+		guildStatus = ""
+		return guildStatus
 # End fetch Guild Data and Check Guild Status
 
 #define subtype based on consumables
@@ -670,7 +681,10 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 def write_support_players(players, top_players, stat, output_file):
 	for i in range(len(top_players)):
 		player = players[top_players[i]]
-		guildStatus = findMember(members, player.account)
+		if Guild_Data:
+			guildStatus = findMember(members, player.account)
+		else:
+			guildStatus = ""
 		if stat == 'rips' and (player.profession == 'Chronomancer' or player.profession == 'Spellbreaker'):
 			print_string = "|"+player.account+" |"+player.name+" |"+player.profession+" | "+str(player.num_fights_present)+"| "+str(player.duration_fights_present)+"| "+stat+" |"+guildStatus+" |"
 			myprint(output_file, print_string)
