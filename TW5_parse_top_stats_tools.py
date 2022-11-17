@@ -628,32 +628,38 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 
 	if consistent_or_avg == StatType.CONSISTENT:
 		if stat == "distJEL":
-			print_string = "`Top "+str(config.num_players_considered_top[stat])+" "+config.stat_names[stat]+" consistency awards"
+			print_string = "\n\n*Top "+str(config.num_players_considered_top[stat])+" "+config.stat_names[stat]+" consistency awards"
 		else:
-			print_string = "`Top "+config.stat_names[stat]+" consistency awards (Max. "+str(config.num_players_listed[stat])+" places, min. "+str(round(config.portion_of_top_for_consistent*100.))+"% of most consistent)"
+			print_string = "\n\n*Top "+config.stat_names[stat]+" consistency awards (Max. "+str(config.num_players_listed[stat])+" places, min. "+str(round(config.portion_of_top_for_consistent*100.))+"% of most consistent)"
 			myprint(output_file, print_string)
-			print_string = "Most times placed in the top "+str(config.num_players_considered_top[stat])+". \nAttendance = number of fights a player was present out of "+str(num_used_fights)+" total fights."
+			print_string = "*Most times placed in the top "+str(config.num_players_considered_top[stat])+"."
+			myprint(output_file, print_string)
+			print_string =  "*Attendance = number of fights a player was present out of "+str(num_used_fights)+" total fights."
 			myprint(output_file, print_string)
 	elif consistent_or_avg == StatType.AVERAGE:
 		if stat == "distJEL":
-			print_string = "`Top average "+str(config.num_players_considered_top[stat])+" "+config.stat_names[stat]+" awards"
+			print_string = "*Top average "+str(config.num_players_considered_top[stat])+" "+config.stat_names[stat]+" awards"
 		else:
-			print_string = "`Top average "+config.stat_names[stat]+" awards (Max. "+str(config.num_players_listed[stat])+" places)"
+			print_string = "*Top average "+config.stat_names[stat]+" awards (Max. "+str(config.num_players_listed[stat])+" places)"
 			myprint(output_file, print_string)
-			print_string = "Attendance = number of fights a player was present out of "+str(num_used_fights)+" total fights."
+			print_string = "*''FightTime avg'': Total/total duration of fights | ''CombatTime avg''= Total/total time player alive during fights"
+			myprint(output_file, print_string)			
+			print_string = "*Attendance = number of fights a player was present out of "+str(num_used_fights)+" total fights."
 			myprint(output_file, print_string)
-	print_string = "`\n"    
+	print_string = "\n"    
 	myprint(output_file, print_string)
 
 
 	# print table header
-	print_string = "|thead-dark table-hover|k"    
+	print_string = "|thead-dark table-hover sortable|k"    
 	myprint(output_file, print_string)
 	print_string = "|Place |Name |Class | Attendance| Times Top|"
 	if stat != "dist":
 		print_string += " Total|"
-	if stat in config.buff_ids or stat == 'dmg_taken' or stat == 'dist':
+	if stat == "dist" or stat == 'dmg_taken':
 		print_string += " Average|"
+	if stat in config.buff_ids:
+		print_string += " FightTime Avg| CombatTime Avg|"
 	print_string += "h"
 	myprint(output_file, print_string)    
 
@@ -663,21 +669,25 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 	# print table
 	for i in range(len(top_consistent_players)):
 		player = players[top_consistent_players[i]]
+		if player.duration_in_combat > 0:
+			combat_Time = int(player.duration_in_combat)
+		else:
+			combat_Time = int(player.duration_fights_present)
 		if player.consistency_stats[stat] != last_val:
 			place += 1
-		print_string = f"|{place}"+f". |{player.name:<{max_name_length}} "+" | {{"+profession_strings[i]+"}} "+f"| {player.num_fights_present:>10} "+f"| {round(player.consistency_stats[stat]):>9} |"
+		print_string = "|"+str(place)+". |"+player.name+" | {{"+profession_strings[i]+"}} | "+str(player.num_fights_present)+" | "+my_value(round(player.consistency_stats[stat]))+" |"
 		if stat != "dist" and stat not in config.buff_ids and stat != 'dmg_taken':
-			print_string += my_value(round(player.total_stats[stat]))+"|"
+			print_string += " "+my_value(round(player.total_stats[stat],1))+"|"
 		if stat == 'dmg_taken':
-			print_string += f" {my_value(player.total_stats[stat]):>9}| "+f" {my_value(player.average_stats[stat]):>8}|"
+			print_string += " "+my_value(round(player.total_stats[stat],1))+"| "+my_value(round(player.average_stats[stat]))+"|"
 		if stat == 'dist':
-			print_string += f" {my_value(round(player.average_stats[stat])):>8}|"			
+			print_string += " "+my_value(round(player.average_stats[stat]))+"|"			
 		if stat == 'iol':
-			print_string += f" {player.total_stats[stat]:>8}| "+f" {player.average_stats[stat]:>7}|"
+			print_string += " "+my_value(round(player.total_stats[stat],1))+"| "+'{:.4f}'.format(player.average_stats[stat])+"| "+'{:.4f}'.format((player.total_stats[stat]/combat_Time)*100)+"|"
 		elif stat in config.buffs_stacking_intensity and stat != 'iol':
-			print_string += f" {player.total_stats[stat]:>8}s| "+f" {player.average_stats[stat]:>8}|"
+			print_string += " "+my_value(round(player.total_stats[stat],1))+"s| "+'{:.4f}'.format(player.average_stats[stat])+"| "+'{:.4f}'.format(player.total_stats[stat]/combat_Time)+"|"
 		elif stat in config.buffs_stacking_duration and stat != 'iol':
-			print_string += f" {player.total_stats[stat]:>8}s| "+f" {player.average_stats[stat]:>7}%|"
+			print_string += " "+my_value(round(player.total_stats[stat],1))+"s| "+'{:.4f}'.format(player.average_stats[stat])+"%| "+'{:.4f}'.format((player.total_stats[stat]/combat_Time)*100)+"%|"
 
 		myprint(output_file, print_string)
 		last_val = player.consistency_stats[stat]
@@ -754,21 +764,25 @@ def write_control_effects_out_xls(sorted_squadControl, stat, players, xls_output
 	sheet1.write(0, 2, "Name")
 	sheet1.write(0, 3, "Profession")
 	sheet1.write(0, 4, "Total "+stat+" Outbound")
+	sheet1.write(0, 5, "Average "+stat+" Outbound")	
 	
 	i = 0
 
 	for name in sorted_squadControl:
 		prof = "Not Found"
+		fightTime = 999999
 		
 		for nameIndex in players:
 			if nameIndex.name == name:
 				prof = nameIndex.profession
+				fightTime = nameIndex.duration_fights_present
 		if i < 25:
 			sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
 			sheet1.write(i+1, 1, i+1)
 			sheet1.write(i+1, 2, name)
 			sheet1.write(i+1, 3, prof)
 			sheet1.write(i+1, 4, round(sorted_squadControl[name], 1))
+			sheet1.write(i+1, 5, round(sorted_squadControl[name]/fightTime, 4))
 			i=i+1
 	wb.save(xls_output_filename)
 
@@ -788,16 +802,19 @@ def write_control_effects_in_xls(sorted_enemyControl, stat, players, xls_output_
 
 	for name in sorted_enemyControl:
 		prof = "Not Found"
+		fightTime = 999999
 		
 		for nameIndex in players:
 			if nameIndex.name == name:
 				prof = nameIndex.profession
+				fightTime = nameIndex.duration_fights_present
 		if i < 25:
 			sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
 			sheet1.write(i+1, 1, i+1)
 			sheet1.write(i+1, 2, name)
 			sheet1.write(i+1, 3, prof)
 			sheet1.write(i+1, 4, round(sorted_enemyControl[name], 4))
+			sheet1.write(i+1, 5, round(sorted_enemyControl[name]/fightTime, 4))
 			i=i+1
 	wb.save(xls_output_filename)
 
@@ -1017,16 +1034,19 @@ def write_auras_in_xls(sorted_auras_TableIn, stat, players, xls_output_filename)
 
 	for name in sorted_auras_TableIn:
 		prof = "Not Found"
-		
+		fightTime = 999999
+
 		for nameIndex in players:
 			if nameIndex.name == name:
 				prof = nameIndex.profession
+				fightTime = nameIndex.duration_fights_present
 		if i < 25:
 			sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
 			sheet1.write(i+1, 1, i+1)
 			sheet1.write(i+1, 2, name)
 			sheet1.write(i+1, 3, prof)
 			sheet1.write(i+1, 4, round(sorted_auras_TableIn[name], 4))
+			sheet1.write(i+1, 5, round(sorted_auras_TableIn[name]/fightTime, 4))
 			i=i+1
 	wb.save(xls_output_filename)
 
@@ -1046,16 +1066,18 @@ def write_auras_out_xls(sorted_auras_TableOut, stat, players, xls_output_filenam
 
 	for name in sorted_auras_TableOut:
 		prof = "Not Found"
-		
+		fightTime = 999999
 		for nameIndex in players:
 			if nameIndex.name == name:
 				prof = nameIndex.profession
+				fightTime = nameIndex.duration_fights_present
 		if i < 25:
 			sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
 			sheet1.write(i+1, 1, i+1)
 			sheet1.write(i+1, 2, name)
 			sheet1.write(i+1, 3, prof)
 			sheet1.write(i+1, 4, round(sorted_auras_TableOut[name], 4))
+			sheet1.write(i+1, 5, round(sorted_auras_TableOut[name]/fightTime, 4))
 			i=i+1
 	wb.save(xls_output_filename)
 
@@ -1189,43 +1211,44 @@ def get_and_write_sorted_total(players, config, total_fight_duration, stat, outp
 # Output:
 # list of top total player indices
 def write_sorted_total(players, top_total_players, config, total_fight_duration, stat, output_file):
-	max_name_length = max([len(players[i].name) for i in top_total_players])    
 	profession_strings, profession_length = get_professions_and_length(players, top_total_players, config)
 	profession_length = max(profession_length, 5)
 	
-	print_string = "`Top overall "+config.stat_names[stat]+" awards (Max. "+str(config.num_players_listed[stat])+" places, min. "+str(round(config.portion_of_top_for_total*100.))+"% of 1st place)"
+	print_string = "*Top overall "+config.stat_names[stat]+" awards (Max. "+str(config.num_players_listed[stat])+" places, min. "+str(round(config.portion_of_top_for_total*100.))+"% of 1st place)"
 	myprint(output_file, print_string)
-	print_string = "Attendance = total duration of fights attended out of "
+	print_string = "*''FightTime avg'': Total/total duration of fights | ''CombatTime avg''= Total/total time player alive during fights"
+	myprint(output_file, print_string)
+	print_string = "*Attendance = total duration of fights attended out of "
 	if total_fight_duration["h"] > 0:
 		print_string += str(total_fight_duration["h"])+"h "
 	print_string += str(total_fight_duration["m"])+"m "+str(total_fight_duration["s"])+"s."    
 	myprint(output_file, print_string)
-	print_string = "`\n"
+	print_string = "\n"
 	myprint(output_file, print_string)
 
 	#JEL - Adjust for TW5 table output
 	#print_string = "|Place |Name |Class | Attendance| Total| "
 	#    print_string += " Average|h"
 	# print table header
-	print_string = "|thead-dark table-hover|k"
+	print_string = "|thead-dark table-hover sortable|k"
 	myprint(output_file, print_string)
 	print_string = "|Place |Name |Class | Attendance| Total|"
 	if stat in config.buff_ids:
-		print_string += " Average|"
+		print_string += " FightTime Avg| CombatTime Avg|"
 	if stat == 'dmg':
-		print_string += " DPS|"
+		print_string += " FightTime DPS| CombatTime DPS|"
 	if stat == 'heal':
-		print_string += " HPS|"
+		print_string += " FightTime HPS| CombatTime HPS|"
 	if stat == 'rips':
-		print_string += " SPS|"
+		print_string += " FigthTime SPS| CombatTime HPS|"
 	if stat == 'cleanses':
-		print_string += " CPS|"
+		print_string += " FightTime CPS| CombatTime CPS|"
 	if stat == 'barrier':
-		print_string += " BPS|"
+		print_string += " FightTime BPS| CombatTime BPS|"
 	if stat == 'downs':
-		print_string += " Downs/Min|"
+		print_string += " FightTime Downs/Min| CombatTime Downs/Min|"
 	if stat == 'kills':
-		print_string += " Kills/Min|"
+		print_string += " FightTime Kills/Min| CombatTime Kills/Min|"
 	print_string += "h"
 	myprint(output_file, print_string)    
 
@@ -1240,31 +1263,39 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 		fight_time_h = int(player.duration_fights_present/3600)
 		fight_time_m = int((player.duration_fights_present - fight_time_h*3600)/60)
 		fight_time_s = int(player.duration_fights_present - fight_time_h*3600 - fight_time_m*60)
+		if player.duration_in_combat > 0:
+			combat_Time = int(player.duration_in_combat)
+		else:
+			combat_Time = int(player.duration_fights_present)
 
 		#JEL - Adjust for TW5 table output
 		print_string = "|"+str(place)+". |"+player.name+" | {{"+profession_strings[i]+"}} | "
 		#print_string = f"{place:>2}"+f". {player.name:<{max_name_length}} "+f" {profession_strings[i]:<{profession_length}} "
 
 		if fight_time_h > 0:
-			print_string += f" {fight_time_h:>2}h {fight_time_m:>2}m {fight_time_s:>2}s | "
+			print_string += f" {fight_time_h:>2}h {fight_time_m:>2}m {fight_time_s:>2}s |"
 		else:
-			print_string += f" {fight_time_m:>6}m {fight_time_s:>2}s | "
+			print_string += f" {fight_time_m:>6}m {fight_time_s:>2}s |"
 		if stat in config.buffs_stacking_duration and stat != 'iol':
-			print_string += f" {round(player.total_stats[stat]):>8}s| "
-			print_string += f" {player.average_stats[stat]:>7}%|"
+			print_string += " "+my_value(round(player.total_stats[stat]))+"s|"
+			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"%| "+"{:.4f}".format(round((player.total_stats[stat]/combat_Time)*100, 4))+"%|"
 		elif stat in config.buffs_stacking_intensity and stat != 'iol':
-			print_string += f" {round(player.total_stats[stat]):>8}s| "
-			print_string += f" {player.average_stats[stat]:>8}|"
-		elif stat == 'dmg' or stat == 'cleanses' or stat == 'barrier' or stat == 'rips' or stat == 'heal' or stat == 'iol':
-			print_string += f" {my_value(round(player.total_stats[stat])):>8}| "
-			print_string += f" {my_value(player.average_stats[stat]):>8}|"        
+			print_string += " "+my_value(round(player.total_stats[stat]))+"s|"
+			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"| "+"{:.4f}".format(round(player.total_stats[stat]/combat_Time, 4))+"|"
+		elif stat == 'cleanses' or stat == 'barrier' or stat == 'rips' or stat == 'heal':
+			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
+			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"| "+"{:.4f}".format(round(player.total_stats[stat]/combat_Time, 4))+"|"
+		elif stat == 'dmg':
+			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
+			print_string += " "+my_value(round(player.average_stats[stat]))+"| "+my_value(round(player.total_stats[stat]/combat_Time))+"|"
 		elif stat == 'downs' or stat == 'kills':
-			print_string += f" {my_value(round(player.total_stats[stat])):>8}| "
-			print_string += f" {my_value(round(player.average_stats[stat]*60, 4)):>8}|"                    
+			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
+			print_string += " "+"{:.4f}".format(round(player.average_stats[stat]*60, 4))+"| "+"{:.4f}".format(round((player.total_stats[stat]/combat_Time)*60, 4))+"|"
+		elif stat == 'iol':
+			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
+			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"| "+"{:.4f}".format(round((player.total_stats[stat]/combat_Time)*100, 4))+"|"			
 		else:
-			print_string += my_value(round(player.total_stats[stat]))+"|"
-			#if stat == 'iol':
-				#print_string += f" {player.average_stats[stat]:>7}|"            
+			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 		myprint(output_file, print_string)
 		last_val = player.total_stats[stat]
 	myprint(output_file, "\n")
@@ -1348,6 +1379,7 @@ def write_sorted_top_percentage(players, top_players, comparison_percentage, con
 			print_string += f" {round(player.total_stats[stat]):>7} |"
 		else:
 			print_string += f" {round(player.total_stats[stat]/player.duration_fights_present):>7} |"
+			#print_string += " "+"{:.4f}".format(round(player.total_stats[stat]/player.duration_fights_present, 4))+"|"
 		myprint(output_file, print_string)
 		last_val = player.portion_top_stats[stat]
 	myprint(output_file, "\n")
@@ -2142,7 +2174,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 						if key not in squad_Control[skill_name]:
 							squad_Control[skill_name][key] = float((value/100)*duration)
 						else:
-							squad_Control[skill_name][key] = squad_Control[skill_name][key] + float(value)
+							squad_Control[skill_name][key] = squad_Control[skill_name][key] + float((value/100)*duration)
 
 			if enemy_name not in enemy_squad:
 				enemy_squad[enemy_name] = 1

@@ -352,7 +352,8 @@ if __name__ == '__main__':
 
 		#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
 		myprint(output,'<$reveal type="match" state="!!curTab" text="'+config.stat_names[stat]+'">')
-		myprint(output, "\n!!!"+config.stat_names[stat].upper()+"\n")
+		myprint(output, "\n!!!<<alert secondary src:'"+config.stat_names[stat].upper()+"' class:'leftbar border-dark'>>\n")
+		
 
 		if stat == 'dist':
 			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
@@ -427,17 +428,19 @@ if __name__ == '__main__':
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" output by Squad Player Descending [TOP 25 Max]|c")
 			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total|h")
+			myprint(output, "|Place |Name | Profession | Total| Average|h")
 			
 			for name in sorted_squadControl:
 				prof = "Not Found"
+				fightTime = 99999 
 				counter = 0
 				for nameIndex in players:
 					if nameIndex.name == name:
 						prof = nameIndex.profession
+						fightTime = nameIndex.duration_fights_present
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_squadControl[name], 4))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_squadControl[name], 4))+"| "+"{:.4f}".format(round(sorted_squadControl[name]/fightTime, 4))+"|")
 					i=i+1
 
 			myprint(output, "</$reveal>\n")
@@ -469,17 +472,19 @@ if __name__ == '__main__':
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" impacted Squad Player Descending [TOP 25 Max]|c")
 			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total|h")
+			myprint(output, "|Place |Name | Profession | Total| Average|h")
 			
 			for name in sorted_enemyControl:
 				prof = "Not Found"
+				fightTime = 99999 
 				counter = 0
 				for nameIndex in players:
 					if nameIndex.name == name:
 						prof = nameIndex.profession
+						fightTime = nameIndex.duration_fights_present
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControl[name], 4))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControl[name], 4))+"| "+"{:.4f}".format(round(sorted_enemyControl[name]/fightTime, 4))+"|")
 					i=i+1
 
 			#myprint(output, "</$reveal>\n")
@@ -534,17 +539,19 @@ if __name__ == '__main__':
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" Aura received by Squad Player Descending [TOP 25 Max]|c")
 			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total|h")
+			myprint(output, "|Place |Name | Profession | Total| Average|h")
 			
 			for name in sorted_auras_TableIn:
 				prof = "Not Found"
+				fightTime = 99999
 				counter = 0
 				for nameIndex in players:
 					if nameIndex.name == name:
 						prof = nameIndex.profession
+						fightTime = nameIndex.duration_fights_present
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_auras_TableIn[name], 4))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_auras_TableIn[name], 4))+"| "+"{:.4f}".format(round(sorted_auras_TableIn[name]/fightTime, 4))+"|")
 					i=i+1
 
 			myprint(output, "</$reveal>\n")
@@ -575,17 +582,19 @@ if __name__ == '__main__':
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" Aura output by Squad Player Descending [TOP 10 Max]|c")
 			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total|h")
+			myprint(output, "|Place |Name | Profession | Total| Average|h")
 			
 			for name in sorted_auras_TableOut:
 				prof = "Not Found"
+				fightTime = 99999
 				counter = 0
 				for nameIndex in players:
 					if nameIndex.name == name:
 						prof = nameIndex.profession
+						fightTime = nameIndex.duration_fights_present
 
 				if i <=10:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_auras_TableOut[name], 4))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_auras_TableOut[name], 4))+"| "+"{:.4f}".format(round(sorted_auras_TableOut[name]/fightTime, 4))+"|")
 					i=i+1
 
 			myprint(output, "</$reveal>\n")
@@ -615,7 +624,7 @@ if __name__ == '__main__':
 		output_string += " {{"+prof+"}} | "+str(fightTime)+"|"
 		for item in uptime_Order:
 			if item in uptime_Table[squadDps_prof_name]:
-				output_string += " "+str(round(((uptime_Table[squadDps_prof_name][item]/fightTime)*100), 4))+"|"
+				output_string += " "+"{:.4f}".format(round(((uptime_Table[squadDps_prof_name][item]/fightTime)*100), 4))+"|"
 			else:
 				output_string += " 0.00|"
 				
