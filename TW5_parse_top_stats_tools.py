@@ -3093,7 +3093,7 @@ def write_box_plot_charts(DPS_List, myDate, input_directory):
 		print_string +='\noption = {'
 		print_string +='\n  title: ['
 		print_string +="\n    {text: 'DPS by "+chart+" across all fights', left: 'center'},"
-		print_string +="\n    {text: 'DPS across all fights \\nupper: Q3 + 1.5 * IQR \\nlower: Q1 - 1.5 * IQR', borderColor: '#999', borderWidth: 1, textStyle: {fontSize: 14}, left: '10%', top: '90%'}"
+		print_string +="\n    {text: 'DPS across all fights \\nupper: Q3 + 1.5 * IQR \\nlower: Q1 - 1.5 * IQR', borderColor: '#999', borderWidth: 1, textStyle: {fontSize: 10}, left: '1%', top: '90%'}"
 		print_string +="\n  ],"
 		print_string +="\ndataset: ["
 		print_string +="\n    {"
@@ -3124,7 +3124,7 @@ def write_box_plot_charts(DPS_List, myDate, input_directory):
 		if chart == 'Profession':
 			print_string += "\n  dataZoom: [{id: 'dataZoomX', type: 'slider', xAxisIndex: [0], left: 10, height: 10, filterMode: 'empty', start: 0, end: 100},{id: 'dataZoomY', type: 'slider', yAxisIndex: [0], filterMode: 'empty', start: 0, end: 100}],"
 		if chart == 'Profession_and_Name':
-			print_string += "\n  dataZoom: [{id: 'dataZoomX', type: 'slider', xAxisIndex: [0], left: 10, height: 10, filterMode: 'empty', start: 0, end: 100},{id: 'dataZoomY', type: 'slider', yAxisIndex: [0], filterMode: 'empty', start: 0, end: 100}],"
+			print_string += "\n  dataZoom: [{id: 'dataZoomX', type: 'slider', xAxisIndex: [0], left: 10, height: 10, filterMode: 'empty', start: 0, end: 100},{id: 'dataZoomY', type: 'slider', yAxisIndex: [0], filterMode: 'empty', start: 0, end: 30}],"
 		print_string += "\n  tooltip: {trigger: 'item', axisPointer: {type: 'shadow'}},"
 		print_string += "\n  grid: {left: '10%', right: '10%', bottom: '15%'},"
 		print_string += "\n  yAxis: {type: 'category', boundaryGap: true, nameGap: 30, splitArea: {show: true}, splitLine: {show: true}},"

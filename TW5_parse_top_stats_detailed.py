@@ -873,15 +873,11 @@ if __name__ == '__main__':
 			#Profession_DPS_BoxPlot
 			if chart == "Profession_DPS_BoxPlot":
 				myprint(output, "\n!!DPS Box Plot by Profession\n")
-				myprint(output, ",,under construction,,\n")
-				myprint(output, "Coming soon™\n")
 				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_DPS_Profession_Box_PlotChartData}} $height="800px" $theme="dark"/>')
 
 			#Player_DPS_BoxPlot
 			if chart == "Player_DPS_BoxPlot":
 				myprint(output, "\n!!DPS Box Plot by Player\n")
-				myprint(output, ",,under construction,,\n")
-				myprint(output, "Coming soon™\n")
 				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_DPS_Profession_and_Name_Box_PlotChartData}} $height="800px" $theme="dark"/>')
 
 			myprint(output, '\n</div>\n</div>\n')
