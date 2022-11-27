@@ -28,7 +28,7 @@ import importlib
 import xlwt
 
 from collections import OrderedDict
-from TW5_parse_top_stats_tools import *
+from TW5_parse_top_stats_monthly_tools import *
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='This reads a set of arcdps reports in xml format and generates top stats.')
@@ -66,7 +66,7 @@ if __name__ == '__main__':
 	print_string = "Considering fights with at least "+str(config.min_allied_players)+" allied players and at least "+str(config.min_enemy_players)+" enemies that took longer than "+str(config.min_fight_duration)+" s."
 	myprint(log, print_string)
 
-	players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag = collect_stat_data(args, config, log, args.anonymize)    
+	players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List = collect_stat_data(args, config, log, args.anonymize)    
 
 	# create xls file if it doesn't exist
 	book = xlwt.Workbook(encoding="utf-8")
@@ -86,12 +86,15 @@ if __name__ == '__main__':
 	myprint(output, 'curControl-Out: Blinded')
 	myprint(output, 'curAuras-Out: Fire')
 	myprint(output, 'curAuras-In: Fire')
+	myprint(output, 'curBurstTableDamage: Ch5Ca')
+	myprint(output, 'curBurstTableType: Cumulative')
+	myprint(output, 'curChart: Kills/Downs/DPS')
 	myprint(output, 'tags: Logs [['+myDate.strftime("%Y")+'-'+myDate.strftime("%m")+' Log Reviews]]')
 	myprint(output, 'title: '+myDate.strftime("%Y%m%d")+'-WvW-Log-Review\n')
 	#End Tid file header
 
 	#JEL-Tweaked to output TW5 formatting (https://drevarr.github.io/FluxCapacity.html)
-	print_string = "__''Flux Capacity Node Farmers - WVW Log Review''__\n"
+	print_string = "__''Flux Capacity Node Farmers - EOM Monthly WVW Log Review''__\n"
 	myprint(output, print_string)
 
 	# print overall stats
@@ -131,6 +134,7 @@ if __name__ == '__main__':
 					'<$button set="!!curTab" setTo="Support" selectedClass="" class="btn btn-sm btn-dark" style=""> Support Players </$button>',
 					'<$button set="!!curTab" setTo="Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Healing </$button>',
 					'<$button set="!!curTab" setTo="Barrier" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier </$button>',
+					'<$button set="!!curTab" setTo="Barrier Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier Damage </$button>',					
 					'<$button set="!!curTab" setTo="Weapon Swaps" selectedClass="" class="btn btn-sm btn-dark" style=""> Weapon Swaps </$button>',
 					'<$button set="!!curTab" setTo="Control Effects - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Outgoing </$button>',
 					'<$button set="!!curTab" setTo="Control Effects - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Incoming </$button>',					
@@ -140,7 +144,8 @@ if __name__ == '__main__':
 					'<$button set="!!curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - Out </$button>',
 					'<$button set="!!curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> Death OnTag </$button>',
 					'<$button set="!!curTab" setTo="Downed_Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Downed Healing </$button>',
-					'<$button set="!!curTab" setTo="Offensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Offensive Stats </$button>'
+					'<$button set="!!curTab" setTo="Offensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Offensive Stats </$button>',
+					'<$button set="!!curTab" setTo="Dashboard" selectedClass="" class="btn btn-sm btn-dark" style=""> Dashboard </$button>'
 	)
 	for item in Nav_Bar_Items:
 		myprint(output, item)
@@ -181,7 +186,8 @@ if __name__ == '__main__':
 
 		#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
 		myprint(output,'<$reveal type="match" state="!!curTab" text="'+config.stat_names[stat]+'">')
-		myprint(output, "\n!!!"+config.stat_names[stat].upper()+"\n")
+		myprint(output, "\n!!!<<alert secondary src:'"+config.stat_names[stat].upper()+"' class:'leftbar border-dark'>>\n")
+		
 
 		if stat == 'dist':
 			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
@@ -215,7 +221,7 @@ if __name__ == '__main__':
 		#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
 		myprint(output, "</$reveal>\n")
 
-		write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, args.json_output_filename)
+		write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, args.json_output_filename)
 
 	#print table of accounts that fielded support characters
 	myprint(output,'<$reveal type="match" state="!!curTab" text="Support">')
@@ -256,17 +262,19 @@ if __name__ == '__main__':
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" output by Squad Player Descending [TOP 25 Max]|c")
 			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total|h")
+			myprint(output, "|Place |Name | Profession | Total| Average|h")
 			
 			for name in sorted_squadControl:
 				prof = "Not Found"
+				fightTime = 99999 
 				counter = 0
 				for nameIndex in players:
 					if nameIndex.name == name:
 						prof = nameIndex.profession
+						fightTime = nameIndex.duration_fights_present
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_squadControl[name], 4))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_squadControl[name], 4))+"| "+"{:.4f}".format(round(sorted_squadControl[name]/fightTime, 4))+"|")
 					i=i+1
 
 			myprint(output, "</$reveal>\n")
@@ -298,17 +306,19 @@ if __name__ == '__main__':
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" impacted Squad Player Descending [TOP 25 Max]|c")
 			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total|h")
+			myprint(output, "|Place |Name | Profession | Total| Average|h")
 			
 			for name in sorted_enemyControl:
 				prof = "Not Found"
+				fightTime = 99999 
 				counter = 0
 				for nameIndex in players:
 					if nameIndex.name == name:
 						prof = nameIndex.profession
+						fightTime = nameIndex.duration_fights_present
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControl[name], 4))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_enemyControl[name], 4))+"| "+"{:.4f}".format(round(sorted_enemyControl[name]/fightTime, 4))+"|")
 					i=i+1
 
 			#myprint(output, "</$reveal>\n")
@@ -363,17 +373,19 @@ if __name__ == '__main__':
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" Aura received by Squad Player Descending [TOP 25 Max]|c")
 			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total|h")
+			myprint(output, "|Place |Name | Profession | Total| Average|h")
 			
 			for name in sorted_auras_TableIn:
 				prof = "Not Found"
+				fightTime = 99999
 				counter = 0
 				for nameIndex in players:
 					if nameIndex.name == name:
 						prof = nameIndex.profession
+						fightTime = nameIndex.duration_fights_present
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_auras_TableIn[name], 4))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_auras_TableIn[name], 4))+"| "+"{:.4f}".format(round(sorted_auras_TableIn[name]/fightTime, 4))+"|")
 					i=i+1
 
 			myprint(output, "</$reveal>\n")
@@ -404,17 +416,19 @@ if __name__ == '__main__':
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" Aura output by Squad Player Descending [TOP 10 Max]|c")
 			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total|h")
+			myprint(output, "|Place |Name | Profession | Total| Average|h")
 			
 			for name in sorted_auras_TableOut:
 				prof = "Not Found"
+				fightTime = 99999
 				counter = 0
 				for nameIndex in players:
 					if nameIndex.name == name:
 						prof = nameIndex.profession
+						fightTime = nameIndex.duration_fights_present
 
 				if i <=10:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_auras_TableOut[name], 4))+"|")
+					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_auras_TableOut[name], 4))+"| "+"{:.4f}".format(round(sorted_auras_TableOut[name]/fightTime, 4))+"|")
 					i=i+1
 
 			myprint(output, "</$reveal>\n")
@@ -444,7 +458,7 @@ if __name__ == '__main__':
 		output_string += " {{"+prof+"}} | "+str(fightTime)+"|"
 		for item in uptime_Order:
 			if item in uptime_Table[squadDps_prof_name]:
-				output_string += " "+str(round(((uptime_Table[squadDps_prof_name][item]/fightTime)*100), 4))+"|"
+				output_string += " "+"{:.4f}".format(round(((uptime_Table[squadDps_prof_name][item]/fightTime)*100), 4))+"|"
 			else:
 				output_string += " 0.00|"
 				
@@ -653,6 +667,59 @@ if __name__ == '__main__':
 	myprint(output, "</$reveal>\n")
 	#end Offensive Stat Table insert
 
+	#start Dashboard insert
+	myprint(output, '<$reveal type="match" state="!!curTab" text="Dashboard">')    
+	myprint(output, '\n<<alert-leftbar light "Dashboard for various charts" width:60%, class:"font-weight-bold">>\n\n')
+	Dashboard_Charts = ["Kills/Downs/DPS", "Deaths/DamageTaken/DistanceFromTag", "Cleanses/Heals/BoonScore", "BoonStrips/OutgoingControlScore/DPS", "Profession_DPS_BoxPlot", "Player_DPS_BoxPlot"]
+	
+	for chart in Dashboard_Charts:
+		myprint(output, '<$button set="!!curChart" setTo="'+chart+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+chart+' </$button>')
+	
+	myprint(output, '\n---\n')
+	
+
+	for chart in Dashboard_Charts:
+			myprint(output, '<$reveal type="match" state="!!curChart" text="'+chart+'">\n')
+			myprint(output, '\n---\n')
+			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
+
+			if chart == "Kills/Downs/DPS":
+				myprint(output, "\n!!Kills / Downs / DPS\n")
+				myprint(output, ",,Bubble Size based on DPS output,,\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_kills_BubbleChartData}} $height="400px" $theme="dark"/>')
+				
+			if chart == "Deaths/DamageTaken/DistanceFromTag":
+				myprint(output, "\n!!Deaths / Damage Taken / Distance from Tag\n")
+				myprint(output, ",,Bubble Size based on Average Distance to Tag,,\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_deaths_BubbleChartData}} $height="400px" $theme="dark"/>')
+
+			if chart == "Cleanses/Heals/BoonScore":
+				myprint(output, "\n!!Cleanses / Heals / Boon Score\n")
+				myprint(output, ",,Bubble Size based on Boon Score = Sum of all average boon output,,\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_cleanse_BubbleChartData}} $height="400px" $theme="dark"/>')
+
+			if chart == "BoonStrips/OutgoingControlScore/DPS":
+				myprint(output, "\n!!Boon Strips / Outgoing Control Score / DPS\n")
+				myprint(output, ",,Bubble Size based on Control Score = Sum of all outgoing control effects,,\n")
+				myprint(output, ",,Bubble Size based on DPS output,,\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_rips_BubbleChartData}} $height="400px" $theme="dark"/>')
+
+			#Profession_DPS_BoxPlot
+			if chart == "Profession_DPS_BoxPlot":
+				myprint(output, "\n!!DPS Box Plot by Profession\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_DPS_Profession_Box_PlotChartData}} $height="800px" $theme="dark"/>')
+
+			#Player_DPS_BoxPlot
+			if chart == "Player_DPS_BoxPlot":
+				myprint(output, "\n!!DPS Box Plot by Player\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_DPS_Profession_and_Name_Box_PlotChartData}} $height="800px" $theme="dark"/>')
+
+			myprint(output, '\n</div>\n</div>\n')
+			myprint(output, "</$reveal>\n")
+
+	myprint(output, "</$reveal>\n")
+	#end Dashboard insert
+
 	for stat in config.stats_to_compute:
 		if stat == 'dist':
 			write_stats_xls(players, top_percentage_stat_players[stat], stat, args.xls_output_filename)
@@ -680,3 +747,7 @@ if __name__ == '__main__':
 				write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
 			if stat == 'rips' or stat == 'cleanses' or stat == 'stability':
 				supportCount = write_support_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename, supportCount)
+
+	#write out Bubble Charts and Box_Plots
+	write_bubble_charts(players, top_total_stat_players[stat], squad_Control, myDate, args.input_directory)
+	write_box_plot_charts(DPS_List, myDate, args.input_directory)
