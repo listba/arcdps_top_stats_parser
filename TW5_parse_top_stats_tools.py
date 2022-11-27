@@ -1750,7 +1750,7 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 			return 0
 		sumDamage = 0
 		for target in player_json['dpsTargets']:
-			sumDamage = sumDamage + int(target[0]['condiDps'])
+			sumDamage = sumDamage + int(target[0]['condiDamage'])
 		return int(sumDamage)
 		#return int(player_json['dpsAll'][0]['condiDamage'])    
 	
@@ -2249,9 +2249,9 @@ def get_stats_from_fight_json(fight_json, config, log):
             
 		for stat in statAll:
 			if stat not in squad_offensive[squadDps_prof_name]['stats']:
-				squad_offensive[squadDps_prof_name]['stats'][stat] = player['statsAll'][0][stat]
+				squad_offensive[squadDps_prof_name]['stats'][stat] = sum([stats[0][stat] for stats in player['statsTargets']])
 			else:
-				squad_offensive[squadDps_prof_name]['stats'][stat] += player['statsAll'][0][stat]
+				squad_offensive[squadDps_prof_name]['stats'][stat] += sum([stats[0][stat] for stats in player['statsTargets']])
 
 
 		#Instant Revive tracking of downed healing
