@@ -653,13 +653,13 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 	# print table header
 	print_string = "|thead-dark table-hover sortable|k"    
 	myprint(output_file, print_string)
-	print_string = "|Place |Name |Class | Attendance| Times Top|"
+	print_string = "|!Place |!Name |!Class | !Attendance| !Times Top|"
 	if stat != "dist":
-		print_string += " Total|"
+		print_string += " !Total|"
 	if stat == "dist" or stat == 'dmg_taken':
-		print_string += " Average|"
+		print_string += " !Average|"
 	if stat in config.buff_ids:
-		print_string += " FightTime Avg| CombatTime Avg|"
+		print_string += " !FightTime Avg| !CombatTime Avg|"
 	print_string += "h"
 	myprint(output_file, print_string)    
 
@@ -1232,23 +1232,23 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 	# print table header
 	print_string = "|thead-dark table-hover sortable|k"
 	myprint(output_file, print_string)
-	print_string = "|Place |Name |Class | Attendance| Total|"
+	print_string = "|!Place |!Name |!Class | !Attendance| !Total|"
 	if stat in config.buff_ids:
-		print_string += " FightTime Avg| CombatTime Avg|"
+		print_string += " !FightTime Avg| !CombatTime Avg|"
 	if stat == 'dmg':
-		print_string += " FightTime DPS| CombatTime DPS|"
+		print_string += " !FightTime DPS| !CombatTime DPS|"
 	if stat == 'heal':
-		print_string += " FightTime HPS| CombatTime HPS|"
+		print_string += " !FightTime HPS| !CombatTime HPS|"
 	if stat == 'rips':
-		print_string += " FigthTime SPS| CombatTime HPS|"
+		print_string += " !FigthTime SPS| !CombatTime HPS|"
 	if stat == 'cleanses':
-		print_string += " FightTime CPS| CombatTime CPS|"
+		print_string += " !FightTime CPS| !CombatTime CPS|"
 	if stat == 'barrier':
-		print_string += " FightTime BPS| CombatTime BPS|"
+		print_string += " !FightTime BPS| !CombatTime BPS|"
 	if stat == 'downs':
-		print_string += " FightTime Downs/Min| CombatTime Downs/Min|"
+		print_string += " !FightTime Downs/Min| !CombatTime Downs/Min|"
 	if stat == 'kills':
-		print_string += " FightTime Kills/Min| CombatTime Kills/Min|"
+		print_string += " !FightTime Kills/Min| !CombatTime Kills/Min|"
 	print_string += "h"
 	myprint(output_file, print_string)    
 
@@ -1354,13 +1354,13 @@ def write_sorted_top_percentage(players, top_players, comparison_percentage, con
 	myprint(output_file, print_string)                
 
 	# print table header
-	print_string = "|thead-dark table-hover|k"
+	print_string = "|thead-dark table-hover sortable|k"
 	myprint(output_file, print_string)
-	print_string = "|Place |Name |Class | Percentage | Times Top | Out of |"
+	print_string = "|!Place |!Name |!Class | !Percentage | !Times Top | !Out of |"
 	if stat != "dist":
-		print_string += " Total|h"
+		print_string += " !Total|h"
 	else:
-		print_string += " Average|h"
+		print_string += " !Average|h"
 	myprint(output_file, print_string)    
 
 	# print stats for top players
@@ -2235,7 +2235,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 					else:
 						enemy_Control[skill_name][player['name']] = enemy_Control[skill_name][player['name']] + float((value/100)*duration)
 
-		#Track Offensive stats from [statsAll]
+		#Track Offensive stats from [statsTarets]
 		statAll = ["totalDamageCount", "directDamageCount", "connectedDirectDamageCount", "connectedDamageCount", "critableDirectDamageCount", "criticalRate", "criticalDmg", "flankingRate", "againstMovingRate", "glanceRate", "missed", "evaded", "blocked", "interrupts", "invulned"]
 		#squadDps_prof_name = player['name']
 		#squadDps_profession = player['profession']

@@ -274,7 +274,7 @@ if __name__ == '__main__':
 			myprint(output, '<$reveal type="match" state="!!curFight" text="Fight-'+str(FightNum)+'">')
 			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col">\n')
 			#begin fight summary
-			myprint(output, "|thead-dark table-hover sortable|k")
+			myprint(output, "|thead-dark table-hover|k")
 			myprint(output, "|Fight Summary:|<|h")
 			myprint(output, '|Squad Members: |'+str(fight.allies)+' |')
 			myprint(output, '|Squad Deaths: |'+str(fight.total_stats['deaths'])+' |')
@@ -427,8 +427,8 @@ if __name__ == '__main__':
 			myprint(output, '\n---\n')
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" output by Squad Player Descending [TOP 25 Max]|c")
-			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total| Average|h")
+			myprint(output, "|thead-dark table-hover sortable|k")
+			myprint(output, "|!Place |!Name | !Profession | !Total| !Average|h")
 			
 			for name in sorted_squadControl:
 				prof = "Not Found"
@@ -471,8 +471,8 @@ if __name__ == '__main__':
 			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" impacted Squad Player Descending [TOP 25 Max]|c")
-			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total| Average|h")
+			myprint(output, "|thead-dark table-hover sortable|k")
+			myprint(output, "|!Place |!Name | !Profession | !Total| !Average|h")
 			
 			for name in sorted_enemyControl:
 				prof = "Not Found"
@@ -500,8 +500,8 @@ if __name__ == '__main__':
 			myprint(output, '\n</div>\n    <div class="flex-col border">\n')
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" output by Enemy Player Descending [TOP 25 Max]|c")
-			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total|h")
+			myprint(output, "|thead-dark table-hover sortable|k")
+			myprint(output, "|!Place |!Name | !Profession | !Total|h")
 		
 			for name in sorted_enemyControlPlayer:
 				prof = name.split(' pl')[0]
@@ -538,8 +538,8 @@ if __name__ == '__main__':
 			myprint(output, '\n---\n')
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" Aura received by Squad Player Descending [TOP 25 Max]|c")
-			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total| Average|h")
+			myprint(output, "|thead-dark table-hover sortable|k")
+			myprint(output, "|!Place |!Name | !Profession | !Total| !Average|h")
 			
 			for name in sorted_auras_TableIn:
 				prof = "Not Found"
@@ -581,8 +581,8 @@ if __name__ == '__main__':
 			myprint(output, '\n---\n')
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" Aura output by Squad Player Descending [TOP 10 Max]|c")
-			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total| Average|h")
+			myprint(output, "|thead-dark table-hover sortable|k")
+			myprint(output, "|!Place |!Name | !Profession | !Total| !Average|h")
 			
 			for name in sorted_auras_TableOut:
 				prof = "Not Found"
