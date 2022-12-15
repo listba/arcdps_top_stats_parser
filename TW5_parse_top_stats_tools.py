@@ -2724,13 +2724,13 @@ def write_stats_chart(players, top_players, stat, myDate, input_directory, confi
 
 	print_string += "'Total "+stat_Name+"', 'Name', 'Profession', 'Fights', 'Duration' ],\n"
 	
-	for i in range(len(top_players)):
+	for i in reversed(range(len(top_players))):
 		player = players[top_players[i]]
 		if stat == 'kills' or stat == 'downs':
 			print_string += "\t\t\t["+str(round(player.average_stats[stat]*60, 4))+", "+str(round(player.total_stats[stat]))+", '"+player.name+"', '{{"+player.profession+"}}', '"+str(player.num_fights_present)+"', '"+str(player.duration_fights_present)+"'"
 		else: 
 			print_string += "\t\t\t["+str(player.average_stats[stat])+", "+str(round(player.total_stats[stat]))+", '"+player.name+"', '{{"+player.profession+"}}', '"+str(player.num_fights_present)+"', '"+str(player.duration_fights_present)+"'"
-		if i >= len(top_players)-1:
+		if i >= len(top_players):
 			print_string +="]\n"
 		else:
 			print_string +="],\n"
