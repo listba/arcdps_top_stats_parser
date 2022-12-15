@@ -2715,7 +2715,7 @@ def write_stats_chart(players, top_players, stat, myDate, input_directory, confi
 	print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData\n'
 	print_string +="type: application/javascript\n\n\n"
 
-	print_string += "option = {\n\tlegend: {},\n\ttooltip: {},\n\tdataset: [\n\t\t{\n\t\tsource: [\n\t\t\t["
+	print_string += "option = {\n\tlegend: {},\n\tgrid: {left: '20%'},\n\ttooltip: {},\n\tdataset: [\n\t\t{\n\t\tsource: [\n\t\t\t["
 	
 	if stat == 'deaths' or stat == 'kills' or stat == 'downs':
 		print_string += "'"+stat_Name+"/Min',"
