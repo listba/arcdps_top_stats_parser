@@ -623,7 +623,7 @@ if __name__ == '__main__':
 		prof = uptime_Table[squadDps_prof_name]['prof']
 
 		output_string = "|"+name+" |"
-		output_string += " {{"+prof+"}} | "+str(fightTime)+"|"
+		output_string += " {{"+prof+"}} | "+my_value(round(fightTime))+"|"
 		for item in uptime_Order:
 			if item in uptime_Table[squadDps_prof_name]:
 				output_string += " "+"{:.4f}".format(round(((uptime_Table[squadDps_prof_name][item]/fightTime)*100), 4))+"|"
@@ -661,7 +661,7 @@ if __name__ == '__main__':
 			Ranges_string = " "
 
 		output_string = "|"+name+" |"
-		output_string += " {{"+prof+"}} | "+str(fightTime)+" | "+str(Death_OnTag[deathOnTag_prof_name]['On_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Off_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['After_Tag_Death'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Run_Back'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Total'])+" |"+Ranges_string+" |"
+		output_string += " {{"+prof+"}} | "+my_value(round(fightTime))+" | "+str(Death_OnTag[deathOnTag_prof_name]['On_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Off_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['After_Tag_Death'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Run_Back'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Total'])+" |"+Ranges_string+" |"
 	
 
 
@@ -694,7 +694,7 @@ if __name__ == '__main__':
 		prof = downed_Healing[squadDps_prof_name]['prof']
 		fightTime = uptime_Table[squadDps_prof_name]['duration']
 
-		output_string = "|"+name+" |{{"+prof+"}}|"+str(fightTime)+"| "
+		output_string = "|"+name+" |{{"+prof+"}}|"+my_value(round(fightTime))+"| "
 		for skill in down_Heal_Order:
 			if down_Heal_Order[skill] in downed_Healing[squadDps_prof_name]:
 				output_string += str(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Heals'])+"|"
@@ -717,7 +717,7 @@ if __name__ == '__main__':
 		prof = downed_Healing[squadDps_prof_name]['prof']
 		fightTime = uptime_Table[squadDps_prof_name]['duration']
 
-		output_string = "|"+name+" |{{"+prof+"}}|"+str(fightTime)+"| "
+		output_string = "|"+name+" |{{"+prof+"}}|"+my_value(round(fightTime))+"| "
 		for skill in down_Heal_Order:
 			if down_Heal_Order[skill] in downed_Healing[squadDps_prof_name]:
 				output_string += str(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Hits'])+" |"
