@@ -66,7 +66,7 @@ if __name__ == '__main__':
 	print_string = "Considering fights with at least "+str(config.min_allied_players)+" allied players and at least "+str(config.min_enemy_players)+" enemies that took longer than "+str(config.min_fight_duration)+" s."
 	myprint(log, print_string)
 
-	players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, DPSStats = collect_stat_data(args, config, log, args.anonymize)    
+	players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, DPSStats = collect_stat_data(args, config, log, args.anonymize)    
 
 	# create xls file if it doesn't exist
 	book = xlwt.Workbook(encoding="utf-8")
@@ -86,6 +86,7 @@ if __name__ == '__main__':
 	myprint(output, 'curControl-Out: Blinded')
 	myprint(output, 'curAuras-Out: Fire')
 	myprint(output, 'curAuras-In: Fire')
+	myprint(output, 'curStackingBuffs: might')
 	myprint(output, 'curBurstTableDamage: Ch5Ca')
 	myprint(output, 'curBurstTableType: Cumulative')
 	myprint(output, 'curChart: Kills/Downs/DPS')
@@ -142,6 +143,7 @@ if __name__ == '__main__':
 					'<$button set="!!curTab" setTo="Control Effects - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Incoming </$button>',					
 					'<$button set="!!curTab" setTo="Spike Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Spike Damage </$button>',
 					'<$button set="!!curTab" setTo="Buff Uptime" selectedClass="" class="btn btn-sm btn-dark" style=""> Buff Uptime </$button>',
+					'<$button set="!!curTab" setTo="Stacking Buffs" selectedClass="" class="btn btn-sm btn-dark" style=""> Stacking Buffs </$button>',
 					'<$button set="!!curTab" setTo="Auras - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - In </$button>',
 					'<$button set="!!curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - Out </$button>',
 					'<$button set="!!curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> Death OnTag </$button>',
@@ -389,7 +391,7 @@ if __name__ == '__main__':
 		#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
 		myprint(output, "</$reveal>\n")
 
-		write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, DPSStats, args.json_output_filename)
+		write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, DPSStats, args.json_output_filename)
 
 	#print table of accounts that fielded support characters
 	myprint(output,'<$reveal type="match" state="!!curTab" text="Support">')
@@ -623,7 +625,7 @@ if __name__ == '__main__':
 		prof = uptime_Table[squadDps_prof_name]['prof']
 
 		output_string = "|"+name+" |"
-		output_string += " {{"+prof+"}} | "+str(fightTime)+"|"
+		output_string += " {{"+prof+"}} | "+my_value(round(fightTime))+"|"
 		for item in uptime_Order:
 			if item in uptime_Table[squadDps_prof_name]:
 				output_string += " "+"{:.4f}".format(round(((uptime_Table[squadDps_prof_name][item]/fightTime)*100), 4))+"|"
@@ -637,6 +639,103 @@ if __name__ == '__main__':
 	write_buff_uptimes_in_xls(uptime_Table, players, uptime_Order, args.xls_output_filename)
 	myprint(output, "</$reveal>\n")
 	#end Buff Uptime Table insert
+	
+	#start Stacking Buff Uptime Table insert
+	stacking_buff_Order = ['might', 'stability']
+	max_stacking_buff_fight_time = 0
+	for uptime_prof_name in stacking_uptime_Table:
+		max_stacking_buff_fight_time = max(stacking_uptime_Table[uptime_prof_name]['duration_might'], max_stacking_buff_fight_time)
+	myprint(output, '<$reveal type="match" state="!!curTab" text="Stacking Buffs">')    
+	myprint(output, '\n<<alert-leftbar info "Stacking Buffs" width:60%, class:"font-weight-bold">>\n\n')
+	for stacking_buff in stacking_buff_Order:
+		myprint(output, '<$button set="!!curStackingBuffs" setTo="'+stacking_buff+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+stacking_buff+'</$button>')
+	
+	myprint(output, '\n---\n')
+
+	# Might stack table
+	myprint(output, '<$reveal type="match" state="!!curStackingBuffs" text="might">\n')
+	myprint(output, '\n---\n')
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|{{Might}} uptime by stack|c")
+	myprint(output, '|thead-dark table-hover sortable|k')
+	output_header =  '|!Name | !Class'
+	output_header += ' | ! <span data-tooltip="Number of seconds player was in squad logs">Seconds</span>'
+	output_header += '| !Avg| !1+ %| !5+ %| !10+ %| !15+ %| !20+ %| !25 %'
+	output_header += '|h'
+	myprint(output, output_header)
+	
+	for uptime_prof_name in stacking_uptime_Table:
+		name = stacking_uptime_Table[uptime_prof_name]['name']
+		prof = stacking_uptime_Table[uptime_prof_name]['profession']
+		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_might'] / 1000
+		might_stacks = stacking_uptime_Table[uptime_prof_name]['might']
+
+		if stacking_uptime_Table[uptime_prof_name]['duration_might'] * 10 < max_stacking_buff_fight_time:
+			continue
+
+		avg_might = sum(stack_num * might_stacks[stack_num] for stack_num in range(1, 26)) / (fight_time * 1000)
+		might_uptime = 1.0 - (might_stacks[0] / (fight_time * 1000))
+		might_5_uptime = sum(might_stacks[i] for i in range(5,26)) / (fight_time * 1000)
+		might_10_uptime = sum(might_stacks[i] for i in range(10,26)) / (fight_time * 1000)
+		might_15_uptime = sum(might_stacks[i] for i in range(15,26)) / (fight_time * 1000)
+		might_20_uptime = sum(might_stacks[i] for i in range(20,26)) / (fight_time * 1000)
+		might_25_uptime = might_stacks[25] / (fight_time * 1000)
+
+		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(round(fight_time))
+		output_string += '|'+"{:.2f}".format(avg_might)
+		output_string += "| "+"{:.2f}".format(round((might_uptime * 100), 4))+"%"
+		output_string += "| "+"{:.2f}".format(round((might_5_uptime * 100), 4))+"%"
+		output_string += "| "+"{:.2f}".format(round((might_10_uptime * 100), 4))+"%"
+		output_string += "| "+"{:.2f}".format(round((might_15_uptime * 100), 4))+"%"
+		output_string += "| "+"{:.2f}".format(round((might_20_uptime * 100), 4))+"%"
+		output_string += "| "+"{:.2f}".format(round((might_25_uptime * 100), 4))+"%"
+		output_string += '|'
+
+		myprint(output, output_string)
+
+	myprint(output, "</$reveal>\n")
+	
+	# Stability stack table
+	myprint(output, '<$reveal type="match" state="!!curStackingBuffs" text="stability">\n')
+	myprint(output, '\n---\n')
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|{{Stability}} uptime by stack|c")
+	myprint(output, '|thead-dark table-hover sortable|k')
+	output_header =  '|!Name | !Class'
+	output_header += ' | ! <span data-tooltip="Number of seconds player was in squad logs">Seconds</span>'
+	output_header += '| !Avg| !1+ %| !2+ %| !5+ %'
+	output_header += '|h'
+	myprint(output, output_header)
+	
+	for uptime_prof_name in stacking_uptime_Table:
+		name = stacking_uptime_Table[uptime_prof_name]['name']
+		prof = stacking_uptime_Table[uptime_prof_name]['profession']
+		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_stability'] / 1000
+		stability_stacks = stacking_uptime_Table[uptime_prof_name]['stability']
+
+		if stacking_uptime_Table[uptime_prof_name]['duration_stability'] * 10 < max_stacking_buff_fight_time:
+			continue
+
+		avg_stab = sum(stack_num * stability_stacks[stack_num] for stack_num in range(1, 26)) / (fight_time * 1000)
+		stab_uptime = 1.0 - (stability_stacks[0] / (fight_time * 1000))
+		stab_2_uptime = sum(stability_stacks[i] for i in range(2,26)) / (fight_time * 1000)
+		stab_5_uptime = sum(stability_stacks[i] for i in range(5,26)) / (fight_time * 1000)
+
+		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(round(fight_time))
+		output_string += '|'+"{:.2f}".format(avg_stab)
+		output_string += "| "+"{:.2f}".format(round((stab_uptime * 100), 4))+"%"
+		output_string += "| "+"{:.2f}".format(round((stab_2_uptime * 100), 4))+"%"
+		output_string += "| "+"{:.2f}".format(round((stab_5_uptime * 100), 4))+"%"
+		output_string += '|'
+
+		myprint(output, output_string)
+
+	myprint(output, "</$reveal>\n")
+	myprint(output, "</$reveal>\n")
+	
+	write_stacking_buff_uptimes_in_xls(stacking_uptime_Table, args.xls_output_filename)
+	#end Stacking Buff Uptime Table insert
+
 
 	#start On Tag Death insert
 	myprint(output, '<$reveal type="match" state="!!curTab" text="Death_OnTag">')    
@@ -661,7 +760,7 @@ if __name__ == '__main__':
 			Ranges_string = " "
 
 		output_string = "|"+name+" |"
-		output_string += " {{"+prof+"}} | "+str(fightTime)+" | "+str(Death_OnTag[deathOnTag_prof_name]['On_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Off_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['After_Tag_Death'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Run_Back'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Total'])+" |"+Ranges_string+" |"
+		output_string += " {{"+prof+"}} | "+my_value(round(fightTime))+" | "+str(Death_OnTag[deathOnTag_prof_name]['On_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Off_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['After_Tag_Death'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Run_Back'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Total'])+" |"+Ranges_string+" |"
 	
 
 
@@ -694,7 +793,7 @@ if __name__ == '__main__':
 		prof = downed_Healing[squadDps_prof_name]['prof']
 		fightTime = uptime_Table[squadDps_prof_name]['duration']
 
-		output_string = "|"+name+" |{{"+prof+"}}|"+str(fightTime)+"| "
+		output_string = "|"+name+" |{{"+prof+"}}|"+my_value(round(fightTime))+"| "
 		for skill in down_Heal_Order:
 			if down_Heal_Order[skill] in downed_Healing[squadDps_prof_name]:
 				output_string += str(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Heals'])+"|"
@@ -717,7 +816,7 @@ if __name__ == '__main__':
 		prof = downed_Healing[squadDps_prof_name]['prof']
 		fightTime = uptime_Table[squadDps_prof_name]['duration']
 
-		output_string = "|"+name+" |{{"+prof+"}}|"+str(fightTime)+"| "
+		output_string = "|"+name+" |{{"+prof+"}}|"+my_value(round(fightTime))+"| "
 		for skill in down_Heal_Order:
 			if down_Heal_Order[skill] in downed_Healing[squadDps_prof_name]:
 				output_string += str(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Hits'])+" |"
@@ -890,8 +989,8 @@ if __name__ == '__main__':
 
 	#start DPS Stats insert
 	max_fightTime = 0
-	for squadDps_prof_name in uptime_Table:
-		max_fightTime = max(uptime_Table[squadDps_prof_name]['duration'], max_fightTime)
+	for squadDps_prof_name in DPSStats:
+		max_fightTime = max(DPSStats[squadDps_prof_name]['duration'], max_fightTime)
 
 	myprint(output, '<$reveal type="match" state="!!curTab" text="DPSStats">')    
 	myprint(output, '\n<<alert-leftbar light "🤖 Experimental DPS stats 🤖" width:60%, class:"font-weight-bold">>\n\n')
@@ -903,6 +1002,8 @@ if __name__ == '__main__':
 	myprint(output, '!!! Damage done to down enemies that die \n')
 	myprint(output, '!!! `Coordination Damage` [`CDPS`] \n')
 	myprint(output, '!!! Damage weighted by squad coordination \n')
+	myprint(output, '!!! `Combat Time Damage` [`CtDPS`] \n')
+	myprint(output, '!!! Damage done while in combat. If this is substantially higher than DPS, you are probably dying early in fights \n')
 	myprint(output, '\n---\n')
 
 	myprint(output, '|table-caption-top|k')
@@ -911,13 +1012,14 @@ if __name__ == '__main__':
 	output_header =  '|!Name | !Class'
 	output_header += ' | ! <span data-tooltip="Number of seconds player was in squad logs">Seconds</span>'
 	output_header += '| ☠️ '
-	output_header += '| !DPS| !Ch2DPS| !Ch5DPS| !CaDPS| !CDPS| 👻 | !🔻/min| !⚰/min'
+	output_header += '| !DPS| !Ch2DPS| !Ch5DPS| !CaDPS| !CDPS| !CtDPS|  👻 | !🔻/min| !⚰/min'
 	output_header += '|h'
 	myprint(output, output_header)
 	for DPSStats_prof_name in DPSStats:
 		name = DPSStats[DPSStats_prof_name]['name']
 		prof = DPSStats[DPSStats_prof_name]['profession']
 		fightTime = DPSStats[DPSStats_prof_name]['duration']
+		combatTime = DPSStats[DPSStats_prof_name]["combatTime"]
 
 		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 500 or fightTime * 10 < max_fightTime:
 			continue
@@ -929,6 +1031,7 @@ if __name__ == '__main__':
 		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Chunk_Damage'][5])+' chunk (5) damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Chunk_Damage'][5] / fightTime))+'</span>'
 		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Carrion_Damage'])+' carrion damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Carrion_Damage'] / fightTime))+'</span>'
 		output_string += '| '+'<span data-tooltip="'+my_value(round(DPSStats[DPSStats_prof_name]['Coordination_Damage']))+' coordination weighted damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Coordination_Damage'] / fightTime))+'</span>'
+		output_string += '| '+'<span data-tooltip="In combat '+'{:.2f}'.format(round(100 * combatTime / fightTime, 2))+'% of fights">'+my_value(round(DPSStats[DPSStats_prof_name]['Damage_Total'] / combatTime))+'</span>'
 		output_string += '| 👻 '
 		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Downs'])+' total downs">'+'{:.2f}'.format(round(DPSStats[DPSStats_prof_name]['Downs'] / (fightTime / 60), 2))+'</span>'
 		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Kills'])+' total kills">'+'{:.2f}'.format(round(DPSStats[DPSStats_prof_name]['Kills'] / (fightTime / 60), 2))+'</span>'
