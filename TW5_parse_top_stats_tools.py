@@ -2186,6 +2186,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 				num_downs += len(enemy['combatReplayData']['down'])
 
 	for player in fight_json['players']:
+		if player['notInSquad']:
+			continue
 		squadDps_name = player['name']
 		squadDps_profession = player['profession']
 		squadDps_prof_name = "{{"+squadDps_profession+"}} "+squadDps_name
