@@ -2058,6 +2058,11 @@ def calculate_dps_stats(fight_json, fight, players_running_healing_addon, config
 	skip_fight = {}
 	for player in fight_json['players']:
 		player_prof_name = "{{"+player['profession']+"}} "+player['name']
+
+		if player['notInSquad']:
+			skip_fight[player_prof_name] = True
+			continue
+
 		time_in_combat = get_stat_from_player_json(player, players_running_healing_addon, 'time_in_combat', config)
 		if time_in_combat == 0:
 			skip_fight[player_prof_name] = True
