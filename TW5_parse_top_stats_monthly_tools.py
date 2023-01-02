@@ -1891,6 +1891,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 				num_downs += len(enemy['combatReplayData']['down'])
 
 	for player in fight_json['players']:
+		if player['notInSquad']:
+			continue		
 		squadDps_name = player['name']
 		squadDps_profession = player['profession']
 		squadDps_prof_name = "{{"+squadDps_profession+"}} "+squadDps_name
@@ -2008,13 +2010,13 @@ def get_stats_from_fight_json(fight_json, config, log):
 		#Track Total Buff Uptimes
 		uptime_Buff_Ids = {1122: 'stability', 717: 'protection', 743: 'aegis', 740: 'might', 725: 'fury', 26980: 'resistance', 873: 'resolution', 1187: 'quickness', 719: 'swiftness', 30328: 'alacrity', 726: 'vigor', 718: 'regeneration'}
 		#uptime_Buff_Names = { 'stability': 1122,  'protection': 717,  'aegis': 743,  'might': 740,  'fury': 725,  'resistance': 26980,  'resolution': 873,  'quickness': 1187,  'swiftness': 719,  'alacrity': 30328,  'vigor': 726,  'regeneration': 718}
+		if squadDps_prof_name not in uptime_Table:
+			uptime_Table[squadDps_prof_name]={}
+			uptime_Table[squadDps_prof_name]['name']=squadDps_name
+			uptime_Table[squadDps_prof_name]['prof']=squadDps_profession
+			uptime_Table[squadDps_prof_name]['duration'] = 0
+			print('Added player to uptime_Table: '+ squadDps_prof_name)
 		for item in player['buffUptimes']:
-			if squadDps_prof_name not in uptime_Table:
-				uptime_Table[squadDps_prof_name]={}
-				uptime_Table[squadDps_prof_name]['name']=squadDps_name
-				uptime_Table[squadDps_prof_name]['prof']=squadDps_profession
-				uptime_Table[squadDps_prof_name]['duration'] = 0
-				print('Added player to uptime_Table: '+ squadDps_prof_name)
 			buffId = int(item['id'])	
 			if buffId not in uptime_Buff_Ids:
 				continue
@@ -2107,6 +2109,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 	num_allies = len(fight_json['players'])
 
 	for player in fight_json['players']:
+		if player['notInSquad']:
+			continue		
 		if durationMS < config.min_fight_duration or num_allies < config.min_allied_players or num_enemies < config.min_enemy_players:
 			continue
 		playerDPS = 0

@@ -2407,6 +2407,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 	num_allies = len(fight_json['players'])
 
 	for player in fight_json['players']:
+		if player['notInSquad']:
+			continue		
 		if durationMS < config.min_fight_duration or num_allies < config.min_allied_players or num_enemies < config.min_enemy_players:
 			continue
 		playerDPS = 0
