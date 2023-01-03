@@ -2087,6 +2087,7 @@ def calculate_dps_stats(fight_json, fight, players_running_healing_addon, config
 	squad_damage_per_tick_ma = moving_average(squad_damage_per_tick, 1)
 	squad_damage_ma_total = sum(squad_damage_per_tick_ma)
 
+	CHUNK_DAMAGE_SECONDS = 21
 	Ch5CaDamage1S = {}
 	UsedOffensiveSiege = {}
 
@@ -2106,14 +2107,14 @@ def calculate_dps_stats(fight_json, fight, players_running_healing_addon, config
 			DPSStats[DPSStats_prof_name]["duration"] = 0
 			DPSStats[DPSStats_prof_name]["combatTime"] = 0
 			DPSStats[DPSStats_prof_name]["Coordination_Damage"] = 0
-			DPSStats[DPSStats_prof_name]["Chunk_Damage"] = [0] * 21
-			DPSStats[DPSStats_prof_name]["Chunk_Damage_Total"] = [0] * 21
+			DPSStats[DPSStats_prof_name]["Chunk_Damage"] = [0] * CHUNK_DAMAGE_SECONDS
+			DPSStats[DPSStats_prof_name]["Chunk_Damage_Total"] = [0] * CHUNK_DAMAGE_SECONDS
 			DPSStats[DPSStats_prof_name]["Carrion_Damage"] = 0
 			DPSStats[DPSStats_prof_name]["Carrion_Damage_Total"] = 0
 			DPSStats[DPSStats_prof_name]["Damage_Total"] = 0
 			DPSStats[DPSStats_prof_name]["Squad_Damage_Total"] = 0
-			DPSStats[DPSStats_prof_name]["Burst_Damage"] = [0] * 21
-			DPSStats[DPSStats_prof_name]["Ch5Ca_Burst_Damage"] = [0] * 21
+			DPSStats[DPSStats_prof_name]["Burst_Damage"] = [0] * CHUNK_DAMAGE_SECONDS
+			DPSStats[DPSStats_prof_name]["Ch5Ca_Burst_Damage"] = [0] * CHUNK_DAMAGE_SECONDS
 			DPSStats[DPSStats_prof_name]["Downs"] = 0
 			DPSStats[DPSStats_prof_name]["Kills"] = 0
 			
@@ -2165,7 +2166,7 @@ def calculate_dps_stats(fight_json, fight, players_running_healing_addon, config
 	# Chunk damage: Damage done within X seconds of target down
 	for index, target in enumerate(fight_json['targets']):
 		if 'enemyPlayer' in target and target['enemyPlayer'] == True and 'combatReplayData' in target and len(target['combatReplayData']['down']):
-			for chunk_damage_seconds in range(1, len(DPSStats[DPSStats_prof_name]["Chunk_Damage"])):
+			for chunk_damage_seconds in range(1, CHUNK_DAMAGE_SECONDS):
 				targetDowns = dict(target['combatReplayData']['down'])
 				for targetDownsIndex, (downKey, downValue) in enumerate(targetDowns.items()):
 					downIndex = math.ceil(downKey / 1000)
@@ -2254,7 +2255,7 @@ def calculate_dps_stats(fight_json, fight, players_running_healing_addon, config
 		player_role = player_roles[player_prof_name]
 		DPSStats_prof_name = player_prof_name + " " + player_role
 		player_damage = damagePS[player_prof_name]
-		for i in range(1, 21):
+		for i in range(1, CHUNK_DAMAGE_SECONDS):
 			for fight_tick in range(i, fight_ticks):
 				dmg = player_damage[fight_tick] - player_damage[fight_tick - i]
 				DPSStats[DPSStats_prof_name]["Burst_Damage"][i] = max(dmg, DPSStats[DPSStats_prof_name]["Burst_Damage"][i])
@@ -2273,7 +2274,7 @@ def calculate_dps_stats(fight_json, fight, players_running_healing_addon, config
 		player_damage[0] = player_damage_ps[0]
 		for i in range(1, len(player_damage)):
 			player_damage[i] = player_damage[i - 1] + player_damage_ps[i]
-		for i in range(1, 21):
+		for i in range(1, CHUNK_DAMAGE_SECONDS):
 			for fight_tick in range(i, fight_ticks):
 				dmg = player_damage[fight_tick] - player_damage[fight_tick - i]
 				DPSStats[DPSStats_prof_name]["Ch5Ca_Burst_Damage"][i] = max(dmg, DPSStats[DPSStats_prof_name]["Ch5Ca_Burst_Damage"][i])
