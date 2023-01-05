@@ -1780,12 +1780,15 @@ def get_combat_time_breakpoints(player_json):
 		return [start_combat, get_stat_from_player_json(player_json, None, 'time_active', None) * 1000]
 
 	breakpoints = []
-	for death in replay['dead']:
-		time_of_death = death[0]
-		time_of_revive = death[1]
-		if start_combat != -1:
-			breakpoints.append([start_combat, time_of_death])
-		start_combat = get_combat_start_from_player_json(time_of_revive, player_json)
+	playerDeaths = dict(replay['dead'])
+	playerDowns = dict(replay['down'])
+	for deathKey, deathValue in playerDeaths.items():
+		for downKey, downValue in playerDowns.items():
+			if deathKey == downValue:
+				if start_combat != -1:
+					breakpoints.append([start_combat, deathKey])
+				start_combat = get_combat_start_from_player_json(deathValue + 1000, player_json)
+				break
 	end_combat = (len(player_json['damage1S'][0]))*1000
 	if start_combat != -1:
 		breakpoints.append([start_combat, end_combat])
