@@ -32,6 +32,7 @@ import jsons
 import math
 import requests
 import datetime
+import gzip
 from collections import OrderedDict
 
 from GW2_Color_Scheme import ProfessionColor
@@ -1355,7 +1356,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 		# skip files of incorrect filetype
 		file_start, file_extension = os.path.splitext(filename)
 		#if args.filetype not in file_extension or "top_stats" in file_start:
-		if 'json' not in file_extension or "top_stats" in file_start:
+		if file_extension not in ['.json', '.gz'] or "top_stats" in file_start:
 			continue
 
 		print_string = "parsing "+filename
@@ -1370,8 +1371,12 @@ def collect_stat_data(args, config, log, anonymize=False):
 #            # get fight stats
 #            fight, players_running_healing_addon = get_stats_from_fight_xml(xml_root, config, log)
 #        else: # filetype == "json"
-		json_datafile = open(file_path, encoding='utf-8')
-		json_data = json.load(json_datafile)
+		if file_extension == '.gz':
+			with gzip.open(file_path, mode="r") as f:
+				json_data = json.loads(f.read().decode('utf-8'))
+		else:
+			json_datafile = open(file_path, encoding='utf-8')
+			json_data = json.load(json_datafile)
 		# get fight stats
 		fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List = get_stats_from_fight_json(json_data, config, log)
 			
