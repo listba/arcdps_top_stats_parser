@@ -1761,7 +1761,7 @@ def get_combat_start_from_player_json(initial_time, player_json):
 	for i in range(math.ceil(initial_time/1000), len(player_json['damage1S'][0])):
 		if i == 0:
 			continue
-		if player_json['damage1S'][0][i] != player_json['damage1S'][0][i-1]:
+		if player_json['powerDamage1S'][0][i] != player_json['powerDamage1S'][0][i-1]:
 			if start_combat == -1:
 				start_combat = i*1000
 			else:
