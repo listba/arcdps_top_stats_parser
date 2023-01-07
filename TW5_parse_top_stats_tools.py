@@ -3222,10 +3222,12 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 			Bubble_Chart[prof_name][statItem] = player.average_stats[statItem]
 
 		#Calculate Fury Uptime per player
-		Bubble_Chart[prof_name]['Fury_Uptime'] = round((uptime_Table[prof_name]['fury']/uptime_Table[prof_name]['duration'])*100,2)
+		if 'fury' in uptime_Table[prof_name]:
+			Bubble_Chart[prof_name]['Fury_Uptime'] = round((uptime_Table[prof_name]['fury']/uptime_Table[prof_name]['duration'])*100,2)
 
 		#Calculate Avg_Might per player
-		Bubble_Chart[prof_name]['Might_Uptime'] = round((uptime_Table[prof_name]['might']/uptime_Table[prof_name]['duration'])*100,2)
+		if 'might' in uptime_Table[prof_name]:
+			Bubble_Chart[prof_name]['Might_Uptime'] = round((uptime_Table[prof_name]['might']/uptime_Table[prof_name]['duration'])*100,2)
 
 			
 	for chart in Charts:
