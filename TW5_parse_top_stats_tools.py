@@ -176,6 +176,13 @@ DPS_List['name'] = {}
 DPS_List['prof_name'] = {}
 DPS_List['prof'] = {}
 
+#Collect CPS Box Plot Data
+CPS_List = {}
+CPS_List['acct'] = {}
+CPS_List['name'] = {}
+CPS_List['prof_name'] = {}
+CPS_List['prof'] = {}
+
 #Calculate DPSStats Variables
 DPSStats = {}
 
@@ -1555,7 +1562,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 			json_datafile = open(file_path, encoding='utf-8')
 			json_data = json.load(json_datafile)
 		# get fight stats
-		fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, DPSStats = get_stats_from_fight_json(json_data, config, log)
+		fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, DPSStats = get_stats_from_fight_json(json_data, config, log)
 			
 		if first:
 			first = False
@@ -1731,7 +1738,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 	if anonymize:
 		anonymize_players(players, account_index)
 	
-	return players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, DPSStats
+	return players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, DPSStats
 			
 
 
@@ -2717,6 +2724,47 @@ def get_stats_from_fight_json(fight_json, config, log):
 			DPS_List['prof'][prof].append(playerDPS)
 #End DPS Box Plot Data Collection
 
+	#Collect Box Plot CPS data by Profession, Prof_Name, Name, Acct
+	durationMS = fight_json['durationMS']
+	num_enemies = len(fight_json['targets'])
+	num_allies = len(fight_json['players'])
+
+	for player in fight_json['players']:
+		if player['notInSquad']:
+			continue		
+		if durationMS < config.min_fight_duration or num_allies < config.min_allied_players or num_enemies < config.min_enemy_players:
+			continue
+		playerCPS = 0
+		playerCleanses = 0
+		name = player['name']
+		acct = player['account']
+		sub_type = player['profession'] + "_" + find_sub_type(player, durationMS / 1000)
+		prof = sub_type
+		prof_name = sub_type+"\n"+name
+
+		if 'support' not in player or len(player['support']) != 1 or 'condiCleanse' not in player['support'][0]:
+			playerCleanses = 0
+		else:
+			playerCleanses += int(player['support'][0]['condiCleanse'])   
+		
+		playerCPS = round(playerCleanses/(durationMS/1000), 4)
+
+		if playerCPS > 0:
+			if prof_name not in CPS_List['prof_name']:
+				CPS_List['prof_name'][prof_name] = []
+			if prof not in CPS_List['prof']:
+				CPS_List['prof'][prof] = []            
+			if name not in CPS_List['name']:
+				CPS_List['name'][name] = []
+			if acct not in CPS_List['acct']:
+				CPS_List['acct'][acct] = []
+		if playerCPS > 0:
+			CPS_List['acct'][acct].append(playerCPS)
+			CPS_List['name'][name].append(playerCPS)
+			CPS_List['prof_name'][prof_name].append(playerCPS)
+			CPS_List['prof'][prof].append(playerCPS)
+#End CPS Box Plot Data Collection
+
 	# initialize fight         
 	fight = Fight()
 	fight.duration = duration
@@ -2763,7 +2811,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 
 	calculate_dps_stats(fight_json, fight, players_running_healing_addon, config)
 		
-	return fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, DPSStats
+	return fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, DPSStats
 
 
 
@@ -3466,7 +3514,7 @@ def write_box_plot_charts(DPS_List, myDate, input_directory):
 #	end write bubble charts
 
 
-def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, DPSStats, output_file):
+def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, DPSStats, output_file):
 	json_dict = {}
 	json_dict["overall_raid_stats"] = {key: value for key, value in overall_raid_stats.items()}
 	json_dict["overall_squad_stats"] = {key: value for key, value in overall_squad_stats.items()}
@@ -3488,6 +3536,7 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	json_dict["auras_TableOut"] =  {key: value for key, value in auras_TableOut.items()}
 	json_dict["Death_OnTag"] =  {key: value for key, value in Death_OnTag.items()}
 	json_dict["DPS_List"] =  {key: value for key, value in DPS_List.items()}
+	json_dict["CPS_List"] =  {key: value for key, value in CPS_List.items()}
 	json_dict["DPSStats"] =  {key: value for key, value in DPSStats.items()}
 	json_dict["downed_Healing"] =  {key: value for key, value in downed_Healing.items()}
 	json_dict["MOA_Targets"] =  {key: value for key, value in MOA_Targets.items()}
