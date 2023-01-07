@@ -450,7 +450,7 @@ if __name__ == '__main__':
 			myprint(output, "</$reveal>\n")
 
 			write_control_effects_out_xls(sorted_squadControl, key, players, args.xls_output_filename)
-	myprint(output, "</$reveal>\n")
+
 
 	#Add MOA Tracking Tables
 	myprint(output, '<$reveal type="match" state="!!curControl-Out" text="MOA Tracking">\n')
@@ -470,6 +470,8 @@ if __name__ == '__main__':
 		myprint(output, "|"+name+" | "+str(MOA_Targets[name]['missed'])+" | "+str(MOA_Targets[name]['blocked'])+" | "+str(MOA_Targets[name]['invulned'])+" |")
 	myprint(output, '\n    </div>\n</div>\n')
 	myprint(output, "</$reveal>\n")
+
+	myprint(output, "</$reveal>\n")	
 	#end Control Effects Outgoing insert
 
 	#start Control Effects Incoming insert
