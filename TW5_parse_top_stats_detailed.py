@@ -959,7 +959,7 @@ if __name__ == '__main__':
 	#start Dashboard insert
 	myprint(output, '<$reveal type="match" state="!!curTab" text="Dashboard">')    
 	myprint(output, '\n<<alert-leftbar light "Dashboard for various charts" width:60%, class:"font-weight-bold">>\n\n')
-	Dashboard_Charts = ["Kills/Downs/DPS", "Deaths/DamageTaken/DistanceFromTag", "Cleanses/Heals/BoonScore", "BoonStrips/OutgoingControlScore/DPS", "Profession_DPS_BoxPlot", "Player_DPS_BoxPlot"]
+	Dashboard_Charts = ["Kills/Downs/DPS", "Fury/Might/DPS", "Deaths/DamageTaken/DistanceFromTag", "Cleanses/Heals/BoonScore", "BoonStrips/OutgoingControlScore/DPS", "Profession_DPS_BoxPlot", "Player_DPS_BoxPlot"]
 	
 	for chart in Dashboard_Charts:
 		myprint(output, '<$button set="!!curChart" setTo="'+chart+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+chart+' </$button>')
@@ -976,7 +976,12 @@ if __name__ == '__main__':
 				myprint(output, "\n!!Kills / Downs / DPS\n")
 				myprint(output, ",,Bubble Size based on DPS output,,\n")
 				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_kills_BubbleChartData}} $height="500px" $theme="dark"/>')
-				
+
+			if chart == "Fury/Might/DPS":
+				myprint(output, "\n!!Kills / Downs / DPS\n")
+				myprint(output, ",,Bubble Size based on DPS output,,\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_fury_might_BubbleChartData}} $height="500px" $theme="dark"/>')
+
 			if chart == "Deaths/DamageTaken/DistanceFromTag":
 				myprint(output, "\n!!Deaths / Damage Taken / Distance from Tag\n")
 				myprint(output, ",,Bubble Size based on Average Distance to Tag,,\n")

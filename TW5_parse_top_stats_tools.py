@@ -2037,6 +2037,8 @@ def split_boon_states_by_combat_breakpoints(states, breakpoints, duration):
 
 	return new_states
 
+player_roles = {}
+player_combat_time = {}
 def calculate_dps_stats(fight_json, fight, players_running_healing_addon, config):
 	if fight.skipped:
 		return
@@ -2055,8 +2057,8 @@ def calculate_dps_stats(fight_json, fight, players_running_healing_addon, config
 				for i in range(fight_ticks):
 					damagePS[player_prof_name ][i] += damage_on_target[i]
 
-	player_roles = {}
-	player_combat_time = {}
+	#player_roles = {}
+	#player_combat_time = {}
 	skip_fight = {}
 	for player in fight_json['players']:
 		player_prof_name = "{{"+player['profession']+"}} "+player['name']
@@ -3174,7 +3176,7 @@ def write_DPSStats_bubble_charts(uptime_Table, DPSStats, myDate, input_directory
 def write_bubble_charts(players, top_players, squad_Control, myDate, input_directory):
 	get_Stats = ['deaths', 'kills', 'downs', 'dmg_taken', 'dmg', 'rips', 'cleanses', 'heal', 'dist']
 	boon_List = ['stability', 'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration']
-	Charts = ['kills', 'cleanse', 'rips', 'deaths']
+	Charts = ['kills', 'cleanse', 'rips', 'deaths', 'fury_might']
 	Bubble_Chart = {}
 
 	#for i in range(len(top_players)):
@@ -3197,6 +3199,8 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 			Bubble_Chart[prof_name]['deaths']=0
 			Bubble_Chart[prof_name]['dmg_taken']=0
 			Bubble_Chart[prof_name]['dist']=0
+			Bubble_Chart[prof_name]['Fury_Uptime']=0
+			Bubble_Chart[prof_name]['Might_Uptime']=0
 		
 		#gather control score per player
 		sum_Control = 0
@@ -3216,6 +3220,13 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 		#gather Stats scores per player
 		for statItem in get_Stats:
 			Bubble_Chart[prof_name][statItem] = player.average_stats[statItem]
+
+		#Calculate Fury Uptime per player
+		Bubble_Chart[prof_name]['Fury_Uptime'] = round((uptime_Table[prof_name]['fury']/uptime_Table[prof_name]['duration'])*100,2)
+
+		#Calculate Avg_Might per player
+		Bubble_Chart[prof_name]['Might_Uptime'] = round((uptime_Table[prof_name]['might']/uptime_Table[prof_name]['duration'])*100,2)
+
 			
 	for chart in Charts:
 		fileDate = myDate
@@ -3271,7 +3282,17 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 					maxStatSec = Bubble_Chart[prof_name]['dist']
 				if Bubble_Chart[prof_name]['dist'] < minStatSec:
 					minStatSec = Bubble_Chart[prof_name]['dist']
-				
+
+		if chart == 'fury_might':
+			print_string += '\n            ["Name", "Profession", "Fury", "Might", "DPS", "color"],'
+			for prof_name in Bubble_Chart:
+				color = ProfessionColor[Bubble_Chart[prof_name]['profession']]
+				print_string += '\n            ["'+Bubble_Chart[prof_name]['name']+'", "'+Bubble_Chart[prof_name]['profession']+'", '+str(Bubble_Chart[prof_name]['Fury_Uptime'])+', '+str(Bubble_Chart[prof_name]['Might_Uptime'])+', '+str(Bubble_Chart[prof_name]['dmg'])+', "'+color+'"],'
+				if Bubble_Chart[prof_name]['dmg'] > maxStatSec:
+					maxStatSec = Bubble_Chart[prof_name]['dmg']
+				if Bubble_Chart[prof_name]['dmg'] < minStatSec:
+					minStatSec = Bubble_Chart[prof_name]['dmg']
+
 		print_string += '\n   ]'
 		print_string += '\n  }],'
 		print_string += '\n  visualMap: {'
@@ -3294,6 +3315,8 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 			print_string +='\n    name: "Average Deaths"'		
 		if chart == 'rips':
 			print_string +='\n    name: "Control Effect Score"'			
+		if chart == 'fury_might':
+			print_string +='\n    name: "Fury Uptime"'			
 		print_string +='\n  },'
 		print_string +='\n  yAxis: {'
 		print_string +="\n    type: 'value',"
@@ -3305,8 +3328,10 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 			print_string +='\n    name: "Average Damage Taken"'		
 		if chart == 'rips':
 			print_string +='\n    name: "Strips per Second"'
+		if chart == 'fury_might':
+			print_string +='\n    name: "Might Uptime"'						
 		print_string +='\n  },'
-		print_string +="\n  tooltip: {trigger: 'axis'},"
+		print_string +="\n  tooltip: {trigger: 'axis',\n        axisPointer: {\n          type: 'cross'\n        },    \n},"
 		print_string +='\n  series: ['
 		print_string +='\n    {'
 		print_string +="\n      type: 'scatter',"
@@ -3320,6 +3345,8 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 			print_string +="\n        x: 'Deaths',"
 		if chart == 'rips':
 			print_string +="\n        x: 'Control',"	
+		if chart == 'fury_might':
+			print_string +="\n        x: 'Fury',"				
 		print_string +='\n        // Map "product" row to y-axis.'
 		if chart == 'kills':	
 			print_string +="\n        y: 'Kills',"
@@ -3329,8 +3356,10 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 			print_string +="\n        y: 'Damage_Taken',"
 		if chart == 'rips':	
 			print_string +="\n        y: 'Strips',"	
+		if chart == 'fury_might':	
+			print_string +="\n        y: 'Might',"				
 		print_string +='\n        // format tooltip'
-		print_string +='\n        tooltip: [0, 1, 4],'
+		print_string +='\n        tooltip: [0, 1, 2, 3, 4],'
 		print_string +='\n      },	'
 		print_string +='\n      itemStyle: {'
 		print_string +='\n        color: function(seriesIndex) {'
