@@ -680,8 +680,10 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 	print_string = "|thead-dark table-hover sortable|k"    
 	myprint(output_file, print_string)
 	print_string = "|!Place |!Name |!Class | !Attendance| !Times Top|"
-	if stat == "dist" or stat == 'dmg_taken':
+	if stat == "dist":
 		print_string += " !Average|"
+	if stat == 'dmg_taken':
+		print_string += " !Total| !Average|"		
 	print_string += "h"
 	myprint(output_file, print_string)    
 
