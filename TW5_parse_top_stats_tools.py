@@ -190,6 +190,13 @@ SPS_List['name'] = {}
 SPS_List['prof_name'] = {}
 SPS_List['prof'] = {}
 
+#Collect CPS Box Plot Data
+HPS_List = {}
+HPS_List['acct'] = {}
+HPS_List['name'] = {}
+HPS_List['prof_name'] = {}
+HPS_List['prof'] = {}
+
 #Calculate DPSStats Variables
 DPSStats = {}
 
@@ -1569,7 +1576,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 			json_datafile = open(file_path, encoding='utf-8')
 			json_data = json.load(json_datafile)
 		# get fight stats
-		fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, DPSStats = get_stats_from_fight_json(json_data, config, log)
+		fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats = get_stats_from_fight_json(json_data, config, log)
 			
 		if first:
 			first = False
@@ -1745,7 +1752,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 	if anonymize:
 		anonymize_players(players, account_index)
 	
-	return players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, DPSStats
+	return players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats
 			
 
 
@@ -2708,7 +2715,9 @@ def get_stats_from_fight_json(fight_json, config, log):
 		playerCPS = 0
 		playerCleanses = 0
 		playerSPS = 0
-		playerStrips = 0				
+		playerStrips = 0
+		playerHPS = 0
+		playerHeals = 0						
 		name = player['name']
 		acct = player['account']
 		sub_type = player['profession'] + "_" + find_sub_type(player, durationMS / 1000)
@@ -2781,7 +2790,34 @@ def get_stats_from_fight_json(fight_json, config, log):
 			SPS_List['name'][name].append(playerSPS)
 			SPS_List['prof_name'][prof_name].append(playerSPS)
 			SPS_List['prof'][prof].append(playerSPS)
-#End SPS Box Plot Data Collection
+		#End SPS Box Plot Data Collection
+
+		#Collect Box Plot HPS data by Profession, Prof_Name, Name, Acct
+		if 'extHealingStats' in player:
+			if 'outgoingHealingAllies' not in player['extHealingStats']:
+				playerHeals = 0
+			for outgoing_healing_json in player['extHealingStats']['outgoingHealingAllies']:
+				for outgoing_healing_json2 in outgoing_healing_json:
+					if 'healing' in outgoing_healing_json2:
+						playerHeals += int(outgoing_healing_json2['healing'])
+		
+		playerHPS = round(playerHeals/(durationMS/1000), 4)
+
+		if playerHPS > 0:
+			if prof_name not in HPS_List['prof_name']:
+				HPS_List['prof_name'][prof_name] = []
+			if prof not in HPS_List['prof']:
+				HPS_List['prof'][prof] = []            
+			if name not in HPS_List['name']:
+				HPS_List['name'][name] = []
+			if acct not in HPS_List['acct']:
+				HPS_List['acct'][acct] = []
+		if playerHPS > 0:
+			HPS_List['acct'][acct].append(playerHPS)
+			HPS_List['name'][name].append(playerHPS)
+			HPS_List['prof_name'][prof_name].append(playerHPS)
+			HPS_List['prof'][prof].append(playerHPS)
+		#End HPS Box Plot Data Collection
 
 	# initialize fight         
 	fight = Fight()
@@ -2829,7 +2865,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 
 	calculate_dps_stats(fight_json, fight, players_running_healing_addon, config)
 		
-	return fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, DPSStats
+	return fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats
 
 
 
@@ -3532,7 +3568,7 @@ def write_box_plot_charts(DPS_List, myDate, input_directory):
 #	end write bubble charts
 
 
-def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, DPSStats, output_file):
+def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, output_file):
 	json_dict = {}
 	json_dict["overall_raid_stats"] = {key: value for key, value in overall_raid_stats.items()}
 	json_dict["overall_squad_stats"] = {key: value for key, value in overall_squad_stats.items()}
@@ -3556,6 +3592,7 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	json_dict["DPS_List"] =  {key: value for key, value in DPS_List.items()}
 	json_dict["CPS_List"] =  {key: value for key, value in CPS_List.items()}
 	json_dict["SPS_List"] =  {key: value for key, value in SPS_List.items()}
+	json_dict["HPS_List"] =  {key: value for key, value in HPS_List.items()}
 	json_dict["DPSStats"] =  {key: value for key, value in DPSStats.items()}
 	json_dict["downed_Healing"] =  {key: value for key, value in downed_Healing.items()}
 	json_dict["MOA_Targets"] =  {key: value for key, value in MOA_Targets.items()}
