@@ -959,7 +959,7 @@ if __name__ == '__main__':
 	#start Dashboard insert
 	myprint(output, '<$reveal type="match" state="!!curTab" text="Dashboard">')    
 	myprint(output, '\n<<alert-leftbar light "Dashboard for various charts" width:60%, class:"font-weight-bold">>\n\n')
-	Dashboard_Charts = ["Kills/Downs/DPS", "Fury/Might/DPS", "Deaths/DamageTaken/DistanceFromTag", "Cleanses/Heals/BoonScore", "BoonStrips/OutgoingControlScore/DPS", "Profession_DPS_BoxPlot", "Player_DPS_BoxPlot"]
+	Dashboard_Charts = ["Kills/Downs/DPS", "Fury/Might/DPS", "Deaths/DamageTaken/DistanceFromTag", "Cleanses/Heals/BoonScore", "BoonStrips/OutgoingControlScore/DPS", "Profession_DPS_BoxPlot", "Player_DPS_BoxPlot", "Profession_SPS_BoxPlot", "Player_SPS_BoxPlot", "Profession_CPS_BoxPlot", "Player_CPS_BoxPlot", "Profession_HPS_BoxPlot", "Player_HPS_BoxPlot"]
 	
 	for chart in Dashboard_Charts:
 		myprint(output, '<$button set="!!curChart" setTo="'+chart+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+chart+' </$button>')
@@ -1000,13 +1000,43 @@ if __name__ == '__main__':
 
 			#Profession_DPS_BoxPlot
 			if chart == "Profession_DPS_BoxPlot":
-				myprint(output, "\n!!DPS Box Plot by Profession\n")
+				myprint(output, "\n!!Damage per Second Box Plot by Profession\n")
 				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_DPS_Profession_Box_PlotChartData}} $height="800px" $theme="dark"/>')
 
 			#Player_DPS_BoxPlot
 			if chart == "Player_DPS_BoxPlot":
-				myprint(output, "\n!!DPS Box Plot by Player\n")
+				myprint(output, "\n!!Damage per Second Box Plot by Player\n")
 				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_DPS_Profession_and_Name_Box_PlotChartData}} $height="800px" $theme="dark"/>')
+
+			#Profession_SPS_BoxPlot
+			if chart == "Profession_SPS_BoxPlot":
+				myprint(output, "\n!!Boon Strip per Second Box Plot by Profession\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_SPS_Profession_Box_PlotChartData}} $height="800px" $theme="dark"/>')
+
+			#Player_SPS_BoxPlot
+			if chart == "Player_SPS_BoxPlot":
+				myprint(output, "\n!!Boon Strip per Second Box Plot by Player\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_SPS_Profession_and_Name_Box_PlotChartData}} $height="800px" $theme="dark"/>')
+
+			#Profession_CPS_BoxPlot
+			if chart == "Profession_CPS_BoxPlot":
+				myprint(output, "\n!!Cleanses per Second Box Plot by Profession\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_CPS_Profession_Box_PlotChartData}} $height="800px" $theme="dark"/>')
+
+			#Player_CPS_BoxPlot
+			if chart == "Player_CPS_BoxPlot":
+				myprint(output, "\n!!Cleanses per Second Box Plot by Player\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_CPS_Profession_and_Name_Box_PlotChartData}} $height="800px" $theme="dark"/>')
+
+			#Profession_HPS_BoxPlot
+			if chart == "Profession_HPS_BoxPlot":
+				myprint(output, "\n!!Heals per Second Box Plot by Profession\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_HPS_Profession_Box_PlotChartData}} $height="800px" $theme="dark"/>')
+
+			#Player_HPS_BoxPlot
+			if chart == "Player_HPS_BoxPlot":
+				myprint(output, "\n!!Heals per Second Box Plot by Player\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_HPS_Profession_and_Name_Box_PlotChartData}} $height="800px" $theme="dark"/>')
 
 			myprint(output, '\n</div>\n</div>\n')
 			myprint(output, "</$reveal>\n")
@@ -1254,5 +1284,8 @@ if __name__ == '__main__':
 
 	#write out Bubble Charts and Box_Plots
 	write_bubble_charts(players, top_total_stat_players[stat], squad_Control, myDate, args.input_directory)
-	write_box_plot_charts(DPS_List, myDate, args.input_directory)
+	write_box_plot_charts(DPS_List, myDate, args.input_directory, "DPS")
+	write_box_plot_charts(SPS_List, myDate, args.input_directory, "SPS")
+	write_box_plot_charts(CPS_List, myDate, args.input_directory, "CPS")
+	write_box_plot_charts(HPS_List, myDate, args.input_directory, "HPS")
 	write_DPSStats_bubble_charts(uptime_Table, DPSStats, myDate, args.input_directory)

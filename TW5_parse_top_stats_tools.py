@@ -3484,17 +3484,17 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 		bubble_chart_Output.close()
 #	end write bubble charts
 
-def write_box_plot_charts(DPS_List, myDate, input_directory):
+def write_box_plot_charts(DPS_List, myDate, input_directory, ChartType):
 	Charts = ['Profession', 'Profession_and_Name']
 	fileDate = myDate
 	for chart in Charts:
-		boxPlotfileTid = input_directory+"/"+fileDate.strftime('%Y%m%d%H%M')+"_DSP_"+chart+"_TW5_Box_Plot_Chart.tid"
+		boxPlotfileTid = input_directory+"/"+fileDate.strftime('%Y%m%d%H%M')+"_"+ChartType+"_"+chart+"_TW5_Box_Plot_Chart.tid"
 		boxPlot_chart_Output = open(boxPlotfileTid, "w",encoding="utf-8")
 
 		print_string = 'created: '+fileDate.strftime("%Y%m%d%H%M%S")
 		print_string +="\ncreator: Drevarr\n"
 		print_string +="tags: ChartData\n"
-		print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_DPS_'+chart+'_Box_PlotChartData\n'
+		print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_'+ChartType+'_'+chart+'_Box_PlotChartData\n'
 		print_string +="type: application/javascript\n"
 
 		#print_string +='const colors = '
@@ -3508,8 +3508,8 @@ def write_box_plot_charts(DPS_List, myDate, input_directory):
 		print_string +='\n'
 		print_string +='\noption = {'
 		print_string +='\n  title: ['
-		print_string +="\n    {text: 'DPS by "+chart+" across all fights', left: 'center'},"
-		print_string +="\n    {text: 'DPS across all fights \\nupper: Q3 + 1.5 * IQR \\nlower: Q1 - 1.5 * IQR', borderColor: '#999', borderWidth: 1, textStyle: {fontSize: 10}, left: '1%', top: '90%'}"
+		print_string +="\n    {text: '"+ChartType+" by "+chart+" across all fights', left: 'center'},"
+		print_string +="\n    {text: '"+ChartType+" across all fights \\nupper: Q3 + 1.5 * IQR \\nlower: Q1 - 1.5 * IQR', borderColor: '#999', borderWidth: 1, textStyle: {fontSize: 10}, left: '1%', top: '90%'}"
 		print_string +="\n  ],"
 		print_string +="\ndataset: ["
 		print_string +="\n    {"
@@ -3544,7 +3544,7 @@ def write_box_plot_charts(DPS_List, myDate, input_directory):
 		print_string += "\n  tooltip: {trigger: 'item', axisPointer: {type: 'shadow'}},"
 		print_string += "\n  grid: {left: '10%', right: '10%', bottom: '15%'},"
 		print_string += "\n  yAxis: {type: 'category', boundaryGap: true, nameGap: 30, splitArea: {show: true}, splitLine: {show: true}},"
-		print_string += "\n  xAxis: {type: 'value', name: 'DPS', splitArea: {show: true}},"
+		print_string += "\n  xAxis: {type: 'value', name: '"+ChartType+"', splitArea: {show: true}},"
 		print_string += "\n  series: ["
 		print_string += "\n    {"
 		print_string += "\n      name: 'boxplot',"
