@@ -376,8 +376,9 @@ if __name__ == '__main__':
 			myprint(output, '\n</div>\n</div>\n')
 		else:
 			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
-			#top_consistent_stat_players[stat] = get_and_write_sorted_top_consistent(players, config, num_used_fights, stat, output)
 			top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
+			myprint(output, '\n\n\n\n')
+			top_consistent_stat_players[stat] = get_and_write_sorted_top_consistent(players, config, num_used_fights, stat, output)			
 			myprint(output, '\n</div>\n    <div class="flex-col border">\n')
 			#top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
 			myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="600px" $theme="dark"/>')

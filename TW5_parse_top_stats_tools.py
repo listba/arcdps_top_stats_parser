@@ -680,12 +680,8 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 	print_string = "|thead-dark table-hover sortable|k"    
 	myprint(output_file, print_string)
 	print_string = "|!Place |!Name |!Class | !Attendance| !Times Top|"
-	if stat != "dist":
-		print_string += " !Total|"
 	if stat == "dist" or stat == 'dmg_taken':
 		print_string += " !Average|"
-	if stat in config.buff_ids:
-		print_string += " !FightTime Avg| !CombatTime Avg|"
 	print_string += "h"
 	myprint(output_file, print_string)    
 
@@ -708,12 +704,6 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 			print_string += " "+my_value(round(player.total_stats[stat],1))+"| "+my_value(round(player.average_stats[stat]))+"|"
 		if stat == 'dist':
 			print_string += " "+my_value(round(player.average_stats[stat]))+"|"			
-		if stat == 'iol':
-			print_string += " "+my_value(round(player.total_stats[stat],1))+"| "+'{:.4f}'.format(player.average_stats[stat])+"| "+'{:.4f}'.format((player.total_stats[stat]/combat_Time)*100)+"|"
-		elif stat in config.buffs_stacking_intensity and stat != 'iol':
-			print_string += " "+my_value(round(player.total_stats[stat],1))+"| "+'{:.4f}'.format(player.average_stats[stat])+"| "+'{:.4f}'.format(player.total_stats[stat]/combat_Time)+"|"
-		elif stat in config.buffs_stacking_duration and stat != 'iol':
-			print_string += " "+my_value(round(player.total_stats[stat],1))+"| "+'{:.4f}'.format(player.average_stats[stat])+"%| "+'{:.4f}'.format((player.total_stats[stat]/combat_Time)*100)+"%|"
 
 		myprint(output_file, print_string)
 		last_val = player.consistency_stats[stat]
