@@ -711,9 +711,9 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 		if stat == 'iol':
 			print_string += " "+my_value(round(player.total_stats[stat],1))+"| "+'{:.4f}'.format(player.average_stats[stat])+"| "+'{:.4f}'.format((player.total_stats[stat]/combat_Time)*100)+"|"
 		elif stat in config.buffs_stacking_intensity and stat != 'iol':
-			print_string += " "+my_value(round(player.total_stats[stat],1))+"s| "+'{:.4f}'.format(player.average_stats[stat])+"| "+'{:.4f}'.format(player.total_stats[stat]/combat_Time)+"|"
+			print_string += " "+my_value(round(player.total_stats[stat],1))+"| "+'{:.4f}'.format(player.average_stats[stat])+"| "+'{:.4f}'.format(player.total_stats[stat]/combat_Time)+"|"
 		elif stat in config.buffs_stacking_duration and stat != 'iol':
-			print_string += " "+my_value(round(player.total_stats[stat],1))+"s| "+'{:.4f}'.format(player.average_stats[stat])+"%| "+'{:.4f}'.format((player.total_stats[stat]/combat_Time)*100)+"%|"
+			print_string += " "+my_value(round(player.total_stats[stat],1))+"| "+'{:.4f}'.format(player.average_stats[stat])+"%| "+'{:.4f}'.format((player.total_stats[stat]/combat_Time)*100)+"%|"
 
 		myprint(output_file, print_string)
 		last_val = player.consistency_stats[stat]
@@ -1374,10 +1374,10 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 		else:
 			print_string += f" {fight_time_m:>6}m {fight_time_s:>2}s |"
 		if stat in config.buffs_stacking_duration and stat != 'iol':
-			print_string += " "+my_value(round(player.total_stats[stat]))+"s|"
+			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"%| "+"{:.4f}".format(round((player.total_stats[stat]/combat_Time)*100, 4))+"%|"
 		elif stat in config.buffs_stacking_intensity and stat != 'iol':
-			print_string += " "+my_value(round(player.total_stats[stat]))+"s|"
+			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"| "+"{:.4f}".format(round(player.total_stats[stat]/combat_Time, 4))+"|"
 		elif stat == 'cleanses' or stat == 'barrier' or stat == 'rips' or stat == 'heal':
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
