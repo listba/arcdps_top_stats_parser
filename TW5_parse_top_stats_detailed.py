@@ -381,13 +381,13 @@ if __name__ == '__main__':
 			top_consistent_stat_players[stat] = get_and_write_sorted_top_consistent(players, config, num_used_fights, stat, output)			
 			myprint(output, '\n</div>\n    <div class="flex-col border">\n')
 			#top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
-			myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="600px" $theme="dark"/>')
+			myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
 			myprint(output, '\n</div>\n</div>\n')
 			top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)
 			top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
 			
 			#myprint(output, '<div>')
-			#myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="600px" $theme="dark"/>')
+			#myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
 			#myprint(output, '</div>')
 		#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
 		myprint(output, "</$reveal>\n")
@@ -975,23 +975,23 @@ if __name__ == '__main__':
 			if chart == "Kills/Downs/DPS":
 				myprint(output, "\n!!Kills / Downs / DPS\n")
 				myprint(output, ",,Bubble Size based on DPS output,,\n")
-				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_kills_BubbleChartData}} $height="400px" $theme="dark"/>')
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_kills_BubbleChartData}} $height="500px" $theme="dark"/>')
 				
 			if chart == "Deaths/DamageTaken/DistanceFromTag":
 				myprint(output, "\n!!Deaths / Damage Taken / Distance from Tag\n")
 				myprint(output, ",,Bubble Size based on Average Distance to Tag,,\n")
-				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_deaths_BubbleChartData}} $height="400px" $theme="dark"/>')
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_deaths_BubbleChartData}} $height="500px" $theme="dark"/>')
 
 			if chart == "Cleanses/Heals/BoonScore":
 				myprint(output, "\n!!Cleanses / Heals / Boon Score\n")
 				myprint(output, ",,Bubble Size based on Boon Score = Sum of all average boon output,,\n")
-				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_cleanse_BubbleChartData}} $height="400px" $theme="dark"/>')
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_cleanse_BubbleChartData}} $height="500px" $theme="dark"/>')
 
 			if chart == "BoonStrips/OutgoingControlScore/DPS":
 				myprint(output, "\n!!Boon Strips / Outgoing Control Score / DPS\n")
 				myprint(output, ",,Bubble Size based on Control Score = Sum of all outgoing control effects,,\n")
 				myprint(output, ",,Bubble Size based on DPS output,,\n")
-				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_rips_BubbleChartData}} $height="400px" $theme="dark"/>')
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_rips_BubbleChartData}} $height="500px" $theme="dark"/>')
 
 			#Profession_DPS_BoxPlot
 			if chart == "Profession_DPS_BoxPlot":
@@ -1065,7 +1065,7 @@ if __name__ == '__main__':
 	myprint(output, '\n---\n')
 	myprint(output, "\n!!DPS Stats Bubble Chart\n")
 	myprint(output, "\n,,Bubble size based on CDPS,,\n")
-	myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_DPSStats_BubbleChartData}} $height="400px" $theme="dark"/>')
+	myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_DPSStats_BubbleChartData}} $height="500px" $theme="dark"/>')
 	myprint(output, "</$reveal>\n")
 	#end DPS Stats insert
 
