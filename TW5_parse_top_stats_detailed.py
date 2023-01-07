@@ -416,7 +416,7 @@ if __name__ == '__main__':
 	Control_Effects = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: "Hunter's Mark"}
 	for C_E in Control_Effects:
 		myprint(output, '<$button set="!!curControl-Out" setTo="'+Control_Effects[C_E]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Control_Effects[C_E]+' </$button>')
-	
+	myprint(output, '<$button set="!!curControl-Out" setTo="MOA Tracking" selectedClass="" class="btn btn-sm btn-dark" style="">MOA Tracking </$button>')
 	myprint(output, '\n---\n')
 	
 
@@ -450,6 +450,25 @@ if __name__ == '__main__':
 			myprint(output, "</$reveal>\n")
 
 			write_control_effects_out_xls(sorted_squadControl, key, players, args.xls_output_filename)
+	myprint(output, "</$reveal>\n")
+
+	#Add MOA Tracking Tables
+	myprint(output, '<$reveal type="match" state="!!curControl-Out" text="MOA Tracking">\n')
+	myprint(output, '\n---\n')
+	myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|MOA Attempts by Squad Player|c")
+	myprint(output, "|!Name | Attempted MOA Casting |h")	
+	for name in MOA_Casters:
+		myprint(output, "|"+name+" | "+str(MOA_Casters[name]['attempts'])+" |")
+	myprint(output, '\n    </div>\n    <div class="flex-col border">\n')
+	#MOA Target Table
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|Confirmed Missed MOA Attempts by Target|c")
+	myprint(output, "|!Name | Missed | Blocked | Invulned |h")	
+	for name in MOA_Targets:
+		myprint(output, "|"+name+" | "+str(MOA_Targets[name]['missed'])+" | "+str(MOA_Targets[name]['blocked'])+" | "+str(MOA_Targets[name]['invulned'])+" |")
+	myprint(output, '\n    </div>\n</div>\n')
 	myprint(output, "</$reveal>\n")
 	#end Control Effects Outgoing insert
 
