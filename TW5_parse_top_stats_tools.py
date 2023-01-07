@@ -698,8 +698,6 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 		if player.consistency_stats[stat] != last_val:
 			place += 1
 		print_string = "|"+str(place)+". |"+player.name+" | {{"+profession_strings[i]+"}} | "+str(player.num_fights_present)+" | "+my_value(round(player.consistency_stats[stat]))+" |"
-		if stat != "dist" and stat not in config.buff_ids and stat != 'dmg_taken':
-			print_string += " "+my_value(round(player.total_stats[stat],1))+"|"
 		if stat == 'dmg_taken':
 			print_string += " "+my_value(round(player.total_stats[stat],1))+"| "+my_value(round(player.average_stats[stat]))+"|"
 		if stat == 'dist':
