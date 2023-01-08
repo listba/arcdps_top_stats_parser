@@ -107,8 +107,9 @@ class Fight:
 @dataclass
 class Config:
 	num_players_listed: dict = field(default_factory=dict)          # How many players will be listed who achieved top stats most often for each stat?
-	num_players_considered_top: dict = field(default_factory=dict)  # How many players are considered to be "top" in each fight for each stat?
-	
+	#num_players_considered_top: dict = field(default_factory=dict)  # How many players are considered to be "top" in each fight for each stat?
+	num_players_considered_top_percentage: float = 0.  #% of players considered to be "top" in each fight for each stat?
+
 	min_attendance_portion_for_percentage: float = 0.  # For what portion of all fights does a player need to be there to be considered for "percentage" awards?
 	min_attendance_portion_for_late: float = 0.        # For what portion of all fights does a player need to be there to be considered for "late but great" awards?     
 	min_attendance_portion_for_buildswap: float = 0.   # For what portion of all fights does a player need to be there to be considered for "jack of all trades" awards?
@@ -312,7 +313,8 @@ def my_value(number):
 def fill_config(config_input):
 	config = Config()
 	config.num_players_listed = config_input.num_players_listed
-	config.num_players_considered_top = config_input.num_players_considered_top
+	#config.num_players_considered_top = config_input.num_players_considered_top
+	config.num_players_considered_top = config_input.num_players_considered_top_percentage/100
 
 	config.min_attendance_portion_for_percentage = config_input.attendance_percentage_for_percentage/100.
 	config.min_attendance_portion_for_late = config_input.attendance_percentage_for_late/100.    
@@ -378,7 +380,7 @@ def increase_top_x_reached(players, sortedList, config, stat):
 		first_valid = True
 		i = 0
 		last_val = 0
-		while i < len(sortedList) and (valid_values < config.num_players_considered_top[stat]+1 or sortedList[i][1] == last_val):
+		while i < len(sortedList) and (valid_values < (len(sortedList)*config.num_players_considered_top)+1 or sortedList[i][1] == last_val):
 			# sometimes dist is -1, filter these out
 			if sortedList[i][1] >= 0:
 				# first valid dist is the comm, don't consider
@@ -395,7 +397,7 @@ def increase_top_x_reached(players, sortedList, config, stat):
 	elif stat == 'deaths':
 		i = 0
 		last_val = 0
-		while i < len(sortedList) and (valid_values < config.num_players_considered_top[stat] or sortedList[i][1] == last_val):
+		while i < len(sortedList) and (valid_values < (len(sortedList)*config.num_players_considered_top) or sortedList[i][1] == last_val):
 			if sortedList[i][1] < 0:
 				i += 1
 				continue
@@ -410,7 +412,7 @@ def increase_top_x_reached(players, sortedList, config, stat):
 	# increase top stats reached for the first num_players_considered_top players
 	i = 0
 	last_val = 0
-	while i < len(sortedList) and (valid_values < config.num_players_considered_top[stat] or sortedList[i][1] == last_val) and players[sortedList[i][0]].total_stats[stat] > 0:
+	while i < len(sortedList) and (valid_values < (len(sortedList)*config.num_players_considered_top) or sortedList[i][1] == last_val) and players[sortedList[i][0]].total_stats[stat] > 0:
 		if sortedList[i][1] < 0 or (sortedList[i][1] == 0 and stat != 'dmg_taken'):
 			i += 1
 			continue
@@ -675,17 +677,17 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 
 	if consistent_or_avg == StatType.CONSISTENT:
 		if stat == "distJEL":
-			print_string = "\n\n*Top "+str(config.num_players_considered_top[stat])+" "+config.stat_names[stat]+" consistency awards"
+			print_string = "\n\n*Top "+str(config.num_players_considered_top*100)+"% "+config.stat_names[stat]+" consistency awards"
 		else:
 			print_string = "\n\n*Top "+config.stat_names[stat]+" consistency awards (Max. "+str(config.num_players_listed[stat])+" places, min. "+str(round(config.portion_of_top_for_consistent*100.))+"% of most consistent)"
 			myprint(output_file, print_string)
-			print_string = "*Most times placed in the top "+str(config.num_players_considered_top[stat])+"."
+			print_string = "*Most times placed in the top "+str(config.num_players_considered_top*100)+"%."
 			myprint(output_file, print_string)
 			print_string =  "*Attendance = number of fights a player was present out of "+str(num_used_fights)+" total fights."
 			myprint(output_file, print_string)
 	elif consistent_or_avg == StatType.AVERAGE:
 		if stat == "distJEL":
-			print_string = "*Top average "+str(config.num_players_considered_top[stat])+" "+config.stat_names[stat]+" awards"
+			print_string = "*Top average "+str(config.num_players_considered_top*100)+"% "+config.stat_names[stat]+" awards"
 		else:
 			print_string = "*Top average "+config.stat_names[stat]+" awards (Max. "+str(config.num_players_listed[stat])+" places)"
 			myprint(output_file, print_string)
@@ -714,10 +716,10 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 	# print table
 	for i in range(len(top_consistent_players)):
 		player = players[top_consistent_players[i]]
-		if player.duration_in_combat > 0:
-			combat_Time = int(player.duration_in_combat)
-		else:
-			combat_Time = int(player.duration_fights_present)
+		#if player.duration_in_combat > 0:
+		#	combat_Time = int(player.duration_in_combat)
+		#else:
+		#	combat_Time = int(player.duration_fights_present)
 		if player.consistency_stats[stat] != last_val:
 			place += 1
 		print_string = "|"+str(place)+". |"+player.name+" | {{"+profession_strings[i]+"}} | "+str(player.num_fights_present)+" | "+my_value(round(player.consistency_stats[stat]))+" |"
