@@ -107,8 +107,7 @@ class Fight:
 @dataclass
 class Config:
 	num_players_listed: dict = field(default_factory=dict)          # How many players will be listed who achieved top stats most often for each stat?
-	#num_players_considered_top: dict = field(default_factory=dict)  # How many players are considered to be "top" in each fight for each stat?
-	num_players_considered_top_percentage: float = 0.  #% of players considered to be "top" in each fight for each stat?
+	num_players_considered_top_percentage: float = 0.  # % of players considered to be "top" in each fight for each stat?
 
 	min_attendance_portion_for_percentage: float = 0.  # For what portion of all fights does a player need to be there to be considered for "percentage" awards?
 	min_attendance_portion_for_late: float = 0.        # For what portion of all fights does a player need to be there to be considered for "late but great" awards?     
@@ -313,7 +312,6 @@ def my_value(number):
 def fill_config(config_input):
 	config = Config()
 	config.num_players_listed = config_input.num_players_listed
-	#config.num_players_considered_top = config_input.num_players_considered_top
 	config.num_players_considered_top = config_input.num_players_considered_top_percentage/100
 
 	config.min_attendance_portion_for_percentage = config_input.attendance_percentage_for_percentage/100.
