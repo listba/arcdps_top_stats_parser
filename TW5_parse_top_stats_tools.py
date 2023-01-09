@@ -3317,7 +3317,10 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 		sum_Boons = 0
 		for boon in boon_List:
 			sum_Boons += player.average_stats[boon]
-		Bubble_Chart[prof_name]['boonScore'] = sum_Boons
+		for aura in auras_TableOut:
+			if player.name in auras_TableOut[aura]:
+				sum_Boons += (auras_TableOut[aura][player.name] / player.duration_fights_present)
+		Bubble_Chart[prof_name]['boonScore'] = round(sum_Boons, 4)
 		
 		#gather Stats scores per player
 		for statItem in get_Stats:
