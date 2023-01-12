@@ -3045,9 +3045,10 @@ def write_fights_overview_xls(fights, overall_squad_stats, overall_raid_stats, c
 #JEL - TW5 tweaks for markdown table output
 def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, config, output):
 	stat_len = {}
-	print_string = "|thead-dark table-hover|k"
+	print_string = '<div style="overflow-x:auto;">\n'
 	myprint(output, print_string)
-	#print_string = "| Fight # | Date | Start Time | End Time | Secs | Skip | Allies | Enemies | Downs | Kills |"
+	print_string = "|thead-dark table-hover w-auto scrollable|k"
+	myprint(output, print_string)
 	print_string = "| Fight # | Date | Ending | Secs | Skip | Allies | Enemies | Downs | Kills |"
 	for stat in overall_squad_stats:
 		if stat not in exclude_Stat:
@@ -3059,23 +3060,12 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 		fight = fights[i]
 		skipped_str = "yes" if fight.skipped else "no"
 		date = fight.start_time.split()[0]
-		start_time = fight.start_time.split()[1]
 		end_time = fight.end_time.split()[1]        
-		#print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(start_time)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
 		print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
 		for stat in overall_squad_stats:
 			if stat not in exclude_Stat:
-				#JEL - added my_value formatting
 				print_string += " "+my_value(round(fight.total_stats[stat]))+"|"
 		myprint(output, print_string)
-
-	#used_fights = [f for f in fights if not f.skipped]
-	#num_used_fights = len(used_fights)
-	#
-	#skipped_fights = len(fights) - num_used_fights
-	#mean_allies = round(sum([f.allies for f in used_fights])/num_used_fights, 1)
-	#mean_enemies = round(sum([f.enemies for f in used_fights])/num_used_fights, 1)
-	#total_kills = sum([f.kills for f in used_fights])
 
 	#print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['start_time']:>10}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
 	print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
@@ -3084,9 +3074,10 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 			print_string += " "+my_value(round(overall_squad_stats[stat]))+"|"
 	print_string += "f\n\n"
 	myprint(output, print_string)
+	print_string = '\n\n</div>'
+	myprint(output, print_string)
 
-
-#JEL - Attempt to write TW5 Chart tids
+#JEL - write TW5 stat Chart tids
 def write_stats_chart(players, top_players, stat, myDate, input_directory, config):
 	#args.input_directory+"/
 	stat_Name = config.stat_names[stat]
