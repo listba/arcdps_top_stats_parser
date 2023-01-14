@@ -164,10 +164,12 @@ if __name__ == '__main__':
 	#Overview reveal
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Overview">')
 	myprint(output, '\n!!!OVERVIEW\n')
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
 
 	print_fights_overview(fights, overall_squad_stats, overall_raid_stats, config, output)
 
 	#End reveal
+	myprint(output, '\n\n</div>\n\n')
 	myprint(output, '</$reveal>')
 
 	write_fights_overview_xls(fights, overall_squad_stats, overall_raid_stats, config, args.xls_output_filename)
@@ -177,7 +179,8 @@ if __name__ == '__main__':
 	#Squad Spike Damage
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Spike Damage">\n')    
 	myprint(output, '\n!!!SPIKE DAMAGE\n')
-	myprint(output, '\n---\n')    
+	myprint(output, '\n---\n')
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
 
 	output_string = "\nCumulative Squad Damage output by second, limited to first 20 seconds of the engagement\n"
 	output_string = "\n|thead-dark table-hover|k\n"
@@ -198,8 +201,8 @@ if __name__ == '__main__':
 	myprint(output, output_string)
 
 	#end reveal
-	print_string = "</$reveal>\n"
-	myprint(output, print_string)     
+	myprint(output, '\n\n</div>\n\n')
+	myprint(output, "</$reveal>\n")     
 
 
 	# end Squad Spike Damage
@@ -207,9 +210,11 @@ if __name__ == '__main__':
 	#Squad Composition Testing
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Squad Composition">')    
 	myprint(output, '\n<<alert dark "Excludes skipped fights in the overview" width:60%>>\n')
-	myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
+	myprint(output, '\n<div class="flex-row">\n    <div class="flex-col-2 border">\n')
 	myprint(output, '\n!!!SQUAD COMPOSITION\n')    
 	sort_order = ['Firebrand', 'Scrapper', 'Spellbreaker', "Herald", "Chronomancer", "Reaper", "Scourge", "Dragonhunter", "Guardian", "Elementalist", "Tempest", "Revenant", "Weaver", "Willbender", "Renegade", "Vindicator", "Warrior", "Berserker", "Bladesworn", "Engineer", "Holosmith", "Mechanist", "Ranger", "Druid", "Soulbeast", "Untamed", "Thief", "Daredevil", "Deadeye", "Specter", "Catalyst", "Mesmer", "Mirage", "Virtuoso", "Necromancer", "Harbinger"]
+
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
 
 	output_string = ""
 
@@ -228,8 +233,10 @@ if __name__ == '__main__':
 		
 		myprint(output, output_string1)
 		myprint(output, output_string2)
-	myprint(output, '\n</div>\n    <div class="flex-col border">\n')
-	myprint(output, '\n!!!ENEMY COMPOSITION\n')    
+	myprint(output, '\n\n</div>\n\n')
+	myprint(output, '\n</div>\n    <div class="flex-col-2 border">\n')
+	myprint(output, '\n!!!ENEMY COMPOSITION\n')  
+	myprint(output, '<div style="overflow-x:auto;">\n\n')  
 	enemy_squad_num = 0
 	for fight in fights:
 		if fight.skipped:
@@ -250,6 +257,7 @@ if __name__ == '__main__':
 
 		myprint(output, output_string1)
 		myprint(output, output_string2)
+	myprint(output, '\n\n</div>\n\n')
 	myprint(output, '\n</div>\n</div>\n')
 	#end reveal
 	print_string = "\n</$reveal>\n"
@@ -360,29 +368,39 @@ if __name__ == '__main__':
 
 		if stat == 'dist':
 			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
+			myprint(output, '<div style="overflow-x:auto;">\n\n')
 			top_consistent_stat_players[stat] = get_top_players(players, config, stat, StatType.CONSISTENT)
 			top_total_stat_players[stat] = get_top_players(players, config, stat, StatType.TOTAL)
 			top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)            
 			top_percentage_stat_players[stat],comparison_val = get_and_write_sorted_top_percentage(players, config, num_used_fights, stat, output, StatType.PERCENTAGE, top_consistent_stat_players[stat])
+			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '\n</div>\n    <div class="flex-col border">\n')
+			myprint(output, '<div style="overflow-x:auto;">\n\n')
 			top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
 			top_average_stat_players[stat] = get_and_write_sorted_average(players, config, num_used_fights, stat, output)
+			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '\n</div>\n</div>\n')
 		elif stat == 'dmg_taken':
 			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
+			myprint(output, '<div style="overflow-x:auto;">\n\n')
 			top_consistent_stat_players[stat] = get_top_players(players, config, stat, StatType.CONSISTENT)
 			top_total_stat_players[stat] = get_top_players(players, config, stat, StatType.TOTAL)
 			top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
 			top_average_stat_players[stat] = get_and_write_sorted_average(players, config, num_used_fights, stat, output)
+			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '\n</div>\n</div>\n')
 		else:
 			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
+			myprint(output, '<div style="overflow-x:auto;">\n\n')
 			top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
 			myprint(output, '\n\n\n\n')
 			top_consistent_stat_players[stat] = get_and_write_sorted_top_consistent(players, config, num_used_fights, stat, output)			
+			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '\n</div>\n    <div class="flex-col border">\n')
+			myprint(output, '<div style="overflow-x:auto;">\n\n')
 			#top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
 			myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
+			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '\n</div>\n</div>\n')
 			top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)
 			top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
@@ -398,6 +416,7 @@ if __name__ == '__main__':
 	#print table of accounts that fielded support characters
 	myprint(output,'<$reveal type="match" state="$:/state/curTab" text="Support">')
 	myprint(output, "\n")
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
 	# print table header
 	print_string = "|thead-dark table-hover sortable|k"    
 	myprint(output, print_string)
@@ -408,6 +427,7 @@ if __name__ == '__main__':
 		if (stat == 'rips' or stat == 'cleanses' or stat == 'stability'):
 			write_support_players(players, top_total_stat_players[stat], stat, output)
 
+	myprint(output, '\n\n</div>\n\n')
 	myprint(output, "</$reveal>\n")
 
 	supportCount=0
