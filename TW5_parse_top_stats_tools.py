@@ -1348,7 +1348,7 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 	if stat == 'heal':
 		print_string += " !FightTime HPS| !CombatTime HPS|"
 	if stat == 'rips' or stat == 'rips-In':
-		print_string += " !FigthTime SPS| !CombatTime HPS|"
+		print_string += " !FigthTime SPS| !CombatTime SPS|"
 	if stat == 'cleanses' or stat == 'cleanses-In':
 		print_string += " !FightTime CPS| !CombatTime CPS|"
 	if stat == 'barrier':
