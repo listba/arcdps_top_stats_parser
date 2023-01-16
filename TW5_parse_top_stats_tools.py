@@ -1347,9 +1347,9 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 		print_string += " !FightTime DPS| !CombatTime DPS|"
 	if stat == 'heal':
 		print_string += " !FightTime HPS| !CombatTime HPS|"
-	if stat == 'rips':
+	if stat == 'rips' or stat == 'rips-In':
 		print_string += " !FigthTime SPS| !CombatTime HPS|"
-	if stat == 'cleanses':
+	if stat == 'cleanses' or stat == 'cleanses-In':
 		print_string += " !FightTime CPS| !CombatTime CPS|"
 	if stat == 'barrier':
 		print_string += " !FightTime BPS| !CombatTime BPS|"
@@ -1390,7 +1390,7 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 		elif stat in config.buffs_stacking_intensity and stat != 'iol':
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"| "+"{:.4f}".format(round(player.total_stats[stat]/combat_Time, 4))+"|"
-		elif stat == 'cleanses' or stat == 'barrier' or stat == 'rips' or stat == 'heal':
+		elif stat == 'cleanses' or stat == 'barrier' or stat == 'rips' or stat == 'heal' or stat == 'cleanses-In' or stat == 'rips-In':
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"| "+"{:.4f}".format(round(player.total_stats[stat]/combat_Time, 4))+"|"
 		elif stat == 'dmg':
@@ -1897,6 +1897,16 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		if 'support' not in player_json or len(player_json['support']) != 1 or 'condiCleanse' not in player_json['support'][0]:
 			return 0
 		return int(player_json['support'][0]['condiCleanse'])            
+	#Prep work for new addition: incoming Boon Strips
+	if stat == 'rips-In':
+		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'BoonStrips' not in player_json['defenses'][0]:
+			return 0        
+		return int(player_json['defenses'][0]['BoonStrips'])		
+	#Prep work for new addition: incoming Condition Clears		
+	if stat == 'cleanses-In':
+		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'ConditionCleanses' not in player_json['defenses'][0]:
+			return 0        
+		return int(player_json['defenses'][0]['ConditionCleanses'])				
 
 	if stat == 'dist':
 		if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'distToCom' not in player_json['statsAll'][0]:
