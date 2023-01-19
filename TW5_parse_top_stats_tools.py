@@ -63,6 +63,7 @@ class Player:
 	name: str                           # character name
 	profession: str                     # profession name
 	num_fights_present: int = 0         # the number of fight the player was involved in 
+	num_enemies_present: int = 0         # the number of fight the player was involved in 
 	attendance_percentage: float = 0.   # the percentage of fights the player was involved in out of all fights
 	duration_fights_present: int = 0    # the total duration of all fights the player was involved in, in s
 	duration_active: int = 0            # the total duration a player was active (alive or down)
@@ -1344,7 +1345,7 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 	if stat in config.buff_ids:
 		print_string += " !FightTime Avg| !CombatTime Avg|"
 	if stat == 'dmg':
-		print_string += " !FightTime DPS| !CombatTime DPS|"
+		print_string += " !FightTime DPS| !CombatTime DPS|  !Avg/Enemy|"
 	if stat == 'heal':
 		print_string += " !FightTime HPS| !CombatTime HPS|"
 	if stat == 'rips' or stat == 'rips-In':
@@ -1395,7 +1396,7 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"| "+"{:.4f}".format(round(player.total_stats[stat]/combat_Time, 4))+"|"
 		elif stat == 'dmg':
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			print_string += " "+my_value(round(player.average_stats[stat]))+"| "+my_value(round(player.total_stats[stat]/combat_Time))+"|"
+			print_string += " "+my_value(round(player.average_stats[stat]))+"| "+my_value(round(player.total_stats[stat]/combat_Time))+"|"+my_value(round(player.total_stats[stat]/player.num_enemies_present))+"|"
 		elif stat == 'downs' or stat == 'kills':
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 			print_string += " "+"{:.4f}".format(round(player.average_stats[stat]*60, 4))+"| "+"{:.4f}".format(round((player.total_stats[stat]/combat_Time)*60, 4))+"|"
@@ -1699,6 +1700,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 				print("\n\n")
 
 			player.num_fights_present += 1
+			player.num_enemies_present += fight.enemies
 			player.duration_fights_present += fight.duration
 			player.duration_active += player.stats_per_fight[fight_number]['time_active']
 			player.duration_in_combat += player.stats_per_fight[fight_number]['time_in_combat']
