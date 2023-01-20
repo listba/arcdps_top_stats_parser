@@ -1355,7 +1355,8 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 		if stat == 'iol':
 			print_string += " !FightTime Avg| !CombatTime Avg|"
 		else:
-			print_string += " !Squad Avg| !Group Avg| !Self Avg|"
+			per_sec_name = stat[:1].upper() + "PS"
+			print_string += f" !Squad {per_sec_name}| !Group {per_sec_name}| !Self {per_sec_name}|"
 	if stat == 'dmg':
 		print_string += " !FightTime DPS| !CombatTime DPS|"
 	if stat == 'heal':
@@ -1416,14 +1417,14 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			print_string += " "+"{:.2f}".format(round(player.average_stats[stat], 2))+"| "+"{:.2f}".format(round((player.total_stats[stat]/combat_Time)*100, 2))+"|"
 		elif stat in config.buffs_stacking_duration:
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats[stat]))+' seconds of generation">'+"{:.2f}".format(round(player.average_stats[stat], 2))+'/sec</span>|'
-			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_group[stat]))+' seconds of generation">'+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+'/sec</span>|'
-			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_self[stat]))+' seconds of generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'/sec</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats[stat]))+' seconds of generation">'+"{:.2f}".format(round(player.average_stats[stat], 2))+'</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_group[stat]))+' seconds of generation">'+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+'</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_self[stat]))+' seconds of generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'</span>|'
 		elif stat in config.buffs_stacking_intensity:
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats[stat]))+' stacks of generation">'+"{:.2f}".format(round(player.average_stats[stat], 2))+'/sec</span>|'
-			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_group[stat]))+' stacks of generation">'+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+'/sec</span>|'
-			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_self[stat]))+' stacks of generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'/sec</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats[stat]))+' stacks of generation">'+"{:.2f}".format(round(player.average_stats[stat], 2))+'</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_group[stat]))+' stacks of generation">'+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+'</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_self[stat]))+' stacks of generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'</span>|'
 		else:
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 		myprint(output_file, print_string)
