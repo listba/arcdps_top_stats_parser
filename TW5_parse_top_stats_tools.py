@@ -54,6 +54,12 @@ class StatType(Enum):
 	LATE_PERCENTAGE = 4
 	SWAPPED_PERCENTAGE = 5
 	PERCENTAGE = 6
+
+class BuffGenerationType(Enum):
+	SQUAD = 1
+	GROUP = 2
+	OFFGROUP = 3
+	SELF = 4
 	
 
 # This class stores information about a player. Note that a different profession will be treated as a new player / character.
@@ -67,17 +73,21 @@ class Player:
 	duration_fights_present: int = 0    # the total duration of all fights the player was involved in, in s
 	duration_active: int = 0            # the total duration a player was active (alive or down)
 	duration_in_combat: int = 0         # the total duration a player was in combat (taking/dealing dmg)    
-	swapped_build: bool = False         # a different player character or specialization with this account name was in some of the fights
+	swapped_build: bool = False         # a different player character or specialization with this account name was in some of the fights 
 
 	# fields for all stats defined in config
 	consistency_stats: dict = field(default_factory=dict)     # how many times did this player get into top for each stat?
 	total_stats: dict = field(default_factory=dict)           # what's the total value for this player for each stat?
+	total_stats_group: dict = field(default_factory=dict)     # what's the total value for this player for each stat for their group?
+	total_stats_self: dict = field(default_factory=dict)      # what's the total value for this player for each stat for self?
 	average_stats: dict = field(default_factory=dict)         # what's the average stat per second for this player? (exception: deaths are per minute)
 	portion_top_stats: dict = field(default_factory=dict)     # what percentage of fights did this player get into top for each stat, in relation to the number of fights they were involved in?
 	stats_per_fight: list = field(default_factory=list)       # what's the value of each stat for this player in each fight?
 
 	def initialize(self, config):
 		self.total_stats = {key: 0 for key in config.stats_to_compute}
+		self.total_stats_group = {key: 0 for key in config.stats_to_compute}
+		self.total_stats_self = {key: 0 for key in config.stats_to_compute}
 		self.average_stats = {key: 0 for key in config.stats_to_compute}        
 		self.consistency_stats = {key: 0 for key in config.stats_to_compute}
 		self.portion_top_stats = {key: 0 for key in config.stats_to_compute}
@@ -1342,17 +1352,20 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 	myprint(output_file, print_string)
 	print_string = "|!Place |!Name |!Class | !Attendance| !Total|"
 	if stat in config.buff_ids:
-		print_string += " !FightTime Avg| !CombatTime Avg|"
+		if stat == 'iol':
+			print_string += " !FightTime Avg| !CombatTime Avg|"
+		else:
+			print_string += " !Squad Avg| !Group Avg| !Self Avg|"
 	if stat == 'dmg':
 		print_string += " !FightTime DPS| !CombatTime DPS|"
 	if stat == 'heal':
-		print_string += " !FightTime HPS| !CombatTime HPS|"
+		print_string += " !Squad HPS| !Group HPS| !Self HPS|"
 	if stat == 'rips' or stat == 'rips-In':
-		print_string += " !FigthTime SPS| !CombatTime SPS|"
+		print_string += " !FightTime SPS| !CombatTime SPS|"
 	if stat == 'cleanses' or stat == 'cleanses-In':
 		print_string += " !FightTime CPS| !CombatTime CPS|"
 	if stat == 'barrier':
-		print_string += " !FightTime BPS| !CombatTime BPS|"
+		print_string += " !Squad BPS| !Group BPS| !Self BPS|"
 	if stat == 'downs':
 		print_string += " !FightTime Downs/Min| !CombatTime Downs/Min|"
 	if stat == 'kills':
@@ -1384,24 +1397,33 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			print_string += f" {fight_time_h:>2}h {fight_time_m:>2}m {fight_time_s:>2}s |"
 		else:
 			print_string += f" {fight_time_m:>6}m {fight_time_s:>2}s |"
-		if stat in config.buffs_stacking_duration and stat != 'iol':
+		if stat == 'cleanses' or stat == 'rips' or stat == 'cleanses-In' or stat == 'rips-In':
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"%| "+"{:.4f}".format(round((player.total_stats[stat]/combat_Time)*100, 4))+"%|"
-		elif stat in config.buffs_stacking_intensity and stat != 'iol':
+			print_string += " "+"{:.2f}".format(round(player.average_stats[stat], 2))+"| "+"{:.2f}".format(round(player.total_stats[stat]/combat_Time, 2))+"|"
+		elif stat == 'barrier' or stat == 'heal':
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"| "+"{:.4f}".format(round(player.total_stats[stat]/combat_Time, 4))+"|"
-		elif stat == 'cleanses' or stat == 'barrier' or stat == 'rips' or stat == 'heal' or stat == 'cleanses-In' or stat == 'rips-In':
-			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"| "+"{:.4f}".format(round(player.total_stats[stat]/combat_Time, 4))+"|"
+			print_string += " "+"{:.2f}".format(round(player.average_stats[stat], 2))+"|"
+			print_string += " "+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+"|"
+			print_string += " "+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+"|"
 		elif stat == 'dmg':
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 			print_string += " "+my_value(round(player.average_stats[stat]))+"| "+my_value(round(player.total_stats[stat]/combat_Time))+"|"
 		elif stat == 'downs' or stat == 'kills':
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			print_string += " "+"{:.4f}".format(round(player.average_stats[stat]*60, 4))+"| "+"{:.4f}".format(round((player.total_stats[stat]/combat_Time)*60, 4))+"|"
+			print_string += " "+"{:.2f}".format(round(player.average_stats[stat]*60, 2))+"| "+"{:.2f}".format(round((player.total_stats[stat]/combat_Time)*60, 2))+"|"
 		elif stat == 'iol':
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"| "+"{:.4f}".format(round((player.total_stats[stat]/combat_Time)*100, 4))+"|"			
+			print_string += " "+"{:.2f}".format(round(player.average_stats[stat], 2))+"| "+"{:.2f}".format(round((player.total_stats[stat]/combat_Time)*100, 2))+"|"
+		elif stat in config.buffs_stacking_duration:
+			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats[stat]))+' seconds of generation">'+"{:.2f}".format(round(player.average_stats[stat], 2))+'/sec</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_group[stat]))+' seconds of generation">'+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+'/sec</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_self[stat]))+' seconds of generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'/sec</span>|'
+		elif stat in config.buffs_stacking_intensity:
+			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats[stat]))+' stacks of generation">'+"{:.2f}".format(round(player.average_stats[stat], 2))+'/sec</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_group[stat]))+' stacks of generation">'+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+'/sec</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_self[stat]))+' stacks of generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'/sec</span>|'
 		else:
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 		myprint(output_file, print_string)
@@ -1595,7 +1617,15 @@ def collect_stat_data(args, config, log, anonymize=False):
 			fights.append(fight)
 			log.write("skipped "+filename)            
 			continue
-		
+
+		party_member_counts = {}
+		for player_data in json_data['players']:
+			group = player_data['group']
+			if group in party_member_counts:
+				party_member_counts[group] += 1
+			else:
+				party_member_counts[group] = 1
+
 		used_fights += 1
 		#fight_number = used_fights-1
 		squad_comp[fight_number]={}
@@ -1650,6 +1680,8 @@ def collect_stat_data(args, config, log, anonymize=False):
 			player.stats_per_fight[fight_number]['time_in_combat'] = get_stat_from_player_json(player_data, players_running_healing_addon, 'time_in_combat', config)
 			player.stats_per_fight[fight_number]['group'] = get_stat_from_player_json(player_data, players_running_healing_addon, 'group', config)
 			
+			num_party_members = party_member_counts[player_data['group']]
+			
 			# get all stats that are supposed to be computed from the player data
 			for stat in config.stats_to_compute:
 				#if args.filetype == "xml":
@@ -1673,19 +1705,59 @@ def collect_stat_data(args, config, log, anonymize=False):
 				if player.stats_per_fight[fight_number][stat] > 0:
 					# buff are generation squad values, using total over time
 					if stat in config.buffs_stacking_duration and stat != 'iol':
-						#value is generated boon time on all squad players / fight duration / (players-1)" in percent, we want generated boon time on all squad players / (players-1)
-						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration, 4)
-						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration, 4)
+						#value is generated boon time on all squad players / fight duration / (players-1)" in percent, we want generated boon time on all squad players
+						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration*(fight.allies - 1), 4)
+						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration*(fight.allies - 1), 4)
+
+						group_gen = get_stat_from_player_json(player_data, players_running_healing_addon, stat, config, False, BuffGenerationType.GROUP)
+						player.total_stats_group[stat] += round(group_gen/100.*fight.duration*(num_party_members - 1), 4)
+						
+						self_gen = get_stat_from_player_json(player_data, players_running_healing_addon, stat, config, False, BuffGenerationType.SELF)
+						player.total_stats_self[stat] += round(self_gen/100.*fight.duration, 4)
 					elif stat in config.buffs_stacking_intensity and stat != 'iol':
-						#value is generated boon time on all squad players / fight duration / (players-1)", we want generated boon time on all squad players / (players-1)
-						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration, 4)
-						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration, 4)
+						#value is generated boon time on all squad players / fight duration / (players-1)", we want generated boon time on all squad players
+						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration*(fight.allies - 1), 4)
+						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration*(fight.allies - 1), 4)
+						
+						group_gen = get_stat_from_player_json(player_data, players_running_healing_addon, stat, config, False, BuffGenerationType.GROUP)
+						player.total_stats_group[stat] += round(group_gen*fight.duration*(num_party_members - 1), 4)
+						
+						self_gen = get_stat_from_player_json(player_data, players_running_healing_addon, stat, config, False, BuffGenerationType.SELF)
+						player.total_stats_self[stat] += round(self_gen*fight.duration, 4)
 					elif stat == 'dist':
 						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration)
 						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration)
 					elif stat == 'dmg_taken':
 						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*player.stats_per_fight[fight_number]['time_in_combat'])
 						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*player.stats_per_fight[fight_number]['time_in_combat'])
+					elif stat == 'heal':
+						fight.total_stats[stat] += player.stats_per_fight[fight_number][stat]
+						player.total_stats[stat] += player.stats_per_fight[fight_number][stat]
+
+						if player_data['name'] in players_running_healing_addon and 'extHealingStats' in player_data:
+							allied_healing_1s = player_data['extHealingStats']['alliedHealing1S']
+							total_healing_group = 0
+							for index in range(len(json_data['players'])):
+								is_same_group = player_data['group'] == json_data['players'][index]['group']
+								if is_same_group:
+									total_healing_group += allied_healing_1s[index][0][-1]
+									if player_data['name'] == json_data['players'][index]['name']:
+										player.total_stats_self[stat] += allied_healing_1s[index][0][-1]
+						player.total_stats_group[stat] += total_healing_group
+					elif stat == 'barrier':
+						fight.total_stats[stat] += player.stats_per_fight[fight_number][stat]
+						player.total_stats[stat] += player.stats_per_fight[fight_number][stat]
+
+						if player_data['name'] in players_running_healing_addon and 'extBarrierStats' in player_data:
+							allied_barrier_1s = player_data['extBarrierStats']['alliedBarrier1S']
+							total_barrier_group = 0
+							for index in range(len(json_data['players'])):
+								is_same_group = player_data['group'] == json_data['players'][index]['group']
+								if is_same_group:
+									total_barrier_group += allied_barrier_1s[index][0][-1]
+									if player_data['name'] == json_data['players'][index]['name']:
+										player.total_stats_self[stat] += allied_barrier_1s[index][0][-1]
+						player.total_stats_group[stat] += total_barrier_group
 					else:
 						# all non-buff stats
 						fight.total_stats[stat] += player.stats_per_fight[fight_number][stat]
@@ -1733,8 +1805,10 @@ def collect_stat_data(args, config, log, anonymize=False):
 		for stat in config.stats_to_compute:
 			player.portion_top_stats[stat] = round(player.consistency_stats[stat]/player.num_fights_present, 4)
 			player.total_stats[stat] = round(player.total_stats[stat], 4)
-			if stat == 'dmg' or stat == 'heal' or stat == 'barrier':
+			if stat == 'dmg':
 				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present)
+			elif stat == 'heal' or stat == 'barrier':
+				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present, 4)
 			elif stat == 'dmg_taken':
 				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_in_combat)                
 			elif stat == 'deaths':
@@ -1742,7 +1816,9 @@ def collect_stat_data(args, config, log, anonymize=False):
 			elif stat == 'downs' or stat == 'kills':
 				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present, 4)
 			elif stat in config.buffs_stacking_duration:
-				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present*100, 4)
+				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present, 4)
+			elif stat in config.buffs_stacking_intensity:
+				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present, 4)
 			else:
 				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present, 4)
 
@@ -1822,7 +1898,7 @@ def sum_breakpoints(breakpoints):
 	return combat_time
 
 # get value of stat from player_json
-def get_stat_from_player_json(player_json, players_running_healing_addon, stat, config):
+def get_stat_from_player_json(player_json, players_running_healing_addon, stat, config, activeBuffs = False, buffGenType = BuffGenerationType.SQUAD):
 	if stat == 'time_in_combat':
 		return round(sum_breakpoints(get_combat_time_breakpoints(player_json)) / 1000)
 
@@ -1938,10 +2014,19 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 
 	### Buffs ###
 	if stat in config.buff_ids:
-		if 'squadBuffs' not in player_json:
+		if buffGenType == BuffGenerationType.GROUP:
+			buffArrayName = 'groupBuffs' if not activeBuffs else 'groupBuffsActive'
+		elif buffGenType == BuffGenerationType.OFFGROUP:
+			buffArrayName = 'offGroupBuffs' if not activeBuffs else 'offGroupBuffsActive'
+		elif buffGenType == BuffGenerationType.SELF:
+			buffArrayName = 'selfBuffs' if not activeBuffs else 'selfBuffsActive'
+		else:
+			buffArrayName = 'squadBuffs' if not activeBuffs else 'squadBuffsActive'
+
+		if buffArrayName not in player_json:
 			return 0
 		# get buffs in squad generation -> need to loop over all buffs
-		for buff in player_json['squadBuffs']:
+		for buff in player_json[buffArrayName]:
 			if 'id' not in buff:
 				continue 
 			# find right buff
@@ -1956,38 +2041,14 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		return 0
 
 	if stat == 'heal':
-		# check if healing was logged, save it
-		heal = -1
-		if player_json['name'] not in players_running_healing_addon:
-			return heal
-		if 'extHealingStats' in player_json:
-			heal = 0
-			if 'outgoingHealingAllies' not in player_json['extHealingStats']:
-				return 0
-			for outgoing_healing_json in player_json['extHealingStats']['outgoingHealingAllies']:
-				# TODO why is this in the json twice?                
-				for outgoing_healing_json2 in outgoing_healing_json:
-					if 'healing' in outgoing_healing_json2:
-						heal += int(outgoing_healing_json2['healing'])
-						break
-		return heal
+		if player_json['name'] in players_running_healing_addon and 'extHealingStats' in player_json and 'alliedHealing1S' in player_json['extHealingStats']:
+			return sum([healing[0][-1] for healing in player_json['extHealingStats']['alliedHealing1S']])
+		return -1
 
 	if stat == 'barrier':
-		# check if barrier was logged, save it
-		barrier = -1
-		if player_json['name'] not in players_running_healing_addon:
-			return barrier
-		if 'extBarrierStats' in player_json:
-			barrier = 0
-			if 'outgoingBarrierAllies' not in player_json['extBarrierStats']:
-				return 0
-			for outgoing_barrier_json in player_json['extBarrierStats']['outgoingBarrierAllies']:
-				# TODO why is this in the json twice?                
-				for outgoing_barrier_json2 in outgoing_barrier_json:
-					barrier += outgoing_barrier_json2['barrier']
-					break
-		return barrier
-
+		if player_json['name'] in players_running_healing_addon and 'extBarrierStats' in player_json and 'alliedBarrier1S' in player_json['extBarrierStats']:
+			return sum([barrier[0][-1] for barrier in player_json['extBarrierStats']['alliedBarrier1S']])
+		return -1
 
 # DPS Stats block
 arrow_cart_skill_ids = [18850, 18853, 18855, 18860, 18862, 18865, 18867, 18869, 18872]
