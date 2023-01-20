@@ -1345,7 +1345,7 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 	if stat in config.buff_ids:
 		print_string += " !FightTime Avg| !CombatTime Avg|"
 	if stat == 'dmg':
-		print_string += " !FightTime DPS| !CombatTime DPS|  !Avg/Enemy|"
+		print_string += " !FightTime DPS| !CombatTime DPS|  !Damage/Enemy|   !DPS/Enemy|"
 	if stat == 'heal':
 		print_string += " !FightTime HPS| !CombatTime HPS|"
 	if stat == 'rips' or stat == 'rips-In':
@@ -1396,7 +1396,7 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"| "+"{:.4f}".format(round(player.total_stats[stat]/combat_Time, 4))+"|"
 		elif stat == 'dmg':
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			print_string += " "+my_value(round(player.average_stats[stat]))+"| "+my_value(round(player.total_stats[stat]/combat_Time))+"| "+my_value(round(player.total_stats[stat]/player.num_enemies_present))+"|"
+			print_string += " "+my_value(round(player.average_stats[stat]))+"| "+my_value(round(player.total_stats[stat]/combat_Time))+"| "+my_value(round(player.total_stats[stat]/(player.num_enemies_present)))+"| "+my_value(round(player.total_stats[stat]/(player.num_enemies_present*player.duration_in_combat),4))+"|"
 		elif stat == 'downs' or stat == 'kills':
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 			print_string += " "+"{:.4f}".format(round(player.average_stats[stat]*60, 4))+"| "+"{:.4f}".format(round((player.total_stats[stat]/combat_Time)*60, 4))+"|"
