@@ -105,54 +105,54 @@ if __name__ == '__main__':
 	total_fight_duration = print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, found_healing, found_barrier, config, output)
 
 	#Start nav_bar_menu for TW5
-	Nav_Bar_Items= ('<$button set="$:/state/curTab" setTo="Overview" selectedClass="" class="btn btn-sm btn-dark" style=""> Session Overview </$button>',
-					'<$button set="$:/state/curTab" setTo="Squad Composition" selectedClass="" class="btn btn-sm btn-dark" style=""> Squad Composition </$button>',
-					'<$button set="$:/state/curTab" setTo="Fight Review" selectedClass="" class="btn btn-sm btn-dark" style=""> Fight Review </$button>',
-					'<$button set="$:/state/curTab" setTo="Deaths" selectedClass="" class="btn btn-sm btn-dark" style=""> Deaths </$button>',
-					'<$button set="$:/state/curTab" setTo="Illusion of Life" selectedClass="" class="btn btn-sm btn-dark" style=""> IOL </$button>',
-					'<$button set="$:/state/curTab" setTo="Resurrect" selectedClass="" class="btn btn-sm btn-dark" style=""> Resurrect </$button>',                    
-					'<$button set="$:/state/curTab" setTo="Enemies Downed" selectedClass="" class="btn btn-sm btn-dark" style=""> Enemies Downed </$button>',
-					'<$button set="$:/state/curTab" setTo="Enemies Killed" selectedClass="" class="btn btn-sm btn-dark" style=""> Enemies Killed </$button>',
-					'<$button set="$:/state/curTab" setTo="Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage </$button>',
-					'<$button set="$:/state/curTab" setTo="Power Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Power Damage </$button>',
-					'<$button set="$:/state/curTab" setTo="Condi Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Condi Damage </$button>',
-					'<$button set="$:/state/curTab" setTo="Damage Taken" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage Taken</$button>',
-					'<$button set="$:/state/curTab" setTo="Boon Strips" selectedClass="" class="btn btn-sm btn-dark" style=""> Boon Strips </$button>',
-					'<$button set="$:/state/curTab" setTo="Condition Cleanses" selectedClass="" class="btn btn-sm btn-dark" style=""> Condition Cleanses</$button>',
-					'<$button set="$:/state/curTab" setTo="Superspeed" selectedClass="" class="btn btn-sm btn-dark" style=""> Superspeed </$button>',
-					'<$button set="$:/state/curTab" setTo="Stealth" selectedClass="" class="btn btn-sm btn-dark" style=""> Stealth </$button>',
-					'<$button set="$:/state/curTab" setTo="Hide in Shadows" selectedClass="" class="btn btn-sm btn-dark" style=""> Hide in Shadows </$button>',
-					'<$button set="$:/state/curTab" setTo="Distance to Tag" selectedClass="" class="btn btn-sm btn-dark" style=""> Distance to Tag </$button>',
-					'<$button set="$:/state/curTab" setTo="Stability" selectedClass="" class="btn btn-sm btn-dark" style=""> Stability </$button>',
-					'<$button set="$:/state/curTab" setTo="Protection" selectedClass="" class="btn btn-sm btn-dark" style=""> Protection </$button>',
-					'<$button set="$:/state/curTab" setTo="Aegis" selectedClass="" class="btn btn-sm btn-dark" style=""> Aegis </$button>',
-					'<$button set="$:/state/curTab" setTo="Might" selectedClass="" class="btn btn-sm btn-dark" style=""> Might </$button>',
-					'<$button set="$:/state/curTab" setTo="Fury" selectedClass="" class="btn btn-sm btn-dark" style=""> Fury </$button>',
-					'<$button set="$:/state/curTab" setTo="Resistance" selectedClass="" class="btn btn-sm btn-dark" style=""> Resistance </$button>',
-					'<$button set="$:/state/curTab" setTo="Resolution" selectedClass="" class="btn btn-sm btn-dark" style=""> Resolution </$button>',
-					'<$button set="$:/state/curTab" setTo="Quickness" selectedClass="" class="btn btn-sm btn-dark" style=""> Quickness </$button>',
-					'<$button set="$:/state/curTab" setTo="Swiftness" selectedClass="" class="btn btn-sm btn-dark" style=""> Swiftness </$button>',
-					'<$button set="$:/state/curTab" setTo="Alacrity" selectedClass="" class="btn btn-sm btn-dark" style=""> Alacrity </$button>',
-					'<$button set="$:/state/curTab" setTo="Vigor" selectedClass="" class="btn btn-sm btn-dark" style=""> Vigor </$button>',
-					'<$button set="$:/state/curTab" setTo="Regeneration" selectedClass="" class="btn btn-sm btn-dark" style=""> Regeneration </$button>',
-					'<$button set="$:/state/curTab" setTo="Support" selectedClass="" class="btn btn-sm btn-dark" style=""> Support Players </$button>',
-					'<$button set="$:/state/curTab" setTo="Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Healing </$button>',
-					'<$button set="$:/state/curTab" setTo="Barrier" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier </$button>',
-					'<$button set="$:/state/curTab" setTo="Barrier Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier Damage </$button>',					
-					'<$button set="$:/state/curTab" setTo="Weapon Swaps" selectedClass="" class="btn btn-sm btn-dark" style=""> Weapon Swaps </$button>',
-					'<$button set="$:/state/curTab" setTo="Control Effects - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Outgoing </$button>',
-					'<$button set="$:/state/curTab" setTo="Control Effects - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Incoming </$button>',					
-					'<$button set="$:/state/curTab" setTo="Spike Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Spike Damage </$button>',
-					'<$button set="$:/state/curTab" setTo="Buff Uptime" selectedClass="" class="btn btn-sm btn-dark" style=""> Buff Uptime </$button>',
-					'<$button set="$:/state/curTab" setTo="Stacking Buffs" selectedClass="" class="btn btn-sm btn-dark" style=""> Stacking Buffs </$button>',
-					'<$button set="$:/state/curTab" setTo="Auras - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - In </$button>',
-					'<$button set="$:/state/curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - Out </$button>',
-					'<$button set="$:/state/curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> Death OnTag </$button>',
-					'<$button set="$:/state/curTab" setTo="Downed_Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Downed Healing </$button>',
-					'<$button set="$:/state/curTab" setTo="Offensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Offensive Stats </$button>',
-					'<$button set="$:/state/curTab" setTo="DPSStats" selectedClass="" class="btn btn-sm btn-dark" style=""> DPS Stats </$button>',
-					'<$button set="$:/state/curTab" setTo="Burst Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Burst Damage </$button>',
-					'<$button set="$:/state/curTab" setTo="Dashboard" selectedClass="" class="btn btn-sm btn-dark" style=""> Dashboard </$button>'
+	Nav_Bar_Items= ('<$button setTitle="$:/state/curTab" setTo="Overview" selectedClass="" class="btn btn-sm btn-dark" style=""> Session Overview </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Squad Composition" selectedClass="" class="btn btn-sm btn-dark" style=""> Squad Composition </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Fight Review" selectedClass="" class="btn btn-sm btn-dark" style=""> Fight Review </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Deaths" selectedClass="" class="btn btn-sm btn-dark" style=""> Deaths </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Illusion of Life" selectedClass="" class="btn btn-sm btn-dark" style=""> IOL </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Resurrect" selectedClass="" class="btn btn-sm btn-dark" style=""> Resurrect </$button>',                    
+					'<$button setTitle="$:/state/curTab" setTo="Enemies Downed" selectedClass="" class="btn btn-sm btn-dark" style=""> Enemies Downed </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Enemies Killed" selectedClass="" class="btn btn-sm btn-dark" style=""> Enemies Killed </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Power Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Power Damage </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Condi Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Condi Damage </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Damage Taken" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage Taken</$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Boon Strips" selectedClass="" class="btn btn-sm btn-dark" style=""> Boon Strips </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Condition Cleanses" selectedClass="" class="btn btn-sm btn-dark" style=""> Condition Cleanses</$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Superspeed" selectedClass="" class="btn btn-sm btn-dark" style=""> Superspeed </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Stealth" selectedClass="" class="btn btn-sm btn-dark" style=""> Stealth </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Hide in Shadows" selectedClass="" class="btn btn-sm btn-dark" style=""> Hide in Shadows </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Distance to Tag" selectedClass="" class="btn btn-sm btn-dark" style=""> Distance to Tag </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Stability" selectedClass="" class="btn btn-sm btn-dark" style=""> Stability </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Protection" selectedClass="" class="btn btn-sm btn-dark" style=""> Protection </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Aegis" selectedClass="" class="btn btn-sm btn-dark" style=""> Aegis </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Might" selectedClass="" class="btn btn-sm btn-dark" style=""> Might </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Fury" selectedClass="" class="btn btn-sm btn-dark" style=""> Fury </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Resistance" selectedClass="" class="btn btn-sm btn-dark" style=""> Resistance </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Resolution" selectedClass="" class="btn btn-sm btn-dark" style=""> Resolution </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Quickness" selectedClass="" class="btn btn-sm btn-dark" style=""> Quickness </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Swiftness" selectedClass="" class="btn btn-sm btn-dark" style=""> Swiftness </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Alacrity" selectedClass="" class="btn btn-sm btn-dark" style=""> Alacrity </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Vigor" selectedClass="" class="btn btn-sm btn-dark" style=""> Vigor </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Regeneration" selectedClass="" class="btn btn-sm btn-dark" style=""> Regeneration </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Support" selectedClass="" class="btn btn-sm btn-dark" style=""> Support Players </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Healing </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Barrier" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Barrier Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier Damage </$button>',					
+					'<$button setTitle="$:/state/curTab" setTo="Weapon Swaps" selectedClass="" class="btn btn-sm btn-dark" style=""> Weapon Swaps </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Control Effects - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Outgoing </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Control Effects - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Incoming </$button>',					
+					'<$button setTitle="$:/state/curTab" setTo="Spike Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Spike Damage </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Buff Uptime" selectedClass="" class="btn btn-sm btn-dark" style=""> Buff Uptime </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Stacking Buffs" selectedClass="" class="btn btn-sm btn-dark" style=""> Stacking Buffs </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Auras - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - In </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - Out </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> Death OnTag </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Downed_Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Downed Healing </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Offensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Offensive Stats </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="DPSStats" selectedClass="" class="btn btn-sm btn-dark" style=""> DPS Stats </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Burst Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Burst Damage </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Dashboard" selectedClass="" class="btn btn-sm btn-dark" style=""> Dashboard </$button>'
 	)
 	for item in Nav_Bar_Items:
 		myprint(output, item)
@@ -274,7 +274,7 @@ if __name__ == '__main__':
 	for fight in fights:
 		FightNum = FightNum+1
 		if not fight.skipped:
-			myprint(output, '<$button set="$:/state/curFight" setTo="Fight-'+str(FightNum)+'" selectedClass="" class="btn btn-sm btn-dark" style=""> Fight-'+str(FightNum)+' </$button>')
+			myprint(output, '<$button setTitle="$:/state/curFight" setTo="Fight-'+str(FightNum)+'" selectedClass="" class="btn btn-sm btn-dark" style=""> Fight-'+str(FightNum)+' </$button>')
 	
 	myprint(output, '\n---\n')
 	
@@ -437,8 +437,8 @@ if __name__ == '__main__':
 	myprint(output, '\n<<alert-leftbar success "Outgoing Control Effects generated by the Squad" width:60%, class:"font-weight-bold">>\n\n')
 	Control_Effects = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: "Hunter's Mark"}
 	for C_E in Control_Effects:
-		myprint(output, '<$button set="$:/state/curControl-Out" setTo="'+Control_Effects[C_E]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Control_Effects[C_E]+' </$button>')
-	myprint(output, '<$button set="$:/state/curControl-Out" setTo="MOA Tracking" selectedClass="" class="btn btn-sm btn-dark" style="">MOA Tracking </$button>')
+		myprint(output, '<$button setTitle="$:/state/curControl-Out" setTo="'+Control_Effects[C_E]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Control_Effects[C_E]+' </$button>')
+	myprint(output, '<$button setTitle="$:/state/curControl-Out" setTo="MOA Tracking" selectedClass="" class="btn btn-sm btn-dark" style="">MOA Tracking </$button>')
 	myprint(output, '\n---\n')
 	
 
@@ -501,7 +501,7 @@ if __name__ == '__main__':
 	myprint(output, '\n<<alert-leftbar danger "Incoming Control Effects generated by the Enemy" width:60%, class:"font-weight-bold">>\n\n')
 	Control_Effects = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: "Hunter's Mark"}
 	for C_E in Control_Effects:
-		myprint(output, '<$button set="$:/state/curControl-In" setTo="'+Control_Effects[C_E]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Control_Effects[C_E]+' </$button>')
+		myprint(output, '<$button setTitle="$:/state/curControl-In" setTo="'+Control_Effects[C_E]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Control_Effects[C_E]+' </$button>')
 	
 	myprint(output, '\n---\n')
 	
@@ -569,7 +569,7 @@ if __name__ == '__main__':
 	myprint(output, '\n<<alert-leftbar danger "Auras by receiving Player" width:60%, class:"font-weight-bold">>\n\n')
 	Auras_Order = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic', 25518: 'Light', 39978: 'Dark', 10332: 'Chaos'}
 	for Aura in Auras_Order:
-		myprint(output, '<$button set="$:/state/curAuras-In" setTo="'+Auras_Order[Aura]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Auras_Order[Aura]+' Aura </$button>')
+		myprint(output, '<$button setTitle="$:/state/curAuras-In" setTo="'+Auras_Order[Aura]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Auras_Order[Aura]+' Aura </$button>')
 	
 	myprint(output, '\n---\n')
 	
@@ -612,7 +612,7 @@ if __name__ == '__main__':
 	myprint(output, '\n<<alert-leftbar info "Auras output by Player" width:60%, class:"font-weight-bold">>\n\n')
 	Auras_Order = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic', 25518: 'Light', 39978: 'Dark', 10332: 'Chaos'}
 	for Aura in Auras_Order:
-		myprint(output, '<$button set="$:/state/curAuras-Out" setTo="'+Auras_Order[Aura]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Auras_Order[Aura]+' Aura </$button>')
+		myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="'+Auras_Order[Aura]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Auras_Order[Aura]+' Aura </$button>')
 	
 	myprint(output, '\n---\n')
 	
@@ -691,7 +691,7 @@ if __name__ == '__main__':
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Stacking Buffs">')    
 	myprint(output, '\n<<alert-leftbar info "Stacking Buffs" width:60%, class:"font-weight-bold">>\n\n')
 	for stacking_buff in stacking_buff_Order:
-		myprint(output, '<$button set="$:/state/curStackingBuffs" setTo="'+stacking_buff+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+stacking_buff+'</$button>')
+		myprint(output, '<$button setTitle="$:/state/curStackingBuffs" setTo="'+stacking_buff+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+stacking_buff+'</$button>')
 	
 	myprint(output, '\n---\n')
 
@@ -983,7 +983,7 @@ if __name__ == '__main__':
 	Dashboard_Charts = ["Kills/Downs/DPS", "Fury/Might/DPS", "Deaths/DamageTaken/DistanceFromTag", "Cleanses/Heals/BoonScore", "BoonStrips/OutgoingControlScore/DPS", "Profession_DPS_BoxPlot", "Player_DPS_BoxPlot", "Profession_SPS_BoxPlot", "Player_SPS_BoxPlot", "Profession_CPS_BoxPlot", "Player_CPS_BoxPlot", "Profession_HPS_BoxPlot", "Player_HPS_BoxPlot"]
 	
 	for chart in Dashboard_Charts:
-		myprint(output, '<$button set="$:/state/curChart" setTo="'+chart+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+chart+' </$button>')
+		myprint(output, '<$button setTitle="$:/state/curChart" setTo="'+chart+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+chart+' </$button>')
 	
 	myprint(output, '\n---\n')
 	
