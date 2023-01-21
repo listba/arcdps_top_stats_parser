@@ -45,7 +45,7 @@ Note that currently, this tool is meant mainly for analyzing wwv fights, and I a
 ## Preparation ##
 To be able to generate the top stats, you need to install/download a few things.
 1. Install python3 if you don't have it yet (https://www.python.org/downloads/).
-2. Install xlrd, xlutils, xlwt and jsons it you don't have them yet: Open a terminal (on windows press windows key + r, type "cmd", enter), and type ```pip3 install xlrd xlutils xlwt jsons```, enter.
+2. Install xlrd, xlutils, xlwt and jsons it you don't have them yet: Open a terminal (on windows press windows key + r, type "cmd", enter), and type ```pip3 install xlrd xlutils xlwt jsons requests```, enter.
 3. Get the Elite Insights parser for arcdps logs (https://github.com/baaron4/GW2-Elite-Insights-Parser/releases). For parsing including barrier, you will need version 2.41 or higher. In the following, we assume the path to it is ```C:\Users\Example\Downloads\EliteInsights\```.
 4. Download this repository if you don't have it yet. We here assume the path is ```C:\Users\Example\Downloads\arcdps_top_stats_parser\```.
 
