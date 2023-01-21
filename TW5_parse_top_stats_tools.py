@@ -69,7 +69,7 @@ class Player:
 	name: str                           # character name
 	profession: str                     # profession name
 	num_fights_present: int = 0         # the number of fight the player was involved in 
-	num_enemies_present: int = 0         # the number of fight the player was involved in 
+	num_enemies_present: int = 0        # the number of fight the player was involved in 
 	attendance_percentage: float = 0.   # the percentage of fights the player was involved in out of all fights
 	duration_fights_present: int = 0    # the total duration of all fights the player was involved in, in s
 	duration_active: int = 0            # the total duration a player was active (alive or down)
@@ -84,6 +84,11 @@ class Player:
 	average_stats: dict = field(default_factory=dict)         # what's the average stat per second for this player? (exception: deaths are per minute)
 	portion_top_stats: dict = field(default_factory=dict)     # what percentage of fights did this player get into top for each stat, in relation to the number of fights they were involved in?
 	stats_per_fight: list = field(default_factory=list)       # what's the value of each stat for this player in each fight?
+
+	#fields for wt dps per enemy
+	wt_dps_enemies: list = field(default_factory=list)      # list of enemies present by fight
+	wt_dps_duration: list = field(default_factory=list)     # list of enemies present by fight
+	wt_dps_damage: list = field(default_factory=list)       # list of enemies present by fight
 
 	def initialize(self, config):
 		self.total_stats = {key: 0 for key in config.stats_to_compute}
@@ -1359,7 +1364,7 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			per_sec_name = stat[:1].upper() + "PS"
 			print_string += f" !Squad {per_sec_name}| !Group {per_sec_name}| !Self {per_sec_name}|"
 	if stat == 'dmg':
-		print_string += " !FightTime DPS| !CombatTime DPS|  !Damage/Enemy|   !DPS/Enemy|"
+		print_string += " !FightTime DPS| !CombatTime DPS|  !Damage/Enemy|   !Wt. DPS/Enemy|"
 	if stat == 'heal':
 		print_string += " !Squad HPS| !Group HPS| !Self HPS|"
 	if stat == 'rips' or stat == 'rips-In':
@@ -1408,8 +1413,13 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			print_string += " "+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+"|"
 			print_string += " "+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+"|"
 		elif stat == 'dmg':
+			weighted_DPS_Enemy=[]
+			for (dmg, enemy, duration) in zip(player.wt_dps_damage, player.wt_dps_enemies, player.wt_dps_duration):
+				if dmg != -1:
+					weighted_DPS_Enemy.append(round((dmg/enemy/duration) * (duration / sum(player.wt_dps_duration)),4))
+			wt_dps_enemy = sum(weighted_DPS_Enemy)
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			print_string += " "+my_value(round(player.average_stats[stat]))+"| "+my_value(round(player.total_stats[stat]/combat_Time))+"| "+my_value(round(player.total_stats[stat]/(player.num_enemies_present)))+"| "+my_value(round(player.total_stats[stat]/(player.num_enemies_present*player.duration_in_combat),4))+"|"
+			print_string += " "+my_value(round(player.average_stats[stat]))+"| "+my_value(round(player.total_stats[stat]/combat_Time))+"| "+my_value(round(player.total_stats[stat]/(player.num_enemies_present)))+"| "+my_value(round(wt_dps_enemy,4))+"|"
 		elif stat == 'downs' or stat == 'kills':
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 			print_string += " "+"{:.2f}".format(round(player.average_stats[stat]*60, 2))+"| "+"{:.2f}".format(round((player.total_stats[stat]/combat_Time)*60, 2))+"|"
@@ -1774,6 +1784,9 @@ def collect_stat_data(args, config, log, anonymize=False):
 
 			player.num_fights_present += 1
 			player.num_enemies_present += fight.enemies
+			player.wt_dps_enemies.append(fight.enemies)
+			player.wt_dps_duration.append(player.stats_per_fight[fight_number]['time_in_combat'])
+			player.wt_dps_damage.append(player.stats_per_fight[fight_number]['dmg'])
 			player.duration_fights_present += fight.duration
 			player.duration_active += player.stats_per_fight[fight_number]['time_active']
 			player.duration_in_combat += player.stats_per_fight[fight_number]['time_in_combat']
@@ -3670,3 +3683,26 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	with open(output_file, 'w') as json_file:
 		json.dump(json_dict, json_file, indent=4)
 
+def calc_weighted_dps_enemy(players, fights):
+	for player in players:
+		playerDamages = []
+		playerDurations = []
+		playerEnemies = []
+		weighted_DPS_Enemy = []
+		sum_playerDurations = 0
+
+		for fight in player['stats_per_fight']:
+			playerDamages.append(fight['dmg'])
+			playerDurations.append(fight['time_in_combat'])
+		for fight in fights:
+			playerEnemies.append(fight['enemies'])
+
+		for fightTime in playerDurations:
+			if fightTime >0:
+				sum_playerDurations += fightTime
+
+		for (dmg, enemy, duration) in zip(playerDamages, playerEnemies, playerDurations):
+			if dmg != -1:
+				weighted_DPS_Enemy.append(round((dmg/enemy) * (duration / sum_playerDurations),2))
+
+	return sum(weighted_DPS_Enemy)
