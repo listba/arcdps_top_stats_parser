@@ -670,7 +670,7 @@ if __name__ == '__main__':
 		output_string = "|"+name+" |"
 		output_string += " {{"+prof+"}} | "+my_value(round(fightTime))+"|"
 		for item in uptime_Order:
-			if item in uptime_Table[squadDps_prof_name]:
+			if item in uptime_Table[squadDps_prof_name] and fightTime >0:
 				output_string += " "+"{:.4f}".format(round(((uptime_Table[squadDps_prof_name][item]/fightTime)*100), 4))+"|"
 			else:
 				output_string += " 0.00|"
