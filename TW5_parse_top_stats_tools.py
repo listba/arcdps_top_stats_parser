@@ -2652,7 +2652,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 
 
 		#Instant Revive tracking of downed healing
-		instant_Revive = {14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Renewal of Water', 5762: 'Renewal of Fire', 5760: 'Renewal of Air', 5761: 'Renewal of Earth'}
+		instant_Revive = {14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Renewal of Water', 5762: 'Renewal of Fire', 5760: 'Renewal of Air', 5761: 'Renewal of Earth', 10611: 'Signet of Undeath', 12596: "Nature's Renewal"}
 		if 'extHealingStats' in player:
 			for target in player['extHealingStats']['totalHealingDist'][0]:
 				if 'totalDownedHealing' in target:
