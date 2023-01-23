@@ -2722,6 +2722,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 	dead_Tag_Mark = 0
 	commanderMissing = True
 	commanderFound = False
+	inchToPixel = fight_json['combatReplayMetaData']['inchToPixel']
 	i=0
 	for id in fight_json['players']:
 		if id['hasCommanderTag']:
@@ -2774,7 +2775,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 						x2 = tagPositions[positionMark][0]
 						y2 = tagPositions[positionMark][1]
 						deathDistance = math.sqrt((x1-x2)**2 + (y1-y2)**2)
-						deathRange = deathDistance/0.01
+						#deathRange = deathDistance/0.01
+						deathRange = deathDistance/inchToPixel
 						Death_OnTag[deathOnTag_prof_name]["Total"] = Death_OnTag[deathOnTag_prof_name]["Total"] + 1
 						if int(downKey) > int(dead_Tag_Mark) and dead_Tag:
 							Death_OnTag[deathOnTag_prof_name]["After_Tag_Death"] = Death_OnTag[deathOnTag_prof_name]["After_Tag_Death"] + 1
