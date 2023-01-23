@@ -55,6 +55,12 @@ class StatType(Enum):
 	SWAPPED_PERCENTAGE = 5
 	PERCENTAGE = 6
 	
+class BuffGenerationType(Enum):
+	SQUAD = 1
+	GROUP = 2
+	OFFGROUP = 3
+	SELF = 4
+	
 
 # This class stores information about a player. Note that a different profession will be treated as a new player / character.
 @dataclass
@@ -63,6 +69,7 @@ class Player:
 	name: str                           # character name
 	profession: str                     # profession name
 	num_fights_present: int = 0         # the number of fight the player was involved in 
+	num_enemies_present: int = 0        # the number of fight the player was involved in 
 	attendance_percentage: float = 0.   # the percentage of fights the player was involved in out of all fights
 	duration_fights_present: int = 0    # the total duration of all fights the player was involved in, in s
 	duration_active: int = 0            # the total duration a player was active (alive or down)
@@ -72,12 +79,21 @@ class Player:
 	# fields for all stats defined in config
 	consistency_stats: dict = field(default_factory=dict)     # how many times did this player get into top for each stat?
 	total_stats: dict = field(default_factory=dict)           # what's the total value for this player for each stat?
+	total_stats_group: dict = field(default_factory=dict)     # what's the total value for this player for each stat for their group?
+	total_stats_self: dict = field(default_factory=dict)      # what's the total value for this player for each stat for self?
 	average_stats: dict = field(default_factory=dict)         # what's the average stat per second for this player? (exception: deaths are per minute)
 	portion_top_stats: dict = field(default_factory=dict)     # what percentage of fights did this player get into top for each stat, in relation to the number of fights they were involved in?
 	stats_per_fight: list = field(default_factory=list)       # what's the value of each stat for this player in each fight?
 
+	#fields for wt dps per enemy
+	wt_dps_enemies: list = field(default_factory=list)      # list of enemies present by fight
+	wt_dps_duration: list = field(default_factory=list)     # list of enemies present by fight
+	wt_dps_damage: list = field(default_factory=list)       # list of enemies present by fight
+
 	def initialize(self, config):
 		self.total_stats = {key: 0 for key in config.stats_to_compute}
+		self.total_stats_group = {key: 0 for key in config.stats_to_compute}
+		self.total_stats_self = {key: 0 for key in config.stats_to_compute}
 		self.average_stats = {key: 0 for key in config.stats_to_compute}        
 		self.consistency_stats = {key: 0 for key in config.stats_to_compute}
 		self.portion_top_stats = {key: 0 for key in config.stats_to_compute}
@@ -107,7 +123,7 @@ class Fight:
 @dataclass
 class Config:
 	num_players_listed: dict = field(default_factory=dict)          # How many players will be listed who achieved top stats most often for each stat?
-	num_players_considered_top: dict = field(default_factory=dict)  # How many players are considered to be "top" in each fight for each stat?
+	num_players_considered_top_percentage: float = 0.  # % of players considered to be "top" in each fight for each stat?
 	
 	min_attendance_portion_for_percentage: float = 0.  # For what portion of all fights does a player need to be there to be considered for "percentage" awards?
 	min_attendance_portion_for_late: float = 0.        # For what portion of all fights does a player need to be there to be considered for "late but great" awards?     
@@ -158,6 +174,11 @@ auras_TableOut = {}
 
 #Uptime Tracking
 uptime_Table = {}
+uptime_Buff_Ids = {1122: 'stability', 717: 'protection', 743: 'aegis', 740: 'might', 725: 'fury', 26980: 'resistance', 873: 'resolution', 1187: 'quickness', 719: 'swiftness', 30328: 'alacrity', 726: 'vigor', 718: 'regeneration'}
+#uptime_Buff_Names = { 'stability': 1122,  'protection': 717,  'aegis': 743,  'might': 740,  'fury': 725,  'resistance': 26980,  'resolution': 873,  'quickness': 1187,  'swiftness': 719,  'alacrity': 30328,  'vigor': 726,  'regeneration': 718}
+
+#Stacking Buffs Tracking
+stacking_uptime_Table = {}
 
 #Calculate On Tag Death Variables
 On_Tag = 600
@@ -170,6 +191,34 @@ DPS_List['acct'] = {}
 DPS_List['name'] = {}
 DPS_List['prof_name'] = {}
 DPS_List['prof'] = {}
+
+#Collect CPS Box Plot Data
+CPS_List = {}
+CPS_List['acct'] = {}
+CPS_List['name'] = {}
+CPS_List['prof_name'] = {}
+CPS_List['prof'] = {}
+
+#Collect CPS Box Plot Data
+SPS_List = {}
+SPS_List['acct'] = {}
+SPS_List['name'] = {}
+SPS_List['prof_name'] = {}
+SPS_List['prof'] = {}
+
+#Collect CPS Box Plot Data
+HPS_List = {}
+HPS_List['acct'] = {}
+HPS_List['name'] = {}
+HPS_List['prof_name'] = {}
+HPS_List['prof'] = {}
+
+#Calculate DPSStats Variables
+DPSStats = {}
+
+#Collect MOA Info
+MOA_Targets = {}
+MOA_Casters = {}
 
 #fetch Guild Data and Check Guild Status function
 if Guild_Data:
@@ -218,33 +267,49 @@ Cele_Food = {
     19451: "Dragon's Revelry Starcake"
     }
 
-def find_sub_type(player):
-	sub_type = ""
+def find_sub_type(player, fightTime):
 	cons_0 = ""
 	cons_1 = ""
-	prof = player['profession']
-	if 'consumables' not in player:
-		sub_type = prof+"_Dps"
-	else:
+	if 'consumables' in player:
 		try: cons_0 = player['consumables'][0]['id']
 		except: cons_0 = ""
 		try: cons_1 = player['consumables'][1]['id']
 		except: cons_1 = ""
 		
-	if cons_0 in Heal_Food:
-		sub_type = prof+"_Heal"
-	if cons_1 in Heal_Utility:
-		sub_type = prof+"_Heal"
+	# If the player has on Cele food, they are always cele, since we wont have enough other
+	# information to determine between the sub types
 	if cons_0 in Cele_Food:
-		sub_type = prof+"_Cele"
-	if player['healing'] > 0:
-		sub_type = prof+"_Heal"
-	if player['concentration'] > 0:
-		sub_type = prof+"_Heal"		
-	if cons_0 not in Heal_Food and cons_0 not in Cele_Food:
-		sub_type = prof+"_Dps"
+		return "Cele"
 
-	return sub_type
+	playerDamage = 0
+	playerPowerDamage = 0
+	playerCondiDamage = 0
+	for target in player['dpsTargets']:
+		playerDamage += target[0]['damage']
+		playerPowerDamage += target[0]['powerDamage']
+		playerCondiDamage += target[0]['condiDamage']
+
+	# If a player is predominantly condi damage and more than 500 DPS
+	if playerCondiDamage > playerPowerDamage and playerDamage / fightTime > 500:
+		return "Condi"
+
+	# If the player has over 750 DPS for the fight, assume DPS regardless of food / crit
+	if playerDamage / fightTime > 750:
+		return "Dps"
+		
+	if cons_0 in Heal_Food or cons_1 in Heal_Utility:
+		return "Heal"
+
+	criticalCount = sum([stats[0]['criticalRate'] for stats in player['statsTargets']])
+	critableCount = sum([stats[0]['critableDirectDamageCount'] for stats in player['statsTargets']])
+	critPercent = criticalCount / critableCount if critableCount else 0
+
+	# Only healers should have a crit % lower than 40%
+	if critPercent <= 0.4:
+		return "Heal"
+ 
+	# If all other detection fails, fallback to assuming DPS like before
+	return "Dps"
 #end define subtype based on consumables
 
 
@@ -263,7 +328,7 @@ def my_value(number):
 def fill_config(config_input):
 	config = Config()
 	config.num_players_listed = config_input.num_players_listed
-	config.num_players_considered_top = config_input.num_players_considered_top
+	config.num_players_considered_top = config_input.num_players_considered_top_percentage/100
 
 	config.min_attendance_portion_for_percentage = config_input.attendance_percentage_for_percentage/100.
 	config.min_attendance_portion_for_late = config_input.attendance_percentage_for_late/100.    
@@ -329,7 +394,7 @@ def increase_top_x_reached(players, sortedList, config, stat):
 		first_valid = True
 		i = 0
 		last_val = 0
-		while i < len(sortedList) and (valid_values < config.num_players_considered_top[stat]+1 or sortedList[i][1] == last_val):
+		while i < len(sortedList) and (valid_values < (len(sortedList)*config.num_players_considered_top)+1 or sortedList[i][1] == last_val):
 			# sometimes dist is -1, filter these out
 			if sortedList[i][1] >= 0:
 				# first valid dist is the comm, don't consider
@@ -346,7 +411,7 @@ def increase_top_x_reached(players, sortedList, config, stat):
 	elif stat == 'deaths':
 		i = 0
 		last_val = 0
-		while i < len(sortedList) and (valid_values < config.num_players_considered_top[stat] or sortedList[i][1] == last_val):
+		while i < len(sortedList) and (valid_values < (len(sortedList)*config.num_players_considered_top) or sortedList[i][1] == last_val):
 			if sortedList[i][1] < 0:
 				i += 1
 				continue
@@ -361,7 +426,7 @@ def increase_top_x_reached(players, sortedList, config, stat):
 	# increase top stats reached for the first num_players_considered_top players
 	i = 0
 	last_val = 0
-	while i < len(sortedList) and (valid_values < config.num_players_considered_top[stat] or sortedList[i][1] == last_val) and players[sortedList[i][0]].total_stats[stat] > 0:
+	while i < len(sortedList) and (valid_values < (len(sortedList)*config.num_players_considered_top) or sortedList[i][1] == last_val) and players[sortedList[i][0]].total_stats[stat] > 0:
 		if sortedList[i][1] < 0 or (sortedList[i][1] == 0 and stat != 'dmg_taken'):
 			i += 1
 			continue
@@ -626,17 +691,17 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 
 	if consistent_or_avg == StatType.CONSISTENT:
 		if stat == "distJEL":
-			print_string = "\n\n*Top "+str(config.num_players_considered_top[stat])+" "+config.stat_names[stat]+" consistency awards"
+			print_string = "\n\n*Top "+str(config.num_players_considered_top*100)+"% "+config.stat_names[stat]+" consistency awards"
 		else:
 			print_string = "\n\n*Top "+config.stat_names[stat]+" consistency awards (Max. "+str(config.num_players_listed[stat])+" places, min. "+str(round(config.portion_of_top_for_consistent*100.))+"% of most consistent)"
 			myprint(output_file, print_string)
-			print_string = "*Most times placed in the top "+str(config.num_players_considered_top[stat])+"."
+			print_string = "*Most times placed in the top "+str(config.num_players_considered_top*100)+"%."
 			myprint(output_file, print_string)
 			print_string =  "*Attendance = number of fights a player was present out of "+str(num_used_fights)+" total fights."
 			myprint(output_file, print_string)
 	elif consistent_or_avg == StatType.AVERAGE:
 		if stat == "distJEL":
-			print_string = "*Top average "+str(config.num_players_considered_top[stat])+" "+config.stat_names[stat]+" awards"
+			print_string = "*Top average "+str(config.num_players_considered_top*100)+"% "+config.stat_names[stat]+" awards"
 		else:
 			print_string = "*Top average "+config.stat_names[stat]+" awards (Max. "+str(config.num_players_listed[stat])+" places)"
 			myprint(output_file, print_string)
@@ -651,13 +716,11 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 	# print table header
 	print_string = "|thead-dark table-hover sortable|k"    
 	myprint(output_file, print_string)
-	print_string = "|Place |Name |Class | Attendance| Times Top|"
-	if stat != "dist":
-		print_string += " Total|"
-	if stat == "dist" or stat == 'dmg_taken':
-		print_string += " Average|"
-	if stat in config.buff_ids:
-		print_string += " FightTime Avg| CombatTime Avg|"
+	print_string = "|!Place |!Name |!Class | !Attendance| !Times Top|"
+	if stat == "dist":
+		print_string += " !Average|"
+	if stat == 'dmg_taken':
+		print_string += " !Total| !Average|"		
 	print_string += "h"
 	myprint(output_file, print_string)    
 
@@ -667,25 +730,17 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 	# print table
 	for i in range(len(top_consistent_players)):
 		player = players[top_consistent_players[i]]
-		if player.duration_in_combat > 0:
-			combat_Time = int(player.duration_in_combat)
-		else:
-			combat_Time = int(player.duration_fights_present)
+		#if player.duration_in_combat > 0:
+		#	combat_Time = int(player.duration_in_combat)
+		#else:
+		#	combat_Time = int(player.duration_fights_present)
 		if player.consistency_stats[stat] != last_val:
 			place += 1
 		print_string = "|"+str(place)+". |"+player.name+" | {{"+profession_strings[i]+"}} | "+str(player.num_fights_present)+" | "+my_value(round(player.consistency_stats[stat]))+" |"
-		if stat != "dist" and stat not in config.buff_ids and stat != 'dmg_taken':
-			print_string += " "+my_value(round(player.total_stats[stat],1))+"|"
 		if stat == 'dmg_taken':
 			print_string += " "+my_value(round(player.total_stats[stat],1))+"| "+my_value(round(player.average_stats[stat]))+"|"
 		if stat == 'dist':
 			print_string += " "+my_value(round(player.average_stats[stat]))+"|"			
-		if stat == 'iol':
-			print_string += " "+my_value(round(player.total_stats[stat],1))+"| "+'{:.4f}'.format(player.average_stats[stat])+"| "+'{:.4f}'.format((player.total_stats[stat]/combat_Time)*100)+"|"
-		elif stat in config.buffs_stacking_intensity and stat != 'iol':
-			print_string += " "+my_value(round(player.total_stats[stat],1))+"s| "+'{:.4f}'.format(player.average_stats[stat])+"| "+'{:.4f}'.format(player.total_stats[stat]/combat_Time)+"|"
-		elif stat in config.buffs_stacking_duration and stat != 'iol':
-			print_string += " "+my_value(round(player.total_stats[stat],1))+"s| "+'{:.4f}'.format(player.average_stats[stat])+"%| "+'{:.4f}'.format((player.total_stats[stat]/combat_Time)*100)+"%|"
 
 		myprint(output_file, print_string)
 		last_val = player.consistency_stats[stat]
@@ -855,6 +910,102 @@ def write_Death_OnTag_xls(Death_OnTag, uptime_Table, players, xls_output_filenam
 		sheet1.write(i+1, 8, Death_OnTag[prof_name]['Total'])
 		sheet1.write(i+1, 9, Ranges_string)
 		i=i+1
+	wb.save(xls_output_filename)
+
+def write_DPSStats_xls(DPSStats, xls_output_filename):
+	fileDate = datetime.datetime.now()
+	book = xlrd.open_workbook(xls_output_filename)
+	wb = copy(book)
+	sheet1 = wb.add_sheet("DPSStats")
+	
+	sheet1.write(0, 0, "Date")
+	sheet1.write(0, 1, "Account")
+	sheet1.write(0, 2, "Name")
+	sheet1.write(0, 3, "Profession")
+	sheet1.write(0, 4, "Role")
+	sheet1.write(0, 5, "Attendance")
+	sheet1.write(0, 6, "Combat Time")
+	sheet1.write(0, 7, "Damage")
+	sheet1.write(0, 8, "Squad Damage")
+	sheet1.write(0, 9, "Downs")
+	sheet1.write(0, 10, "Kills")
+	sheet1.write(0, 11, "Coordination Damage")
+	sheet1.write(0, 12, "Carrion Damage")
+	sheet1.write(0, 13, "Squad Carrion Damage")
+	for j in range(1, 21):
+		sheet1.write(0, 13 + j, 'Chunk Damage (' + str(j) + ')')
+	for j in range(1, 21):
+		sheet1.write(0, 33 + j, 'Squad Chunk Damage (' + str(j) + ')')
+		
+	i = 0
+
+	for name in DPSStats:
+		sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
+		sheet1.write(i+1, 1, DPSStats[name]['account'])
+		sheet1.write(i+1, 2, DPSStats[name]['name'])
+		sheet1.write(i+1, 3, DPSStats[name]['profession'])
+		sheet1.write(i+1, 4, DPSStats[name]['role'])
+		sheet1.write(i+1, 5, DPSStats[name]['duration'])
+		sheet1.write(i+1, 6, DPSStats[name]['combatTime'])
+		sheet1.write(i+1, 7, DPSStats[name]['Damage_Total'])
+		sheet1.write(i+1, 8, DPSStats[name]['Squad_Damage_Total'])
+		sheet1.write(i+1, 9, DPSStats[name]['Downs'])
+		sheet1.write(i+1, 10, DPSStats[name]['Kills'])
+		sheet1.write(i+1, 11, DPSStats[name]['Coordination_Damage'])
+		sheet1.write(i+1, 12, DPSStats[name]['Carrion_Damage'])
+		sheet1.write(i+1, 13, DPSStats[name]['Carrion_Damage_Total'])
+		for j in range(1, 21):
+			sheet1.write(i+1, 13 + j, DPSStats[name]['Chunk_Damage'][j])
+		for j in range(1, 21):
+			sheet1.write(i+1, 33 + j, DPSStats[name]['Chunk_Damage_Total'][j])
+		i=i+1
+	
+	# Add BurstDPS sheet
+	sheet2 = wb.add_sheet("Burst Damage")
+	
+	sheet2.write(0, 0, "Date")
+	sheet2.write(0, 1, "Account")
+	sheet2.write(0, 2, "Name")
+	sheet2.write(0, 3, "Profession")
+	sheet2.write(0, 4, "Role")
+	for j in range(1, 21):
+		sheet2.write(0, 4 + j, 'Burst Damage (' + str(j) + ')')
+		
+	i = 0
+
+	for name in DPSStats:
+		sheet2.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
+		sheet2.write(i+1, 1, DPSStats[name]['account'])
+		sheet2.write(i+1, 2, DPSStats[name]['name'])
+		sheet2.write(i+1, 3, DPSStats[name]['profession'])
+		sheet2.write(i+1, 4, DPSStats[name]['role'])
+		for j in range(1, 21):
+			sheet2.write(i+1, 4 + j, DPSStats[name]['Burst_Damage'][j])
+		i=i+1
+	
+	# Add Ch5CaBurstDPS sheet
+	sheet3 = wb.add_sheet("Ch5Ca Burst Damage")
+	
+	sheet3.write(0, 0, "Date")
+	sheet3.write(0, 1, "Account")
+	sheet3.write(0, 2, "Name")
+	sheet3.write(0, 3, "Profession")
+	sheet3.write(0, 4, "Role")
+	for j in range(1, 21):
+		sheet3.write(0, 4 + j, 'Ch5Ca Burst Damage (' + str(j) + ')')
+		
+	i = 0
+
+	for name in DPSStats:
+		sheet3.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
+		sheet3.write(i+1, 1, DPSStats[name]['account'])
+		sheet3.write(i+1, 2, DPSStats[name]['name'])
+		sheet3.write(i+1, 3, DPSStats[name]['profession'])
+		sheet3.write(i+1, 4, DPSStats[name]['role'])
+		for j in range(1, 21):
+			sheet3.write(i+1, 4 + j, DPSStats[name]['Ch5Ca_Burst_Damage'][j])
+		i=i+1
+
 	wb.save(xls_output_filename)
 
 def write_squad_offensive_xls(squad_offensive, xls_output_filename):
@@ -1037,6 +1188,69 @@ def write_buff_uptimes_in_xls(uptime_Table, players, uptime_Order, xls_output_fi
 		i=i+1
 	wb.save(xls_output_filename)
 
+def write_stacking_buff_uptimes_in_xls(uptimeTable, xls_output_filename):
+	fileDate = datetime.datetime.now()
+	book = xlrd.open_workbook(xls_output_filename)
+	wb = copy(book)
+
+	# Add Might Stack sheet
+	sheet1 = wb.add_sheet("Might Stack Uptime")
+	
+	sheet1.write(0, 0, "Date")
+	sheet1.write(0, 1, "Account")
+	sheet1.write(0, 2, "Name")
+	sheet1.write(0, 3, "Profession")
+	sheet1.write(0, 4, "Role")
+	sheet1.write(0, 5, "Attendance")
+	for j in range(0, 26):
+		sheet1.write(0, 6 + j, 'Might (' + str(j) + ')')
+		
+	i = 0
+
+	for name in uptimeTable:
+		if 'might' not in uptimeTable[name]:
+			continue
+
+		sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
+		sheet1.write(i+1, 1, uptimeTable[name]['account'])
+		sheet1.write(i+1, 2, uptimeTable[name]['name'])
+		sheet1.write(i+1, 3, uptimeTable[name]['profession'])
+		sheet1.write(i+1, 4, uptimeTable[name]['role'])
+		sheet1.write(i+1, 5, uptimeTable[name]['duration_might'])
+		for j in range(0, 26):
+			sheet1.write(i+1, 6 + j, uptimeTable[name]['might'][j])
+		i=i+1
+
+	# Add Stability Stack sheet
+	sheet2 = wb.add_sheet("Stability Stack Uptime")
+	
+	sheet2.write(0, 0, "Date")
+	sheet2.write(0, 1, "Account")
+	sheet2.write(0, 2, "Name")
+	sheet2.write(0, 3, "Profession")
+	sheet2.write(0, 4, "Role")
+	sheet2.write(0, 5, "Attendance")
+	for j in range(0, 26):
+		sheet2.write(0, 6 + j, 'Stability (' + str(j) + ')')
+		
+	i = 0
+
+	for name in uptimeTable:
+		if 'stability' not in uptimeTable[name]:
+			continue
+
+		sheet2.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
+		sheet2.write(i+1, 1, uptimeTable[name]['account'])
+		sheet2.write(i+1, 2, uptimeTable[name]['name'])
+		sheet2.write(i+1, 3, uptimeTable[name]['profession'])
+		sheet2.write(i+1, 4, uptimeTable[name]['role'])
+		sheet2.write(i+1, 5, uptimeTable[name]['duration_stability'])
+		for j in range(0, 26):
+			sheet2.write(i+1, 6 + j, uptimeTable[name]['stability'][j])
+		i=i+1
+
+	wb.save(xls_output_filename)
+
 def write_support_xls(players, top_players, stat, xls_output_filename, supportCount):
 	fileDate = datetime.datetime.now()
 	book = xlrd.open_workbook(xls_output_filename)
@@ -1142,23 +1356,27 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 	# print table header
 	print_string = "|thead-dark table-hover sortable|k"
 	myprint(output_file, print_string)
-	print_string = "|Place |Name |Class | Attendance| Total|"
+	print_string = "|!Place |!Name |!Class | !Attendance| !Total|"
 	if stat in config.buff_ids:
-		print_string += " FightTime Avg| CombatTime Avg|"
+		if stat == 'iol':
+			print_string += " !FightTime Avg| !CombatTime Avg|"
+		else:
+			per_sec_name = stat[:1].upper() + "PS"
+			print_string += f" !Squad {per_sec_name}| !Group {per_sec_name}| !Self {per_sec_name}|"
 	if stat == 'dmg':
-		print_string += " FightTime DPS| CombatTime DPS|"
+		print_string += " !FightTime DPS| !CombatTime DPS|  !Damage/Enemy|   !Wt. DPS/Enemy|"
 	if stat == 'heal':
-		print_string += " FightTime HPS| CombatTime HPS|"
-	if stat == 'rips':
-		print_string += " FigthTime SPS| CombatTime HPS|"
-	if stat == 'cleanses':
-		print_string += " FightTime CPS| CombatTime CPS|"
+		print_string += " !Squad HPS| !Group HPS| !Self HPS|"
+	if stat == 'rips' or stat == 'rips-In':
+		print_string += " !FightTime SPS| !CombatTime SPS|"
+	if stat == 'cleanses' or stat == 'cleanses-In':
+		print_string += " !FightTime CPS| !CombatTime CPS|"
 	if stat == 'barrier':
-		print_string += " FightTime BPS| CombatTime BPS|"
+		print_string += " !Squad BPS| !Group BPS| !Self BPS|"
 	if stat == 'downs':
-		print_string += " FightTime Downs/Min| CombatTime Downs/Min|"
+		print_string += " !FightTime Downs/Min| !CombatTime Downs/Min|"
 	if stat == 'kills':
-		print_string += " FightTime Kills/Min| CombatTime Kills/Min|"
+		print_string += " !FightTime Kills/Min| !CombatTime Kills/Min|"
 	print_string += "h"
 	myprint(output_file, print_string)    
 
@@ -1186,24 +1404,38 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			print_string += f" {fight_time_h:>2}h {fight_time_m:>2}m {fight_time_s:>2}s |"
 		else:
 			print_string += f" {fight_time_m:>6}m {fight_time_s:>2}s |"
-		if stat in config.buffs_stacking_duration and stat != 'iol':
-			print_string += " "+my_value(round(player.total_stats[stat]))+"s|"
-			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"%| "+"{:.4f}".format(round((player.total_stats[stat]/combat_Time)*100, 4))+"%|"
-		elif stat in config.buffs_stacking_intensity and stat != 'iol':
-			print_string += " "+my_value(round(player.total_stats[stat]))+"s|"
-			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"| "+"{:.4f}".format(round(player.total_stats[stat]/combat_Time, 4))+"|"
-		elif stat == 'cleanses' or stat == 'barrier' or stat == 'rips' or stat == 'heal':
+		if stat == 'cleanses' or stat == 'rips' or stat == 'cleanses-In' or stat == 'rips-In':
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"| "+"{:.4f}".format(round(player.total_stats[stat]/combat_Time, 4))+"|"
+			print_string += " "+"{:.2f}".format(round(player.average_stats[stat], 2))+"| "+"{:.2f}".format(round(player.total_stats[stat]/combat_Time, 2))+"|"
+		elif stat == 'barrier' or stat == 'heal':
+			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
+			print_string += " "+"{:.2f}".format(round(player.average_stats[stat], 2))+"|"
+			print_string += " "+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+"|"
+			print_string += " "+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+"|"
 		elif stat == 'dmg':
+			weighted_DPS_Enemy=[]
+			for (dmg, enemy, duration) in zip(player.wt_dps_damage, player.wt_dps_enemies, player.wt_dps_duration):
+				if dmg != -1:
+					weighted_DPS_Enemy.append(round((dmg/enemy/duration) * (duration / sum(player.wt_dps_duration)),4))
+			wt_dps_enemy = sum(weighted_DPS_Enemy)
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			print_string += " "+my_value(round(player.average_stats[stat]))+"| "+my_value(round(player.total_stats[stat]/combat_Time))+"|"
+			print_string += " "+my_value(round(player.average_stats[stat]))+"| "+my_value(round(player.total_stats[stat]/combat_Time))+"| "+my_value(round(player.total_stats[stat]/(player.num_enemies_present)))+"| "+my_value(round(wt_dps_enemy,4))+"|"
 		elif stat == 'downs' or stat == 'kills':
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			print_string += " "+"{:.4f}".format(round(player.average_stats[stat]*60, 4))+"| "+"{:.4f}".format(round((player.total_stats[stat]/combat_Time)*60, 4))+"|"
+			print_string += " "+"{:.2f}".format(round(player.average_stats[stat]*60, 2))+"| "+"{:.2f}".format(round((player.total_stats[stat]/combat_Time)*60, 2))+"|"
 		elif stat == 'iol':
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			print_string += " "+"{:.4f}".format(round(player.average_stats[stat], 4))+"| "+"{:.4f}".format(round((player.total_stats[stat]/combat_Time)*100, 4))+"|"			
+			print_string += " "+"{:.2f}".format(round(player.average_stats[stat], 2))+"| "+"{:.2f}".format(round((player.total_stats[stat]/combat_Time)*100, 2))+"|"
+		elif stat in config.buffs_stacking_duration:
+			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats[stat]))+' seconds of generation">'+"{:.2f}".format(round(player.average_stats[stat], 2))+'</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_group[stat]))+' seconds of generation">'+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+'</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_self[stat]))+' seconds of generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'</span>|'
+		elif stat in config.buffs_stacking_intensity:
+			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats[stat]))+' stacks of generation">'+"{:.2f}".format(round(player.average_stats[stat], 2))+'</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_group[stat]))+' stacks of generation">'+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+'</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_self[stat]))+' stacks of generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'</span>|'
 		else:
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 		myprint(output_file, print_string)
@@ -1264,13 +1496,13 @@ def write_sorted_top_percentage(players, top_players, comparison_percentage, con
 	myprint(output_file, print_string)                
 
 	# print table header
-	print_string = "|thead-dark table-hover|k"
+	print_string = "|thead-dark table-hover sortable|k"
 	myprint(output_file, print_string)
-	print_string = "|Place |Name |Class | Percentage | Times Top | Out of |"
+	print_string = "|!Place |!Name |!Class | !Percentage | !Times Top | !Out of |"
 	if stat != "dist":
-		print_string += " Total|h"
+		print_string += " !Total|h"
 	else:
-		print_string += " Average|h"
+		print_string += " !Average|h"
 	myprint(output_file, print_string)    
 
 	# print stats for top players
@@ -1378,7 +1610,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 			json_datafile = open(file_path, encoding='utf-8')
 			json_data = json.load(json_datafile)
 		# get fight stats
-		fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List = get_stats_from_fight_json(json_data, config, log)
+		fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats = get_stats_from_fight_json(json_data, config, log)
 			
 		if first:
 			first = False
@@ -1398,6 +1630,14 @@ def collect_stat_data(args, config, log, anonymize=False):
 			log.write("skipped "+filename)            
 			continue
 		
+		party_member_counts = {}
+		for player_data in json_data['players']:
+			group = player_data['group']
+			if group in party_member_counts:
+				party_member_counts[group] += 1
+			else:
+				party_member_counts[group] = 1
+
 		used_fights += 1
 		#fight_number = used_fights-1
 		squad_comp[fight_number]={}
@@ -1452,6 +1692,8 @@ def collect_stat_data(args, config, log, anonymize=False):
 			player.stats_per_fight[fight_number]['time_in_combat'] = get_stat_from_player_json(player_data, players_running_healing_addon, 'time_in_combat', config)
 			player.stats_per_fight[fight_number]['group'] = get_stat_from_player_json(player_data, players_running_healing_addon, 'group', config)
 			
+			num_party_members = party_member_counts[player_data['group']]
+			
 			# get all stats that are supposed to be computed from the player data
 			for stat in config.stats_to_compute:
 				#if args.filetype == "xml":
@@ -1470,24 +1712,64 @@ def collect_stat_data(args, config, log, anonymize=False):
 						player.stats_per_fight[fight_number]['time_in_combat'] = 1
 					player.stats_per_fight[fight_number][stat] = player.stats_per_fight[fight_number][stat]/player.stats_per_fight[fight_number]['time_in_combat']
 
-				print(stat)
+				#print(stat)
 				# add stats of this fight and player to total stats of this fight and player
 				if player.stats_per_fight[fight_number][stat] > 0:
 					# buff are generation squad values, using total over time
 					if stat in config.buffs_stacking_duration and stat != 'iol':
-						#value is generated boon time on all squad players / fight duration / (players-1)" in percent, we want generated boon time on all squad players / (players-1)
-						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration, 4)
-						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration, 4)
+						#value is generated boon time on all squad players / fight duration / (players-1)" in percent, we want generated boon time on all squad players
+						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration*(fight.allies - 1), 4)
+						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration*(fight.allies - 1), 4)
+
+						group_gen = get_stat_from_player_json(player_data, players_running_healing_addon, stat, config, False, BuffGenerationType.GROUP)
+						player.total_stats_group[stat] += round(group_gen/100.*fight.duration*(num_party_members - 1), 4)
+						
+						self_gen = get_stat_from_player_json(player_data, players_running_healing_addon, stat, config, False, BuffGenerationType.SELF)
+						player.total_stats_self[stat] += round(self_gen/100.*fight.duration, 4)
 					elif stat in config.buffs_stacking_intensity and stat != 'iol':
-						#value is generated boon time on all squad players / fight duration / (players-1)", we want generated boon time on all squad players / (players-1)
-						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration, 4)
-						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration, 4)
+						#value is generated boon time on all squad players / fight duration / (players-1)", we want generated boon time on all squad players
+						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration*(fight.allies - 1), 4)
+						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration*(fight.allies - 1), 4)
+						
+						group_gen = get_stat_from_player_json(player_data, players_running_healing_addon, stat, config, False, BuffGenerationType.GROUP)
+						player.total_stats_group[stat] += round(group_gen*fight.duration*(num_party_members - 1), 4)
+						
+						self_gen = get_stat_from_player_json(player_data, players_running_healing_addon, stat, config, False, BuffGenerationType.SELF)
+						player.total_stats_self[stat] += round(self_gen*fight.duration, 4)
 					elif stat == 'dist':
 						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration)
 						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration)
 					elif stat == 'dmg_taken':
 						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*player.stats_per_fight[fight_number]['time_in_combat'])
 						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*player.stats_per_fight[fight_number]['time_in_combat'])
+					elif stat == 'heal':
+						fight.total_stats[stat] += player.stats_per_fight[fight_number][stat]
+						player.total_stats[stat] += player.stats_per_fight[fight_number][stat]
+
+						if player_data['name'] in players_running_healing_addon and 'extHealingStats' in player_data:
+							allied_healing_1s = player_data['extHealingStats']['alliedHealing1S']
+							total_healing_group = 0
+							for index in range(len(json_data['players'])):
+								is_same_group = player_data['group'] == json_data['players'][index]['group']
+								if is_same_group:
+									total_healing_group += allied_healing_1s[index][0][-1]
+									if player_data['name'] == json_data['players'][index]['name']:
+										player.total_stats_self[stat] += allied_healing_1s[index][0][-1]
+						player.total_stats_group[stat] += total_healing_group
+					elif stat == 'barrier':
+						fight.total_stats[stat] += player.stats_per_fight[fight_number][stat]
+						player.total_stats[stat] += player.stats_per_fight[fight_number][stat]
+
+						if player_data['name'] in players_running_healing_addon and 'extBarrierStats' in player_data:
+							allied_barrier_1s = player_data['extBarrierStats']['alliedBarrier1S']
+							total_barrier_group = 0
+							for index in range(len(json_data['players'])):
+								is_same_group = player_data['group'] == json_data['players'][index]['group']
+								if is_same_group:
+									total_barrier_group += allied_barrier_1s[index][0][-1]
+									if player_data['name'] == json_data['players'][index]['name']:
+										player.total_stats_self[stat] += allied_barrier_1s[index][0][-1]
+						player.total_stats_group[stat] += total_barrier_group
 					else:
 						# all non-buff stats
 						fight.total_stats[stat] += player.stats_per_fight[fight_number][stat]
@@ -1501,6 +1783,10 @@ def collect_stat_data(args, config, log, anonymize=False):
 				print("\n\n")
 
 			player.num_fights_present += 1
+			player.num_enemies_present += fight.enemies
+			player.wt_dps_enemies.append(fight.enemies)
+			player.wt_dps_duration.append(player.stats_per_fight[fight_number]['time_in_combat'])
+			player.wt_dps_damage.append(player.stats_per_fight[fight_number]['dmg'])
 			player.duration_fights_present += fight.duration
 			player.duration_active += player.stats_per_fight[fight_number]['time_active']
 			player.duration_in_combat += player.stats_per_fight[fight_number]['time_in_combat']
@@ -1535,8 +1821,10 @@ def collect_stat_data(args, config, log, anonymize=False):
 		for stat in config.stats_to_compute:
 			player.portion_top_stats[stat] = round(player.consistency_stats[stat]/player.num_fights_present, 4)
 			player.total_stats[stat] = round(player.total_stats[stat], 4)
-			if stat == 'dmg' or stat == 'heal' or stat == 'barrier':
+			if stat == 'dmg':
 				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present)
+			elif stat == 'heal' or stat == 'barrier':
+				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present, 4)
 			elif stat == 'dmg_taken':
 				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_in_combat)                
 			elif stat == 'deaths':
@@ -1544,7 +1832,9 @@ def collect_stat_data(args, config, log, anonymize=False):
 			elif stat == 'downs' or stat == 'kills':
 				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present, 4)
 			elif stat in config.buffs_stacking_duration:
-				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present*100, 4)
+				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present, 4)
+			elif stat in config.buffs_stacking_intensity:
+				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present, 4)
 			else:
 				player.average_stats[stat] = round(player.total_stats[stat]/player.duration_fights_present, 4)
 
@@ -1554,7 +1844,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 	if anonymize:
 		anonymize_players(players, account_index)
 	
-	return players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List
+	return players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats
 			
 
 
@@ -1585,7 +1875,7 @@ def get_combat_start_from_player_json(initial_time, player_json):
 	for i in range(math.ceil(initial_time/1000), len(player_json['damage1S'][0])):
 		if i == 0:
 			continue
-		if player_json['damage1S'][0][i] != player_json['damage1S'][0][i-1]:
+		if player_json['powerDamage1S'][0][i] != player_json['powerDamage1S'][0][i-1]:
 			if start_combat == -1:
 				start_combat = i*1000
 			else:
@@ -1594,31 +1884,41 @@ def get_combat_start_from_player_json(initial_time, player_json):
 	return start_combat
 		
 		
-# get value of stat from player_json
-def get_stat_from_player_json(player_json, players_running_healing_addon, stat, config):
-	if stat == 'time_in_combat':
-		if 'combatReplayData' not in player_json:
-			print("WARNING: combatReplayData not in json, using activeTimes as time in combat")
-			return get_stat_from_player_json(player_json, players_running_healing_addon, 'time_active', config)
-		replay = player_json['combatReplayData']
-		if 'dead' not in replay:
-			return get_stat_from_player_json(player_json, players_running_healing_addon, 'time_active', config)
+def get_combat_time_breakpoints(player_json):
+	start_combat = get_combat_start_from_player_json(0, player_json)
+	if 'combatReplayData' not in player_json:
+		print("WARNING: combatReplayData not in json, using activeTimes as time in combat")
+		return [start_combat, get_stat_from_player_json(player_json, None, 'time_active', None) * 1000]
+	replay = player_json['combatReplayData']
+	if 'dead' not in replay:
+		return [start_combat, get_stat_from_player_json(player_json, None, 'time_active', None) * 1000]
 		
-		combat_time = 0
-		start_combat = get_combat_start_from_player_json(0, player_json)
-			
-		for death in replay['dead']:
-			time_of_death = death[0]
-			time_of_revive = death[1]
-			if start_combat != -1:
-				combat_time += (time_of_death - start_combat)
-			start_combat = get_combat_start_from_player_json(time_of_revive, player_json)
-		end_combat = len(player_json['damage1S'][0])*1000
-		if start_combat != -1:
-			combat_time += end_combat - start_combat
-		combat_time /= 1000
-		#print(player_json['name']+": in combat for "+str(combat_time)+"s")
-		return round(combat_time)
+	breakpoints = []
+	playerDeaths = dict(replay['dead'])
+	playerDowns = dict(replay['down'])
+	for deathKey, deathValue in playerDeaths.items():
+		for downKey, downValue in playerDowns.items():
+			if deathKey == downValue:
+				if start_combat != -1:
+					breakpoints.append([start_combat, deathKey])
+				start_combat = get_combat_start_from_player_json(deathValue + 1000, player_json)
+				break
+	end_combat = (len(player_json['damage1S'][0]))*1000
+	if start_combat != -1:
+		breakpoints.append([start_combat, end_combat])
+
+	return breakpoints
+
+def sum_breakpoints(breakpoints):
+	combat_time = 0
+	for [start, end] in breakpoints:
+		combat_time += end - start
+	return combat_time
+
+# get value of stat from player_json
+def get_stat_from_player_json(player_json, players_running_healing_addon, stat, config, activeBuffs = False, buffGenType = BuffGenerationType.SQUAD):
+	if stat == 'time_in_combat':
+		return round(sum_breakpoints(get_combat_time_breakpoints(player_json)) / 1000)
 
 	if stat == 'group':
 		if 'group' not in player_json:
@@ -1664,7 +1964,7 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 			return 0
 		sumDamage = 0
 		for target in player_json['dpsTargets']:
-			sumDamage = sumDamage + int(target[0]['condiDps'])
+			sumDamage = sumDamage + int(target[0]['condiDamage'])
 		return int(sumDamage)
 		#return int(player_json['dpsAll'][0]['condiDamage'])    
 	
@@ -1691,6 +1991,16 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		if 'support' not in player_json or len(player_json['support']) != 1 or 'condiCleanse' not in player_json['support'][0]:
 			return 0
 		return int(player_json['support'][0]['condiCleanse'])            
+	#Prep work for new addition: incoming Boon Strips
+	if stat == 'rips-In':
+		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'BoonStrips' not in player_json['defenses'][0]:
+			return 0        
+		return int(player_json['defenses'][0]['BoonStrips'])		
+	#Prep work for new addition: incoming Condition Clears		
+	if stat == 'cleanses-In':
+		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'ConditionCleanses' not in player_json['defenses'][0]:
+			return 0        
+		return int(player_json['defenses'][0]['ConditionCleanses'])				
 
 	if stat == 'dist':
 		if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'distToCom' not in player_json['statsAll'][0]:
@@ -1722,10 +2032,19 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 
 	### Buffs ###
 	if stat in config.buff_ids:
-		if 'squadBuffs' not in player_json:
+		if buffGenType == BuffGenerationType.GROUP:
+			buffArrayName = 'groupBuffs' if not activeBuffs else 'groupBuffsActive'
+		elif buffGenType == BuffGenerationType.OFFGROUP:
+			buffArrayName = 'offGroupBuffs' if not activeBuffs else 'offGroupBuffsActive'
+		elif buffGenType == BuffGenerationType.SELF:
+			buffArrayName = 'selfBuffs' if not activeBuffs else 'selfBuffsActive'
+		else:
+			buffArrayName = 'squadBuffs' if not activeBuffs else 'squadBuffsActive'
+
+		if buffArrayName not in player_json:
 			return 0
 		# get buffs in squad generation -> need to loop over all buffs
-		for buff in player_json['squadBuffs']:
+		for buff in player_json[buffArrayName]:
 			if 'id' not in buff:
 				continue 
 			# find right buff
@@ -1740,38 +2059,14 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		return 0
 
 	if stat == 'heal':
-		# check if healing was logged, save it
-		heal = -1
-		if player_json['name'] not in players_running_healing_addon:
-			return heal
-		if 'extHealingStats' in player_json:
-			heal = 0
-			if 'outgoingHealingAllies' not in player_json['extHealingStats']:
-				return 0
-			for outgoing_healing_json in player_json['extHealingStats']['outgoingHealingAllies']:
-				# TODO why is this in the json twice?                
-				for outgoing_healing_json2 in outgoing_healing_json:
-					if 'healing' in outgoing_healing_json2:
-						heal += int(outgoing_healing_json2['healing'])
-						break
-		return heal
+		if player_json['name'] in players_running_healing_addon and 'extHealingStats' in player_json and 'alliedHealing1S' in player_json['extHealingStats']:
+			return sum([healing[0][-1] for healing in player_json['extHealingStats']['alliedHealing1S']])
+		return -1
 
 	if stat == 'barrier':
-		# check if barrier was logged, save it
-		barrier = -1
-		if player_json['name'] not in players_running_healing_addon:
-			return barrier
-		if 'extBarrierStats' in player_json:
-			barrier = 0
-			if 'outgoingBarrierAllies' not in player_json['extBarrierStats']:
-				return 0
-			for outgoing_barrier_json in player_json['extBarrierStats']['outgoingBarrierAllies']:
-				# TODO why is this in the json twice?                
-				for outgoing_barrier_json2 in outgoing_barrier_json:
-					barrier += outgoing_barrier_json2['barrier']
-					break
-		return barrier
-
+		if player_json['name'] in players_running_healing_addon and 'extBarrierStats' in player_json and 'alliedBarrier1S' in player_json['extBarrierStats']:
+			return sum([barrier[0][-1] for barrier in player_json['extBarrierStats']['alliedBarrier1S']])
+		return -1
 
 # DPS Stats block
 arrow_cart_skill_ids = [18850, 18853, 18855, 18860, 18862, 18865, 18867, 18869, 18872]
@@ -1789,6 +2084,359 @@ siege_skill_ids = [
 	*burning_oil_skill_ids,
 	*dragon_banner_skill_ids
 ]
+
+def moving_average(data, window_size):
+	num_elements = len(data)
+	ma = []
+	for n in range(num_elements):
+		min_tick = max(n - window_size, 0)
+		max_tick = min(n + window_size, num_elements - 1)
+		sub_data = data[min_tick:max_tick + 1]
+		ma.append(sum(sub_data) / len(sub_data))
+
+	return ma
+
+# States array is formatted: [start, stack_count]
+# Reformat as: [start, end, stack_count]
+def split_boon_states(states, duration):
+	split_states = []
+	num_states = len(states) - 1
+	for index, [start, stacks] in enumerate(states):
+		if index == num_states:
+			if start < duration:
+				split_states.append([start, duration, stacks])
+		else:
+			split_states.append([start, min(states[index + 1][0], duration), stacks])
+	return split_states
+
+# Take state array and combat breakpoints, filter down states to only include those when in combat
+def split_boon_states_by_combat_breakpoints(states, breakpoints, duration):
+	if not breakpoints:
+		return []
+
+	breakpoints_copy = breakpoints[:]
+	split_states = split_boon_states(states, duration)
+	new_states = []
+
+	while(len(breakpoints_copy) > 0 and len(split_states) > 0):
+		[combat_start, combat_end] = breakpoints_copy.pop(0)
+		[start_state, end_state, stacks] = split_states.pop(0)
+
+		while(end_state < combat_start):
+			if len(split_states) == 0:
+				break
+			[start_state, end_state, stacks] = split_states.pop(0)
+
+		if end_state < combat_start:
+			break
+
+		new_states.append([
+			combat_start if combat_start > start_state else start_state,
+			combat_end if combat_end < end_state else end_state,
+			stacks
+		])
+
+		while(len(split_states) > 0 and split_states[0][1] <= combat_end):
+			[start_state, end_state, stacks] = split_states.pop(0)
+
+			new_states.append([
+				combat_start if combat_start > start_state else start_state,
+				combat_end if combat_end < end_state else end_state,
+				stacks
+			])
+
+	return new_states
+
+player_roles = {}
+player_combat_time = {}
+def calculate_dps_stats(fight_json, fight, players_running_healing_addon, config):
+	if fight.skipped:
+		return
+
+	fight_ticks = len(fight_json['players'][0]["damage1S"][0])
+
+	damagePS = {}
+	for index, target in enumerate(fight_json['targets']):
+		if 'enemyPlayer' in target and target['enemyPlayer'] == True:
+			for player in fight_json['players']:
+				player_prof_name  = "{{"+player['profession']+"}} "+player['name']		
+				if player_prof_name  not in damagePS:
+					damagePS[player_prof_name ] = [0] * fight_ticks
+
+				damage_on_target = player["targetDamage1S"][index][0]
+				for i in range(fight_ticks):
+					damagePS[player_prof_name ][i] += damage_on_target[i]
+
+	#player_roles = {}
+	#player_combat_time = {}
+	skip_fight = {}
+	for player in fight_json['players']:
+		player_prof_name = "{{"+player['profession']+"}} "+player['name']
+
+		if player['notInSquad']:
+			skip_fight[player_prof_name] = True
+			continue
+
+		time_in_combat = get_stat_from_player_json(player, players_running_healing_addon, 'time_in_combat', config)
+		if time_in_combat == 0:
+			skip_fight[player_prof_name] = True
+			continue
+
+		player_combat_time[player_prof_name] = time_in_combat
+		player_roles[player_prof_name] = find_sub_type(player, time_in_combat)
+
+		if 'dead' in player['combatReplayData'] and len(player['combatReplayData']['dead']) > 0 and (time_in_combat / fight.duration) < 0.4:
+			skip_fight[player_prof_name] = True
+		else:
+			skip_fight[player_prof_name] = False
+
+	squad_damage_per_tick = []
+	for fight_tick in range(fight_ticks - 1):
+		squad_damage_on_tick = 0
+		for player in fight_json['players']:
+			player_prof_name = "{{"+player['profession']+"}} "+player['name']
+			if skip_fight[player_prof_name]:
+				continue
+	
+			player_damage = damagePS[player_prof_name]
+			squad_damage_on_tick += player_damage[fight_tick + 1] - player_damage[fight_tick]
+		squad_damage_per_tick.append(squad_damage_on_tick)
+
+	squad_damage_total = sum(squad_damage_per_tick)
+	squad_damage_per_tick_ma = moving_average(squad_damage_per_tick, 1)
+	squad_damage_ma_total = sum(squad_damage_per_tick_ma)
+
+	CHUNK_DAMAGE_SECONDS = 21
+	Ch5CaDamage1S = {}
+	UsedOffensiveSiege = {}
+
+	for player in fight_json['players']:
+		player_prof_name = "{{"+player['profession']+"}} "+player['name']
+		if skip_fight[player_prof_name]:
+			continue
+
+		player_role = player_roles[player_prof_name]
+		DPSStats_prof_name = player_prof_name + " " + player_role	
+		if DPSStats_prof_name not in DPSStats:
+			DPSStats[DPSStats_prof_name] = {}
+			DPSStats[DPSStats_prof_name]["account"] = player['account']
+			DPSStats[DPSStats_prof_name]["name"] = player['name']
+			DPSStats[DPSStats_prof_name]["profession"] = player['profession']
+			DPSStats[DPSStats_prof_name]["role"] = player_role
+			DPSStats[DPSStats_prof_name]["duration"] = 0
+			DPSStats[DPSStats_prof_name]["combatTime"] = 0
+			DPSStats[DPSStats_prof_name]["Coordination_Damage"] = 0
+			DPSStats[DPSStats_prof_name]["Chunk_Damage"] = [0] * CHUNK_DAMAGE_SECONDS
+			DPSStats[DPSStats_prof_name]["Chunk_Damage_Total"] = [0] * CHUNK_DAMAGE_SECONDS
+			DPSStats[DPSStats_prof_name]["Carrion_Damage"] = 0
+			DPSStats[DPSStats_prof_name]["Carrion_Damage_Total"] = 0
+			DPSStats[DPSStats_prof_name]["Damage_Total"] = 0
+			DPSStats[DPSStats_prof_name]["Squad_Damage_Total"] = 0
+			DPSStats[DPSStats_prof_name]["Burst_Damage"] = [0] * CHUNK_DAMAGE_SECONDS
+			DPSStats[DPSStats_prof_name]["Ch5Ca_Burst_Damage"] = [0] * CHUNK_DAMAGE_SECONDS
+			DPSStats[DPSStats_prof_name]["Downs"] = 0
+			DPSStats[DPSStats_prof_name]["Kills"] = 0
+			
+			
+		Ch5CaDamage1S[player_prof_name] = [0] * fight_ticks
+		UsedOffensiveSiege[player_prof_name] = False
+			
+		player_damage = damagePS[player_prof_name]
+		
+		DPSStats[DPSStats_prof_name]["duration"] += fight.duration
+		DPSStats[DPSStats_prof_name]["combatTime"] += player_combat_time[player_prof_name]
+		DPSStats[DPSStats_prof_name]["Damage_Total"] += player_damage[fight_ticks - 1]
+		DPSStats[DPSStats_prof_name]["Squad_Damage_Total"] += squad_damage_total
+
+		for statsTarget in player["statsTargets"]:
+			DPSStats[DPSStats_prof_name]["Downs"] += statsTarget[0]['downed']
+			DPSStats[DPSStats_prof_name]["Kills"] += statsTarget[0]['killed']
+
+		for damage_dist in player['totalDamageDist'][0]:
+			if damage_dist['id'] in siege_skill_ids:
+				UsedOffensiveSiege[player_prof_name] = True
+
+		if "minions" in player:	
+			for minion in player["minions"]:
+				for minion_damage_dist in minion["totalDamageDist"][0]:
+					if minion_damage_dist['id'] in siege_skill_ids:
+						UsedOffensiveSiege[player_prof_name] = True
+
+		# Coordination_Damage: Damage weighted by coordination with squad
+		player_damage_per_tick = [player_damage[0]]
+		for fight_tick in range(fight_ticks - 1):
+			player_damage_per_tick.append(player_damage[fight_tick + 1] - player_damage[fight_tick])
+
+		player_damage_ma = moving_average(player_damage_per_tick, 1)
+
+		for fight_tick in range(fight_ticks - 1):
+			player_damage_on_tick = player_damage_ma[fight_tick]
+			if player_damage_on_tick == 0:
+				continue
+
+			squad_damage_on_tick = squad_damage_per_tick_ma[fight_tick]
+			if squad_damage_on_tick == 0:
+				continue
+
+			squad_damage_percent = squad_damage_on_tick / squad_damage_ma_total
+
+			DPSStats[DPSStats_prof_name]["Coordination_Damage"] += player_damage_on_tick * squad_damage_percent * fight.duration
+
+	# Chunk damage: Damage done within X seconds of target down
+	for index, target in enumerate(fight_json['targets']):
+		if 'enemyPlayer' in target and target['enemyPlayer'] == True and 'combatReplayData' in target and len(target['combatReplayData']['down']):
+			for chunk_damage_seconds in range(1, CHUNK_DAMAGE_SECONDS):
+				targetDowns = dict(target['combatReplayData']['down'])
+				for targetDownsIndex, (downKey, downValue) in enumerate(targetDowns.items()):
+					downIndex = math.ceil(downKey / 1000)
+					startIndex = max(0, math.ceil(downKey / 1000) - chunk_damage_seconds)
+					if targetDownsIndex > 0:
+						lastDownKey, lastDownValue = list(targetDowns.items())[targetDownsIndex - 1]
+						lastDownIndex = math.ceil(lastDownKey / 1000)
+						if lastDownIndex == downIndex:
+							# Probably an ele in mist form
+							continue
+						startIndex = max(startIndex, lastDownIndex)
+
+					squad_damage_on_target = 0
+					for player in fight_json['players']:
+						player_prof_name = "{{"+player['profession']+"}} "+player['name']	
+						if skip_fight[player_prof_name]:
+							continue
+						
+						player_role = player_roles[player_prof_name]
+						DPSStats_prof_name = player_prof_name + " " + player_role
+
+						damage_on_target = player["targetDamage1S"][index][0]
+						player_damage = damage_on_target[downIndex] - damage_on_target[startIndex]
+
+						DPSStats[DPSStats_prof_name]["Chunk_Damage"][chunk_damage_seconds] += player_damage
+						squad_damage_on_target += player_damage
+
+						if chunk_damage_seconds == 5:
+							for i in range(startIndex, downIndex):
+								Ch5CaDamage1S[player_prof_name][i] += damage_on_target[i + 1] - damage_on_target[i]
+
+					for player in fight_json['players']:
+						player_prof_name = "{{"+player['profession']+"}} "+player['name']
+						if skip_fight[player_prof_name]:
+							continue
+
+						player_role = player_roles[player_prof_name]
+						DPSStats_prof_name = player_prof_name + " " + player_role
+
+						DPSStats[DPSStats_prof_name]["Chunk_Damage_Total"][chunk_damage_seconds] += squad_damage_on_target
+
+	# Carrion damage: damage to downs that die 
+	for index, target in enumerate(fight_json['targets']):
+		if 'enemyPlayer' in target and target['enemyPlayer'] == True and 'combatReplayData' in target and len(target['combatReplayData']['dead']):
+			targetDeaths = dict(target['combatReplayData']['dead'])
+			targetDowns = dict(target['combatReplayData']['down'])
+			for deathKey, deathValue in targetDeaths.items():
+				for downKey, downValue in targetDowns.items():
+					if deathKey == downValue:
+						dmgEnd = math.ceil(deathKey / 1000)
+						dmgStart = math.ceil(downKey / 1000)
+
+						total_carrion_damage = 0
+						for player in fight_json['players']:
+							player_prof_name = "{{"+player['profession']+"}} "+player['name']
+							if skip_fight[player_prof_name]:
+								continue
+							
+							player_role = player_roles[player_prof_name]
+							DPSStats_prof_name = player_prof_name + " " + player_role
+							damage_on_target = player["targetDamage1S"][index][0]
+							carrion_damage = damage_on_target[dmgEnd] - damage_on_target[dmgStart]
+
+							DPSStats[DPSStats_prof_name]["Carrion_Damage"] += carrion_damage
+							total_carrion_damage += carrion_damage
+
+							for i in range(dmgStart, dmgEnd):
+								Ch5CaDamage1S[player_prof_name][i] += damage_on_target[i + 1] - damage_on_target[i]
+
+						for player in fight_json['players']:
+							player_prof_name = "{{"+player['profession']+"}} "+player['name']
+							if skip_fight[player_prof_name]:
+								continue
+							
+							player_role = player_roles[player_prof_name]
+							DPSStats_prof_name = player_prof_name + " " + player_role
+							DPSStats[DPSStats_prof_name]["Carrion_Damage_Total"] += total_carrion_damage
+
+	# Burst damage: max damage done in n seconds
+	for player in fight_json['players']:
+		player_prof_name = "{{"+player['profession']+"}} "+player['name']
+		if skip_fight[player_prof_name] or UsedOffensiveSiege[player_prof_name]:
+			# Exclude Dragon Banner from Burst stats
+			continue
+
+		player_role = player_roles[player_prof_name]
+		DPSStats_prof_name = player_prof_name + " " + player_role
+		player_damage = damagePS[player_prof_name]
+		for i in range(1, CHUNK_DAMAGE_SECONDS):
+			for fight_tick in range(i, fight_ticks):
+				dmg = player_damage[fight_tick] - player_damage[fight_tick - i]
+				DPSStats[DPSStats_prof_name]["Burst_Damage"][i] = max(dmg, DPSStats[DPSStats_prof_name]["Burst_Damage"][i])
+
+	# Ch5Ca Burst damage: max damage done in n seconds
+	for player in fight_json['players']:
+		player_prof_name = "{{"+player['profession']+"}} "+player['name']
+		if skip_fight[player_prof_name] or UsedOffensiveSiege[player_prof_name]:
+			# Exclude Dragon Banner from Burst stats
+			continue
+
+		player_role = player_roles[player_prof_name]
+		DPSStats_prof_name = player_prof_name + " " + player_role
+		player_damage_ps = Ch5CaDamage1S[player_prof_name]
+		player_damage = [0] * len(player_damage_ps)
+		player_damage[0] = player_damage_ps[0]
+		for i in range(1, len(player_damage)):
+			player_damage[i] = player_damage[i - 1] + player_damage_ps[i]
+		for i in range(1, CHUNK_DAMAGE_SECONDS):
+			for fight_tick in range(i, fight_ticks):
+				dmg = player_damage[fight_tick] - player_damage[fight_tick - i]
+				DPSStats[DPSStats_prof_name]["Ch5Ca_Burst_Damage"][i] = max(dmg, DPSStats[DPSStats_prof_name]["Ch5Ca_Burst_Damage"][i])
+	
+	# Track Stacking Buff Uptimes
+	for player in fight_json['players']:
+		player_prof_name = "{{"+player['profession']+"}} "+player['name']
+		if skip_fight[player_prof_name]:
+			continue
+
+		player_role = player_roles[player_prof_name]
+		DPSStats_prof_name = player_prof_name + " " + player_role
+		if DPSStats_prof_name not in stacking_uptime_Table:
+			stacking_uptime_Table[DPSStats_prof_name] = {}
+			stacking_uptime_Table[DPSStats_prof_name]["account"] = player['account']
+			stacking_uptime_Table[DPSStats_prof_name]["name"] = player['name']
+			stacking_uptime_Table[DPSStats_prof_name]["profession"] = player['profession']
+			stacking_uptime_Table[DPSStats_prof_name]["role"] = player_role
+			stacking_uptime_Table[DPSStats_prof_name]["duration_might"] = 0
+			stacking_uptime_Table[DPSStats_prof_name]["duration_stability"] = 0
+			stacking_uptime_Table[DPSStats_prof_name]["might"] = [0] * 26
+			stacking_uptime_Table[DPSStats_prof_name]["stability"] = [0] * 26
+
+		player_combat_breakpoints = get_combat_time_breakpoints(player)
+
+		for item in player['buffUptimesActive']:
+			buffId = int(item['id'])	
+			if buffId not in uptime_Buff_Ids:
+				continue
+
+			buff_name = uptime_Buff_Ids[buffId]
+			if buff_name == 'stability' or buff_name == 'might':
+				states = split_boon_states_by_combat_breakpoints(item['states'], player_combat_breakpoints, fight.duration*1000)
+
+				total_time = 0
+				for [state_start, state_end, stacks] in states:
+					uptime = state_end - state_start
+					total_time += uptime
+					stacking_uptime_Table[DPSStats_prof_name][buff_name][min(stacks, 25)] += uptime
+
+				stacking_uptime_Table[DPSStats_prof_name]["duration_"+buff_name] += total_time
+	
+	return DPSStats
 
 # get stats for this fight from fight_json
 # Input:
@@ -1867,6 +2515,24 @@ def get_stats_from_fight_json(fight_json, config, log):
 				else:
 					enemy_skill_dmg[skill_name] = enemy_skill_dmg[skill_name] +skill_dmg
 
+			#Track MOA - Signet of Humility (Active)
+			for skill in enemy['totalDamageTaken'][0]:
+				if int(skill['id']) == 29519:
+					if enemy_name not in MOA_Targets:
+						MOA_Targets[enemy_name]={}
+						MOA_Targets[enemy_name]['hits'] = skill['hits']
+						MOA_Targets[enemy_name]['connectedHits'] = skill['connectedHits']
+						MOA_Targets[enemy_name]['missed'] = skill['missed']
+						MOA_Targets[enemy_name]['blocked'] = skill['blocked']
+						MOA_Targets[enemy_name]['invulned'] = skill['invulned']
+					else:
+						MOA_Targets[enemy_name]['hits'] += skill['hits']
+						MOA_Targets[enemy_name]['connectedHits'] += skill['connectedHits']
+						MOA_Targets[enemy_name]['missed'] += skill['missed']
+						MOA_Targets[enemy_name]['blocked'] += skill['blocked']
+						MOA_Targets[enemy_name]['invulned'] += skill['invulned']
+					
+
 			#Tracking Outgoing Control Effects generated by the squad against enemy players
 			Control_Effects = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: "Hunter's Mark"}
 			#Control_Duration = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear',  26766: 'Slow', 27705: 'Taunt', 30778: "Hunter's Mark"}
@@ -1902,9 +2568,18 @@ def get_stats_from_fight_json(fight_json, config, log):
 		squadDps_profession = player['profession']
 		squadDps_prof_name = "{{"+squadDps_profession+"}} "+squadDps_name
 		squadDps_damage = 0
+
+		if squadDps_prof_name not in uptime_Table:
+			uptime_Table[squadDps_prof_name]={}
+			uptime_Table[squadDps_prof_name]['name']=squadDps_name
+			uptime_Table[squadDps_prof_name]['prof']=squadDps_profession
+			uptime_Table[squadDps_prof_name]['duration'] = 0
+			print('Added player to uptime_Table: '+ squadDps_prof_name)		
+
 		for target in player['dpsTargets']:
 			squadDps_damage = squadDps_damage + int(target[0]['damage'])
 		squad_Dps[squadDps_prof_name] = squadDps_damage
+
 		for skill_used in player['totalDamageDist'][0]:
 			skill_id = skill_used['id']
 			if skill_id in SiegeSkills:
@@ -1925,9 +2600,21 @@ def get_stats_from_fight_json(fight_json, config, log):
 				else:
 					squad_spike_dmg[PHASE] = squad_spike_dmg[PHASE] + DAMAGE1S
 
+		player_combat_time = sum_breakpoints(get_combat_time_breakpoints(player)) / 1000
+
+		#Track MOA Activity - Casting of Signet of Humility
+		if 'rotation' in player:
+			for item in player['rotation']:
+				if int(item['id']) == 29519:
+					if squadDps_name not in MOA_Casters:
+						MOA_Casters[squadDps_name]={}
+						MOA_Casters[squadDps_name]['attempts'] = len(item['skills'])
+					else:
+						MOA_Casters[squadDps_name]['attempts'] += len(item['skills'])
+
 		#Track Incoming Control Effects generated by the enemy against Squad Members
 		#config.condition_ids = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: 'Hunters Mark'}
-		for item in player['buffUptimes']:
+		for item in player['buffUptimesActive']:
 			conditionId = int(item['id'])
 			if conditionId not in Control_Effects:
 				continue
@@ -1939,15 +2626,15 @@ def get_stats_from_fight_json(fight_json, config, log):
 			for cc in item['buffData']:
 				for key, value in cc['generated'].items():
 					if key not in enemy_Control_Player[skill_name]:
-						enemy_Control_Player[skill_name][key] = float((value/100)*duration)
+						enemy_Control_Player[skill_name][key] = float((value/100)*player_combat_time)
 					else:
-						enemy_Control_Player[skill_name][key] = enemy_Control_Player[skill_name][key] + float((value/100)*duration)
+						enemy_Control_Player[skill_name][key] = enemy_Control_Player[skill_name][key] + float((value/100)*player_combat_time)
 					if player['name'] not in enemy_Control[skill_name]:
-						enemy_Control[skill_name][player['name']] = float((value/100)*duration)
+						enemy_Control[skill_name][player['name']] = float((value/100)*player_combat_time)
 					else:
-						enemy_Control[skill_name][player['name']] = enemy_Control[skill_name][player['name']] + float((value/100)*duration)
+						enemy_Control[skill_name][player['name']] = enemy_Control[skill_name][player['name']] + float((value/100)*player_combat_time)
 
-		#Track Offensive stats from [statsAll]
+		#Track Offensive stats from [statsTarets]
 		statAll = ["totalDamageCount", "directDamageCount", "connectedDirectDamageCount", "connectedDamageCount", "critableDirectDamageCount", "criticalRate", "criticalDmg", "flankingRate", "againstMovingRate", "glanceRate", "missed", "evaded", "blocked", "interrupts", "invulned"]
 		#squadDps_prof_name = player['name']
 		#squadDps_profession = player['profession']
@@ -1961,9 +2648,9 @@ def get_stats_from_fight_json(fight_json, config, log):
             
 		for stat in statAll:
 			if stat not in squad_offensive[squadDps_prof_name]['stats']:
-				squad_offensive[squadDps_prof_name]['stats'][stat] = player['statsAll'][0][stat]
+				squad_offensive[squadDps_prof_name]['stats'][stat] = sum([stats[0][stat] for stats in player['statsTargets']])
 			else:
-				squad_offensive[squadDps_prof_name]['stats'][stat] += player['statsAll'][0][stat]
+				squad_offensive[squadDps_prof_name]['stats'][stat] += sum([stats[0][stat] for stats in player['statsTargets']])
 
 
 		#Instant Revive tracking of downed healing
@@ -1992,7 +2679,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 									
 		#Track Aura Output		
 		Auras_Id = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic', 25518: 'Light', 39978: 'Dark', 10332: 'Chaos'}				
-		for item in player['buffUptimes']:
+		for item in player['buffUptimesActive']:
 			auraId = int(item['id'])
 			if auraId not in Auras_Id:
 				continue
@@ -2004,24 +2691,18 @@ def get_stats_from_fight_json(fight_json, config, log):
 			for cc in item['buffData']:
 				for key, value in cc['generated'].items():
 					if player['name'] not in auras_TableIn[skill_name]:
-						auras_TableIn[skill_name][player['name']] = float((value/100)*duration)
+						auras_TableIn[skill_name][player['name']] = float((value/100)*player_combat_time)
 					else:
-						auras_TableIn[skill_name][player['name']] = auras_TableIn[skill_name][player['name']] + float((value/100)*duration)
+						auras_TableIn[skill_name][player['name']] = auras_TableIn[skill_name][player['name']] + float((value/100)*player_combat_time)
 					if key not in auras_TableOut[skill_name]:
-						auras_TableOut[skill_name][key] = float((value/100)*duration)
+						auras_TableOut[skill_name][key] = float((value/100)*player_combat_time)
 					else:
-						auras_TableOut[skill_name][key] = auras_TableOut[skill_name][key] + float((value/100)*duration)
+						auras_TableOut[skill_name][key] = auras_TableOut[skill_name][key] + float((value/100)*player_combat_time)
 
 		#Track Total Buff Uptimes
 		uptime_Buff_Ids = {1122: 'stability', 717: 'protection', 743: 'aegis', 740: 'might', 725: 'fury', 26980: 'resistance', 873: 'resolution', 1187: 'quickness', 719: 'swiftness', 30328: 'alacrity', 726: 'vigor', 718: 'regeneration'}
 		#uptime_Buff_Names = { 'stability': 1122,  'protection': 717,  'aegis': 743,  'might': 740,  'fury': 725,  'resistance': 26980,  'resolution': 873,  'quickness': 1187,  'swiftness': 719,  'alacrity': 30328,  'vigor': 726,  'regeneration': 718}
-		if squadDps_prof_name not in uptime_Table:
-			uptime_Table[squadDps_prof_name]={}
-			uptime_Table[squadDps_prof_name]['name']=squadDps_name
-			uptime_Table[squadDps_prof_name]['prof']=squadDps_profession
-			uptime_Table[squadDps_prof_name]['duration'] = 0
-			print('Added player to uptime_Table: '+ squadDps_prof_name)
-		for item in player['buffUptimes']:
+		for item in player['buffUptimesActive']:
 			buffId = int(item['id'])	
 			if buffId not in uptime_Buff_Ids:
 				continue
@@ -2030,12 +2711,12 @@ def get_stats_from_fight_json(fight_json, config, log):
 				uptime_value = float(item['buffData'][0]['presence'])
 			else:
 				uptime_value = float(item['buffData'][0]['uptime'])
-			uptime_duration = float(duration * (uptime_value/100))
+			uptime_duration = float(player_combat_time * (uptime_value/100))
 			if buff_name not in uptime_Table[squadDps_prof_name]:
 				uptime_Table[squadDps_prof_name][buff_name] = uptime_duration
 			else:
 				uptime_Table[squadDps_prof_name][buff_name] = uptime_Table[squadDps_prof_name][buff_name] + uptime_duration
-		uptime_Table[squadDps_prof_name]['duration'] = uptime_Table[squadDps_prof_name]['duration'] + duration
+		uptime_Table[squadDps_prof_name]['duration'] = uptime_Table[squadDps_prof_name]['duration'] + player_combat_time
 
 	#Death_OnTag Tracking
 	tagPositions = {}
@@ -2120,9 +2801,15 @@ def get_stats_from_fight_json(fight_json, config, log):
 			continue
 		playerDPS = 0
 		playerDamage = 0
+		playerCPS = 0
+		playerCleanses = 0
+		playerSPS = 0
+		playerStrips = 0
+		playerHPS = 0
+		playerHeals = 0						
 		name = player['name']
 		acct = player['account']
-		sub_type = find_sub_type(player)
+		sub_type = player['profession'] + "_" + find_sub_type(player, durationMS / 1000)
 		prof = sub_type
 		prof_name = sub_type+"\n"+name
 		for target in player['dpsTargets']:
@@ -2145,6 +2832,81 @@ def get_stats_from_fight_json(fight_json, config, log):
 			DPS_List['prof_name'][prof_name].append(playerDPS)
 			DPS_List['prof'][prof].append(playerDPS)
 #End DPS Box Plot Data Collection
+
+		#Collect Box Plot CPS data by Profession, Prof_Name, Name, Acct
+		if 'support' not in player or len(player['support']) != 1 or 'condiCleanse' not in player['support'][0]:
+			playerCleanses = 0
+		else:
+			playerCleanses += int(player['support'][0]['condiCleanse'])   
+		
+		playerCPS = round(playerCleanses/(durationMS/1000), 4)
+
+		if playerCPS > 0:
+			if prof_name not in CPS_List['prof_name']:
+				CPS_List['prof_name'][prof_name] = []
+			if prof not in CPS_List['prof']:
+				CPS_List['prof'][prof] = []            
+			if name not in CPS_List['name']:
+				CPS_List['name'][name] = []
+			if acct not in CPS_List['acct']:
+				CPS_List['acct'][acct] = []
+		if playerCPS > 0:
+			CPS_List['acct'][acct].append(playerCPS)
+			CPS_List['name'][name].append(playerCPS)
+			CPS_List['prof_name'][prof_name].append(playerCPS)
+			CPS_List['prof'][prof].append(playerCPS)
+		#End CPS Box Plot Data Collection
+
+		#Collect Box Plot SPS data by Profession, Prof_Name, Name, Acct
+		if 'support' not in player or len(player['support']) != 1 or 'boonStrips' not in player['support'][0]:
+			playerStrips = 0
+		else:
+			playerStrips += int(player['support'][0]['boonStrips'])   
+		
+		playerSPS = round(playerStrips/(durationMS/1000), 4)
+
+		if playerSPS > 0:
+			if prof_name not in SPS_List['prof_name']:
+				SPS_List['prof_name'][prof_name] = []
+			if prof not in SPS_List['prof']:
+				SPS_List['prof'][prof] = []            
+			if name not in SPS_List['name']:
+				SPS_List['name'][name] = []
+			if acct not in SPS_List['acct']:
+				SPS_List['acct'][acct] = []
+		if playerSPS > 0:
+			SPS_List['acct'][acct].append(playerSPS)
+			SPS_List['name'][name].append(playerSPS)
+			SPS_List['prof_name'][prof_name].append(playerSPS)
+			SPS_List['prof'][prof].append(playerSPS)
+		#End SPS Box Plot Data Collection
+
+		#Collect Box Plot HPS data by Profession, Prof_Name, Name, Acct
+		if 'extHealingStats' in player:
+			if 'outgoingHealingAllies' not in player['extHealingStats']:
+				playerHeals = 0
+			for outgoing_healing_json in player['extHealingStats']['outgoingHealingAllies']:
+				for outgoing_healing_json2 in outgoing_healing_json:
+					if 'healing' in outgoing_healing_json2:
+						playerHeals += int(outgoing_healing_json2['healing'])
+		
+		playerHPS = round(playerHeals/(durationMS/1000), 4)
+
+		if playerHPS > 0:
+			if prof_name not in HPS_List['prof_name']:
+				HPS_List['prof_name'][prof_name] = []
+			if prof not in HPS_List['prof']:
+				HPS_List['prof'][prof] = []            
+			if name not in HPS_List['name']:
+				HPS_List['name'][name] = []
+			if acct not in HPS_List['acct']:
+				HPS_List['acct'][acct] = []
+		if playerHPS > 0:
+			HPS_List['acct'][acct].append(playerHPS)
+			HPS_List['name'][name].append(playerHPS)
+			HPS_List['prof_name'][prof_name].append(playerHPS)
+			HPS_List['prof'][prof].append(playerHPS)
+		#End HPS Box Plot Data Collection
 
 	# initialize fight         
 	fight = Fight()
@@ -2190,7 +2952,9 @@ def get_stats_from_fight_json(fight_json, config, log):
 			if extension['name'] == "Healing Stats":
 				players_running_healing_addon = extension['runningExtension']
 
-	return fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List
+	calculate_dps_stats(fight_json, fight, players_running_healing_addon, config)
+		
+	return fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats
 
 
 
@@ -2370,9 +3134,10 @@ def write_fights_overview_xls(fights, overall_squad_stats, overall_raid_stats, c
 #JEL - TW5 tweaks for markdown table output
 def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, config, output):
 	stat_len = {}
-	print_string = "|thead-dark table-hover|k"
+	print_string = '<div style="overflow-x:auto;">\n'
 	myprint(output, print_string)
-	#print_string = "| Fight # | Date | Start Time | End Time | Secs | Skip | Allies | Enemies | Downs | Kills |"
+	print_string = "|thead-dark table-hover w-auto scrollable|k"
+	myprint(output, print_string)
 	print_string = "| Fight # | Date | Ending | Secs | Skip | Allies | Enemies | Downs | Kills |"
 	for stat in overall_squad_stats:
 		if stat not in exclude_Stat:
@@ -2384,23 +3149,12 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 		fight = fights[i]
 		skipped_str = "yes" if fight.skipped else "no"
 		date = fight.start_time.split()[0]
-		start_time = fight.start_time.split()[1]
 		end_time = fight.end_time.split()[1]        
-		#print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(start_time)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
 		print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
 		for stat in overall_squad_stats:
 			if stat not in exclude_Stat:
-				#JEL - added my_value formatting
 				print_string += " "+my_value(round(fight.total_stats[stat]))+"|"
 		myprint(output, print_string)
-
-	#used_fights = [f for f in fights if not f.skipped]
-	#num_used_fights = len(used_fights)
-	#
-	#skipped_fights = len(fights) - num_used_fights
-	#mean_allies = round(sum([f.allies for f in used_fights])/num_used_fights, 1)
-	#mean_enemies = round(sum([f.enemies for f in used_fights])/num_used_fights, 1)
-	#total_kills = sum([f.kills for f in used_fights])
 
 	#print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['start_time']:>10}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
 	print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
@@ -2409,9 +3163,10 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 			print_string += " "+my_value(round(overall_squad_stats[stat]))+"|"
 	print_string += "f\n\n"
 	myprint(output, print_string)
+	print_string = '\n\n</div>'
+	myprint(output, print_string)
 
-
-#JEL - Attempt to write TW5 Chart tids
+#JEL - write TW5 stat Chart tids
 def write_stats_chart(players, top_players, stat, myDate, input_directory, config):
 	#args.input_directory+"/
 	stat_Name = config.stat_names[stat]
@@ -2427,7 +3182,7 @@ def write_stats_chart(players, top_players, stat, myDate, input_directory, confi
 	print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData\n'
 	print_string +="type: application/javascript\n\n\n"
 
-	print_string += "option = {\n\tlegend: {},\n\ttooltip: {},\n\tdataset: [\n\t\t{\n\t\tsource: [\n\t\t\t["
+	print_string += "option = {\n\tlegend: {},\n\tgrid: {left: '20%'},\n\ttooltip: {},\n\tdataset: [\n\t\t{\n\t\tsource: [\n\t\t\t["
 	
 	if stat == 'deaths' or stat == 'kills' or stat == 'downs':
 		print_string += "'"+stat_Name+"/Min',"
@@ -2436,13 +3191,13 @@ def write_stats_chart(players, top_players, stat, myDate, input_directory, confi
 
 	print_string += "'Total "+stat_Name+"', 'Name', 'Profession', 'Fights', 'Duration' ],\n"
 	
-	for i in range(len(top_players)):
+	for i in reversed(range(len(top_players))):
 		player = players[top_players[i]]
 		if stat == 'kills' or stat == 'downs':
 			print_string += "\t\t\t["+str(round(player.average_stats[stat]*60, 4))+", "+str(round(player.total_stats[stat]))+", '"+player.name+"', '{{"+player.profession+"}}', '"+str(player.num_fights_present)+"', '"+str(player.duration_fights_present)+"'"
 		else: 
 			print_string += "\t\t\t["+str(player.average_stats[stat])+", "+str(round(player.total_stats[stat]))+", '"+player.name+"', '{{"+player.profession+"}}', '"+str(player.num_fights_present)+"', '"+str(player.duration_fights_present)+"'"
-		if i >= len(top_players)-1:
+		if i >= len(top_players):
 			print_string +="]\n"
 		else:
 			print_string +="],\n"
@@ -2510,11 +3265,100 @@ def write_stats_chart(players, top_players, stat, myDate, input_directory, confi
 	chart_Output.close()
 # 	end write TW5 Chart tids
 
+def write_DPSStats_bubble_charts(uptime_Table, DPSStats, myDate, input_directory):
+	#write Bubble chart tid for DPSStats
+	max_fightTime = 0
+	for squadDps_prof_name in uptime_Table:
+		max_fightTime = max(uptime_Table[squadDps_prof_name]['duration'], max_fightTime)
+
+	fileDate = myDate
+	bubblefileTid = input_directory+"/"+fileDate.strftime('%Y%m%d%H%M')+"_DPSStats_TW5_Bubble_Chart.tid"
+	DPSStats_bubble_chart_Output = open(bubblefileTid, "w",encoding="utf-8")
+	minStatSec= 1000
+	maxStatSec = 0
+	
+	print_string = 'created: '+fileDate.strftime("%Y%m%d%H%M%S")
+	print_string +="\ncreator: Drevarr\n"
+	print_string +="tags: ChartData\n"
+	print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_DPSStats_BubbleChartData\n'
+	print_string +="type: application/javascript\n\n\n"
+
+	print_string +='\nvar option = {\n  dataset: [{\n    source: ['
+	print_string += '\n            ["Name", "Profession", "DPS", "Ch2DPS", "Ch5DPS", "CaDPS", "CDPS", "Downs", "Kills", "color", "Fight Time"],'
+	for DPSStats_prof_name in DPSStats:
+		name = DPSStats[DPSStats_prof_name]['name']
+		prof = DPSStats[DPSStats_prof_name]['profession']
+		fightTime = DPSStats[DPSStats_prof_name]['duration']
+		myDPS = round(DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime)
+		Ch2DPS = round(DPSStats[DPSStats_prof_name]['Chunk_Damage'][2] / fightTime)
+		Ch5DPS = round(DPSStats[DPSStats_prof_name]['Chunk_Damage'][5] / fightTime)
+		CaDPS = round(DPSStats[DPSStats_prof_name]['Carrion_Damage'] / fightTime)
+		myCDPS = round(DPSStats[DPSStats_prof_name]['Coordination_Damage'] / fightTime)
+		Downs = round(DPSStats[DPSStats_prof_name]['Downs'] / (fightTime / 60), 2)
+		Kills = round(DPSStats[DPSStats_prof_name]['Kills'] / (fightTime / 60), 2)
+		color = ProfessionColor[prof]
+		if myCDPS > maxStatSec:
+			maxStatSec = myCDPS
+		if myCDPS < minStatSec:
+			minStatSec = myCDPS
+		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 500 or fightTime * 10 < max_fightTime:
+			continue
+		else:
+			print_string += '\n            ["'+name+'", "'+prof+'", '+str(myDPS)+', '+str(Ch2DPS)+', '+str(Ch5DPS)+', '+str(CaDPS)+', '+str(myCDPS)+', '+str(Downs)+', '+str(Kills)+', "'+color+'", '+str(fightTime)+'],'
+				
+	print_string += '\n   ]'
+	print_string += '\n  }],'
+	print_string += '\n  visualMap: {'
+	print_string += '\n    show: true,'
+	print_string += '\n    dimension: 6, // means the 7th column		'
+	print_string +='\n    min: '+str(minStatSec)+', // lower bound'
+	print_string +='\n    max: '+str(maxStatSec)+', // upper bound'
+	print_string +='\n    inRange: {'
+	print_string +='\n      // Size of the bubble.'
+	print_string +='\n      symbolSize: [5, 50]'
+	print_string +='\n    }'
+	print_string +='\n  },			'
+	print_string +=  '\nxAxis: {'
+	print_string +="\n    type: 'value',"
+	print_string +='\n    name: "Ch5DPS"'
+	print_string +='\n  },'
+	print_string +='\n  yAxis: {'
+	print_string +="\n    type: 'value',"
+	print_string +='\n    name: "CaDPS"'
+	print_string +='\n  },'
+	print_string +="\n  tooltip: {trigger: 'axis'},"
+	print_string +='\n  series: ['
+	print_string +='\n    {'
+	print_string +="\n      type: 'scatter',"
+	print_string +='\n      encode: {'
+	print_string +='\n        // Map "amount" column to x-axis.'
+	print_string +="\n        x: 'Ch5DPS',"
+	print_string +='\n        // Map "product" row to y-axis.'
+	print_string +="\n        y: 'CaDPS',"
+	print_string +='\n        // format tooltip'
+	print_string +='\n        tooltip: [0, 1, 2, 3, 4, 5, 6, 7, 8, 10],'
+	print_string +='\n      },	'
+	print_string +='\n      itemStyle: {'
+	print_string +='\n        color: function(seriesIndex) {'
+	print_string +='\n        	if (seriesIndex.data[9]){'
+	print_string +='\n        	  return seriesIndex.data[9];'
+	print_string +='\n        	}'
+	print_string +='\n        }'
+	print_string +='\n      }'
+	print_string +='\n    }'
+	print_string +='\n  ]'
+	print_string +='\n};'
+		
+	myprint(DPSStats_bubble_chart_Output, print_string)
+
+	DPSStats_bubble_chart_Output.close()
+#	end write bubble charts
+
 #JEL - write TW5 Bubble Chart tids
 def write_bubble_charts(players, top_players, squad_Control, myDate, input_directory):
 	get_Stats = ['deaths', 'kills', 'downs', 'dmg_taken', 'dmg', 'rips', 'cleanses', 'heal', 'dist']
 	boon_List = ['stability', 'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration']
-	Charts = ['kills', 'cleanse', 'rips', 'deaths']
+	Charts = ['kills', 'cleanse', 'rips', 'deaths', 'fury_might']
 	Bubble_Chart = {}
 
 	#for i in range(len(top_players)):
@@ -2537,6 +3381,8 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 			Bubble_Chart[prof_name]['deaths']=0
 			Bubble_Chart[prof_name]['dmg_taken']=0
 			Bubble_Chart[prof_name]['dist']=0
+			Bubble_Chart[prof_name]['Fury_Uptime']=0
+			Bubble_Chart[prof_name]['Might_Uptime']=0
 		
 		#gather control score per player
 		sum_Control = 0
@@ -2551,11 +3397,26 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 		sum_Boons = 0
 		for boon in boon_List:
 			sum_Boons += player.average_stats[boon]
-		Bubble_Chart[prof_name]['boonScore'] = sum_Boons
+		for aura in auras_TableOut:
+			if player.name in auras_TableOut[aura]:
+				sum_Boons += (auras_TableOut[aura][player.name] / player.duration_fights_present)
+		Bubble_Chart[prof_name]['boonScore'] = round(sum_Boons, 4)
 		
 		#gather Stats scores per player
 		for statItem in get_Stats:
 			Bubble_Chart[prof_name][statItem] = player.average_stats[statItem]
+			
+		#Calculate Fury Uptime per player
+		if prof_name in uptime_Table and 'fury' in uptime_Table[prof_name] and uptime_Table[prof_name]['duration'] >0:
+			Bubble_Chart[prof_name]['Fury_Uptime'] = round((uptime_Table[prof_name]['fury']/uptime_Table[prof_name]['duration'])*100,2)
+		else:
+			Bubble_Chart[prof_name]['Fury_Uptime'] = 0.00
+
+		#Calculate Avg_Might per player
+		if prof_name in uptime_Table and 'might' in uptime_Table[prof_name] and uptime_Table[prof_name]['duration'] >0:
+			Bubble_Chart[prof_name]['Might_Uptime'] = round((uptime_Table[prof_name]['might']/uptime_Table[prof_name]['duration'])*100,2)
+		else:
+			Bubble_Chart[prof_name]['Might_Uptime'] = 0.00
 			
 	for chart in Charts:
 		fileDate = myDate
@@ -2612,6 +3473,16 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 				if Bubble_Chart[prof_name]['dist'] < minStatSec:
 					minStatSec = Bubble_Chart[prof_name]['dist']
 				
+		if chart == 'fury_might':
+			print_string += '\n            ["Name", "Profession", "Fury", "Might", "DPS", "color"],'
+			for prof_name in Bubble_Chart:
+				color = ProfessionColor[Bubble_Chart[prof_name]['profession']]
+				print_string += '\n            ["'+Bubble_Chart[prof_name]['name']+'", "'+Bubble_Chart[prof_name]['profession']+'", '+str(Bubble_Chart[prof_name]['Fury_Uptime'])+', '+str(Bubble_Chart[prof_name]['Might_Uptime'])+', '+str(Bubble_Chart[prof_name]['dmg'])+', "'+color+'"],'
+				if Bubble_Chart[prof_name]['dmg'] > maxStatSec:
+					maxStatSec = Bubble_Chart[prof_name]['dmg']
+				if Bubble_Chart[prof_name]['dmg'] < minStatSec:
+					minStatSec = Bubble_Chart[prof_name]['dmg']
+
 		print_string += '\n   ]'
 		print_string += '\n  }],'
 		print_string += '\n  visualMap: {'
@@ -2634,6 +3505,8 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 			print_string +='\n    name: "Average Deaths"'		
 		if chart == 'rips':
 			print_string +='\n    name: "Control Effect Score"'			
+		if chart == 'fury_might':
+			print_string +='\n    name: "Fury Uptime"'			
 		print_string +='\n  },'
 		print_string +='\n  yAxis: {'
 		print_string +="\n    type: 'value',"
@@ -2645,8 +3518,10 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 			print_string +='\n    name: "Average Damage Taken"'		
 		if chart == 'rips':
 			print_string +='\n    name: "Strips per Second"'
+		if chart == 'fury_might':
+			print_string +='\n    name: "Might Uptime"'						
 		print_string +='\n  },'
-		print_string +="\n  tooltip: {trigger: 'axis'},"
+		print_string +="\n  tooltip: {trigger: 'axis',\n        axisPointer: {\n          type: 'cross'\n        },    \n},"
 		print_string +='\n  series: ['
 		print_string +='\n    {'
 		print_string +="\n      type: 'scatter',"
@@ -2660,6 +3535,8 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 			print_string +="\n        x: 'Deaths',"
 		if chart == 'rips':
 			print_string +="\n        x: 'Control',"	
+		if chart == 'fury_might':
+			print_string +="\n        x: 'Fury',"				
 		print_string +='\n        // Map "product" row to y-axis.'
 		if chart == 'kills':	
 			print_string +="\n        y: 'Kills',"
@@ -2669,8 +3546,10 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 			print_string +="\n        y: 'Damage_Taken',"
 		if chart == 'rips':	
 			print_string +="\n        y: 'Strips',"	
+		if chart == 'fury_might':	
+			print_string +="\n        y: 'Might',"				
 		print_string +='\n        // format tooltip'
-		print_string +='\n        tooltip: [0, 1, 4],'
+		print_string +='\n        tooltip: [0, 1, 2, 3, 4],'
 		print_string +='\n      },	'
 		print_string +='\n      itemStyle: {'
 		print_string +='\n        color: function(seriesIndex) {'
@@ -2691,17 +3570,17 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 		bubble_chart_Output.close()
 #	end write bubble charts
 
-def write_box_plot_charts(DPS_List, myDate, input_directory):
+def write_box_plot_charts(DPS_List, myDate, input_directory, ChartType):
 	Charts = ['Profession', 'Profession_and_Name']
 	fileDate = myDate
 	for chart in Charts:
-		boxPlotfileTid = input_directory+"/"+fileDate.strftime('%Y%m%d%H%M')+"_DSP_"+chart+"_TW5_Box_Plot_Chart.tid"
+		boxPlotfileTid = input_directory+"/"+fileDate.strftime('%Y%m%d%H%M')+"_"+ChartType+"_"+chart+"_TW5_Box_Plot_Chart.tid"
 		boxPlot_chart_Output = open(boxPlotfileTid, "w",encoding="utf-8")
 
 		print_string = 'created: '+fileDate.strftime("%Y%m%d%H%M%S")
 		print_string +="\ncreator: Drevarr\n"
 		print_string +="tags: ChartData\n"
-		print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_DPS_'+chart+'_Box_PlotChartData\n'
+		print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_'+ChartType+'_'+chart+'_Box_PlotChartData\n'
 		print_string +="type: application/javascript\n"
 
 		#print_string +='const colors = '
@@ -2715,8 +3594,8 @@ def write_box_plot_charts(DPS_List, myDate, input_directory):
 		print_string +='\n'
 		print_string +='\noption = {'
 		print_string +='\n  title: ['
-		print_string +="\n    {text: 'DPS by "+chart+" across all fights', left: 'center'},"
-		print_string +="\n    {text: 'DPS across all fights \\nupper: Q3 + 1.5 * IQR \\nlower: Q1 - 1.5 * IQR', borderColor: '#999', borderWidth: 1, textStyle: {fontSize: 10}, left: '1%', top: '90%'}"
+		print_string +="\n    {text: '"+ChartType+" by "+chart+" across all fights', left: 'center'},"
+		print_string +="\n    {text: '"+ChartType+" across all fights \\nupper: Q3 + 1.5 * IQR \\nlower: Q1 - 1.5 * IQR', borderColor: '#999', borderWidth: 1, textStyle: {fontSize: 10}, left: '1%', top: '90%'}"
 		print_string +="\n  ],"
 		print_string +="\ndataset: ["
 		print_string +="\n    {"
@@ -2751,17 +3630,15 @@ def write_box_plot_charts(DPS_List, myDate, input_directory):
 		print_string += "\n  tooltip: {trigger: 'item', axisPointer: {type: 'shadow'}},"
 		print_string += "\n  grid: {left: '10%', right: '10%', bottom: '15%'},"
 		print_string += "\n  yAxis: {type: 'category', boundaryGap: true, nameGap: 30, splitArea: {show: true}, splitLine: {show: true}},"
-		print_string += "\n  xAxis: {type: 'value', name: 'DPS', splitArea: {show: true}},"
+		print_string += "\n  xAxis: {type: 'value', name: '"+ChartType+"', splitArea: {show: true}},"
 		print_string += "\n  series: ["
 		print_string += "\n    {"
 		print_string += "\n      name: 'boxplot',"
 		print_string += "\n      type: 'boxplot',"
 		print_string += "\n      datasetIndex: 1,"
 		print_string += "\n      itemStyle: {"
-		print_string += "\n        color: function(seriesIndex) {"
-		print_string += "\n        	console.log(datasetIndex);"
-		print_string += "\n          return colors[seriesIndex];"
-		print_string += "\n        }\n      },"
+		print_string += "\n        color: '#b8c5f2'"
+		print_string += "\n      },"
 		print_string += "\n      encode:{tooltip: [ 1, 2, 3, 4, 5]},"
 		print_string += "\n      },\n    {"
 		print_string += "\n      name: 'outlier',"
@@ -2777,7 +3654,7 @@ def write_box_plot_charts(DPS_List, myDate, input_directory):
 #	end write bubble charts
 
 
-def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, output_file):
+def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, output_file):
 	json_dict = {}
 	json_dict["overall_raid_stats"] = {key: value for key, value in overall_raid_stats.items()}
 	json_dict["overall_squad_stats"] = {key: value for key, value in overall_squad_stats.items()}
@@ -2794,13 +3671,43 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	json_dict["enemy_Control"] =  {key: value for key, value in enemy_Control.items()}
 	json_dict["enemy_Control_Player"] =  {key: value for key, value in enemy_Control_Player.items()}
 	json_dict["uptime_Table"] =  {key: value for key, value in uptime_Table.items()}
+	json_dict["stacking_uptime_Table"] =  {key: value for key, value in stacking_uptime_Table.items()}
 	json_dict["auras_TableIn"] =  {key: value for key, value in auras_TableIn.items()}
 	json_dict["auras_TableOut"] =  {key: value for key, value in auras_TableOut.items()}
 	json_dict["Death_OnTag"] =  {key: value for key, value in Death_OnTag.items()}
 	json_dict["DPS_List"] =  {key: value for key, value in DPS_List.items()}
+	json_dict["CPS_List"] =  {key: value for key, value in CPS_List.items()}
+	json_dict["SPS_List"] =  {key: value for key, value in SPS_List.items()}
+	json_dict["HPS_List"] =  {key: value for key, value in HPS_List.items()}
+	json_dict["DPSStats"] =  {key: value for key, value in DPSStats.items()}
 	json_dict["downed_Healing"] =  {key: value for key, value in downed_Healing.items()}
+	json_dict["MOA_Targets"] =  {key: value for key, value in MOA_Targets.items()}
+	json_dict["MOA_Casters"] =  {key: value for key, value in MOA_Casters.items()}
 	
 	
 	with open(output_file, 'w') as json_file:
 		json.dump(json_dict, json_file, indent=4)
 
+def calc_weighted_dps_enemy(players, fights):
+	for player in players:
+		playerDamages = []
+		playerDurations = []
+		playerEnemies = []
+		weighted_DPS_Enemy = []
+		sum_playerDurations = 0
+
+		for fight in player['stats_per_fight']:
+			playerDamages.append(fight['dmg'])
+			playerDurations.append(fight['time_in_combat'])
+		for fight in fights:
+			playerEnemies.append(fight['enemies'])
+
+		for fightTime in playerDurations:
+			if fightTime >0:
+				sum_playerDurations += fightTime
+
+		for (dmg, enemy, duration) in zip(playerDamages, playerEnemies, playerDurations):
+			if dmg != -1:
+				weighted_DPS_Enemy.append(round((dmg/enemy) * (duration / sum_playerDurations),2))
+
+	return sum(weighted_DPS_Enemy)

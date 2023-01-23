@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+	#!/usr/bin/env python3
 
 #    parse_top_stats_detailed.py outputs detailed top stats in arcdps logs as parsed by Elite Insights.
 #    Copyright (C) 2021 Freya Fleckenstein
@@ -66,7 +66,7 @@ if __name__ == '__main__':
 	print_string = "Considering fights with at least "+str(config.min_allied_players)+" allied players and at least "+str(config.min_enemy_players)+" enemies that took longer than "+str(config.min_fight_duration)+" s."
 	myprint(log, print_string)
 
-	players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List = collect_stat_data(args, config, log, args.anonymize)    
+	players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats = collect_stat_data(args, config, log, args.anonymize)    
 
 	# create xls file if it doesn't exist
 	book = xlwt.Workbook(encoding="utf-8")
@@ -78,17 +78,19 @@ if __name__ == '__main__':
 	myDate = datetime.datetime.now()
 
 	myprint(output, 'created: '+myDate.strftime("%Y%m%d%H%M%S"))
+	myprint(output, 'modified: '+myDate.strftime("%Y%m%d%H%M%S"))
 	myprint(output, 'creator: Drevarr ')
 	myprint(output, 'caption: '+myDate.strftime("%Y%m%d")+'-WvW-Log-Review')
-	myprint(output, 'curTab: Overview')
-	myprint(output, 'curFight: Fight-1')
-	myprint(output, 'curControl-In: Blinded')
-	myprint(output, 'curControl-Out: Blinded')
-	myprint(output, 'curAuras-Out: Fire')
-	myprint(output, 'curAuras-In: Fire')
-	myprint(output, 'curBurstTableDamage: Ch5Ca')
-	myprint(output, 'curBurstTableType: Cumulative')
-	myprint(output, 'curChart: Kills/Downs/DPS')
+	#myprint(output, 'curTab: Overview')
+	#myprint(output, 'curFight: Fight-1')
+	#myprint(output, 'curControl-In: Blinded')
+	#myprint(output, 'curControl-Out: Blinded')
+	#myprint(output, 'curAuras-Out: Fire')
+	#myprint(output, 'curAuras-In: Fire')
+	#myprint(output, 'curStackingBuffs: might')
+	#myprint(output, 'curBurstTableDamage: Ch5Ca')
+	#myprint(output, 'curBurstTableType: Cumulative')
+	#myprint(output, 'curChart: Kills/Downs/DPS')
 	myprint(output, 'tags: Logs [['+myDate.strftime("%Y")+'-'+myDate.strftime("%m")+' Log Reviews]]')
 	myprint(output, 'title: '+myDate.strftime("%Y%m%d")+'-WvW-Log-Review\n')
 	#End Tid file header
@@ -103,49 +105,51 @@ if __name__ == '__main__':
 	total_fight_duration = print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, found_healing, found_barrier, config, output)
 
 	#Start nav_bar_menu for TW5
-	Nav_Bar_Items= ('<$button set="!!curTab" setTo="Overview" selectedClass="" class="btn btn-sm btn-dark" style=""> Session Overview </$button>',
-					'<$button set="!!curTab" setTo="Deaths" selectedClass="" class="btn btn-sm btn-dark" style=""> Deaths </$button>',
-					'<$button set="!!curTab" setTo="Illusion of Life" selectedClass="" class="btn btn-sm btn-dark" style=""> IOL </$button>',
-					'<$button set="!!curTab" setTo="Resurrect" selectedClass="" class="btn btn-sm btn-dark" style=""> Resurrect </$button>',                    
-					'<$button set="!!curTab" setTo="Enemies Downed" selectedClass="" class="btn btn-sm btn-dark" style=""> Enemies Downed </$button>',
-					'<$button set="!!curTab" setTo="Enemies Killed" selectedClass="" class="btn btn-sm btn-dark" style=""> Enemies Killed </$button>',
-					'<$button set="!!curTab" setTo="Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage </$button>',
-					'<$button set="!!curTab" setTo="Power Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Power Damage </$button>',
-					'<$button set="!!curTab" setTo="Condi Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Condi Damage </$button>',
-					'<$button set="!!curTab" setTo="Damage Taken" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage Taken</$button>',
-					'<$button set="!!curTab" setTo="Boon Strips" selectedClass="" class="btn btn-sm btn-dark" style=""> Boon Strips </$button>',
-					'<$button set="!!curTab" setTo="Condition Cleanses" selectedClass="" class="btn btn-sm btn-dark" style=""> Condition Cleanses</$button>',
-					'<$button set="!!curTab" setTo="Superspeed" selectedClass="" class="btn btn-sm btn-dark" style=""> Superspeed </$button>',
-					'<$button set="!!curTab" setTo="Stealth" selectedClass="" class="btn btn-sm btn-dark" style=""> Stealth </$button>',
-					'<$button set="!!curTab" setTo="Hide in Shadows" selectedClass="" class="btn btn-sm btn-dark" style=""> Hide in Shadows </$button>',
-					'<$button set="!!curTab" setTo="Distance to Tag" selectedClass="" class="btn btn-sm btn-dark" style=""> Distance to Tag </$button>',
-					'<$button set="!!curTab" setTo="Stability" selectedClass="" class="btn btn-sm btn-dark" style=""> Stability </$button>',
-					'<$button set="!!curTab" setTo="Protection" selectedClass="" class="btn btn-sm btn-dark" style=""> Protection </$button>',
-					'<$button set="!!curTab" setTo="Aegis" selectedClass="" class="btn btn-sm btn-dark" style=""> Aegis </$button>',
-					'<$button set="!!curTab" setTo="Might" selectedClass="" class="btn btn-sm btn-dark" style=""> Might </$button>',
-					'<$button set="!!curTab" setTo="Fury" selectedClass="" class="btn btn-sm btn-dark" style=""> Fury </$button>',
-					'<$button set="!!curTab" setTo="Resistance" selectedClass="" class="btn btn-sm btn-dark" style=""> Resistance </$button>',
-					'<$button set="!!curTab" setTo="Resolution" selectedClass="" class="btn btn-sm btn-dark" style=""> Resolution </$button>',
-					'<$button set="!!curTab" setTo="Quickness" selectedClass="" class="btn btn-sm btn-dark" style=""> Quickness </$button>',
-					'<$button set="!!curTab" setTo="Swiftness" selectedClass="" class="btn btn-sm btn-dark" style=""> Swiftness </$button>',
-					'<$button set="!!curTab" setTo="Alacrity" selectedClass="" class="btn btn-sm btn-dark" style=""> Alacrity </$button>',
-					'<$button set="!!curTab" setTo="Vigor" selectedClass="" class="btn btn-sm btn-dark" style=""> Vigor </$button>',
-					'<$button set="!!curTab" setTo="Regeneration" selectedClass="" class="btn btn-sm btn-dark" style=""> Regeneration </$button>',
-					'<$button set="!!curTab" setTo="Support" selectedClass="" class="btn btn-sm btn-dark" style=""> Support Players </$button>',
-					'<$button set="!!curTab" setTo="Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Healing </$button>',
-					'<$button set="!!curTab" setTo="Barrier" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier </$button>',
-					'<$button set="!!curTab" setTo="Barrier Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier Damage </$button>',					
-					'<$button set="!!curTab" setTo="Weapon Swaps" selectedClass="" class="btn btn-sm btn-dark" style=""> Weapon Swaps </$button>',
-					'<$button set="!!curTab" setTo="Control Effects - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Outgoing </$button>',
-					'<$button set="!!curTab" setTo="Control Effects - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Incoming </$button>',					
-					'<$button set="!!curTab" setTo="Spike Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Spike Damage </$button>',
-					'<$button set="!!curTab" setTo="Buff Uptime" selectedClass="" class="btn btn-sm btn-dark" style=""> Buff Uptime </$button>',
-					'<$button set="!!curTab" setTo="Auras - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - In </$button>',
-					'<$button set="!!curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - Out </$button>',
-					'<$button set="!!curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> Death OnTag </$button>',
-					'<$button set="!!curTab" setTo="Downed_Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Downed Healing </$button>',
-					'<$button set="!!curTab" setTo="Offensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Offensive Stats </$button>',
-					'<$button set="!!curTab" setTo="Dashboard" selectedClass="" class="btn btn-sm btn-dark" style=""> Dashboard </$button>'
+	Nav_Bar_Items= ('<$button setTitle="$:/state/curTab" setTo="Overview" selectedClass="" class="btn btn-sm btn-dark" style=""> Session Overview </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Deaths" selectedClass="" class="btn btn-sm btn-dark" style=""> Deaths </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Illusion of Life" selectedClass="" class="btn btn-sm btn-dark" style=""> IOL </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Resurrect" selectedClass="" class="btn btn-sm btn-dark" style=""> Resurrect </$button>',                    
+					'<$button setTitle="$:/state/curTab" setTo="Enemies Downed" selectedClass="" class="btn btn-sm btn-dark" style=""> Enemies Downed </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Enemies Killed" selectedClass="" class="btn btn-sm btn-dark" style=""> Enemies Killed </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Power Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Power Damage </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Condi Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Condi Damage </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Damage Taken" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage Taken</$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Boon Strips" selectedClass="" class="btn btn-sm btn-dark" style=""> Boon Strips </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Condition Cleanses" selectedClass="" class="btn btn-sm btn-dark" style=""> Condition Cleanses</$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Superspeed" selectedClass="" class="btn btn-sm btn-dark" style=""> Superspeed </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Stealth" selectedClass="" class="btn btn-sm btn-dark" style=""> Stealth </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Hide in Shadows" selectedClass="" class="btn btn-sm btn-dark" style=""> Hide in Shadows </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Distance to Tag" selectedClass="" class="btn btn-sm btn-dark" style=""> Distance to Tag </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Stability" selectedClass="" class="btn btn-sm btn-dark" style=""> Stability </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Protection" selectedClass="" class="btn btn-sm btn-dark" style=""> Protection </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Aegis" selectedClass="" class="btn btn-sm btn-dark" style=""> Aegis </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Might" selectedClass="" class="btn btn-sm btn-dark" style=""> Might </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Fury" selectedClass="" class="btn btn-sm btn-dark" style=""> Fury </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Resistance" selectedClass="" class="btn btn-sm btn-dark" style=""> Resistance </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Resolution" selectedClass="" class="btn btn-sm btn-dark" style=""> Resolution </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Quickness" selectedClass="" class="btn btn-sm btn-dark" style=""> Quickness </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Swiftness" selectedClass="" class="btn btn-sm btn-dark" style=""> Swiftness </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Alacrity" selectedClass="" class="btn btn-sm btn-dark" style=""> Alacrity </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Vigor" selectedClass="" class="btn btn-sm btn-dark" style=""> Vigor </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Regeneration" selectedClass="" class="btn btn-sm btn-dark" style=""> Regeneration </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Support" selectedClass="" class="btn btn-sm btn-dark" style=""> Support Players </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Healing </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Barrier" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Barrier Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier Damage </$button>',					
+					'<$button setTitle="$:/state/curTab" setTo="Weapon Swaps" selectedClass="" class="btn btn-sm btn-dark" style=""> Weapon Swaps </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Control Effects - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Outgoing </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Control Effects - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Incoming </$button>',					
+					'<$button setTitle="$:/state/curTab" setTo="Buff Uptime" selectedClass="" class="btn btn-sm btn-dark" style=""> Buff Uptime </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Stacking Buffs" selectedClass="" class="btn btn-sm btn-dark" style=""> Stacking Buffs </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Auras - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - In </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - Out </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> Death OnTag </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Downed_Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Downed Healing </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Offensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Offensive Stats </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="DPSStats" selectedClass="" class="btn btn-sm btn-dark" style=""> DPS Stats </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Burst Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Burst Damage </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Dashboard" selectedClass="" class="btn btn-sm btn-dark" style=""> Dashboard </$button>'
 	)
 	for item in Nav_Bar_Items:
 		myprint(output, item)
@@ -155,12 +159,14 @@ if __name__ == '__main__':
 	#End nav_bar_menu for TW5
 
 	#Overview reveal
-	myprint(output, '<$reveal type="match" state="!!curTab" text="Overview">')
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Overview">')
 	myprint(output, '\n!!!OVERVIEW\n')
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
 
 	print_fights_overview(fights, overall_squad_stats, overall_raid_stats, config, output)
 
 	#End reveal
+	myprint(output, '\n\n</div>\n\n')
 	myprint(output, '</$reveal>')
 
 	write_fights_overview_xls(fights, overall_squad_stats, overall_raid_stats, config, args.xls_output_filename)
@@ -185,47 +191,61 @@ if __name__ == '__main__':
 		fileDate = myDate
 
 		#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
-		myprint(output,'<$reveal type="match" state="!!curTab" text="'+config.stat_names[stat]+'">')
+		myprint(output,'<$reveal type="match" state="$:/state/curTab" text="'+config.stat_names[stat]+'">')
 		myprint(output, "\n!!!<<alert secondary src:'"+config.stat_names[stat].upper()+"' class:'leftbar border-dark'>>\n")
 		
 
 		if stat == 'dist':
 			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
+			myprint(output, '<div style="overflow-x:auto;">\n\n')
 			top_consistent_stat_players[stat] = get_top_players(players, config, stat, StatType.CONSISTENT)
 			top_total_stat_players[stat] = get_top_players(players, config, stat, StatType.TOTAL)
 			top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)            
 			top_percentage_stat_players[stat],comparison_val = get_and_write_sorted_top_percentage(players, config, num_used_fights, stat, output, StatType.PERCENTAGE, top_consistent_stat_players[stat])
+			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '\n</div>\n    <div class="flex-col border">\n')
+			myprint(output, '<div style="overflow-x:auto;">\n\n')
 			top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
 			top_average_stat_players[stat] = get_and_write_sorted_average(players, config, num_used_fights, stat, output)
+			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '\n</div>\n</div>\n')
 		elif stat == 'dmg_taken':
 			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
+			myprint(output, '<div style="overflow-x:auto;">\n\n')
 			top_consistent_stat_players[stat] = get_top_players(players, config, stat, StatType.CONSISTENT)
 			top_total_stat_players[stat] = get_top_players(players, config, stat, StatType.TOTAL)
 			top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
 			top_average_stat_players[stat] = get_and_write_sorted_average(players, config, num_used_fights, stat, output)
+			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '\n</div>\n</div>\n')
 		else:
 			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
-			top_consistent_stat_players[stat] = get_and_write_sorted_top_consistent(players, config, num_used_fights, stat, output)
-			myprint(output, '\n</div>\n    <div class="flex-col border">\n')
+			myprint(output, '<div style="overflow-x:auto;">\n\n')
 			top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
+			myprint(output, '\n\n\n\n')
+			top_consistent_stat_players[stat] = get_and_write_sorted_top_consistent(players, config, num_used_fights, stat, output)
+			myprint(output, '\n\n</div>\n\n')
+			myprint(output, '\n</div>\n    <div class="flex-col border">\n')
+			myprint(output, '<div style="overflow-x:auto;">\n\n')
+			#top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
+			myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
+			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '\n</div>\n</div>\n')
 			top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)
 			top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
 			
-			myprint(output, '<div>')
-			myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="600px" $theme="dark"/>')
-			myprint(output, '</div>')
+			#myprint(output, '<div>')
+			#myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
+			#myprint(output, '</div>')
 		#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
 		myprint(output, "</$reveal>\n")
 
-		write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, args.json_output_filename)
+		write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, args.json_output_filename)
 
 	#print table of accounts that fielded support characters
-	myprint(output,'<$reveal type="match" state="!!curTab" text="Support">')
+	myprint(output,'<$reveal type="match" state="$:/state/curTab" text="Support">')
 	myprint(output, "\n")
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
 	# print table header
 	print_string = "|thead-dark table-hover sortable|k"    
 	myprint(output, print_string)
@@ -236,17 +256,18 @@ if __name__ == '__main__':
 		if (stat == 'rips' or stat == 'cleanses' or stat == 'stability'):
 			write_support_players(players, top_total_stat_players[stat], stat, output)
 
+	myprint(output, '\n\n</div>\n\n')
 	myprint(output, "</$reveal>\n")
 
 	supportCount=0
 
 	#start Control Effects Outgoing insert
-	myprint(output, '<$reveal type="match" state="!!curTab" text="Control Effects - Out">')    
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Control Effects - Out">')    
 	myprint(output, '\n<<alert-leftbar success "Outgoing Control Effects generated by the Squad" width:60%, class:"font-weight-bold">>\n\n')
 	Control_Effects = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: "Hunter's Mark"}
 	for C_E in Control_Effects:
-		myprint(output, '<$button set="!!curControl-Out" setTo="'+Control_Effects[C_E]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Control_Effects[C_E]+' </$button>')
-	
+		myprint(output, '<$button setTitle="$:/state/curControl-Out" setTo="'+Control_Effects[C_E]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Control_Effects[C_E]+' </$button>')
+	myprint(output, '<$button setTitle="$:/state/curControl-Out" setTo="MOA Tracking" selectedClass="" class="btn btn-sm btn-dark" style="">MOA Tracking </$button>')
 	myprint(output, '\n---\n')
 	
 
@@ -257,12 +278,12 @@ if __name__ == '__main__':
 
 			i=1
 		
-			myprint(output, '<$reveal type="match" state="!!curControl-Out" text="'+key+'">\n')
+			myprint(output, '<$reveal type="match" state="$:/state/curControl-Out" text="'+key+'">\n')
 			myprint(output, '\n---\n')
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" output by Squad Player Descending [TOP 25 Max]|c")
-			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total| Average|h")
+			myprint(output, "|thead-dark table-hover sortable|k")
+			myprint(output, "|!Place |!Name | !Profession | !Total| !Average|h")
 			
 			for name in sorted_squadControl:
 				prof = "Not Found"
@@ -280,15 +301,36 @@ if __name__ == '__main__':
 			myprint(output, "</$reveal>\n")
 
 			write_control_effects_out_xls(sorted_squadControl, key, players, args.xls_output_filename)
+
+
+	#Add MOA Tracking Tables
+	myprint(output, '<$reveal type="match" state="$:/state/curControl-Out" text="MOA Tracking">\n')
+	myprint(output, '\n---\n')
+	myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|MOA Attempts by Squad Player|c")
+	myprint(output, "|!Name | Attempted MOA Casting |h")	
+	for name in MOA_Casters:
+		myprint(output, "|"+name+" | "+str(MOA_Casters[name]['attempts'])+" |")
+	myprint(output, '\n    </div>\n    <div class="flex-col border">\n')
+	#MOA Target Table
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|Confirmed Missed MOA Attempts by Target|c")
+	myprint(output, "|!Name | Missed | Blocked | Invulned |h")	
+	for name in MOA_Targets:
+		myprint(output, "|"+name+" | "+str(MOA_Targets[name]['missed'])+" | "+str(MOA_Targets[name]['blocked'])+" | "+str(MOA_Targets[name]['invulned'])+" |")
+	myprint(output, '\n    </div>\n</div>\n')
+	myprint(output, "</$reveal>\n")
+
 	myprint(output, "</$reveal>\n")
 	#end Control Effects Outgoing insert
 
 	#start Control Effects Incoming insert
-	myprint(output, '<$reveal type="match" state="!!curTab" text="Control Effects - In">')    
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Control Effects - In">')    
 	myprint(output, '\n<<alert-leftbar danger "Incoming Control Effects generated by the Enemy" width:60%, class:"font-weight-bold">>\n\n')
 	Control_Effects = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: "Hunter's Mark"}
 	for C_E in Control_Effects:
-		myprint(output, '<$button set="!!curControl-In" setTo="'+Control_Effects[C_E]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Control_Effects[C_E]+' </$button>')
+		myprint(output, '<$button setTitle="$:/state/curControl-In" setTo="'+Control_Effects[C_E]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Control_Effects[C_E]+' </$button>')
 	
 	myprint(output, '\n---\n')
 	
@@ -300,13 +342,13 @@ if __name__ == '__main__':
 
 			i=1
 			
-			myprint(output, '<$reveal type="match" state="!!curControl-In" text="'+key+'">\n')
+			myprint(output, '<$reveal type="match" state="$:/state/curControl-In" text="'+key+'">\n')
 			myprint(output, '\n---\n')
 			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" impacted Squad Player Descending [TOP 25 Max]|c")
-			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total| Average|h")
+			myprint(output, "|thead-dark table-hover sortable|k")
+			myprint(output, "|!Place |!Name | !Profession | !Total| !Average|h")
 			
 			for name in sorted_enemyControl:
 				prof = "Not Found"
@@ -334,8 +376,8 @@ if __name__ == '__main__':
 			myprint(output, '\n</div>\n    <div class="flex-col border">\n')
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" output by Enemy Player Descending [TOP 25 Max]|c")
-			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total|h")
+			myprint(output, "|thead-dark table-hover sortable|k")
+			myprint(output, "|!Place |!Name | !Profession | !Total|h")
 		
 			for name in sorted_enemyControlPlayer:
 				prof = name.split(' pl')[0]
@@ -352,11 +394,11 @@ if __name__ == '__main__':
 	#end Control Effects Incoming insert
 
 	#start Aura Effects Incoming insert
-	myprint(output, '<$reveal type="match" state="!!curTab" text="Auras - In">')    
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Auras - In">')    
 	myprint(output, '\n<<alert-leftbar danger "Auras by receiving Player" width:60%, class:"font-weight-bold">>\n\n')
 	Auras_Order = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic', 25518: 'Light', 39978: 'Dark', 10332: 'Chaos'}
 	for Aura in Auras_Order:
-		myprint(output, '<$button set="!!curAuras-In" setTo="'+Auras_Order[Aura]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Auras_Order[Aura]+' Aura </$button>')
+		myprint(output, '<$button setTitle="$:/state/curAuras-In" setTo="'+Auras_Order[Aura]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Auras_Order[Aura]+' Aura </$button>')
 	
 	myprint(output, '\n---\n')
 	
@@ -368,12 +410,12 @@ if __name__ == '__main__':
 
 			i=1
 		
-			myprint(output, '<$reveal type="match" state="!!curAuras-In" text="'+key+'">\n')
+			myprint(output, '<$reveal type="match" state="$:/state/curAuras-In" text="'+key+'">\n')
 			myprint(output, '\n---\n')
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" Aura received by Squad Player Descending [TOP 25 Max]|c")
-			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total| Average|h")
+			myprint(output, "|thead-dark table-hover sortable|k")
+			myprint(output, "|!Place |!Name | !Profession | !Total| !Average|h")
 			
 			for name in sorted_auras_TableIn:
 				prof = "Not Found"
@@ -395,11 +437,11 @@ if __name__ == '__main__':
 	#end Auras Incoming insert
 
 	#start Aura Effects Out insert
-	myprint(output, '<$reveal type="match" state="!!curTab" text="Auras - Out">')    
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Auras - Out">')    
 	myprint(output, '\n<<alert-leftbar info "Auras output by Player" width:60%, class:"font-weight-bold">>\n\n')
 	Auras_Order = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic', 25518: 'Light', 39978: 'Dark', 10332: 'Chaos'}
 	for Aura in Auras_Order:
-		myprint(output, '<$button set="!!curAuras-Out" setTo="'+Auras_Order[Aura]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Auras_Order[Aura]+' Aura </$button>')
+		myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="'+Auras_Order[Aura]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Auras_Order[Aura]+' Aura </$button>')
 	
 	myprint(output, '\n---\n')
 	
@@ -411,12 +453,12 @@ if __name__ == '__main__':
 
 			i=1
 		
-			myprint(output, '<$reveal type="match" state="!!curAuras-Out" text="'+key+'">\n')
+			myprint(output, '<$reveal type="match" state="$:/state/curAuras-Out" text="'+key+'">\n')
 			myprint(output, '\n---\n')
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" Aura output by Squad Player Descending [TOP 10 Max]|c")
-			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Place |Name | Profession | Total| Average|h")
+			myprint(output, "|thead-dark table-hover sortable|k")
+			myprint(output, "|!Place |!Name | !Profession | !Total| !Average|h")
 			
 			for name in sorted_auras_TableOut:
 				prof = "Not Found"
@@ -439,7 +481,7 @@ if __name__ == '__main__':
 
 	#start Buff Uptime Table insert
 	uptime_Order = ['stability',  'protection',  'aegis',  'might',  'fury',  'resistance',  'resolution',  'quickness',  'swiftness',  'alacrity',  'vigor',  'regeneration']
-	myprint(output, '<$reveal type="match" state="!!curTab" text="Buff Uptime">')    
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Buff Uptime">')    
 	myprint(output, '\n<<alert-leftbar light "Total Buff Uptime % across all fights attended.\n Current Formula: (((Sum of (fight duration * Uptime%))/Attendance)*100)" width:60%, class:"font-weight-bold">>\n\n')
 	
 	myprint(output, '\n---\n')
@@ -455,9 +497,9 @@ if __name__ == '__main__':
 		prof = uptime_Table[squadDps_prof_name]['prof']
 
 		output_string = "|"+name+" |"
-		output_string += " {{"+prof+"}} | "+str(fightTime)+"|"
+		output_string += " {{"+prof+"}} | "+my_value(round(fightTime))+"|"
 		for item in uptime_Order:
-			if item in uptime_Table[squadDps_prof_name]:
+			if item in uptime_Table[squadDps_prof_name] and fightTime >0:
 				output_string += " "+"{:.4f}".format(round(((uptime_Table[squadDps_prof_name][item]/fightTime)*100), 4))+"|"
 			else:
 				output_string += " 0.00|"
@@ -470,8 +512,105 @@ if __name__ == '__main__':
 	myprint(output, "</$reveal>\n")
 	#end Buff Uptime Table insert
 
+	#start Stacking Buff Uptime Table insert
+	stacking_buff_Order = ['might', 'stability']
+	max_stacking_buff_fight_time = 0
+	for uptime_prof_name in stacking_uptime_Table:
+		max_stacking_buff_fight_time = max(stacking_uptime_Table[uptime_prof_name]['duration_might'], max_stacking_buff_fight_time)
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Stacking Buffs">')    
+	myprint(output, '\n<<alert-leftbar info "Stacking Buffs" width:60%, class:"font-weight-bold">>\n\n')
+	for stacking_buff in stacking_buff_Order:
+		myprint(output, '<$button setTitle="$:/state/curStackingBuffs" setTo="'+stacking_buff+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+stacking_buff+'</$button>')
+	
+	myprint(output, '\n---\n')
+
+	# Might stack table
+	myprint(output, '<$reveal type="match" state="$:/state/curStackingBuffs" text="might">\n')
+	myprint(output, '\n---\n')
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|{{Might}} uptime by stack|c")
+	myprint(output, '|thead-dark table-hover sortable|k')
+	output_header =  '|!Name | !Class'
+	output_header += ' | ! <span data-tooltip="Number of seconds player was in squad logs">Seconds</span>'
+	output_header += '| !Avg| !1+ %| !5+ %| !10+ %| !15+ %| !20+ %| !25 %'
+	output_header += '|h'
+	myprint(output, output_header)
+	
+	for uptime_prof_name in stacking_uptime_Table:
+		name = stacking_uptime_Table[uptime_prof_name]['name']
+		prof = stacking_uptime_Table[uptime_prof_name]['profession']
+		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_might'] / 1000
+		might_stacks = stacking_uptime_Table[uptime_prof_name]['might']
+
+		if stacking_uptime_Table[uptime_prof_name]['duration_might'] * 10 < max_stacking_buff_fight_time:
+			continue
+
+		avg_might = sum(stack_num * might_stacks[stack_num] for stack_num in range(1, 26)) / (fight_time * 1000)
+		might_uptime = 1.0 - (might_stacks[0] / (fight_time * 1000))
+		might_5_uptime = sum(might_stacks[i] for i in range(5,26)) / (fight_time * 1000)
+		might_10_uptime = sum(might_stacks[i] for i in range(10,26)) / (fight_time * 1000)
+		might_15_uptime = sum(might_stacks[i] for i in range(15,26)) / (fight_time * 1000)
+		might_20_uptime = sum(might_stacks[i] for i in range(20,26)) / (fight_time * 1000)
+		might_25_uptime = might_stacks[25] / (fight_time * 1000)
+
+		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(round(fight_time))
+		output_string += '|'+"{:.2f}".format(avg_might)
+		output_string += "| "+"{:.2f}".format(round((might_uptime * 100), 4))+"%"
+		output_string += "| "+"{:.2f}".format(round((might_5_uptime * 100), 4))+"%"
+		output_string += "| "+"{:.2f}".format(round((might_10_uptime * 100), 4))+"%"
+		output_string += "| "+"{:.2f}".format(round((might_15_uptime * 100), 4))+"%"
+		output_string += "| "+"{:.2f}".format(round((might_20_uptime * 100), 4))+"%"
+		output_string += "| "+"{:.2f}".format(round((might_25_uptime * 100), 4))+"%"
+		output_string += '|'
+
+		myprint(output, output_string)
+
+	myprint(output, "</$reveal>\n")
+	
+	# Stability stack table
+	myprint(output, '<$reveal type="match" state="$:/state/curStackingBuffs" text="stability">\n')
+	myprint(output, '\n---\n')
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|{{Stability}} uptime by stack|c")
+	myprint(output, '|thead-dark table-hover sortable|k')
+	output_header =  '|!Name | !Class'
+	output_header += ' | ! <span data-tooltip="Number of seconds player was in squad logs">Seconds</span>'
+	output_header += '| !Avg| !1+ %| !2+ %| !5+ %'
+	output_header += '|h'
+	myprint(output, output_header)
+	
+	for uptime_prof_name in stacking_uptime_Table:
+		name = stacking_uptime_Table[uptime_prof_name]['name']
+		prof = stacking_uptime_Table[uptime_prof_name]['profession']
+		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_stability'] / 1000
+		stability_stacks = stacking_uptime_Table[uptime_prof_name]['stability']
+
+		if stacking_uptime_Table[uptime_prof_name]['duration_stability'] * 10 < max_stacking_buff_fight_time:
+			continue
+
+		avg_stab = sum(stack_num * stability_stacks[stack_num] for stack_num in range(1, 26)) / (fight_time * 1000)
+		stab_uptime = 1.0 - (stability_stacks[0] / (fight_time * 1000))
+		stab_2_uptime = sum(stability_stacks[i] for i in range(2,26)) / (fight_time * 1000)
+		stab_5_uptime = sum(stability_stacks[i] for i in range(5,26)) / (fight_time * 1000)
+
+		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(round(fight_time))
+		output_string += '|'+"{:.2f}".format(avg_stab)
+		output_string += "| "+"{:.2f}".format(round((stab_uptime * 100), 4))+"%"
+		output_string += "| "+"{:.2f}".format(round((stab_2_uptime * 100), 4))+"%"
+		output_string += "| "+"{:.2f}".format(round((stab_5_uptime * 100), 4))+"%"
+		output_string += '|'
+
+		myprint(output, output_string)
+
+	myprint(output, "</$reveal>\n")
+	myprint(output, "</$reveal>\n")
+	
+	write_stacking_buff_uptimes_in_xls(stacking_uptime_Table, args.xls_output_filename)
+	#end Stacking Buff Uptime Table insert
+
+
 	#start On Tag Death insert
-	myprint(output, '<$reveal type="match" state="!!curTab" text="Death_OnTag">')    
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Death_OnTag">')    
 	myprint(output, '\n<<alert-leftbar light "On Tag Death Review \n Current Formula: (On Tag <= 600 Range, Off Tag >600 and <=5000, Run Back Death > 5000)" width:60%, class:"font-weight-bold">>\n\n')
 	
 	myprint(output, '\n---\n')
@@ -493,7 +632,7 @@ if __name__ == '__main__':
 			Ranges_string = " "
 
 		output_string = "|"+name+" |"
-		output_string += " {{"+prof+"}} | "+str(fightTime)+" | "+str(Death_OnTag[deathOnTag_prof_name]['On_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Off_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['After_Tag_Death'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Run_Back'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Total'])+" |"+Ranges_string+" |"
+		output_string += " {{"+prof+"}} | "+my_value(round(fightTime))+" | "+str(Death_OnTag[deathOnTag_prof_name]['On_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Off_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['After_Tag_Death'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Run_Back'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Total'])+" |"+Ranges_string+" |"
 	
 
 
@@ -505,7 +644,7 @@ if __name__ == '__main__':
 
 	#Downed Healing
 	down_Heal_Order = {14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Renewal of Water', 5762: 'Renewal of Fire', 5760: 'Renewal of Air', 5761: 'Renewal of Earth'}
-	myprint(output, '<$reveal type="match" state="!!curTab" text="Downed_Healing">')    
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Downed_Healing">')    
 	myprint(output, '\n<<alert-leftbar light "Healing to downed players (Instant Revive Skills) - requires Heal Stat addon for ARCDPS to track" width:60%, class:"font-weight-bold">>\n\n')
 	
 	myprint(output, '\n---\n')
@@ -526,7 +665,7 @@ if __name__ == '__main__':
 		prof = downed_Healing[squadDps_prof_name]['prof']
 		fightTime = uptime_Table[squadDps_prof_name]['duration']
 
-		output_string = "|"+name+" |{{"+prof+"}}|"+str(fightTime)+"| "
+		output_string = "|"+name+" |{{"+prof+"}}|"+my_value(round(fightTime))+"| "
 		for skill in down_Heal_Order:
 			if down_Heal_Order[skill] in downed_Healing[squadDps_prof_name]:
 				output_string += str(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Heals'])+"|"
@@ -549,7 +688,7 @@ if __name__ == '__main__':
 		prof = downed_Healing[squadDps_prof_name]['prof']
 		fightTime = uptime_Table[squadDps_prof_name]['duration']
 
-		output_string = "|"+name+" |{{"+prof+"}}|"+str(fightTime)+"| "
+		output_string = "|"+name+" |{{"+prof+"}}|"+my_value(round(fightTime))+"| "
 		for skill in down_Heal_Order:
 			if down_Heal_Order[skill] in downed_Healing[squadDps_prof_name]:
 				output_string += str(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Hits'])+" |"
@@ -564,7 +703,7 @@ if __name__ == '__main__':
 
 	#start Offensive Stat Table insert
 	offensive_Order = ['Critical',  'Flanking',  'Glancing',  'Moving',  'Blinded',  'Interupt',  'Invulnerable',  'Evaded',  'Blocked']
-	myprint(output, '<$reveal type="match" state="!!curTab" text="Offensive Stats">')    
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Offensive Stats">')    
 	myprint(output, '\n<<alert-leftbar light "Offensive Stats across all fights attended." width:60%, class:"font-weight-bold">>\n\n')
 	
 	myprint(output, '\n---\n')
@@ -668,57 +807,302 @@ if __name__ == '__main__':
 	#end Offensive Stat Table insert
 
 	#start Dashboard insert
-	myprint(output, '<$reveal type="match" state="!!curTab" text="Dashboard">')    
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Dashboard">')    
 	myprint(output, '\n<<alert-leftbar light "Dashboard for various charts" width:60%, class:"font-weight-bold">>\n\n')
-	Dashboard_Charts = ["Kills/Downs/DPS", "Deaths/DamageTaken/DistanceFromTag", "Cleanses/Heals/BoonScore", "BoonStrips/OutgoingControlScore/DPS", "Profession_DPS_BoxPlot", "Player_DPS_BoxPlot"]
+	Dashboard_Charts = ["Kills/Downs/DPS", "Fury/Might/DPS", "Deaths/DamageTaken/DistanceFromTag", "Cleanses/Heals/BoonScore", "BoonStrips/OutgoingControlScore/DPS", "Profession_DPS_BoxPlot", "Player_DPS_BoxPlot", "Profession_SPS_BoxPlot", "Player_SPS_BoxPlot", "Profession_CPS_BoxPlot", "Player_CPS_BoxPlot", "Profession_HPS_BoxPlot", "Player_HPS_BoxPlot"]
 	
 	for chart in Dashboard_Charts:
-		myprint(output, '<$button set="!!curChart" setTo="'+chart+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+chart+' </$button>')
+		myprint(output, '<$button setTitle="$:/state/curChart" setTo="'+chart+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+chart+' </$button>')
 	
 	myprint(output, '\n---\n')
 	
 
 	for chart in Dashboard_Charts:
-			myprint(output, '<$reveal type="match" state="!!curChart" text="'+chart+'">\n')
+			myprint(output, '<$reveal type="match" state="$:/state/curChart" text="'+chart+'">\n')
 			myprint(output, '\n---\n')
 			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
 
 			if chart == "Kills/Downs/DPS":
 				myprint(output, "\n!!Kills / Downs / DPS\n")
 				myprint(output, ",,Bubble Size based on DPS output,,\n")
-				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_kills_BubbleChartData}} $height="400px" $theme="dark"/>')
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_kills_BubbleChartData}} $height="500px" $theme="dark"/>')
+
+			if chart == "Fury/Might/DPS":
+				myprint(output, "\n!!Kills / Downs / DPS\n")
+				myprint(output, ",,Bubble Size based on DPS output,,\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_fury_might_BubbleChartData}} $height="500px" $theme="dark"/>')
 				
 			if chart == "Deaths/DamageTaken/DistanceFromTag":
 				myprint(output, "\n!!Deaths / Damage Taken / Distance from Tag\n")
 				myprint(output, ",,Bubble Size based on Average Distance to Tag,,\n")
-				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_deaths_BubbleChartData}} $height="400px" $theme="dark"/>')
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_deaths_BubbleChartData}} $height="500px" $theme="dark"/>')
 
 			if chart == "Cleanses/Heals/BoonScore":
 				myprint(output, "\n!!Cleanses / Heals / Boon Score\n")
 				myprint(output, ",,Bubble Size based on Boon Score = Sum of all average boon output,,\n")
-				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_cleanse_BubbleChartData}} $height="400px" $theme="dark"/>')
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_cleanse_BubbleChartData}} $height="500px" $theme="dark"/>')
 
 			if chart == "BoonStrips/OutgoingControlScore/DPS":
 				myprint(output, "\n!!Boon Strips / Outgoing Control Score / DPS\n")
 				myprint(output, ",,Bubble Size based on Control Score = Sum of all outgoing control effects,,\n")
 				myprint(output, ",,Bubble Size based on DPS output,,\n")
-				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_rips_BubbleChartData}} $height="400px" $theme="dark"/>')
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_rips_BubbleChartData}} $height="500px" $theme="dark"/>')
 
 			#Profession_DPS_BoxPlot
 			if chart == "Profession_DPS_BoxPlot":
-				myprint(output, "\n!!DPS Box Plot by Profession\n")
+				myprint(output, "\n!!Damage per Second Box Plot by Profession\n")
 				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_DPS_Profession_Box_PlotChartData}} $height="800px" $theme="dark"/>')
 
 			#Player_DPS_BoxPlot
 			if chart == "Player_DPS_BoxPlot":
-				myprint(output, "\n!!DPS Box Plot by Player\n")
+				myprint(output, "\n!!Damage per Second Box Plot by Player\n")
 				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_DPS_Profession_and_Name_Box_PlotChartData}} $height="800px" $theme="dark"/>')
+
+			#Profession_SPS_BoxPlot
+			if chart == "Profession_SPS_BoxPlot":
+				myprint(output, "\n!!Boon Strip per Second Box Plot by Profession\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_SPS_Profession_Box_PlotChartData}} $height="800px" $theme="dark"/>')
+
+			#Player_SPS_BoxPlot
+			if chart == "Player_SPS_BoxPlot":
+				myprint(output, "\n!!Boon Strip per Second Box Plot by Player\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_SPS_Profession_and_Name_Box_PlotChartData}} $height="800px" $theme="dark"/>')
+
+			#Profession_CPS_BoxPlot
+			if chart == "Profession_CPS_BoxPlot":
+				myprint(output, "\n!!Cleanses per Second Box Plot by Profession\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_CPS_Profession_Box_PlotChartData}} $height="800px" $theme="dark"/>')
+
+			#Player_CPS_BoxPlot
+			if chart == "Player_CPS_BoxPlot":
+				myprint(output, "\n!!Cleanses per Second Box Plot by Player\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_CPS_Profession_and_Name_Box_PlotChartData}} $height="800px" $theme="dark"/>')
+
+			#Profession_HPS_BoxPlot
+			if chart == "Profession_HPS_BoxPlot":
+				myprint(output, "\n!!Heals per Second Box Plot by Profession\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_HPS_Profession_Box_PlotChartData}} $height="800px" $theme="dark"/>')
+
+			#Player_HPS_BoxPlot
+			if chart == "Player_HPS_BoxPlot":
+				myprint(output, "\n!!Heals per Second Box Plot by Player\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_HPS_Profession_and_Name_Box_PlotChartData}} $height="800px" $theme="dark"/>')
 
 			myprint(output, '\n</div>\n</div>\n')
 			myprint(output, "</$reveal>\n")
 
 	myprint(output, "</$reveal>\n")
 	#end Dashboard insert
+
+	#start DPS Stats insert
+	max_fightTime = 0
+	for squadDps_prof_name in DPSStats:
+		max_fightTime = max(DPSStats[squadDps_prof_name]['duration'], max_fightTime)
+
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="DPSStats">')    
+	myprint(output, '\n<<alert-leftbar light "🤖 Experimental DPS stats 🤖" width:60%, class:"font-weight-bold">>\n\n')
+	
+	myprint(output, '\n---\n')
+	myprint(output, '!!! `Chunk Damage(t)` [`Ch(t)DPS`] \n')
+	myprint(output, '!!! Damage done `t` seconds before an enemy goes down \n')
+	myprint(output, '!!! `Carrior Damage` [`CaDPS`] \n')
+	myprint(output, '!!! Damage done to down enemies that die \n')
+	myprint(output, '!!! `Coordination Damage` [`CDPS`] \n')
+	myprint(output, '!!! Damage weighted by squad coordination \n')
+	myprint(output, '!!! `Combat Time Damage` [`CtDPS`] \n')
+	myprint(output, '!!! Damage done while in combat. If this is substantially higher than DPS, you are probably dying early in fights \n')
+	myprint(output, '\n---\n')
+
+	myprint(output, '|table-caption-top|k')
+	myprint(output, '|Sortable table - Click header item to sort table |c')
+	myprint(output, '|thead-dark table-hover sortable|k')
+	output_header =  '|!Name | !Class'
+	output_header += ' | ! <span data-tooltip="Number of seconds player was in squad logs">Seconds</span>'
+	output_header += '| ☠️ '
+	output_header += '| !DPS| !Ch2DPS| !Ch5DPS| !CaDPS| !CDPS| !CtDPS|  👻 | !🔻/min| !⚰/min'
+	output_header += '|h'
+	myprint(output, output_header)
+	for DPSStats_prof_name in DPSStats:
+		name = DPSStats[DPSStats_prof_name]['name']
+		prof = DPSStats[DPSStats_prof_name]['profession']
+		fightTime = DPSStats[DPSStats_prof_name]['duration']
+		combatTime = DPSStats[DPSStats_prof_name]["combatTime"]
+
+		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 500 or fightTime * 10 < max_fightTime:
+			continue
+
+		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(fightTime)
+		output_string += '| ☠️ '
+		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Damage_Total'])+' total damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime))+'</span>'
+		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Chunk_Damage'][2])+' chunk(2) damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Chunk_Damage'][2] / fightTime))+'</span>'
+		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Chunk_Damage'][5])+' chunk (5) damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Chunk_Damage'][5] / fightTime))+'</span>'
+		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Carrion_Damage'])+' carrion damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Carrion_Damage'] / fightTime))+'</span>'
+		output_string += '| '+'<span data-tooltip="'+my_value(round(DPSStats[DPSStats_prof_name]['Coordination_Damage']))+' coordination weighted damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Coordination_Damage'] / fightTime))+'</span>'
+		output_string += '| '+'<span data-tooltip="In combat '+'{:.2f}'.format(round(100 * combatTime / fightTime, 2))+'% of fights">'+my_value(round(DPSStats[DPSStats_prof_name]['Damage_Total'] / combatTime))+'</span>'
+		output_string += '| 👻 '
+		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Downs'])+' total downs">'+'{:.2f}'.format(round(DPSStats[DPSStats_prof_name]['Downs'] / (fightTime / 60), 2))+'</span>'
+		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Kills'])+' total kills">'+'{:.2f}'.format(round(DPSStats[DPSStats_prof_name]['Kills'] / (fightTime / 60), 2))+'</span>'
+		output_string += '|'
+
+		myprint(output, output_string)
+
+	write_DPSStats_xls(DPSStats, args.xls_output_filename)
+	myprint(output, '\n---\n')
+	myprint(output, "\n!!DPS Stats Bubble Chart\n")
+	myprint(output, "\n,,Bubble size based on CDPS,,\n")
+	myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_DPSStats_BubbleChartData}} $height="500px" $theme="dark"/>')
+	myprint(output, "</$reveal>\n")
+	#end DPS Stats insert
+
+	# Burst Damage
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Burst Damage">\n')    
+	myprint(output, '\n<<alert-leftbar light "🤖 Experimental DPS stats 🤖" width:60%, class:"font-weight-bold">>\n\n')
+	
+	myprint(output, '---\n')
+	myprint(output, '!!! `Burst Damage(t)` [`Bur(t)`] \n')
+	myprint(output, '!!! Maximum damage done over any `t` second interval \n')
+	myprint(output, '---\n')
+	myprint(output, '!!! `Ch5Ca Burst Damage(t)` [`Ch5CaBur(t)`] \n')
+	myprint(output, '!!! Maximum Chunk(5) + Carrion damage done over any `t` second interval \n')
+	myprint(output, '---\n')
+
+	burst_menu_string = '| '
+	burst_menu_string += '<$radio tiddler="$:/temp/BurstDamage" field="curBurstTableDamage" value="Ch5Ca">Ch5Ca Damage</$radio>&nbsp; &nbsp;<$radio tiddler="$:/temp/BurstDamage" field="curBurstTableDamage" value="Damage"> Total Damage</$radio>'
+	burst_menu_string += '&nbsp;&nbsp;/&nbsp;&nbsp;'
+	burst_menu_string += '<$radio tiddler="$:/temp/BurstDamage" field="curBurstTableType" value="Cumulative">&nbsp;Cumulative</$radio>&nbsp; &nbsp;<$radio tiddler="$:/temp/BurstDamage" field="curBurstTableType" value="PS">&nbsp;PS</$radio>'
+	burst_menu_string += ' |c'
+
+	# First the per second version of the table
+	myprint(output, '<$reveal type="match" stateTitle= "$:/temp/BurstDamage" stateField="curBurstTableDamage" text="Damage">\n')
+	myprint(output, '<$reveal type="match" stateTitle= "$:/temp/BurstDamage" stateField="curBurstTableType" text="PS">\n')
+
+	myprint(output, '|table-caption-top|k')
+	myprint(output, burst_menu_string)
+	myprint(output, '|thead-dark table-hover sortable|k')
+	
+	output_string = '|!Name | !Class |'
+
+	for i in range(1, 21):
+		output_string += " !"+str(i)+"s |"
+		
+	output_string += "h"
+	myprint(output, output_string)
+
+	for DPSStats_prof_name in DPSStats:
+		name = DPSStats[DPSStats_prof_name]['name']
+		prof = DPSStats[DPSStats_prof_name]['profession']
+		fightTime = DPSStats[DPSStats_prof_name]['duration']
+
+		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 500 or fightTime * 10 < max_fightTime:
+			continue
+
+		output_string = '|'+name+' |'+' {{'+prof+'}} | '
+		for i in range(1, 21):
+			output_string += ' '+my_value(round(DPSStats[DPSStats_prof_name]['Burst_Damage'][i] / i))+'|'
+				
+		myprint(output, output_string)
+
+	myprint(output, "\n</$reveal>\n")
+
+	# Next the cumulative version of the table
+	myprint(output, '<$reveal type="match" stateTitle= "$:/temp/BurstDamage" stateField="curBurstTableType" text="Cumulative">\n')
+
+	myprint(output, '|table-caption-top|k')
+	myprint(output, burst_menu_string)
+	myprint(output, '|thead-dark table-hover sortable|k')
+	
+	output_string = '|!Name | !Class |'
+
+	for i in range(1, 21):
+		output_string += " !"+str(i)+"s |"
+		
+	output_string += "h"
+	myprint(output, output_string)
+
+	for DPSStats_prof_name in DPSStats:
+		name = DPSStats[DPSStats_prof_name]['name']
+		prof = DPSStats[DPSStats_prof_name]['profession']
+		fightTime = DPSStats[DPSStats_prof_name]['duration']
+
+		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 500 or fightTime * 10 < max_fightTime:
+			continue
+
+		output_string = '|'+name+' |'+' {{'+prof+'}} | '
+		for i in range(1, 21):
+			output_string += ' '+my_value(DPSStats[DPSStats_prof_name]['Burst_Damage'][i])+'|'
+				
+		myprint(output, output_string)
+
+	myprint(output, "\n</$reveal>\n")
+	myprint(output, "\n</$reveal>\n")
+
+	# Ch5Ca Burst Damage
+	# First the per second version of the table
+	myprint(output, '<$reveal type="match" stateTitle= "$:/temp/BurstDamage" stateField="curBurstTableDamage" text="Ch5Ca">\n')
+	myprint(output, '<$reveal type="match" stateTitle= "$:/temp/BurstDamage" stateField="curBurstTableType" text="PS">\n')
+
+	myprint(output, '|table-caption-top|k')
+	myprint(output, burst_menu_string)
+	myprint(output, '|thead-dark table-hover sortable|k')
+	
+	output_string = '|!Name | !Class |'
+
+	for i in range(1, 21):
+		output_string += " !"+str(i)+"s |"
+		
+	output_string += "h"
+	myprint(output, output_string)
+
+	for DPSStats_prof_name in DPSStats:
+		name = DPSStats[DPSStats_prof_name]['name']
+		prof = DPSStats[DPSStats_prof_name]['profession']
+		fightTime = DPSStats[DPSStats_prof_name]['duration']
+
+		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 500 or fightTime * 10 < max_fightTime:
+			continue
+
+		output_string = '|'+name+' |'+' {{'+prof+'}} | '
+		for i in range(1, 21):
+			output_string += ' '+my_value(round(DPSStats[DPSStats_prof_name]['Ch5Ca_Burst_Damage'][i] / i))+'|'
+				
+		myprint(output, output_string)
+
+	myprint(output, "\n</$reveal>\n")
+
+	# Next the cumulative version of the table
+	myprint(output, '<$reveal type="match" stateTitle= "$:/temp/BurstDamage" stateField="curBurstTableType" text="Cumulative">\n')
+
+	myprint(output, '|table-caption-top|k')
+	myprint(output, burst_menu_string)
+	myprint(output, '|thead-dark table-hover sortable|k')
+	
+	output_string = '|!Name | !Class |'
+
+	for i in range(1, 21):
+		output_string += " !"+str(i)+"s |"
+		
+	output_string += "h"
+	myprint(output, output_string)
+
+	for DPSStats_prof_name in DPSStats:
+		name = DPSStats[DPSStats_prof_name]['name']
+		prof = DPSStats[DPSStats_prof_name]['profession']
+		fightTime = DPSStats[DPSStats_prof_name]['duration']
+
+		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 500 or fightTime * 10 < max_fightTime:
+			continue
+
+		output_string = '|'+name+' |'+' {{'+prof+'}} | '
+		for i in range(1, 21):
+			output_string += ' '+my_value(DPSStats[DPSStats_prof_name]['Ch5Ca_Burst_Damage'][i])+'|'
+				
+		myprint(output, output_string)
+
+	myprint(output, "\n</$reveal>\n")
+	myprint(output, "\n</$reveal>\n")
+
+	myprint(output, "\n</$reveal>\n")     
+	# end Ch5Ca Burst Damage
 
 	for stat in config.stats_to_compute:
 		if stat == 'dist':
@@ -750,4 +1134,8 @@ if __name__ == '__main__':
 
 	#write out Bubble Charts and Box_Plots
 	write_bubble_charts(players, top_total_stat_players[stat], squad_Control, myDate, args.input_directory)
-	write_box_plot_charts(DPS_List, myDate, args.input_directory)
+	write_box_plot_charts(DPS_List, myDate, args.input_directory, "DPS")
+	write_box_plot_charts(SPS_List, myDate, args.input_directory, "SPS")
+	write_box_plot_charts(CPS_List, myDate, args.input_directory, "CPS")
+	write_box_plot_charts(HPS_List, myDate, args.input_directory, "HPS")
+	write_DPSStats_bubble_charts(uptime_Table, DPSStats, myDate, args.input_directory)
