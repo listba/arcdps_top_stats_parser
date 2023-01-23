@@ -3592,6 +3592,7 @@ def write_box_plot_charts(DPS_List, myDate, input_directory, ChartType):
 			sorted_DPS_List = OrderedDict(sorted(DPS_List['prof_name'].items()))
 			print_string += str(list(sorted_DPS_List.keys()))
 		print_string +='\n'
+		print_string +='\nProfessionColor = {"Warrior":"#FFD166", "Berserker":"#B39247", "Spellbreaker":"#665429", "Bladesworm":"#19150A", "Guardian":"#72C1D9", "Dragonhunter":"#508798", "Firebrand":"#2E4D57", "Willbender":"#0B1316", "Revenant":"#D16E5A", "Herald":"#924D3F", "Renegade":"#542C24", "Vindicator":"#2A1612", "Engineer":"#D09C59", "Scrapper":"#926D3E", "Holosmith":"#533E24", "Mechanist":"#2A1F12", "Ranger":"#8CDC82", "Druid":"#629A5B", "Soulbeast":"#385834", "Untamed":"#1C2C1A", "Thief":"#C08F95", "Daredevil":"#866468", "Deadeye":"#4D393C", "Specter":"#261D1E", "Elementalist":"#F68A87", "Tempest":"#AC615F", "Weaver":"#623736", "Catalyst":"#311C1B", "Mesmer":"#B679D5", "Chronomancer":"#7F5595", "Mirage":"#493055", "Virtuoso":"#24182B", "Necromancer":"#52A76F", "Reaper":"#39754E", "Scourge":"#21432C", "Harbinger":"#08110B"}'
 		print_string +='\noption = {'
 		print_string +='\n  title: ['
 		print_string +="\n    {text: '"+ChartType+" by "+chart+" across all fights', left: 'center'},"
@@ -3637,14 +3638,21 @@ def write_box_plot_charts(DPS_List, myDate, input_directory, ChartType):
 		print_string += "\n      type: 'boxplot',"
 		print_string += "\n      datasetIndex: 1,"
 		print_string += "\n      itemStyle: {"
-		print_string += "\n        color: '#b8c5f2'"
+		print_string += "\n        borderColor: function (seriesIndex) {  "
+		print_string += "\n          return ProfessionColor[seriesIndex.name.split('_', 1)];"
+		print_string += "\n                }"
 		print_string += "\n      },"
 		print_string += "\n      encode:{tooltip: [ 1, 2, 3, 4, 5]},"
 		print_string += "\n      },\n    {"
 		print_string += "\n      name: 'outlier',"
 		print_string += "\n      type: 'scatter',"
 		print_string += "\n      encode: { x: 1, y: 0 },"
-		print_string += "\n      datasetIndex: 2"
+		print_string += "\n      datasetIndex: 2,"
+		print_string += "\n      itemStyle: {"
+		print_string += "\n        color: function (seriesIndex) {  "
+		print_string += "\n          return ProfessionColor[seriesIndex.name.split('_', 1)];"
+		print_string += "\n                }"
+		print_string += "\n      },"		
 		print_string += "\n    }\n  ]\n};		"
 
 		
