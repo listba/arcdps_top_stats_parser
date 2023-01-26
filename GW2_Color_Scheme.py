@@ -3,7 +3,7 @@ ProfessionColor = {
   "Warrior":"#FFD166",
   "Berserker":"#B39247",
   "Spellbreaker":"#665429",
-  "Bladesworm":"#19150A",
+  "Bladesworn":"#19150A",
   "Guardian":"#72C1D9",
   "Dragonhunter":"#508798",
   "Firebrand":"#2E4D57",
