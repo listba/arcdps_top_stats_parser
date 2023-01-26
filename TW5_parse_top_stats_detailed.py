@@ -104,10 +104,16 @@ if __name__ == '__main__':
 	overall_raid_stats = get_overall_raid_stats(fights)
 	total_fight_duration = print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, found_healing, found_barrier, config, output)
 
+	include_comp_and_review = config.include_comp_and_review
+
+	large_items = [
+		'<$button setTitle="$:/state/curTab" setTo="Squad Composition" selectedClass="" class="btn btn-sm btn-dark" style=""> Squad Composition </$button>',
+		'<$button setTitle="$:/state/curTab" setTo="Fight Review" selectedClass="" class="btn btn-sm btn-dark" style=""> Fight Review </$button>'
+	] if include_comp_and_review else []
+
 	#Start nav_bar_menu for TW5
 	Nav_Bar_Items= ('<$button setTitle="$:/state/curTab" setTo="Overview" selectedClass="" class="btn btn-sm btn-dark" style=""> Session Overview </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Squad Composition" selectedClass="" class="btn btn-sm btn-dark" style=""> Squad Composition </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Fight Review" selectedClass="" class="btn btn-sm btn-dark" style=""> Fight Review </$button>',
+					*large_items,
 					'<$button setTitle="$:/state/curTab" setTo="Deaths" selectedClass="" class="btn btn-sm btn-dark" style=""> Deaths </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Illusion of Life" selectedClass="" class="btn btn-sm btn-dark" style=""> IOL </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Resurrect" selectedClass="" class="btn btn-sm btn-dark" style=""> Resurrect </$button>',                    
@@ -207,140 +213,141 @@ if __name__ == '__main__':
 
 	# end Squad Spike Damage
 
-	#Squad Composition Testing
-	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Squad Composition">')    
-	myprint(output, '\n<<alert dark "Excludes skipped fights in the overview" width:60%>>\n')
-	myprint(output, '\n<div class="flex-row">\n    <div class="flex-col-2 border">\n')
-	myprint(output, '\n!!!SQUAD COMPOSITION\n')    
-	sort_order = ['Firebrand', 'Scrapper', 'Spellbreaker', "Herald", "Chronomancer", "Reaper", "Scourge", "Dragonhunter", "Guardian", "Elementalist", "Tempest", "Revenant", "Weaver", "Willbender", "Renegade", "Vindicator", "Warrior", "Berserker", "Bladesworn", "Engineer", "Holosmith", "Mechanist", "Ranger", "Druid", "Soulbeast", "Untamed", "Thief", "Daredevil", "Deadeye", "Specter", "Catalyst", "Mesmer", "Mirage", "Virtuoso", "Necromancer", "Harbinger"]
+	if include_comp_and_review:
+		#Squad Composition Testing
+		myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Squad Composition">')    
+		myprint(output, '\n<<alert dark "Excludes skipped fights in the overview" width:60%>>\n')
+		myprint(output, '\n<div class="flex-row">\n    <div class="flex-col-2 border">\n')
+		myprint(output, '\n!!!SQUAD COMPOSITION\n')    
+		sort_order = ['Firebrand', 'Scrapper', 'Spellbreaker', "Herald", "Chronomancer", "Reaper", "Scourge", "Dragonhunter", "Guardian", "Elementalist", "Tempest", "Revenant", "Weaver", "Willbender", "Renegade", "Vindicator", "Warrior", "Berserker", "Bladesworn", "Engineer", "Holosmith", "Mechanist", "Ranger", "Druid", "Soulbeast", "Untamed", "Thief", "Daredevil", "Deadeye", "Specter", "Catalyst", "Mesmer", "Mirage", "Virtuoso", "Necromancer", "Harbinger"]
 
-	myprint(output, '<div style="overflow-x:auto;">\n\n')
+		myprint(output, '<div style="overflow-x:auto;">\n\n')
 
-	output_string = ""
+		output_string = ""
 
-	for fight in squad_comp:
-		output_string1 = "\n|thead-dark|k\n"
-		output_string2 = ""
-		output_string1 += "|Fight |"
-		output_string2 += "|"+str(fight+1)
-		for prof in sort_order:
-			if prof in squad_comp[fight]:
-				output_string1 += " {{"+str(prof)+"}} |"
-				output_string2 += " | "+str(squad_comp[fight][prof])
-				
-		output_string1 += "h"
-		output_string2 += " |\n"
-		
-		myprint(output, output_string1)
-		myprint(output, output_string2)
-	myprint(output, '\n\n</div>\n\n')
-	myprint(output, '\n</div>\n    <div class="flex-col-2 border">\n')
-	myprint(output, '\n!!!ENEMY COMPOSITION\n')    
-	myprint(output, '<div style="overflow-x:auto;">\n\n')  
-	enemy_squad_num = 0
-	for fight in fights:
-		if fight.skipped:
+		for fight in squad_comp:
+			output_string1 = "\n|thead-dark|k\n"
+			output_string2 = ""
+			output_string1 += "|Fight |"
+			output_string2 += "|"+str(fight+1)
+			for prof in sort_order:
+				if prof in squad_comp[fight]:
+					output_string1 += " {{"+str(prof)+"}} |"
+					output_string2 += " | "+str(squad_comp[fight][prof])
+					
+			output_string1 += "h"
+			output_string2 += " |\n"
+			
+			myprint(output, output_string1)
+			myprint(output, output_string2)
+		myprint(output, '\n\n</div>\n\n')
+		myprint(output, '\n</div>\n    <div class="flex-col-2 border">\n')
+		myprint(output, '\n!!!ENEMY COMPOSITION\n')    
+		myprint(output, '<div style="overflow-x:auto;">\n\n')  
+		enemy_squad_num = 0
+		for fight in fights:
+			if fight.skipped:
+				enemy_squad_num += 1
+				continue
 			enemy_squad_num += 1
-			continue
-		enemy_squad_num += 1
-		output_string1 = "\n|thead-dark|k\n"
-		output_string2 = ""
-		output_string1 += "|Fight |"
-		output_string2 += "|"+str(enemy_squad_num)
-		for prof in sort_order:
-			if prof in fight.enemy_squad:
-				output_string1 += " {{"+str(prof)+"}} |"
-				output_string2 += " | "+str(fight.enemy_squad[prof])
+			output_string1 = "\n|thead-dark|k\n"
+			output_string2 = ""
+			output_string1 += "|Fight |"
+			output_string2 += "|"+str(enemy_squad_num)
+			for prof in sort_order:
+				if prof in fight.enemy_squad:
+					output_string1 += " {{"+str(prof)+"}} |"
+					output_string2 += " | "+str(fight.enemy_squad[prof])
 
-		output_string1 += "h"
-		output_string2 += " |\n"
+			output_string1 += "h"
+			output_string2 += " |\n"
 
-		myprint(output, output_string1)
-		myprint(output, output_string2)
-	myprint(output, '\n\n</div>\n\n')
-	myprint(output, '\n</div>\n</div>\n')
-	#end reveal
-	print_string = "\n</$reveal>\n"
-	myprint(output, print_string)     
+			myprint(output, output_string1)
+			myprint(output, output_string2)
+		myprint(output, '\n\n</div>\n\n')
+		myprint(output, '\n</div>\n</div>\n')
+		#end reveal
+		print_string = "\n</$reveal>\n"
+		myprint(output, print_string)     
 
 
-	# end Squad Composition insert
+		# end Squad Composition insert
 
-	#start Fight DPS Review insert
-	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Fight Review">')    
-	myprint(output, '\n<<alert dark "Excludes skipped fights in the overview" width:60%>>\n')
-	myprint(output, '\n!!!Damage Output Review by Fight-#\n\n')
-	FightNum=0
-	for fight in fights:
-		FightNum = FightNum+1
-		if not fight.skipped:
-			myprint(output, '<$button setTitle="$:/state/curFight" setTo="Fight-'+str(FightNum)+'" selectedClass="" class="btn btn-sm btn-dark" style=""> Fight-'+str(FightNum)+' </$button>')
-	
-	myprint(output, '\n---\n')
-	
-	FightNum = 0
-	for fight in fights:
-		FightNum = FightNum+1
-		if not fight.skipped:
-			myprint(output, '<$reveal type="match" state="$:/state/curFight" text="Fight-'+str(FightNum)+'">')
-			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col">\n')
-			#begin fight summary
-			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|Fight Summary:|<|h")
-			myprint(output, '|Squad Members: |'+str(fight.allies)+' |')
-			myprint(output, '|Squad Deaths: |'+str(fight.total_stats['deaths'])+' |')
-			myprint(output, '|Enemies: |'+str(fight.enemies)+' |')
-			myprint(output, '|Enemies Downed: |'+str(fight.downs)+' |')
-			myprint(output, '|Enemies Killed: |'+str(fight.kills)+' |')
-			myprint(output, '|Fight Duration: |'+str(fight.duration)+' |')
-			myprint(output, '|Fight End Time: |'+str(fight.end_time)+' |')
-			myprint(output, '</div></div>\n\n')
-			#end fight Summary
-			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col-1">\n')
-			myprint(output, "|table-caption-top|k")
-			myprint(output, "|Damage by Squad Player Descending|c")
-			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|!Squad Member | !Damage Output|h")
-			#begin squad DPS totals
-			sorted_squad_Dps = dict(sorted(fight.squad_Dps.items(), key=lambda x: x[1], reverse=True))
-			for name in sorted_squad_Dps:
-				myprint(output, '|'+name+'|'+my_value(sorted_squad_Dps[name])+'|')
-			#end Squad DPS totals
-			myprint(output, '\n</div>\n    <div class="flex-col-1">\n')
-			myprint(output, "|table-caption-top|k")
-			myprint(output, "|Damage by Squad Skill Descending|c")
-			myprint(output, "|thead-dark table-hover|k")
-			myprint(output, "|!Squad Skill Name | !Damage Output|h")
-			#start   Squad Skill Damage totals
-			sorted_squad_skill_dmg = dict(sorted(fight.squad_skill_dmg.items(), key=lambda x: x[1], reverse=True))
-			for name in sorted_squad_skill_dmg:
-				myprint(output, '|'+name+'|'+my_value(sorted_squad_skill_dmg[name])+'|')
-			#end Squad Skill Damage totals
-			myprint(output, '\n</div>\n    <div class="flex-col-1">\n')
-			myprint(output, "|table-caption-top|k")
-			myprint(output, "|Damage by Enemy Player Descending|c")            
-			myprint(output, "|thead-secondary table-hover|k")
-			myprint(output, "|!Enemy Player | !Damage Output|h")
-			#begin Enemy DPS totals
-			sorted_enemy_Dps = dict(sorted(fight.enemy_Dps.items(), key=lambda x: x[1], reverse=True))
-			for name in sorted_enemy_Dps:
-				myprint(output, '|'+name+'|'+my_value(sorted_enemy_Dps[name])+'|')
-			#end Enemy DPS totals
-			myprint(output, '\n</div>\n    <div class="flex-col-1">\n')
-			myprint(output, "|table-caption-top|k")
-			myprint(output, "|Damage by Enemy Skill Descending|c")            
-			myprint(output, "|thead-secondary table-hover|k")
-			myprint(output, "|!Enemy Skill | !Damage Output|h")
-			#begin Enemy Skill Damage       
-			sorted_enemy_skill_dmg = dict(sorted(fight.enemy_skill_dmg.items(), key=lambda x: x[1], reverse=True))
-			for name in sorted_enemy_skill_dmg:
-				myprint(output, '|'+name+'|'+my_value(sorted_enemy_skill_dmg[name])+'|')
-			#end Enemy Skill Damage
-			myprint(output, '\n</div>\n</div>\n')
-			myprint(output, "</$reveal>\n")
-	myprint(output, "</$reveal>\n")
+		#start Fight DPS Review insert
+		myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Fight Review">')    
+		myprint(output, '\n<<alert dark "Excludes skipped fights in the overview" width:60%>>\n')
+		myprint(output, '\n!!!Damage Output Review by Fight-#\n\n')
+		FightNum=0
+		for fight in fights:
+			FightNum = FightNum+1
+			if not fight.skipped:
+				myprint(output, '<$button setTitle="$:/state/curFight" setTo="Fight-'+str(FightNum)+'" selectedClass="" class="btn btn-sm btn-dark" style=""> Fight-'+str(FightNum)+' </$button>')
+		
+		myprint(output, '\n---\n')
+		
+		FightNum = 0
+		for fight in fights:
+			FightNum = FightNum+1
+			if not fight.skipped:
+				myprint(output, '<$reveal type="match" state="$:/state/curFight" text="Fight-'+str(FightNum)+'">')
+				myprint(output, '\n<div class="flex-row">\n    <div class="flex-col">\n')
+				#begin fight summary
+				myprint(output, "|thead-dark table-hover|k")
+				myprint(output, "|Fight Summary:|<|h")
+				myprint(output, '|Squad Members: |'+str(fight.allies)+' |')
+				myprint(output, '|Squad Deaths: |'+str(fight.total_stats['deaths'])+' |')
+				myprint(output, '|Enemies: |'+str(fight.enemies)+' |')
+				myprint(output, '|Enemies Downed: |'+str(fight.downs)+' |')
+				myprint(output, '|Enemies Killed: |'+str(fight.kills)+' |')
+				myprint(output, '|Fight Duration: |'+str(fight.duration)+' |')
+				myprint(output, '|Fight End Time: |'+str(fight.end_time)+' |')
+				myprint(output, '</div></div>\n\n')
+				#end fight Summary
+				myprint(output, '\n<div class="flex-row">\n    <div class="flex-col-1">\n')
+				myprint(output, "|table-caption-top|k")
+				myprint(output, "|Damage by Squad Player Descending|c")
+				myprint(output, "|thead-dark table-hover|k")
+				myprint(output, "|!Squad Member | !Damage Output|h")
+				#begin squad DPS totals
+				sorted_squad_Dps = dict(sorted(fight.squad_Dps.items(), key=lambda x: x[1], reverse=True))
+				for name in sorted_squad_Dps:
+					myprint(output, '|'+name+'|'+my_value(sorted_squad_Dps[name])+'|')
+				#end Squad DPS totals
+				myprint(output, '\n</div>\n    <div class="flex-col-1">\n')
+				myprint(output, "|table-caption-top|k")
+				myprint(output, "|Damage by Squad Skill Descending|c")
+				myprint(output, "|thead-dark table-hover|k")
+				myprint(output, "|!Squad Skill Name | !Damage Output|h")
+				#start   Squad Skill Damage totals
+				sorted_squad_skill_dmg = dict(sorted(fight.squad_skill_dmg.items(), key=lambda x: x[1], reverse=True))
+				for name in sorted_squad_skill_dmg:
+					myprint(output, '|'+name+'|'+my_value(sorted_squad_skill_dmg[name])+'|')
+				#end Squad Skill Damage totals
+				myprint(output, '\n</div>\n    <div class="flex-col-1">\n')
+				myprint(output, "|table-caption-top|k")
+				myprint(output, "|Damage by Enemy Player Descending|c")            
+				myprint(output, "|thead-secondary table-hover|k")
+				myprint(output, "|!Enemy Player | !Damage Output|h")
+				#begin Enemy DPS totals
+				sorted_enemy_Dps = dict(sorted(fight.enemy_Dps.items(), key=lambda x: x[1], reverse=True))
+				for name in sorted_enemy_Dps:
+					myprint(output, '|'+name+'|'+my_value(sorted_enemy_Dps[name])+'|')
+				#end Enemy DPS totals
+				myprint(output, '\n</div>\n    <div class="flex-col-1">\n')
+				myprint(output, "|table-caption-top|k")
+				myprint(output, "|Damage by Enemy Skill Descending|c")            
+				myprint(output, "|thead-secondary table-hover|k")
+				myprint(output, "|!Enemy Skill | !Damage Output|h")
+				#begin Enemy Skill Damage       
+				sorted_enemy_skill_dmg = dict(sorted(fight.enemy_skill_dmg.items(), key=lambda x: x[1], reverse=True))
+				for name in sorted_enemy_skill_dmg:
+					myprint(output, '|'+name+'|'+my_value(sorted_enemy_skill_dmg[name])+'|')
+				#end Enemy Skill Damage
+				myprint(output, '\n</div>\n</div>\n')
+				myprint(output, "</$reveal>\n")
+		myprint(output, "</$reveal>\n")
 
-	#end Fight DPS Review insert
+		#end Fight DPS Review insert
 
 	# print top x players for all stats. If less then x
 	# players, print all. If x-th place doubled, print all with the
