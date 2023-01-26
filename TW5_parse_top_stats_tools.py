@@ -69,7 +69,9 @@ class Player:
 	name: str                           # character name
 	profession: str                     # profession name
 	num_fights_present: int = 0         # the number of fight the player was involved in 
-	num_enemies_present: int = 0        # the number of fight the player was involved in 
+	num_enemies_present: int = 0        # the number of fight the player was involved in
+	num_allies_supported: int = 0       # the number of fight the player was involved in
+	num_allies_group_supported: int = 0  # the number of fight the player was involved in
 	attendance_percentage: float = 0.   # the percentage of fights the player was involved in out of all fights
 	duration_fights_present: int = 0    # the total duration of all fights the player was involved in, in s
 	duration_active: int = 0            # the total duration a player was active (alive or down)
@@ -758,7 +760,7 @@ def write_support_players(players, top_players, stat, output_file):
 		if stat == 'rips' and (player.profession == 'Chronomancer' or player.profession == 'Spellbreaker'):
 			print_string = "|"+player.account+" |"+player.name+" |"+player.profession+" | "+str(player.num_fights_present)+"| "+str(player.duration_fights_present)+"| "+stat+" |"+guildStatus+" |"
 			myprint(output_file, print_string)
-		if stat == 'cleanses' and (player.profession == 'Scrapper' or player.profession == 'Tempest' or player.profession == 'Druid'):
+		if stat == 'cleanses' and (player.profession == 'Scrapper' or player.profession == 'Tempest' or player.profession == 'Druid' or player.profession == 'Vindicator'):
 			print_string = "|"+player.account+" |"+player.name+" |"+player.profession+" | "+str(player.num_fights_present)+"| "+str(player.duration_fights_present)+"| "+stat+" |"+guildStatus+" |"
 			myprint(output_file, print_string)
 		if stat == 'stability' and (player.profession == 'Firebrand'):
@@ -1427,15 +1429,21 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 			print_string += " "+"{:.2f}".format(round(player.average_stats[stat], 2))+"| "+"{:.2f}".format(round((player.total_stats[stat]/combat_Time)*100, 2))+"|"
 		elif stat in config.buffs_stacking_duration:
-			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats[stat]))+' seconds of generation">'+"{:.2f}".format(round(player.average_stats[stat], 2))+'</span>|'
-			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_group[stat]))+' seconds of generation">'+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+'</span>|'
-			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_self[stat]))+' seconds of generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'</span>|'
+			stat_Generated_Squad = (player.total_stats[stat]/((player.num_allies_supported - player.num_fights_present)/player.num_fights_present)/ player.duration_fights_present)*100
+			stat_Generated_Group = (player.total_stats_group[stat]/((player.num_allies_group_supported - player.num_fights_present)/player.num_fights_present)/ player.duration_fights_present)*100
+			stat_Generated_Self = (player.total_stats_self[stat]/player.duration_fights_present)*100
+			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Squad, 4))+'% Squad Generation">'+my_value(round(player.total_stats[stat]))+"</span>|"
+			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Squad, 4))+'% Squad Generation">'+"{:.2f}".format(round(player.average_stats[stat], 2))+'</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Group, 4))+'% Group Generation">'+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+'</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Self, 4))+'% Self Generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'</span>|'
 		elif stat in config.buffs_stacking_intensity:
-			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats[stat]))+' stacks of generation">'+"{:.2f}".format(round(player.average_stats[stat], 2))+'</span>|'
-			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_group[stat]))+' stacks of generation">'+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+'</span>|'
-			print_string += " "+'<span data-tooltip="'+my_value(round(player.total_stats_self[stat]))+' stacks of generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'</span>|'
+			stat_Generated_Squad = (player.total_stats[stat]/((player.num_allies_supported - player.num_fights_present)/player.num_fights_present)/ player.duration_fights_present)
+			stat_Generated_Group = (player.total_stats_group[stat]/((player.num_allies_group_supported - player.num_fights_present)/player.num_fights_present)/ player.duration_fights_present)
+			stat_Generated_Self = (player.total_stats_self[stat]/player.duration_fights_present)
+			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Squad, 4))+' Squad Generation">'+my_value(round(player.total_stats[stat]))+"</span>|"
+			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Squad, 4))+' Squad Generation">'+"{:.2f}".format(round(player.average_stats[stat], 2))+'</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Group, 4))+' Group Generation">'+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+'</span>|'
+			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Self, 4))+' Self Generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'</span>|'
 		else:
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 		myprint(output_file, print_string)
@@ -1693,6 +1701,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 			player.stats_per_fight[fight_number]['group'] = get_stat_from_player_json(player_data, players_running_healing_addon, 'group', config)
 			
 			num_party_members = party_member_counts[player_data['group']]
+			player.num_allies_group_supported += party_member_counts[player_data['group']]
 			
 			# get all stats that are supposed to be computed from the player data
 			for stat in config.stats_to_compute:
@@ -1784,6 +1793,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 
 			player.num_fights_present += 1
 			player.num_enemies_present += fight.enemies
+			player.num_allies_supported += (fight.allies)
 			player.wt_dps_enemies.append(fight.enemies)
 			player.wt_dps_duration.append(player.stats_per_fight[fight_number]['time_in_combat'])
 			player.wt_dps_damage.append(player.stats_per_fight[fight_number]['dmg'])
