@@ -14,10 +14,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-stats_to_compute = ['deaths', 'iol', 'res', 'kills', 'downs','dmg', 'Pdmg', 'Cdmg', 'dmg_taken', 'rips', 'cleanses', 'superspeed', 'stealth', 'HiS', 'dist', 'stability', 'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration', 'heal', 'barrier', 'barrierDamage', 'swaps']
+stats_to_compute = ['deaths', 'iol', 'res', 'kills', 'downs','dmg', 'Pdmg', 'Cdmg', 'dmg_taken', 'rips', 'cleanses', 'superspeed', 'stealth', 'HiS', 'dist', 'stability', 'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration', 'heal', 'barrier', 'barrierDamage', 'swaps', 'dodges', 'evades']
 
 # How many players will be listed who achieved top stats most often for each stat?
-num_players_listed = {'dmg': 50, 'Pdmg': 50, 'Cdmg': 50, 'iol': 50,'rips': 50, 'cleanses': 50, 'dist': 50, 'stability': 50, 'protection': 50, 'aegis': 50, 'might': 50, 'fury': 50, 'dmg_taken': 50, 'deaths': 50, 'res': 50, 'superspeed': 50, 'stealth': 50, 'HiS': 50, 'resistance': 50, 'resolution': 50, 'quickness': 50, 'swiftness': 50, 'alacrity': 50, 'vigor': 50, 'regeneration': 50, 'heal': 50, 'barrier': 50, 'barrierDamage': 50, 'swaps': 50, 'kills': 50, 'downs': 50}
+num_players_listed = {'dmg': 50, 'Pdmg': 50, 'Cdmg': 50, 'iol': 50,'rips': 50, 'cleanses': 50, 'dist': 50, 'stability': 50, 'protection': 50, 'aegis': 50, 'might': 50, 'fury': 50, 'dmg_taken': 50, 'deaths': 50, 'res': 50, 'superspeed': 50, 'stealth': 50, 'HiS': 50, 'resistance': 50, 'resolution': 50, 'quickness': 50, 'swiftness': 50, 'alacrity': 50, 'vigor': 50, 'regeneration': 50, 'heal': 50, 'barrier': 50, 'barrierDamage': 50, 'swaps': 50, 'kills': 50, 'downs': 50, 'dodges': 50, 'evades': 50}
 # What portion (%) of are considered to be "top" in each fight for each stat?
 num_players_considered_top_percentage = 5
 
@@ -135,3 +135,5 @@ stat_names["immobilize"] = "Immobilize"
 stat_names["swaps"] = "Weapon Swaps"
 stat_names["kills"] = "Enemies Killed"
 stat_names["downs"] = "Enemies Downed"
+stat_names["dodges"] = "Dodges"
+stat_names["evades"] = "Evades"

@@ -159,7 +159,7 @@ class Config:
 
 
 #Stats to exlucde from overview summary
-exclude_Stat = ["iol", "dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealth", "superspeed", "swaps", "barrierDamage"]
+exclude_Stat = ["iol", "dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealth", "superspeed", "swaps", "barrierDamage", "dodges", "evades"]
 
 #Control Effects Tracking
 squad_offensive = {}
@@ -1429,17 +1429,39 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 			print_string += " "+"{:.2f}".format(round(player.average_stats[stat], 2))+"| "+"{:.2f}".format(round((player.total_stats[stat]/combat_Time)*100, 2))+"|"
 		elif stat in config.buffs_stacking_duration:
-			stat_Generated_Squad = (player.total_stats[stat]/((player.num_allies_supported - player.num_fights_present)/player.num_fights_present)/ player.duration_fights_present)*100
-			stat_Generated_Group = (player.total_stats_group[stat]/((player.num_allies_group_supported - player.num_fights_present)/player.num_fights_present)/ player.duration_fights_present)*100
-			stat_Generated_Self = (player.total_stats_self[stat]/player.duration_fights_present)*100
+			if  player.duration_fights_present >0 and player.num_fights_present >0 and player.num_allies_supported >0:
+				stat_Generated_Squad = (player.total_stats[stat]/((player.num_allies_supported - player.num_fights_present)/player.num_fights_present)/ player.duration_fights_present)*100
+			else:
+				stat_Generated_Squad = 0
+			if  player.duration_fights_present >0 and player.num_fights_present >0 and player.num_allies_group_supported >0:
+				if (player.num_allies_group_supported - player.num_fights_present) != 0:
+					stat_Generated_Group = (player.total_stats_group[stat]/((player.num_allies_group_supported - player.num_fights_present)/player.num_fights_present)/ player.duration_fights_present)*100
+			else:
+				stat_Generated_Squad = 0
+			if  player.duration_fights_present >0:	
+				stat_Generated_Self = (player.total_stats_self[stat]/player.duration_fights_present)*100
+			else:
+				stat_Generated_Self = 0
+
 			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Squad, 4))+'% Squad Generation">'+my_value(round(player.total_stats[stat]))+"</span>|"
 			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Squad, 4))+'% Squad Generation">'+"{:.2f}".format(round(player.average_stats[stat], 2))+'</span>|'
 			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Group, 4))+'% Group Generation">'+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+'</span>|'
 			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Self, 4))+'% Self Generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'</span>|'
 		elif stat in config.buffs_stacking_intensity:
-			stat_Generated_Squad = (player.total_stats[stat]/((player.num_allies_supported - player.num_fights_present)/player.num_fights_present)/ player.duration_fights_present)
-			stat_Generated_Group = (player.total_stats_group[stat]/((player.num_allies_group_supported - player.num_fights_present)/player.num_fights_present)/ player.duration_fights_present)
-			stat_Generated_Self = (player.total_stats_self[stat]/player.duration_fights_present)
+			if  player.duration_fights_present >0 and player.num_fights_present >0 and player.num_allies_supported >0:
+				stat_Generated_Squad = (player.total_stats[stat]/((player.num_allies_supported - player.num_fights_present)/player.num_fights_present)/ player.duration_fights_present)
+			else:
+				stat_Generated_Squad = 0
+			if  player.duration_fights_present >0 and player.num_fights_present >0 and player.num_allies_group_supported >0:
+				if (player.num_allies_group_supported - player.num_fights_present) != 0:
+					stat_Generated_Group = (player.total_stats_group[stat]/((player.num_allies_group_supported - player.num_fights_present)/player.num_fights_present)/ player.duration_fights_present)
+			else:
+				stat_Generated_Group = 0
+			if  player.duration_fights_present >0:
+				stat_Generated_Self = (player.total_stats_self[stat]/player.duration_fights_present)
+			else:
+				stat_Generated_Self = 0
+
 			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Squad, 4))+' Squad Generation">'+my_value(round(player.total_stats[stat]))+"</span>|"
 			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Squad, 4))+' Squad Generation">'+"{:.2f}".format(round(player.average_stats[stat], 2))+'</span>|'
 			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Group, 4))+' Group Generation">'+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+'</span>|'
@@ -2009,6 +2031,16 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'ConditionCleanses' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['ConditionCleanses'])				
+
+	if stat == 'dodges':
+		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'dodgeCount' not in player_json['defenses'][0]:
+			return 0        
+		return int(player_json['defenses'][0]['dodgeCount'])	
+
+	if stat == 'evades':
+		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'evadedCount' not in player_json['defenses'][0]:
+			return 0        
+		return int(player_json['defenses'][0]['evadedCount'])
 
 	if stat == 'dist':
 		if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'distToCom' not in player_json['statsAll'][0]:
