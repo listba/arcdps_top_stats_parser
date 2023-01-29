@@ -376,6 +376,7 @@ def fill_config(config_input):
 	config.auras_ids = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic'}
 
 	config.charts = config_input.charts
+	config.include_comp_and_review = config_input.include_comp_and_review
 			
 	return config
 	
