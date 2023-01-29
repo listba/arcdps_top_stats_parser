@@ -1276,7 +1276,7 @@ if __name__ == '__main__':
 	# end Ch5Ca Burst Damage
 
 	for stat in config.stats_to_compute:
-		boxplot_Stats = ['rips', 'cleanses', 'superspeed', 'stability',  'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration']
+		boxplot_Stats = ['stability',  'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration']
 		if stat == 'dist':
 			write_stats_xls(players, top_percentage_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
