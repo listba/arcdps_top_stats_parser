@@ -1721,7 +1721,6 @@ def collect_stat_data(args, config, log, anonymize=False):
 			player.stats_per_fight[fight_number]['time_active'] = get_stat_from_player_json(player_data, players_running_healing_addon, 'time_active', config)
 			player.stats_per_fight[fight_number]['time_in_combat'] = get_stat_from_player_json(player_data, players_running_healing_addon, 'time_in_combat', config)
 			player.stats_per_fight[fight_number]['group'] = get_stat_from_player_json(player_data, players_running_healing_addon, 'group', config)
-			
 			num_party_members = party_member_counts[player_data['group']]
 			player.num_allies_group_supported += party_member_counts[player_data['group']]
 			
@@ -1823,6 +1822,8 @@ def collect_stat_data(args, config, log, anonymize=False):
 			player.duration_active += player.stats_per_fight[fight_number]['time_active']
 			player.duration_in_combat += player.stats_per_fight[fight_number]['time_in_combat']
 			player.swapped_build |= build_swapped
+			player.stats_per_fight[fight_number]['fight_duration'] = fight.duration
+			player.stats_per_fight[fight_number]['allies'] = fight.allies
 
 		# create lists sorted according to stats
 		sortedStats = {key: list() for key in config.stats_to_compute}
@@ -3301,6 +3302,144 @@ def write_stats_chart(players, top_players, stat, myDate, input_directory, confi
 	print_string += "    }\n"
 	print_string += "  ]\n"
 	print_string += "};\n"
+
+	myprint(chart_Output, print_string)
+
+	chart_Output.close()
+# 	end write TW5 Chart tids
+
+def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, input_directory, config):
+	#args.input_directory+"/
+	stat_Name = config.stat_names[stat]
+	fileDate = myDate
+	fileTid = input_directory+"/"+fileDate.strftime('%Y%m%d%H%M')+"_"+stat+"_TW5_Chart.tid"
+	chart_Output = open(fileTid, "w",encoding="utf-8")
+	statBoxPlot_names = []
+	statBoxPlot_profs = []
+	statBoxPlot_data = []	
+
+	for i in reversed(range(len(top_players))):
+		player= players[top_players[i]]
+		statBoxPlot_names.append(player.name)
+		statBoxPlot_profs.append(player.profession)
+		statPerFight = []
+		#/100.*fight.duration*(fight.allies - 1)
+		for fight in player.stats_per_fight:
+			if fight[stat] != -1:
+				duration = fight['fight_duration']
+				fightAllies = fight['allies']
+				statPerFight.append(round(fight[stat]/100*duration*(fightAllies-1),4))
+        
+		statBoxPlot_data.append(statPerFight)
+
+
+	print_string = 'created: '+fileDate.strftime("%Y%m%d%H%M%S")
+	print_string +="\ncreator: Drevarr\n"
+	print_string +="tags: ChartData\n"
+	print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData\n'
+	print_string +="type: application/javascript\n\n\n"
+	#output Box Plot Names
+	jsonStr = json.dumps(statBoxPlot_names)
+	print_string +='const names = '+jsonStr+';\n'
+	#output Box Plot Professions
+	jsonStr = json.dumps(statBoxPlot_profs)
+	print_string +='const professions = '+jsonStr+';\n'
+	#output Box Plot Professions
+	jsonStr = json.dumps(ProfessionColor)
+	print_string +='const ProfessionColor = '+jsonStr+';\n'
+	
+	print_string += "option = {\n"
+	print_string += "  title: [\n"
+	print_string += "    {text: 'Top Output in Seconds for all Fights Present', left: 'center'},\n"
+	print_string += "    {text: 'Output in seconds across all fights \\nupper: Q3 + 1.5 * IQR \\nlower: Q1 - 1.5 * IQR', borderColor: '#999', borderWidth: 1, textStyle: {fontSize: 10}, left: '1%', top: '90%'}\n"
+	print_string += "  ],\n"
+	print_string += "dataset: [\n"
+	print_string += "    {\n"
+	print_string += "      // prettier-ignore\n"
+	print_string += "      source: \n"
+	jsonStr = json.dumps(statBoxPlot_data)
+	print_string += jsonStr+'\n'
+
+	chartText_2 ="""    },
+    {
+      transform: {
+        type: 'boxplot',
+        config: {
+          itemNameFormatter: function (params) {
+            return names[params.value];
+          }
+        }
+      },
+    },
+    {
+      fromDatasetIndex: 1,
+      fromTransformResult: 1
+    }
+  ],
+  dataZoom: [{id: 'dataZoomX', type: 'slider', xAxisIndex: [0], left: 10, height: 10, filterMode: 'empty', start: 0, end: 100},{id: 'dataZoomY', type: 'slider', yAxisIndex: [0], filterMode: 'empty', start: 0, end: 100}],
+  tooltip: {trigger: 'item'},
+  grid: {left: '20%', right: '10%', bottom: '15%'},
+  yAxis: {type: 'category', boundaryGap: true, nameGap: 30, splitArea: {show: true}, splitLine: {show: true}},
+  xAxis: {type: 'value', name: 'Sec', splitArea: {show: true}},
+  series: [
+    {
+      name: 'boxplot',
+      type: 'boxplot',
+      datasetIndex: 1,
+      tooltip: {trigger: 'item',
+          formatter: function (params) {
+            console.log(params.value);
+            //Low = params.value[1]
+          return `<u><b>${params.value[0]}</b></u>
+    <table>
+      <tr>
+      	<td align="right">&#x2022;</td>
+        <td align="left">Low   :</td>
+        <td style="color:blue;"align="right"><b>${params.value[1].toFixed(2)}</b></td>
+      </tr>
+      <tr>
+      	<td align="right">&#x2022;</td>
+        <td align="left">Q1    :</td>
+        <td style="color:blue;"align="right"><b>${params.value[2].toFixed(2)}</b></td>
+      </tr>
+      <tr>
+      	<td align="right">&#x2022;</td>
+        <td align="left">Q2    :</td>
+        <td style="color:blue;"align="right"><b>${params.value[3].toFixed(2)}</b></td>
+      </tr>
+      <tr>
+      	<td align="right">&#x2022;</td>
+        <td align="left">Q3    :</td>
+        <td style="color:blue;"align="right"><b>${params.value[4].toFixed(2)}</b></td>
+      </tr>
+      <tr>
+      	<td align="right">&#x2022;</td>
+        <td align="left">High  :</td>
+        <td style="color:blue;"align="right"><b>${params.value[5].toFixed(2)}</b></td>
+      </tr>  
+    </table>`;              
+        },    
+        axisPointer: {type: 'shadow'}},      
+      itemStyle: {
+        borderColor: function (seriesIndex) {
+          let myIndex = names.indexOf(seriesIndex.name);
+          return ProfessionColor[professions[myIndex]];
+                },
+        borderWidth: 2
+      },
+      encode:{tooltip: [ 1, 2, 3, 4, 5]},
+      },
+    {
+      name: 'outlier',
+      type: 'scatter',
+      encode: { x: 1, y: 0 },
+      datasetIndex: 2,
+    }
+  ]
+};
+"""
+	print_string += chartText_2
+
 
 	myprint(chart_Output, print_string)
 

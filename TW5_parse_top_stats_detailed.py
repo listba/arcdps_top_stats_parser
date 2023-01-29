@@ -1276,6 +1276,7 @@ if __name__ == '__main__':
 	# end Ch5Ca Burst Damage
 
 	for stat in config.stats_to_compute:
+		boxplot_Stats = ['rips', 'cleanses', 'superspeed', 'stability',  'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration']
 		if stat == 'dist':
 			write_stats_xls(players, top_percentage_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
@@ -1296,10 +1297,16 @@ if __name__ == '__main__':
 			write_stats_xls(players, top_consistent_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
 				write_stats_chart(players, top_consistent_stat_players[stat], stat, myDate, args.input_directory, config)
+		elif stat in boxplot_Stats:
+			write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
+			if config.charts:
+				#write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
+				write_stats_box_plots(players, top_total_stat_players[stat], stat, ProfessionColor, myDate, args.input_directory, config)
 		else:
 			write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
 				write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
+				#write_stats_box_plots(players, top_total_stat_players[stat], stat, ProfessionColor, myDate, args.input_directory, config)
 			if stat == 'rips' or stat == 'cleanses' or stat == 'stability':
 				supportCount = write_support_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename, supportCount)
 
