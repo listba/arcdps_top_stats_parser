@@ -888,17 +888,20 @@ def write_Attendance_xls(Attendance, xls_output_filename):
 	sheet1.write(0, 1, "Account")
 	sheet1.write(0, 2, "Attendance (number of fights)")
 	sheet1.write(0, 3, "Attendance (duration fights)")	
+	sheet1.write(0, 4, "Guild Status")	
 	
 	i=0
 	
 	for account in Attendance:
 		Acct_Fights = Attendance[account]['fights']
 		Acct_Duration = Attendance[account]['duration']
+		Acct_Guild_Status = Attendance[account]['guildStatus']
 		
 		sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
 		sheet1.write(i+1, 1, account)
 		sheet1.write(i+1, 2, Acct_Fights)
 		sheet1.write(i+1, 3, Acct_Duration)
+		sheet1.write(i+1, 4, Acct_Guild_Status)
 		i=i+1
 	wb.save(xls_output_filename)
 
@@ -2791,13 +2794,56 @@ def get_stats_from_fight_json(fight_json, config, log):
 	#Attendance Tracking
 	#duration in secs
 	for player in fight_json['players']:
-		if player['account'] not in Attendance:
+		player_account = player['account']
+		player_name = player['name']
+		player_prof = player['profession']
+
+		if Guild_Data:
+			guildStatus = findMember(members, player_account)
+		else:
+			guildStatus = ""			
+
+		if player_account not in Attendance:
+
 			Attendance[player['account']]={}
 			Attendance[player['account']]['fights'] = 1
 			Attendance[player['account']]['duration'] = duration
-		else:
+			Attendance[player['account']]['guildStatus'] = guildStatus
+			Attendance[player['account']]['names']={}
+		
+		elif player_account in Attendance:
 			Attendance[player['account']]['fights'] += 1
 			Attendance[player['account']]['duration'] += duration
+
+		if player_name not in Attendance[player_account]['names']:
+			Attendance[player_account]['names'][player_name]={}
+
+			if player_prof not in Attendance[player_account]['names'][player_name]:
+				Attendance[player_account]['names'][player_name]['professions']={}
+				Attendance[player_account]['names'][player_name]['professions'][player_prof]={}
+				Attendance[player_account]['names'][player_name]['professions'][player_prof]['fights'] = 1
+				Attendance[player_account]['names'][player_name]['professions'][player_prof]['duration'] = duration
+				Attendance[player_account]['names'][player_name]['professions'][player_prof]['guildStatus'] = guildStatus
+			else:
+				Attendance[player_account]['names'][player_name]['professions'][player_prof]['fights'] += 1
+				Attendance[player_account]['names'][player_name]['professions'][player_prof]['duration'] += duration
+				Attendance[player_account]['names'][player_name]['professions'][player_prof]['guildStatus'] += guildStatus
+
+
+		#if player_name in Attendance[player_account]['names']:
+
+		elif player_prof not in Attendance[player_account]['names'][player_name]['professions']:
+			Attendance[player_account]['names'][player_name]['professions'][player_prof]={}
+			Attendance[player_account]['names'][player_name]['professions'][player_prof]['fights'] = 1
+			Attendance[player_account]['names'][player_name]['professions'][player_prof]['duration'] = duration
+			Attendance[player_account]['names'][player_name]['professions'][player_prof]['guildStatus'] = guildStatus
+		else:
+			Attendance[player_account]['names'][player_name]['professions'][player_prof]['fights'] += 1
+			Attendance[player_account]['names'][player_name]['professions'][player_prof]['duration'] += duration
+			Attendance[player_account]['names'][player_name]['professions'][player_prof]['guildStatus'] += guildStatus
+
+
+
 
 	#Death_OnTag Tracking
 	tagPositions = {}
