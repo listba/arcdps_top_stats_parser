@@ -1431,7 +1431,8 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			combat_Time = int(player.duration_fights_present)
 
 		#JEL - Adjust for TW5 table output
-		print_string = "|"+str(place)+". |"+player.name+" | {{"+profession_strings[i]+"}} | "
+		nameWithTooltip = '<span data-tooltip="'+player.account+'">'+player.name+'</span>'
+		print_string = "|"+str(place)+". |"+nameWithTooltip+" | {{"+profession_strings[i]+"}} | "
 		#print_string = f"{place:>2}"+f". {player.name:<{max_name_length}} "+f" {profession_strings[i]:<{profession_length}} "
 
 		if fight_time_h > 0:
