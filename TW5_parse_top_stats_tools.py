@@ -187,6 +187,9 @@ On_Tag = 600
 Run_Back = 5000
 Death_OnTag = {}
 
+#Collect Account Attendance Data
+Attendance = {}
+
 #Collect DPS Box Plot Data
 DPS_List = {}
 DPS_List['acct'] = {}
@@ -872,6 +875,31 @@ def write_control_effects_in_xls(sorted_enemyControl, stat, players, xls_output_
 			sheet1.write(i+1, 4, round(sorted_enemyControl[name], 4))
 			sheet1.write(i+1, 5, round(sorted_enemyControl[name]/fightTime, 4))
 			i=i+1
+	wb.save(xls_output_filename)
+
+def write_Attendance_xls(Attendance, xls_output_filename):
+
+	fileDate = datetime.datetime.now()
+	book = xlrd.open_workbook(xls_output_filename)
+	wb = copy(book)
+	sheet1 = wb.add_sheet("Attendance")
+
+	sheet1.write(0, 0, "Date")
+	sheet1.write(0, 1, "Account")
+	sheet1.write(0, 2, "Attendance (number of fights)")
+	sheet1.write(0, 3, "Attendance (duration fights)")	
+	
+	i=0
+	
+	for account in Attendance:
+		Acct_Fights = Attendance[account]['fights']
+		Acct_Duration = Attendance[account]['duration']
+		
+		sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
+		sheet1.write(i+1, 1, account)
+		sheet1.write(i+1, 2, Acct_Fights)
+		sheet1.write(i+1, 3, Acct_Duration)
+		i=i+1
 	wb.save(xls_output_filename)
 
 def write_Death_OnTag_xls(Death_OnTag, uptime_Table, players, xls_output_filename):
@@ -1641,7 +1669,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 			json_datafile = open(file_path, encoding='utf-8')
 			json_data = json.load(json_datafile)
 		# get fight stats
-		fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats = get_stats_from_fight_json(json_data, config, log)
+		fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats = get_stats_from_fight_json(json_data, config, log)
 			
 		if first:
 			first = False
@@ -1878,7 +1906,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 	if anonymize:
 		anonymize_players(players, account_index)
 	
-	return players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats
+	return players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats
 			
 
 
@@ -2760,6 +2788,17 @@ def get_stats_from_fight_json(fight_json, config, log):
 				uptime_Table[squadDps_prof_name][buff_name] = uptime_Table[squadDps_prof_name][buff_name] + uptime_duration
 		uptime_Table[squadDps_prof_name]['duration'] = uptime_Table[squadDps_prof_name]['duration'] + player_combat_time
 
+	#Attendance Tracking
+	#duration in secs
+	for player in fight_json['players']:
+		if player['account'] not in Attendance:
+			Attendance[player['account']]={}
+			Attendance[player['account']]['fights'] = 1
+			Attendance[player['account']]['duration'] = duration
+		else:
+			Attendance[player['account']]['fights'] += 1
+			Attendance[player['account']]['duration'] += duration
+
 	#Death_OnTag Tracking
 	tagPositions = {}
 	dead_Tag = 0
@@ -2998,7 +3037,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 
 	calculate_dps_stats(fight_json, fight, players_running_healing_addon, config)
 		
-	return fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats
+	return fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats
 
 
 
@@ -3844,7 +3883,7 @@ def write_box_plot_charts(DPS_List, myDate, input_directory, ChartType):
 #	end write bubble charts
 
 
-def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, output_file):
+def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, output_file):
 	json_dict = {}
 	json_dict["overall_raid_stats"] = {key: value for key, value in overall_raid_stats.items()}
 	json_dict["overall_squad_stats"] = {key: value for key, value in overall_squad_stats.items()}
@@ -3865,6 +3904,7 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	json_dict["auras_TableIn"] =  {key: value for key, value in auras_TableIn.items()}
 	json_dict["auras_TableOut"] =  {key: value for key, value in auras_TableOut.items()}
 	json_dict["Death_OnTag"] =  {key: value for key, value in Death_OnTag.items()}
+	json_dict["Attendance"] =  {key: value for key, value in Attendance.items()}
 	json_dict["DPS_List"] =  {key: value for key, value in DPS_List.items()}
 	json_dict["CPS_List"] =  {key: value for key, value in CPS_List.items()}
 	json_dict["SPS_List"] =  {key: value for key, value in SPS_List.items()}
