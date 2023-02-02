@@ -711,8 +711,8 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 		else:
 			print_string = "*Top average "+config.stat_names[stat]+" awards (Max. "+str(config.num_players_listed[stat])+" places)"
 			myprint(output_file, print_string)
-			print_string = "*''FightTime avg'': Total/total duration of fights | ''CombatTime avg''= Total/total time player alive during fights"
-			myprint(output_file, print_string)			
+			#print_string = "*''FightTime avg'': Total/total duration of fights | ''CombatTime avg''= Total/total time player alive during fights"
+			#myprint(output_file, print_string)			
 			print_string = "*Attendance = number of fights a player was present out of "+str(num_used_fights)+" total fights."
 			myprint(output_file, print_string)
 	print_string = "\n"    
@@ -742,7 +742,8 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 		#	combat_Time = int(player.duration_fights_present)
 		if player.consistency_stats[stat] != last_val:
 			place += 1
-		print_string = "|"+str(place)+". |"+player.name+" | {{"+profession_strings[i]+"}} | "+str(player.num_fights_present)+" | "+my_value(round(player.consistency_stats[stat]))+" |"
+		nameWithTooltip = '<span data-tooltip="'+player.account+'">'+player.name+'</span>'
+		print_string = "|"+str(place)+". |"+nameWithTooltip+" | {{"+profession_strings[i]+"}} | "+str(player.num_fights_present)+" | "+my_value(round(player.consistency_stats[stat]))+" |"
 		if stat == 'dmg_taken':
 			print_string += " "+my_value(round(player.total_stats[stat],1))+"| "+my_value(round(player.average_stats[stat]))+"|"
 		if stat == 'dist':
@@ -1374,8 +1375,8 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 	
 	print_string = "*Top overall "+config.stat_names[stat]+" awards (Max. "+str(config.num_players_listed[stat])+" places, min. "+str(round(config.portion_of_top_for_total*100.))+"% of 1st place)"
 	myprint(output_file, print_string)
-	print_string = "*''FightTime avg'': Total/total duration of fights | ''CombatTime avg''= Total/total time player alive during fights"
-	myprint(output_file, print_string)
+	#print_string = "*''FightTime avg'': Total/total duration of fights | ''CombatTime avg''= Total/total time player alive during fights"
+	#myprint(output_file, print_string)
 	print_string = "*Attendance = total duration of fights attended out of "
 	if total_fight_duration["h"] > 0:
 		print_string += str(total_fight_duration["h"])+"h "
@@ -1578,8 +1579,9 @@ def write_sorted_top_percentage(players, top_players, comparison_percentage, con
 			place += 1
 
 		percentage = int(player.portion_top_stats[stat]*100)
-		print_string = f"|{place:>2}"+f". |{player.name:<{max_name_length}} "+" | {{"+profession_strings[i]+"}} "+f"| {percentage:>10}% " +f" | {round(player.consistency_stats[stat]):>9} "+f" | {player.num_fights_present:>6} |"
-
+		nameWithTooltip = '<span data-tooltip="'+player.account+'">'+player.name+'</span>'
+		#print_string = f"|{place:>2}"+f". |{player.name:<{max_name_length}} "+" | {{"+profession_strings[i]+"}} "+f"| {percentage:>10}% " +f" | {round(player.consistency_stats[stat]):>9} "+f" | {player.num_fights_present:>6} |"
+		print_string = "|"+str(place)+". |"+nameWithTooltip+" | {{"+profession_strings[i]+"}} | "+str(percentage)+"%| "+str(round(player.consistency_stats[stat]))+" | "+ str(player.num_fights_present)+" |"
 		if stat != "dist":
 			print_string += f" {round(player.total_stats[stat]):>7} |"
 		else:
