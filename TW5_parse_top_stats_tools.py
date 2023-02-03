@@ -45,8 +45,6 @@ except ImportError:
 
 debug = False # enable / disable debug output
 
-API_response = "" #API Response code for Guild_Data
-
 class StatType(Enum):
 	TOTAL = 1
 	CONSISTENT = 2
@@ -226,14 +224,30 @@ MOA_Targets = {}
 MOA_Casters = {}
 
 #fetch Guild Data and Check Guild Status function
+#members: Dict[str, Any] = {}
+members: dict = field(default_factory=dict) 
+API_response = ""
+
 if Guild_Data:
-	Guild_ID = Guild_Data.Guild_ID
-	API_Key = Guild_Data.API_Key
-	api_url = "https://api.guildwars2.com/v2/guild/"+Guild_ID+"/members?access_token="+API_Key
+	if type(Guild_Data.Guild_ID) == dict:
+		print("Guild Keys Available: ", Guild_Data.Guild_ID.keys())
+		inputGuild = input('What Guild key for this session?\n')
+		Guild_ID = Guild_Data.Guild_ID[inputGuild]
+		API_Key = Guild_Data.API_Key[inputGuild]
+		print("-----=====:Guild ID:", Guild_ID)
+		print("-----=====:Guild API:", API_Key)
+		api_url = "https://api.guildwars2.com/v2/guild/"+Guild_ID+"/members?access_token="+API_Key
+	else:
+		Guild_ID = Guild_Data.Guild_ID
+		API_Key = Guild_Data.API_Key
+		api_url = "https://api.guildwars2.com/v2/guild/"+Guild_ID+"/members?access_token="+API_Key
 	response = requests.get(api_url)
 	members = json.loads(response.text)
 	print("response code: "+str(response.status_code))
 	API_response = response.status_code
+else:
+	members = {}
+	API_response = " "
 
 
 def findMember(json_object, name):
