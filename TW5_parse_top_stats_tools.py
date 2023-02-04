@@ -157,7 +157,7 @@ class Config:
 
 
 #Stats to exlucde from overview summary
-exclude_Stat = ["iol", "dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealth", "superspeed", "swaps", "barrierDamage", "dodges", "evades"]
+exclude_Stat = ["iol", "dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealth", "superspeed", "swaps", "barrierDamage", "dodges", "evades", "blocks", "invulns"]
 
 #Control Effects Tracking
 squad_offensive = {}
@@ -1484,8 +1484,10 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			if  player.duration_fights_present >0 and player.num_fights_present >0 and player.num_allies_group_supported >0:
 				if (player.num_allies_group_supported - player.num_fights_present) != 0:
 					stat_Generated_Group = (player.total_stats_group[stat]/((player.num_allies_group_supported - player.num_fights_present)/player.num_fights_present)/ player.duration_fights_present)*100
+				else:
+					stat_Generated_Group = 0
 			else:
-				stat_Generated_Squad = 0
+				stat_Generated_Group = 0
 			if  player.duration_fights_present >0:	
 				stat_Generated_Self = (player.total_stats_self[stat]/player.duration_fights_present)*100
 			else:
@@ -2091,6 +2093,16 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'evadedCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['evadedCount'])
+
+	if stat == 'invulns':
+		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'invulnedCount' not in player_json['defenses'][0]:
+			return 0        
+		return int(player_json['defenses'][0]['invulnedCount'])
+
+	if stat == 'blocks':
+		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'blockedCount' not in player_json['defenses'][0]:
+			return 0        
+		return int(player_json['defenses'][0]['blockedCount'])		
 
 	if stat == 'dist':
 		if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'distToCom' not in player_json['statsAll'][0]:
@@ -3420,7 +3432,8 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
 	statBoxPlot_names = []
 	statBoxPlot_profs = []
 	statBoxPlot_data = []	
-
+	chart_per_fight = ['res', 'kills', 'downs', 'swaps', 'dist', 'evades', 'dodges']
+	chart_per_second = ['dmg', 'Pdmg', 'Cdmg', 'dmg_taken', 'rips', 'cleanses', 'superspeed', 'heal', 'barrier', 'barrierDamage'] 
 	for i in reversed(range(len(top_players))):
 		player= players[top_players[i]]
 		statBoxPlot_names.append(player.name)
@@ -3431,7 +3444,12 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
 			if fight[stat] != -1:
 				duration = fight['fight_duration']
 				fightAllies = fight['allies']
-				statPerFight.append(round(fight[stat]/100*duration*(fightAllies-1),4))
+				if stat in chart_per_fight:
+					statPerFight.append(round(fight[stat], 4))
+				elif stat in chart_per_second:
+					statPerFight.append(round(fight[stat]/duration, 4))
+				else:
+					statPerFight.append(round(fight[stat]/100*duration*(fightAllies-1),4))
         
 		statBoxPlot_data.append(statPerFight)
 
@@ -3453,7 +3471,12 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
 	
 	print_string += "option = {\n"
 	print_string += "  title: [\n"
-	print_string += "    {text: 'Top Output in Seconds for all Fights Present', left: 'center'},\n"
+	if stat in chart_per_fight:
+			print_string += "    {text: '"+stat_Name+" per Fight for all Fights Present', left: 'center'},\n"
+	elif stat in chart_per_second:
+			print_string += "    {text: '"+stat_Name+" per Second for all Fights Present', left: 'center'},\n"
+	else:
+			print_string += "    {text: '"+stat_Name+" per Second for all Fights Present', left: 'center'},\n"
 	print_string += "    {text: 'Output in seconds across all fights \\nupper: Q3 + 1.5 * IQR \\nlower: Q1 - 1.5 * IQR', borderColor: '#999', borderWidth: 1, textStyle: {fontSize: 10}, left: '1%', top: '90%'}\n"
 	print_string += "  ],\n"
 	print_string += "dataset: [\n"

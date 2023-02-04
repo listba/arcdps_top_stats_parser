@@ -381,11 +381,13 @@ if __name__ == '__main__':
 			top_total_stat_players[stat] = get_top_players(players, config, stat, StatType.TOTAL)
 			top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)            
 			top_percentage_stat_players[stat],comparison_val = get_and_write_sorted_top_percentage(players, config, num_used_fights, stat, output, StatType.PERCENTAGE, top_consistent_stat_players[stat])
+			myprint(output, '\n\n\n\n')
+			top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
+			top_average_stat_players[stat] = get_and_write_sorted_average(players, config, num_used_fights, stat, output)			
 			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '\n</div>\n    <div class="flex-col border">\n')
 			myprint(output, '<div style="overflow-x:auto;">\n\n')
-			top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
-			top_average_stat_players[stat] = get_and_write_sorted_average(players, config, num_used_fights, stat, output)
+			myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
 			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '\n</div>\n</div>\n')
 		elif stat == 'dmg_taken':
@@ -395,8 +397,13 @@ if __name__ == '__main__':
 			top_total_stat_players[stat] = get_top_players(players, config, stat, StatType.TOTAL)
 			top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
 			top_average_stat_players[stat] = get_and_write_sorted_average(players, config, num_used_fights, stat, output)
-			myprint(output, '\n\n</div>\n\n')
-			myprint(output, '\n</div>\n</div>\n')
+			#myprint(output, '\n\n</div>\n\n')
+			#myprint(output, '\n</div>\n</div>\n')
+			myprint(output, '\n</div>\n    <div class="flex-col border">\n')
+			myprint(output, '<div style="overflow-x:auto;">\n\n')
+			myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
+			myprint(output, '\n\n</div></div>\n\n')
+			myprint(output, '\n</div>\n</div>\n')			
 		else:
 			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
 			myprint(output, '<div style="overflow-x:auto;">\n\n')
@@ -1105,7 +1112,7 @@ if __name__ == '__main__':
 		max_fightTime = max(DPSStats[squadDps_prof_name]['duration'], max_fightTime)
 
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="DPSStats">')    
-	myprint(output, '\n<<alert-leftbar light "🤖 Experimental DPS stats 🤖" width:60%, class:"font-weight-bold">>\n\n')
+	myprint(output, '\n<<alert-leftbar light "Experimental DPS stats" width:60%, class:"font-weight-bold">>\n\n')
 	
 	myprint(output, '\n---\n')
 	myprint(output, '!!! `Chunk Damage(t)` [`Ch(t)DPS`] \n')
@@ -1123,8 +1130,7 @@ if __name__ == '__main__':
 	myprint(output, '|thead-dark table-hover sortable|k')
 	output_header =  '|!Name | !Class'
 	output_header += ' | ! <span data-tooltip="Number of seconds player was in squad logs">Seconds</span>'
-	output_header += '| ☠️ '
-	output_header += '| !DPS| !Ch2DPS| !Ch5DPS| !CaDPS| !CDPS| !CtDPS|  👻 | !🔻/min| !⚰/min'
+	output_header += '| !DPS| !Ch2DPS| !Ch5DPS| !CaDPS| !CDPS| !CtDPS| !Downs/min| !Kills/min'
 	output_header += '|h'
 	myprint(output, output_header)
 	for DPSStats_prof_name in DPSStats:
@@ -1137,14 +1143,12 @@ if __name__ == '__main__':
 			continue
 
 		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(fightTime)
-		output_string += '| ☠️ '
 		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Damage_Total'])+' total damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime))+'</span>'
 		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Chunk_Damage'][2])+' chunk(2) damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Chunk_Damage'][2] / fightTime))+'</span>'
 		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Chunk_Damage'][5])+' chunk (5) damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Chunk_Damage'][5] / fightTime))+'</span>'
 		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Carrion_Damage'])+' carrion damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Carrion_Damage'] / fightTime))+'</span>'
 		output_string += '| '+'<span data-tooltip="'+my_value(round(DPSStats[DPSStats_prof_name]['Coordination_Damage']))+' coordination weighted damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Coordination_Damage'] / fightTime))+'</span>'
 		output_string += '| '+'<span data-tooltip="In combat '+'{:.2f}'.format(round(100 * combatTime / fightTime, 2))+'% of fights">'+my_value(round(DPSStats[DPSStats_prof_name]['Damage_Total'] / combatTime))+'</span>'
-		output_string += '| 👻 '
 		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Downs'])+' total downs">'+'{:.2f}'.format(round(DPSStats[DPSStats_prof_name]['Downs'] / (fightTime / 60), 2))+'</span>'
 		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Kills'])+' total kills">'+'{:.2f}'.format(round(DPSStats[DPSStats_prof_name]['Kills'] / (fightTime / 60), 2))+'</span>'
 		output_string += '|'
@@ -1161,7 +1165,7 @@ if __name__ == '__main__':
 
 	# Burst Damage
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Burst Damage">\n')    
-	myprint(output, '\n<<alert-leftbar light "🤖 Experimental DPS stats 🤖" width:60%, class:"font-weight-bold">>\n\n')
+	myprint(output, '\n<<alert-leftbar light "Experimental DPS stats" width:60%, class:"font-weight-bold">>\n\n')
 	
 	myprint(output, '---\n')
 	myprint(output, '!!! `Burst Damage(t)` [`Bur(t)`] \n')
@@ -1310,28 +1314,33 @@ if __name__ == '__main__':
 	# end Ch5Ca Burst Damage
 
 	for stat in config.stats_to_compute:
-		boxplot_Stats = ['stability',  'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration']
+		skip_boxplot_charts = ['deaths', 'iol', 'stealth', 'HiS']
+		#boxplot_Stats = ['stability',  'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration', 'res', 'kills', 'downs', 'swaps', 'dmg', 'Pdmg', 'Cdmg', 'rips', 'cleanses', 'superspeed', 'barrierDamage']
 		if stat == 'dist':
 			write_stats_xls(players, top_percentage_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
-				write_stats_chart(players, top_percentage_stat_players[stat], stat, myDate, args.input_directory, config)
+				#write_stats_chart(players, top_percentage_stat_players[stat], stat, myDate, args.input_directory, config)
+				write_stats_box_plots(players, top_percentage_stat_players[stat], stat, ProfessionColor, myDate, args.input_directory, config)
 		elif stat == 'dmg_taken':
 			write_stats_xls(players, top_average_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
-				write_stats_chart(players, top_average_stat_players[stat], stat, myDate, args.input_directory, config)
+				#write_stats_chart(players, top_average_stat_players[stat], stat, myDate, args.input_directory, config)
+				write_stats_box_plots(players, top_average_stat_players[stat], stat, ProfessionColor, myDate, args.input_directory, config)
 		elif stat == 'heal' and found_healing:
 			write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
-				write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
+				#write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
+				write_stats_box_plots(players, top_total_stat_players[stat], stat, ProfessionColor, myDate, args.input_directory, config)
 		elif stat == 'barrier' and found_barrier:
 			write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
-				write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
+				#write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
+				write_stats_box_plots(players, top_total_stat_players[stat], stat, ProfessionColor, myDate, args.input_directory, config)
 		elif stat == 'deaths':
 			write_stats_xls(players, top_consistent_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
 				write_stats_chart(players, top_consistent_stat_players[stat], stat, myDate, args.input_directory, config)
-		elif stat in boxplot_Stats:
+		elif stat not in skip_boxplot_charts:
 			write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
 				#write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
@@ -1341,8 +1350,8 @@ if __name__ == '__main__':
 			if config.charts:
 				write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
 				#write_stats_box_plots(players, top_total_stat_players[stat], stat, ProfessionColor, myDate, args.input_directory, config)
-			if stat == 'rips' or stat == 'cleanses' or stat == 'stability':
-				supportCount = write_support_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename, supportCount)
+		if stat == 'rips' or stat == 'cleanses' or stat == 'stability':
+			supportCount = write_support_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename, supportCount)
 
 	#write out Bubble Charts and Box_Plots
 	write_bubble_charts(players, top_total_stat_players[stat], squad_Control, myDate, args.input_directory)
