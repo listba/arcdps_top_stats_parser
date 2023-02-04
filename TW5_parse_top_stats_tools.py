@@ -2232,20 +2232,23 @@ def split_boon_states_by_combat_breakpoints(states, breakpoints, duration):
 		if end_state < combat_start:
 			break
 
-		new_states.append([
-			combat_start if combat_start > start_state else start_state,
-			combat_end if combat_end < end_state else end_state,
-			stacks
-		])
+		new_start = combat_start if combat_start > start_state else start_state
+		new_end = combat_end if combat_end < end_state else end_state
+		if new_end > new_start:
+			new_states.append([new_start, new_end, stacks])
 
 		while(len(split_states) > 0 and split_states[0][1] <= combat_end):
 			[start_state, end_state, stacks] = split_states.pop(0)
 
-			new_states.append([
-				combat_start if combat_start > start_state else start_state,
-				combat_end if combat_end < end_state else end_state,
-				stacks
-			])
+			new_start = combat_start if combat_start > start_state else start_state
+			new_end = combat_end if combat_end < end_state else end_state
+
+			if new_end > new_start:
+				new_states.append([
+					combat_start if combat_start > start_state else start_state,
+					combat_end if combat_end < end_state else end_state,
+					stacks
+				])
 
 	return new_states
 
