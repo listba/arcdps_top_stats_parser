@@ -2015,7 +2015,7 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 	if stat == 'dmg_taken':
 		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'damageTaken' not in player_json['defenses'][0] or 'damageBarrier' not in player_json['defenses'][0]:
 			return 0
-		return int(player_json['defenses'][0]['damageTaken']+player_json['defenses'][0]['damageBarrier'])
+		return int(player_json['defenses'][0]['damageTaken'])
 
 	if stat == 'barrierDamage':
 		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'damageBarrier' not in player_json['defenses'][0]:
