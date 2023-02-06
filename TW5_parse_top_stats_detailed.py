@@ -945,7 +945,10 @@ if __name__ == '__main__':
 			damage_with_buff = stacking_uptime_Table[uptime_prof_name]['damage_with_'+damage_buff]
 			damage_with_buff_uptime = damage_with_buff[1] / total_damage			
 
-			buff_uptime = uptime_Table[uptime_table_prof_name][damage_buff] / uptime_fight_time
+			if damage_buff in uptime_Table[uptime_table_prof_name]:
+				buff_uptime = uptime_Table[uptime_table_prof_name][damage_buff] / uptime_fight_time
+			else:
+				buff_uptime = 0
 
 			output_string += ' <span data-tooltip="'+"{:.2f}".format(round(damage_with_buff_uptime * 100, 4))+'% dmg - '+"{:.2f}".format(round(buff_uptime * 100, 4))+'% uptime">'
 			output_string += "{:.2f}".format(round((damage_with_buff_uptime * 100), 4))+'</span>|'
