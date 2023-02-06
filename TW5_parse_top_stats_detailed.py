@@ -88,6 +88,7 @@ if __name__ == '__main__':
 	#myprint(output, 'curAuras-Out: Fire')
 	#myprint(output, 'curAuras-In: Fire')
 	#myprint(output, 'curStackingBuffs: might')
+	#myprint(output, 'curDamageWithBuffs: might')
 	#myprint(output, 'curBurstTableDamage: Ch5Ca')
 	#myprint(output, 'curBurstTableType: Cumulative')
 	#myprint(output, 'curChart: Kills/Downs/DPS')
@@ -152,6 +153,7 @@ if __name__ == '__main__':
 					'<$button setTitle="$:/state/curTab" setTo="Spike Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Spike Damage </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Buff Uptime" selectedClass="" class="btn btn-sm btn-dark" style=""> Buff Uptime </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Stacking Buffs" selectedClass="" class="btn btn-sm btn-dark" style=""> Stacking Buffs </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Damage with Buffs" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage with Buffs </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Auras - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - In </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - Out </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> Death OnTag </$button>',
@@ -785,6 +787,7 @@ if __name__ == '__main__':
 		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_stability'] / 1000
 		stability_stacks = stacking_uptime_Table[uptime_prof_name]['stability']
 
+		# todo use stab
 		if stacking_uptime_Table[uptime_prof_name]['duration_stability'] * 10 < max_stacking_buff_fight_time:
 			continue
 
@@ -806,6 +809,143 @@ if __name__ == '__main__':
 	myprint(output, "</$reveal>\n")
 	
 	write_stacking_buff_uptimes_in_xls(stacking_uptime_Table, args.xls_output_filename)
+	#end Stacking Buff Uptime Table insert
+
+
+	#start Stacking Buff Uptime Table insert
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Damage with Buffs">')    
+	myprint(output, '\n<<alert-leftbar light "Damage with Buffs" width:60%, class:"font-weight-bold">>\n\n')
+	myprint(output, '\n---\n')
+	myprint(output, '!!! `Damage with buff %` \n')
+	myprint(output, '!!! Percentage of damage done with a buff, similar to uptime %, but based on damage dealt \n')
+	myprint(output, '!!! `Damage % - Uptime %` \n')
+	myprint(output, '!!! The difference in `damage with buff %` and `uptime %` \n')
+	myprint(output, '\n---\n')
+	myprint(output, '<$button setTitle="$:/state/curDamageWithBuffs" setTo="might" selectedClass="" class="btn btn-sm btn-dark" style="">might</$button>')
+	myprint(output, '<$button setTitle="$:/state/curDamageWithBuffs" setTo="other" selectedClass="" class="btn btn-sm btn-dark" style="">other buffs</$button>')
+	
+	myprint(output, '\n---\n')
+
+	# Might
+	myprint(output, '<$reveal type="match" state="$:/state/curDamageWithBuffs" text="might">\n')
+	myprint(output, '\n---\n')
+
+	# Might with damage table
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|{{Might}} Sortable table - Click header item to sort table {{Might}}|c")
+	myprint(output, '|thead-dark table-hover sortable|k')
+	output_header =  '|!Name | !Class'
+	output_header += ' | ! <span data-tooltip="Number of seconds player was in squad logs">Seconds</span>'
+	output_header += '| !Avg| !1+ %| !5+ %| !10+ %| !15+ %| !20+ %| !25 %'
+	output_header += '|h'
+	myprint(output, output_header)
+	
+	for uptime_prof_name in stacking_uptime_Table:
+		name = stacking_uptime_Table[uptime_prof_name]['name']
+		prof = stacking_uptime_Table[uptime_prof_name]['profession']
+		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_might'] / 1000
+		damage_with_might = stacking_uptime_Table[uptime_prof_name]['damage_with_might']
+		might_stacks = stacking_uptime_Table[uptime_prof_name]['might']
+
+		if stacking_uptime_Table[uptime_prof_name]['duration_might'] * 10 < max_stacking_buff_fight_time:
+			continue
+
+		total_damage = DPSStats[uptime_prof_name]["Damage_Total"] or 1
+
+		damage_with_avg_might = sum(stack_num * damage_with_might[stack_num] for stack_num in range(1, 26)) / total_damage
+		damage_with_might_uptime = 1.0 - (damage_with_might[0] / total_damage)
+		damage_with_might_5_uptime = sum(damage_with_might[i] for i in range(5,26)) / total_damage
+		damage_with_might_10_uptime = sum(damage_with_might[i] for i in range(10,26)) / total_damage
+		damage_with_might_15_uptime = sum(damage_with_might[i] for i in range(15,26)) / total_damage
+		damage_with_might_20_uptime = sum(damage_with_might[i] for i in range(20,26)) / total_damage
+		damage_with_might_25_uptime = damage_with_might[25] / total_damage
+		
+		avg_might = sum(stack_num * might_stacks[stack_num] for stack_num in range(1, 26)) / (fight_time * 1000)
+		might_uptime = 1.0 - (might_stacks[0] / (fight_time * 1000))
+		might_5_uptime = sum(might_stacks[i] for i in range(5,26)) / (fight_time * 1000)
+		might_10_uptime = sum(might_stacks[i] for i in range(10,26)) / (fight_time * 1000)
+		might_15_uptime = sum(might_stacks[i] for i in range(15,26)) / (fight_time * 1000)
+		might_20_uptime = sum(might_stacks[i] for i in range(20,26)) / (fight_time * 1000)
+		might_25_uptime = might_stacks[25] / (fight_time * 1000)
+
+
+		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(round(fight_time))
+
+		output_string += '| <span data-tooltip="'+"{:.2f}".format(round(damage_with_avg_might, 4))+'% dmg - '+"{:.2f}".format(round(avg_might, 4))+'% uptime">'
+		output_string += "{:.2f}".format(round((damage_with_avg_might), 4))+'</span>'
+
+		output_string += '| <span data-tooltip="'+"{:.2f}".format(round(damage_with_might_uptime * 100, 4))+'% dmg - '+"{:.2f}".format(round(might_uptime * 100, 4))+'% uptime">'
+		output_string += "{:.2f}".format(round((damage_with_might_uptime * 100), 4))+'</span>'
+
+		output_string += '| <span data-tooltip="'+"{:.2f}".format(round(damage_with_might_5_uptime * 100, 4))+'% dmg - '+"{:.2f}".format(round(might_5_uptime * 100, 4))+'% uptime">'
+		output_string += "{:.2f}".format(round((damage_with_might_5_uptime * 100), 4))+'</span>'
+
+		output_string += '| <span data-tooltip="'+"{:.2f}".format(round(damage_with_might_10_uptime * 100, 4))+'% dmg - '+"{:.2f}".format(round(might_10_uptime * 100, 4))+'% uptime">'
+		output_string += "{:.2f}".format(round((damage_with_might_10_uptime * 100), 4))+'</span>'
+
+		output_string += '| <span data-tooltip="'+"{:.2f}".format(round(damage_with_might_15_uptime * 100, 4))+'% dmg - '+"{:.2f}".format(round(might_15_uptime * 100, 4))+'% uptime">'
+		output_string += "{:.2f}".format(round((damage_with_might_15_uptime * 100), 4))+'</span>'
+
+		output_string += '| <span data-tooltip="'+"{:.2f}".format(round(damage_with_might_20_uptime * 100, 4))+'% dmg - '+"{:.2f}".format(round(might_20_uptime * 100, 4))+'% uptime">'
+		output_string += "{:.2f}".format(round((damage_with_might_20_uptime * 100), 4))+'</span>'
+
+		output_string += '| <span data-tooltip="'+"{:.2f}".format(round(damage_with_might_25_uptime * 100, 4))+'% dmg - '+"{:.2f}".format(round(might_25_uptime * 100, 4))+'% uptime">'
+		output_string += "{:.2f}".format(round((damage_with_might_25_uptime * 100), 4))+'</span>'
+		
+		output_string += '|'
+
+		myprint(output, output_string)
+
+	myprint(output, "</$reveal>\n")
+
+	# Other buffs with damage
+	myprint(output, '<$reveal type="match" state="$:/state/curDamageWithBuffs" text="other">\n')
+	myprint(output, '\n---\n')
+		
+	# Other buffs with damage table
+	other_buffs_with_damage = ['stability', 'protection', 'aegis', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration']
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|Sortable table - Click header item to sort table |c")
+	myprint(output, '|thead-dark table-hover sortable|k')
+	output_header =  '|!Name | !Class'
+	output_header += ' | ! <span data-tooltip="Number of seconds player was in squad logs">Seconds</span>'
+	for damage_buff in other_buffs_with_damage:
+		output_header += '| !{{'+damage_buff.capitalize()+'}}'
+	output_header += '|h'
+	myprint(output, output_header)
+	
+	for uptime_prof_name in stacking_uptime_Table:
+		name = stacking_uptime_Table[uptime_prof_name]['name']
+		prof = stacking_uptime_Table[uptime_prof_name]['profession']
+		uptime_table_prof_name = "{{"+prof+"}} "+name
+
+		uptime_fight_time = uptime_Table[uptime_table_prof_name]['duration']
+		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_might'] / 1000
+
+		if stacking_uptime_Table[uptime_prof_name]['duration_might'] * 10 < max_stacking_buff_fight_time:
+			continue
+
+		total_damage = DPSStats[uptime_prof_name]["Damage_Total"] or 1
+		
+		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(round(fight_time))+'|'
+
+		for damage_buff in other_buffs_with_damage:
+			damage_with_buff = stacking_uptime_Table[uptime_prof_name]['damage_with_'+damage_buff]
+			damage_with_buff_uptime = damage_with_buff[1] / total_damage			
+
+			if damage_buff in uptime_Table[uptime_table_prof_name]:
+				buff_uptime = uptime_Table[uptime_table_prof_name][damage_buff] / uptime_fight_time
+			else:
+				buff_uptime = 0
+
+			output_string += ' <span data-tooltip="'+"{:.2f}".format(round(damage_with_buff_uptime * 100, 4))+'% dmg - '+"{:.2f}".format(round(buff_uptime * 100, 4))+'% uptime">'
+			output_string += "{:.2f}".format(round((damage_with_buff_uptime * 100), 4))+'</span>|'
+
+		myprint(output, output_string)
+
+	myprint(output, "</$reveal>\n")
+
+	myprint(output, "</$reveal>\n")
 	#end Stacking Buff Uptime Table insert
 
 
