@@ -147,6 +147,8 @@ class Config:
 
 	empty_stats: dict = field(default_factory=dict)
 	stats_to_compute: list = field(default_factory=list)
+	aurasIn_to_compute: list = field(default_factory=list)
+	aurasOut_to_compute: list = field(default_factory=list)
 
 	buff_ids: dict = field(default_factory=dict)
 	buffs_stacking_duration: list = field(default_factory=list)
@@ -157,7 +159,7 @@ class Config:
 
 
 #Stats to exlucde from overview summary
-exclude_Stat = ["iol", "dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealth", "superspeed", "swaps", "barrierDamage", "dodges", "evades", "blocks", "invulns"]
+exclude_Stat = ["iol", "dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealth", "superspeed", "swaps", "barrierDamage", "dodges", "evades", "blocks", "invulns", 'fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut']
 
 #Control Effects Tracking
 squad_offensive = {}
@@ -368,6 +370,8 @@ def fill_config(config_input):
 	config.profession_abbreviations = config_input.profession_abbreviations
 
 	config.stats_to_compute = config_input.stats_to_compute
+	config.aurasIn_to_compute = config_input.aurasIn_to_compute
+	config.aurasOut_to_compute = config_input.aurasOut_to_compute
 	config.empty_stats = {stat: -1 for stat in config.stats_to_compute}
 	config.empty_stats['time_active'] = -1
 	config.empty_stats['time_in_combat'] = -1
@@ -1627,7 +1631,7 @@ def get_buff_ids_from_json(json_data, config):
 			else:
 				config.buffs_stacking_duration.append(abbrev_name)
 	#Quick fix for Buffs not found in the initial fight log buffMap
-	BuffIdFix = { 'iol': 10346, 'superspeed': 5974,  'stealth': 13017,  'HiS': 10269,  'stability': 1122,  'protection': 717,  'aegis': 743,  'might': 740,  'fury': 725,  'resistance': 26980,  'resolution': 873,  'quickness': 1187,  'swiftness': 719,  'alacrity': 30328,  'vigor': 726,  'regeneration': 718, 'Fire': 5677, 'Shocking': 5577, 'Frost': 5579, 'Magnetic':5684}
+	BuffIdFix = { 'iol': 10346, 'superspeed': 5974,  'stealth': 13017,  'HiS': 10269,  'stability': 1122,  'protection': 717,  'aegis': 743,  'might': 740,  'fury': 725,  'resistance': 26980,  'resolution': 873,  'quickness': 1187,  'swiftness': 719,  'alacrity': 30328,  'vigor': 726,  'regeneration': 718, 'fireOut': 5677, 'shockingOut': 5577, 'frostOut': 5579, 'magneticOut':5684, 'lightOut': 25518, 'darkOut': 39978, 'chaosOut': 10332}
 	for buff in BuffIdFix:
 		if buff not in config.buff_ids:
 			config.buff_ids[buff] = BuffIdFix[buff]
@@ -2780,7 +2784,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 		#End Instant Revive tracking
 									
 		#Track Aura Output		
-		Auras_Id = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic', 25518: 'Light', 39978: 'Dark', 10332: 'Chaos'}				
+		Auras_Id = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic', 25518: 'Light', 39978: 'Dark', 10332: 'Chaos'}
 		for item in player['buffUptimesActive']:
 			auraId = int(item['id'])
 			if auraId not in Auras_Id:
@@ -3664,7 +3668,7 @@ def write_DPSStats_bubble_charts(uptime_Table, DPSStats, myDate, input_directory
 #JEL - write TW5 Bubble Chart tids
 def write_bubble_charts(players, top_players, squad_Control, myDate, input_directory):
 	get_Stats = ['deaths', 'kills', 'downs', 'dmg_taken', 'dmg', 'rips', 'cleanses', 'heal', 'dist']
-	boon_List = ['stability', 'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration']
+	boon_List = ['stability', 'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration', 'fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut']
 	Charts = ['kills', 'cleanse', 'rips', 'deaths', 'fury_might']
 	Bubble_Chart = {}
 
@@ -3704,9 +3708,9 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 		sum_Boons = 0
 		for boon in boon_List:
 			sum_Boons += player.average_stats[boon]
-		for aura in auras_TableOut:
-			if player.name in auras_TableOut[aura]:
-				sum_Boons += (auras_TableOut[aura][player.name] / player.duration_fights_present)
+		#for aura in auras_TableOut:
+		#	if player.name in auras_TableOut[aura]:
+		#		sum_Boons += (auras_TableOut[aura][player.name] / player.duration_fights_present)
 		Bubble_Chart[prof_name]['boonScore'] = round(sum_Boons, 4)
 		
 		#gather Stats scores per player
