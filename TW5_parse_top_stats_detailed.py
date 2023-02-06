@@ -365,70 +365,101 @@ if __name__ == '__main__':
 	top_jack_of_all_trades_players = {key: list() for key in config.stats_to_compute}    
 	
 	#JEL-Tweaked to output TW5 formatting (https://drevarr.github.io/FluxCapacity.html)
+
 	for stat in config.stats_to_compute:
-		if (stat == 'heal' and not found_healing) or (stat == 'barrier' and not found_barrier):
-			continue
-		
-		fileDate = myDate
-
-		#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
-		myprint(output,'<$reveal type="match" state="$:/state/curTab" text="'+config.stat_names[stat]+'">')
-		myprint(output, "\n!!!<<alert secondary src:'"+config.stat_names[stat].upper()+"' class:'leftbar border-dark'>>\n")
-		
-
-		if stat == 'dist':
-			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
-			myprint(output, '<div style="overflow-x:auto;">\n\n')
-			top_consistent_stat_players[stat] = get_top_players(players, config, stat, StatType.CONSISTENT)
-			top_total_stat_players[stat] = get_top_players(players, config, stat, StatType.TOTAL)
-			top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)            
-			top_percentage_stat_players[stat],comparison_val = get_and_write_sorted_top_percentage(players, config, num_used_fights, stat, output, StatType.PERCENTAGE, top_consistent_stat_players[stat])
-			myprint(output, '\n\n\n\n')
-			top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
-			top_average_stat_players[stat] = get_and_write_sorted_average(players, config, num_used_fights, stat, output)			
-			myprint(output, '\n\n</div>\n\n')
-			myprint(output, '\n</div>\n    <div class="flex-col border">\n')
-			myprint(output, '<div style="overflow-x:auto;">\n\n')
-			myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
-			myprint(output, '\n\n</div>\n\n')
-			myprint(output, '\n</div>\n</div>\n')
-		elif stat == 'dmg_taken':
-			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
-			myprint(output, '<div style="overflow-x:auto;">\n\n')
-			top_consistent_stat_players[stat] = get_top_players(players, config, stat, StatType.CONSISTENT)
-			top_total_stat_players[stat] = get_top_players(players, config, stat, StatType.TOTAL)
-			top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
-			top_average_stat_players[stat] = get_and_write_sorted_average(players, config, num_used_fights, stat, output)
-			#myprint(output, '\n\n</div>\n\n')
-			#myprint(output, '\n</div>\n</div>\n')
-			myprint(output, '\n</div>\n    <div class="flex-col border">\n')
-			myprint(output, '<div style="overflow-x:auto;">\n\n')
-			myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
-			myprint(output, '\n\n</div></div>\n\n')
-			myprint(output, '\n</div>\n</div>\n')			
-		else:
-			myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
-			myprint(output, '<div style="overflow-x:auto;">\n\n')
-			top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
-			myprint(output, '\n\n\n\n')
-			top_consistent_stat_players[stat] = get_and_write_sorted_top_consistent(players, config, num_used_fights, stat, output)			
-			myprint(output, '\n\n</div>\n\n')
-			myprint(output, '\n</div>\n    <div class="flex-col border">\n')
-			myprint(output, '<div style="overflow-x:auto;">\n\n')
-			#top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
-			myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
-			myprint(output, '\n\n</div>\n\n')
-			myprint(output, '\n</div>\n</div>\n')
-			top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)
-			top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
+		if stat not in config.aurasOut_to_compute:
+			if (stat == 'heal' and not found_healing) or (stat == 'barrier' and not found_barrier):
+				continue
 			
-			#myprint(output, '<div>')
-			#myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
-			#myprint(output, '</div>')
-		#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
-		myprint(output, "</$reveal>\n")
+			fileDate = myDate
 
-		write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, args.json_output_filename)
+			#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
+			myprint(output,'<$reveal type="match" state="$:/state/curTab" text="'+config.stat_names[stat]+'">')
+			myprint(output, "\n!!!<<alert secondary src:'"+config.stat_names[stat].upper()+"' class:'leftbar border-dark'>>\n")
+			
+			if stat == 'dist':
+				myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
+				myprint(output, '<div style="overflow-x:auto;">\n\n')
+				top_consistent_stat_players[stat] = get_top_players(players, config, stat, StatType.CONSISTENT)
+				top_total_stat_players[stat] = get_top_players(players, config, stat, StatType.TOTAL)
+				top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)            
+				top_percentage_stat_players[stat],comparison_val = get_and_write_sorted_top_percentage(players, config, num_used_fights, stat, output, StatType.PERCENTAGE, top_consistent_stat_players[stat])
+				myprint(output, '\n\n\n\n')
+				top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
+				top_average_stat_players[stat] = get_and_write_sorted_average(players, config, num_used_fights, stat, output)			
+				myprint(output, '\n\n</div>\n\n')
+				myprint(output, '\n</div>\n    <div class="flex-col border">\n')
+				myprint(output, '<div style="overflow-x:auto;">\n\n')
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
+				myprint(output, '\n\n</div>\n\n')
+				myprint(output, '\n</div>\n</div>\n')
+			elif stat == 'dmg_taken':
+				myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
+				myprint(output, '<div style="overflow-x:auto;">\n\n')
+				top_consistent_stat_players[stat] = get_top_players(players, config, stat, StatType.CONSISTENT)
+				top_total_stat_players[stat] = get_top_players(players, config, stat, StatType.TOTAL)
+				top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
+				top_average_stat_players[stat] = get_and_write_sorted_average(players, config, num_used_fights, stat, output)
+				#myprint(output, '\n\n</div>\n\n')
+				#myprint(output, '\n</div>\n</div>\n')
+				myprint(output, '\n</div>\n    <div class="flex-col border">\n')
+				myprint(output, '<div style="overflow-x:auto;">\n\n')
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
+				myprint(output, '\n\n</div></div>\n\n')
+				myprint(output, '\n</div>\n</div>\n')			
+			else:
+				myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
+				myprint(output, '<div style="overflow-x:auto;">\n\n')
+				top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
+				myprint(output, '\n\n\n\n')
+				top_consistent_stat_players[stat] = get_and_write_sorted_top_consistent(players, config, num_used_fights, stat, output)			
+				myprint(output, '\n\n</div>\n\n')
+				myprint(output, '\n</div>\n    <div class="flex-col border">\n')
+				myprint(output, '<div style="overflow-x:auto;">\n\n')
+				#top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
+				myprint(output, '\n\n</div>\n\n')
+				myprint(output, '\n</div>\n</div>\n')
+				top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)
+				top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
+				
+				#myprint(output, '<div>')
+				#myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
+				#myprint(output, '</div>')
+			#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
+			myprint(output, "</$reveal>\n")
+			write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, args.json_output_filename)
+
+	#print Auras-Out details
+	myprint(output,'<$reveal type="match" state="$:/state/curTab" text="Auras - Out">')
+	myprint(output, '\n!!!<<alert secondary src:"Auras - Out" class:"leftbar border-dark">>\n')
+	myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="Fire Aura" selectedClass="" class="btn btn-sm btn-dark" style="">Fire Aura </$button>')
+	myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="Shocking Aura" selectedClass="" class="btn btn-sm btn-dark" style="">Shocking Aura </$button>')
+	myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="Frost Aura" selectedClass="" class="btn btn-sm btn-dark" style="">Frost Aura </$button>')
+	myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="Magnetic Aura" selectedClass="" class="btn btn-sm btn-dark" style="">Magnetic Aura </$button>')
+	myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="Light Aura" selectedClass="" class="btn btn-sm btn-dark" style="">Light Aura </$button>')
+	myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="Dark Aura" selectedClass="" class="btn btn-sm btn-dark" style="">Dark Aura </$button>')
+	myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="Chaos Aura" selectedClass="" class="btn btn-sm btn-dark" style="">Chaos Aura </$button>')
+
+	for stat in config.aurasOut_to_compute:
+		myprint(output,'<$reveal type="match" state="$:/state/curAuras-Out" text="'+config.stat_names[stat]+'">')
+		myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
+		myprint(output, '<div style="overflow-x:auto;">\n\n')
+		top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
+		myprint(output, '\n\n')
+		top_consistent_stat_players[stat] = get_and_write_sorted_top_consistent(players, config, num_used_fights, stat, output)			
+		myprint(output, '\n</div>')
+		myprint(output, '\n</div>\n    <div class="flex-col border">\n')
+		myprint(output, '<div style="overflow-x:auto;">\n')
+		#top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
+		myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
+		myprint(output, '\n</div>')
+		myprint(output, '\n</div></div>\n')
+		top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)
+		top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
+		myprint(output, "</$reveal>\n")
+	myprint(output, "</$reveal>\n")	
+	write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, args.json_output_filename)
 
 	#print table of accounts that fielded support characters
 	myprint(output,'<$reveal type="match" state="$:/state/curTab" text="Support">')
@@ -649,49 +680,6 @@ if __name__ == '__main__':
 			write_auras_in_xls(sorted_auras_TableIn, key, players, args.xls_output_filename)
 	myprint(output, "</$reveal>\n")
 	#end Auras Incoming insert
-
-	#start Aura Effects Out insert
-	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Auras - Out">')    
-	myprint(output, '\n<<alert-leftbar info "Auras output by Player" width:60%, class:"font-weight-bold">>\n\n')
-	Auras_Order = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic', 25518: 'Light', 39978: 'Dark', 10332: 'Chaos'}
-	for Aura in Auras_Order:
-		myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="'+Auras_Order[Aura]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Auras_Order[Aura]+' Aura </$button>')
-	
-	myprint(output, '\n---\n')
-	
-
-	for Aura in Auras_Order:
-		key = Auras_Order[Aura]
-		if key in auras_TableOut:
-			sorted_auras_TableOut = dict(sorted(auras_TableOut[key].items(), key=lambda x: x[1], reverse=True))
-
-			i=1
-		
-			myprint(output, '<$reveal type="match" state="$:/state/curAuras-Out" text="'+key+'">\n')
-			myprint(output, '\n---\n')
-			myprint(output, "|table-caption-top|k")
-			myprint(output, "|{{"+key+"}} "+key+" Aura output by Squad Player Descending [TOP 10 Max]|c")
-			myprint(output, "|thead-dark table-hover sortable|k")
-			myprint(output, "|!Place |!Name | !Profession | !Total| !Average|h")
-			
-			for name in sorted_auras_TableOut:
-				prof = "Not Found"
-				fightTime = 99999
-				counter = 0
-				for nameIndex in players:
-					if nameIndex.name == name:
-						prof = nameIndex.profession
-						fightTime = nameIndex.duration_fights_present
-
-				if i <=10:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_auras_TableOut[name], 4))+"| "+"{:.4f}".format(round(sorted_auras_TableOut[name]/fightTime, 4))+"|")
-					i=i+1
-
-			myprint(output, "</$reveal>\n")
-
-			write_auras_out_xls(sorted_auras_TableOut, key, players, args.xls_output_filename)
-	myprint(output, "</$reveal>\n")
-	#end Auras Out insert
 
 	#start Buff Uptime Table insert
 	uptime_Order = ['stability',  'protection',  'aegis',  'might',  'fury',  'resistance',  'resolution',  'quickness',  'swiftness',  'alacrity',  'vigor',  'regeneration']
@@ -1191,7 +1179,7 @@ if __name__ == '__main__':
 
 			if chart == "Cleanses/Heals/BoonScore":
 				myprint(output, "\n!!Cleanses / Heals / Boon Score\n")
-				myprint(output, ",,Bubble Size based on Boon Score = Sum of all average boon output,,\n")
+				myprint(output, ",,Bubble Size based on Boon Score = Sum of all average Boon and Aura output,,\n")
 				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_cleanse_BubbleChartData}} $height="500px" $theme="dark"/>')
 
 			if chart == "BoonStrips/OutgoingControlScore/DPS":
