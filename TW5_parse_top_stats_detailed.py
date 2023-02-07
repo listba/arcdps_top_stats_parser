@@ -834,7 +834,7 @@ if __name__ == '__main__':
 	myprint(output, "|table-caption-top|k")
 	myprint(output, "|{{Might}} Sortable table - Click header item to sort table {{Might}}|c")
 	myprint(output, '|thead-dark table-hover sortable|k')
-	output_header =  '|!Name | !Class'
+	output_header =  '|!Name | !Class | !DPS' 
 	output_header += ' | ! <span data-tooltip="Number of seconds player was in squad logs">Seconds</span>'
 	output_header += '| !Avg| !1+ %| !5+ %| !10+ %| !15+ %| !20+ %| !25 %'
 	output_header += '|h'
@@ -851,6 +851,7 @@ if __name__ == '__main__':
 			continue
 
 		total_damage = DPSStats[uptime_prof_name]["Damage_Total"] or 1
+		playerDPS = total_damage/uptime_Table['{{'+prof+'}} '+name]['duration']
 
 		damage_with_avg_might = sum(stack_num * damage_with_might[stack_num] for stack_num in range(1, 26)) / total_damage
 		damage_with_might_uptime = 1.0 - (damage_with_might[0] / total_damage)
@@ -869,7 +870,7 @@ if __name__ == '__main__':
 		might_25_uptime = might_stacks[25] / (fight_time * 1000)
 
 
-		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(round(fight_time))
+		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(round(playerDPS))+'| '+my_value(round(fight_time))
 
 		output_string += '| <span data-tooltip="'+"{:.2f}".format(round(damage_with_avg_might, 4))+'% dmg - '+"{:.2f}".format(round(avg_might, 4))+'% uptime">'
 		output_string += "{:.2f}".format(round((damage_with_avg_might), 4))+'</span>'
@@ -907,7 +908,7 @@ if __name__ == '__main__':
 	myprint(output, "|table-caption-top|k")
 	myprint(output, "|Sortable table - Click header item to sort table |c")
 	myprint(output, '|thead-dark table-hover sortable|k')
-	output_header =  '|!Name | !Class'
+	output_header =  '|!Name | !Class | !DPS '
 	output_header += ' | ! <span data-tooltip="Number of seconds player was in squad logs">Seconds</span>'
 	for damage_buff in other_buffs_with_damage:
 		output_header += '| !{{'+damage_buff.capitalize()+'}}'
@@ -926,8 +927,8 @@ if __name__ == '__main__':
 			continue
 
 		total_damage = DPSStats[uptime_prof_name]["Damage_Total"] or 1
-		
-		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(round(fight_time))+'|'
+		playerDPS = total_damage/uptime_fight_time
+		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(round(playerDPS))+'| '+my_value(round(fight_time))+'|'
 
 		for damage_buff in other_buffs_with_damage:
 			damage_with_buff = stacking_uptime_Table[uptime_prof_name]['damage_with_'+damage_buff]
