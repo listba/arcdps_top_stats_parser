@@ -2887,6 +2887,25 @@ def get_stats_from_fight_json(fight_json, config, log):
 		player_name = player['name']
 		player_prof = player['profession']
 
+		if player['notInSquad']:
+			continue
+		
+		if 'usedExtensions' not in fight_json:
+			players_running_healing_addon = []
+		else:
+			extensions = fight_json['usedExtensions']
+			for extension in extensions:
+				if extension['name'] == "Healing Stats":
+					players_running_healing_addon = extension['runningExtension']
+
+		time_in_combat = get_stat_from_player_json(player, players_running_healing_addon, 'time_in_combat', config)
+
+		if time_in_combat == 0:
+			continue
+
+		player_role = find_sub_type(player, time_in_combat)
+		player_prof_role = player_prof+" "+player_role
+
 		if Guild_Data:
 			guildStatus = findMember(members, player_account)
 		else:
@@ -2907,29 +2926,31 @@ def get_stats_from_fight_json(fight_json, config, log):
 		if player_name not in Attendance[player_account]['names']:
 			Attendance[player_account]['names'][player_name]={}
 
-			if player_prof not in Attendance[player_account]['names'][player_name]:
+			if player_prof_role not in Attendance[player_account]['names'][player_name]:
 				Attendance[player_account]['names'][player_name]['professions']={}
-				Attendance[player_account]['names'][player_name]['professions'][player_prof]={}
-				Attendance[player_account]['names'][player_name]['professions'][player_prof]['fights'] = 1
-				Attendance[player_account]['names'][player_name]['professions'][player_prof]['duration'] = duration
-				Attendance[player_account]['names'][player_name]['professions'][player_prof]['guildStatus'] = guildStatus
+				Attendance[player_account]['names'][player_name]['professions'][player_prof_role]={}
+				Attendance[player_account]['names'][player_name]['professions'][player_prof_role]['role'] = player_role
+				Attendance[player_account]['names'][player_name]['professions'][player_prof_role]['fights'] = 1
+				Attendance[player_account]['names'][player_name]['professions'][player_prof_role]['duration'] = duration
+				Attendance[player_account]['names'][player_name]['professions'][player_prof_role]['guildStatus'] = guildStatus
 			else:
-				Attendance[player_account]['names'][player_name]['professions'][player_prof]['fights'] += 1
-				Attendance[player_account]['names'][player_name]['professions'][player_prof]['duration'] += duration
-				Attendance[player_account]['names'][player_name]['professions'][player_prof]['guildStatus'] += guildStatus
+				Attendance[player_account]['names'][player_name]['professions'][player_prof_role]['fights'] += 1
+				Attendance[player_account]['names'][player_name]['professions'][player_prof_role]['duration'] += duration
+				Attendance[player_account]['names'][player_name]['professions'][player_prof_role]['guildStatus'] = guildStatus
 
 
 		#if player_name in Attendance[player_account]['names']:
 
-		elif player_prof not in Attendance[player_account]['names'][player_name]['professions']:
-			Attendance[player_account]['names'][player_name]['professions'][player_prof]={}
-			Attendance[player_account]['names'][player_name]['professions'][player_prof]['fights'] = 1
-			Attendance[player_account]['names'][player_name]['professions'][player_prof]['duration'] = duration
-			Attendance[player_account]['names'][player_name]['professions'][player_prof]['guildStatus'] = guildStatus
+		elif player_prof_role not in Attendance[player_account]['names'][player_name]['professions']:
+			Attendance[player_account]['names'][player_name]['professions'][player_prof_role]={}
+			Attendance[player_account]['names'][player_name]['professions'][player_prof_role]['role'] = player_role
+			Attendance[player_account]['names'][player_name]['professions'][player_prof_role]['fights'] = 1
+			Attendance[player_account]['names'][player_name]['professions'][player_prof_role]['duration'] = duration
+			Attendance[player_account]['names'][player_name]['professions'][player_prof_role]['guildStatus'] = guildStatus
 		else:
-			Attendance[player_account]['names'][player_name]['professions'][player_prof]['fights'] += 1
-			Attendance[player_account]['names'][player_name]['professions'][player_prof]['duration'] += duration
-			Attendance[player_account]['names'][player_name]['professions'][player_prof]['guildStatus'] += guildStatus
+			Attendance[player_account]['names'][player_name]['professions'][player_prof_role]['fights'] += 1
+			Attendance[player_account]['names'][player_name]['professions'][player_prof_role]['duration'] += duration
+			Attendance[player_account]['names'][player_name]['professions'][player_prof_role]['guildStatus'] = guildStatus
 
 
 

@@ -487,20 +487,20 @@ if __name__ == '__main__':
 	# print table header
 	print_string = "|thead-dark table-hover sortable|k"    
 	myprint(output, print_string)
-	print_string = "|!Account |Prof_Name | !Fights| !Duration| !Guild Status|h"
+	print_string = "|!Account |Prof_Name | Role| !Fights| !Duration| !Guild Status|h"
 	myprint(output, print_string)    
 
 	for account in Attendance:
 		Acct_Fights = Attendance[account]['fights']
 		Acct_Duration = Attendance[account]['duration']
 		Acct_Guild_Status = Attendance[account]['guildStatus']
-		print_string = "|''"+account+"'' |  | ''"+str(Acct_Fights)+"''| ''"+str(Acct_Duration)+"''| ''"+Acct_Guild_Status+"''|h"
+		print_string = "|''"+account+"'' | | | ''"+str(Acct_Fights)+"''| ''"+str(Acct_Duration)+"''| ''"+Acct_Guild_Status+"''|h"
 		myprint(output, print_string)
 		for name in Attendance[account]['names']:
 			for prof in Attendance[account]['names'][name]['professions']:
 				prof_fights = Attendance[account]['names'][name]['professions'][prof]['fights']
 				prof_duration = Attendance[account]['names'][name]['professions'][prof]['duration']
-				print_string = "| |{{"+prof+"}}"+name+"  | "+str(prof_fights)+"| "+str(prof_duration)+"| "+Acct_Guild_Status+"|"
+				print_string = "| |{{"+prof.split()[0]+"}}"+name+"  | "+prof.split()[1]+" | "+str(prof_fights)+"| "+str(prof_duration)+"| "+Acct_Guild_Status+"|"
 				myprint(output, print_string)
 
 	myprint(output, '\n\n</div>\n\n')
