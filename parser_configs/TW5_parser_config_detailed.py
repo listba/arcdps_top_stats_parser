@@ -14,13 +14,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-stats_to_compute = ['deaths', 'iol', 'res', 'kills', 'downs','dmg', 'Pdmg', 'Cdmg', 'dmg_taken', 'rips', 'cleanses', 'superspeed', 'stealth', 'HiS', 'dist', 'stability', 'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration', 'heal', 'barrier', 'barrierDamage', 'swaps', 'dodges', 'evades', 'invulns', 'blocks', 'fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut']
+stats_to_compute = ['deaths', 'downed', 'iol', 'res', 'kills', 'downs','dmg', 'Pdmg', 'Cdmg', 'dmg_taken', 'rips', 'cleanses', 'superspeed', 'stealth', 'HiS', 'dist', 'stability', 'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration', 'heal', 'barrier', 'barrierDamage', 'swaps', 'dodges', 'evades', 'invulns', 'hitsMissed', 'interupted', 'blocks', 'fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut', 'ripsIn', 'cleansesIn', 'downContrib']
 aurasIn_to_compute = []
 aurasOut_to_compute = ['fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut']
+defenses_to_compute = ['dmg_taken', 'barrierDamage', 'hitsMissed', 'interupted', 'invulns', 'evades', 'blocks', 'dodges', 'cleansesIn', 'ripsIn', 'downed', 'deaths']
 #defense_to_compute =['dmg_taken','blockedCount', 'evadedCount', 'missedCount', 'dodgeCount', 'invulnedCount', 'damageBarrier', 'interruptedCount', 'downCount', 'deadCount']
 
 # How many players will be listed who achieved top stats most often for each stat?
-num_players_listed = {'dmg': 50, 'Pdmg': 50, 'Cdmg': 50, 'iol': 50,'rips': 50, 'cleanses': 50, 'dist': 50, 'stability': 50, 'protection': 50, 'aegis': 50, 'might': 50, 'fury': 50, 'dmg_taken': 50, 'deaths': 50, 'res': 50, 'superspeed': 50, 'stealth': 50, 'HiS': 50, 'resistance': 50, 'resolution': 50, 'quickness': 50, 'swiftness': 50, 'alacrity': 50, 'vigor': 50, 'regeneration': 50, 'heal': 50, 'barrier': 50, 'barrierDamage': 50, 'swaps': 50, 'kills': 50, 'downs': 50, 'dodges': 50, 'evades': 50, 'blocks': 50, 'invulns': 50, 'fireOut': 50, 'shockingOut': 50, 'frostOut': 50, 'magneticOut': 50, 'lightOut': 50, 'darkOut': 50, 'chaosOut':50}
+num_players_listed = {'dmg': 50, 'Pdmg': 50, 'Cdmg': 50, 'iol': 50,'rips': 50, 'cleanses': 50, 'dist': 50, 'stability': 50, 'protection': 50, 'aegis': 50, 'might': 50, 'fury': 50, 'dmg_taken': 50, 'deaths': 50, 'downed': 50,'res': 50, 'superspeed': 50, 'stealth': 50, 'HiS': 50, 'resistance': 50, 'resolution': 50, 'quickness': 50, 'swiftness': 50, 'alacrity': 50, 'vigor': 50, 'regeneration': 50, 'heal': 50, 'barrier': 50, 'barrierDamage': 50, 'swaps': 50, 'kills': 50, 'downs': 50, 'dodges': 50, 'evades': 50, 'hitsMissed': 50, 'interupted': 50, 'blocks': 50, 'invulns': 50, 'fireOut': 50, 'shockingOut': 50, 'frostOut': 50, 'magneticOut': 50, 'lightOut': 50, 'darkOut': 50, 'chaosOut': 50, 'ripsIn': 50, 'cleansesIn': 50, 'downContrib': 50}
 # What portion (%) of are considered to be "top" in each fight for each stat?
 num_players_considered_top_percentage = 5
 
@@ -121,6 +122,7 @@ stat_names["barrier"] = "Barrier"
 stat_names["barrierDamage"] = "Barrier Damage"
 stat_names["dist"] = "Distance to Tag"
 stat_names["deaths"] = "Deaths"
+stat_names["downed"] = "Downed"
 stat_names["superspeed"] = "Superspeed"
 stat_names["stealth"] = "Stealth"
 stat_names["HiS"] = "Hide in Shadows"
@@ -144,6 +146,8 @@ stat_names["dodges"] = "Dodge Attempts"
 stat_names["evades"] = "Evaded Attacks"
 stat_names["blocks"] = "Blocked Attacks"
 stat_names["invulns"] = "Invulnerable to Attacks"
+stat_names["interupted"] = "Interupted"
+stat_names["hitsMissed"] = "Hits Missed Against"
 stat_names["fireOut"] = "Fire Aura"
 stat_names["shockingOut"] = "Shocking Aura"
 stat_names["frostOut"] = "Frost Aura"
@@ -151,3 +155,8 @@ stat_names["magneticOut"] = "Magnetic Aura"
 stat_names["lightOut"] = "Light Aura"
 stat_names["darkOut"] = "Dark Aura"
 stat_names["chaosOut"] = "Chaos Aura"
+stat_names["ripsIn"] = "Boon Strips Incoming"
+#stat_names["ripsTime"] = "Boon Time Lost"
+stat_names["cleansesIn"] = "Condition Cleanses Incoming"
+#stat_names["cleansesTime"] = "Condition Time Cleared"
+stat_names["downContrib"] = "Down Contribution in Damage"

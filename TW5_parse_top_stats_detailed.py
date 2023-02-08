@@ -124,7 +124,6 @@ if __name__ == '__main__':
 					'<$button setTitle="$:/state/curTab" setTo="Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Power Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Power Damage </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Condi Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Condi Damage </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Damage Taken" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage Taken</$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Boon Strips" selectedClass="" class="btn btn-sm btn-dark" style=""> Boon Strips </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Condition Cleanses" selectedClass="" class="btn btn-sm btn-dark" style=""> Condition Cleanses</$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Superspeed" selectedClass="" class="btn btn-sm btn-dark" style=""> Superspeed </$button>',
@@ -146,7 +145,6 @@ if __name__ == '__main__':
 					'<$button setTitle="$:/state/curTab" setTo="Support" selectedClass="" class="btn btn-sm btn-dark" style=""> Support Players </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Healing </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Barrier" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Barrier Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier Damage </$button>',					
 					'<$button setTitle="$:/state/curTab" setTo="Weapon Swaps" selectedClass="" class="btn btn-sm btn-dark" style=""> Weapon Swaps </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Control Effects - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Outgoing </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Control Effects - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Incoming </$button>',					
@@ -159,6 +157,7 @@ if __name__ == '__main__':
 					'<$button setTitle="$:/state/curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> Death OnTag </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Downed_Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Downed Healing </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Offensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Offensive Stats </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Defensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Defensive Stats </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="DPSStats" selectedClass="" class="btn btn-sm btn-dark" style=""> DPS Stats </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Burst Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Burst Damage </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Dashboard" selectedClass="" class="btn btn-sm btn-dark" style=""> Dashboard </$button>'
@@ -367,7 +366,7 @@ if __name__ == '__main__':
 	#JEL-Tweaked to output TW5 formatting (https://drevarr.github.io/FluxCapacity.html)
 
 	for stat in config.stats_to_compute:
-		if stat not in config.aurasOut_to_compute:
+		if stat not in config.aurasOut_to_compute and stat not in config.defenses_to_compute:
 			if (stat == 'heal' and not found_healing) or (stat == 'barrier' and not found_barrier):
 				continue
 			
@@ -393,20 +392,6 @@ if __name__ == '__main__':
 				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
 				myprint(output, '\n\n</div>\n\n')
 				myprint(output, '\n</div>\n</div>\n')
-			elif stat == 'dmg_taken':
-				myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
-				myprint(output, '<div style="overflow-x:auto;">\n\n')
-				top_consistent_stat_players[stat] = get_top_players(players, config, stat, StatType.CONSISTENT)
-				top_total_stat_players[stat] = get_top_players(players, config, stat, StatType.TOTAL)
-				top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
-				top_average_stat_players[stat] = get_and_write_sorted_average(players, config, num_used_fights, stat, output)
-				#myprint(output, '\n\n</div>\n\n')
-				#myprint(output, '\n</div>\n</div>\n')
-				myprint(output, '\n</div>\n    <div class="flex-col border">\n')
-				myprint(output, '<div style="overflow-x:auto;">\n\n')
-				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
-				myprint(output, '\n\n</div></div>\n\n')
-				myprint(output, '\n</div>\n</div>\n')			
 			else:
 				myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
 				myprint(output, '<div style="overflow-x:auto;">\n\n')
@@ -428,21 +413,42 @@ if __name__ == '__main__':
 				#myprint(output, '</div>')
 			#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
 			myprint(output, "</$reveal>\n")
-			write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, args.json_output_filename)
+			#write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, args.json_output_filename)
 
 	#print Auras-Out details
 	myprint(output,'<$reveal type="match" state="$:/state/curTab" text="Auras - Out">')
 	myprint(output, '\n!!!<<alert secondary src:"Auras - Out" class:"leftbar border-dark">>\n')
-	myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="Fire Aura" selectedClass="" class="btn btn-sm btn-dark" style="">Fire Aura </$button>')
-	myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="Shocking Aura" selectedClass="" class="btn btn-sm btn-dark" style="">Shocking Aura </$button>')
-	myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="Frost Aura" selectedClass="" class="btn btn-sm btn-dark" style="">Frost Aura </$button>')
-	myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="Magnetic Aura" selectedClass="" class="btn btn-sm btn-dark" style="">Magnetic Aura </$button>')
-	myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="Light Aura" selectedClass="" class="btn btn-sm btn-dark" style="">Light Aura </$button>')
-	myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="Dark Aura" selectedClass="" class="btn btn-sm btn-dark" style="">Dark Aura </$button>')
-	myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="Chaos Aura" selectedClass="" class="btn btn-sm btn-dark" style="">Chaos Aura </$button>')
+	for stat in config.aurasOut_to_compute:
+		myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="'+config.stat_names[stat]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+config.stat_names[stat]+' </$button>')
 
 	for stat in config.aurasOut_to_compute:
 		myprint(output,'<$reveal type="match" state="$:/state/curAuras-Out" text="'+config.stat_names[stat]+'">')
+		myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
+		myprint(output, '<div style="overflow-x:auto;">\n\n')
+		top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
+		myprint(output, '\n\n')
+		top_consistent_stat_players[stat] = get_and_write_sorted_top_consistent(players, config, num_used_fights, stat, output)			
+		myprint(output, '\n</div>')
+		myprint(output, '\n</div>\n    <div class="flex-col border">\n')
+		myprint(output, '<div style="overflow-x:auto;">\n')
+		#top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
+		myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
+		myprint(output, '\n</div>')
+		myprint(output, '\n</div></div>\n')
+		top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)
+		top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
+		myprint(output, "</$reveal>\n")
+	myprint(output, "</$reveal>\n")	
+	#write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, args.json_output_filename)
+
+	#print Defense details
+	myprint(output,'<$reveal type="match" state="$:/state/curTab" text="Defensive Stats">')
+	myprint(output, '\n!!!<<alert secondary src:"Defensive Stats" class:"leftbar border-dark">>\n')
+	for stat in config.defenses_to_compute:
+		myprint(output, '<$button setTitle="$:/state/curDefense" setTo="'+config.stat_names[stat]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+config.stat_names[stat]+' </$button>')
+
+	for stat in config.defenses_to_compute:
+		myprint(output,'<$reveal type="match" state="$:/state/curDefense" text="'+config.stat_names[stat]+'">')
 		myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
 		myprint(output, '<div style="overflow-x:auto;">\n\n')
 		top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
@@ -1450,11 +1456,11 @@ if __name__ == '__main__':
 			if config.charts:
 				#write_stats_chart(players, top_percentage_stat_players[stat], stat, myDate, args.input_directory, config)
 				write_stats_box_plots(players, top_percentage_stat_players[stat], stat, ProfessionColor, myDate, args.input_directory, config)
-		elif stat == 'dmg_taken':
-			write_stats_xls(players, top_average_stat_players[stat], stat, args.xls_output_filename)
-			if config.charts:
-				#write_stats_chart(players, top_average_stat_players[stat], stat, myDate, args.input_directory, config)
-				write_stats_box_plots(players, top_average_stat_players[stat], stat, ProfessionColor, myDate, args.input_directory, config)
+		#elif stat == 'dmg_taken':
+		#	write_stats_xls(players, top_average_stat_players[stat], stat, args.xls_output_filename)
+		#	if config.charts:
+		#		#write_stats_chart(players, top_average_stat_players[stat], stat, myDate, args.input_directory, config)
+		#		write_stats_box_plots(players, top_average_stat_players[stat], stat, ProfessionColor, myDate, args.input_directory, config)
 		elif stat == 'heal' and found_healing:
 			write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:
@@ -1465,10 +1471,10 @@ if __name__ == '__main__':
 			if config.charts:
 				#write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
 				write_stats_box_plots(players, top_total_stat_players[stat], stat, ProfessionColor, myDate, args.input_directory, config)
-		elif stat == 'deaths':
-			write_stats_xls(players, top_consistent_stat_players[stat], stat, args.xls_output_filename)
-			if config.charts:
-				write_stats_chart(players, top_consistent_stat_players[stat], stat, myDate, args.input_directory, config)
+		#elif stat == 'deaths':
+		#	write_stats_xls(players, top_consistent_stat_players[stat], stat, args.xls_output_filename)
+		#	if config.charts:
+		#		write_stats_chart(players, top_consistent_stat_players[stat], stat, myDate, args.input_directory, config)
 		elif stat not in skip_boxplot_charts:
 			write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
 			if config.charts:

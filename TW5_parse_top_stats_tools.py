@@ -149,6 +149,7 @@ class Config:
 	stats_to_compute: list = field(default_factory=list)
 	aurasIn_to_compute: list = field(default_factory=list)
 	aurasOut_to_compute: list = field(default_factory=list)
+	defenses_to_compute: list = field(default_factory=list)
 
 	buff_ids: dict = field(default_factory=dict)
 	buffs_stacking_duration: list = field(default_factory=list)
@@ -159,7 +160,7 @@ class Config:
 
 
 #Stats to exlucde from overview summary
-exclude_Stat = ["iol", "dist", "res", "Cdmg", "Pdmg",  "kills", "downs", "HiS", "stealth", "superspeed", "swaps", "barrierDamage", "dodges", "evades", "blocks", "invulns", 'fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut']
+exclude_Stat = ["iol", "dist", "res", "Cdmg", "Pdmg",  "kills", "downs", 'downed', "HiS", "stealth", "superspeed", "swaps", "barrierDamage", "dodges", "evades", "blocks", "invulns", 'hitsMissed', 'interupted', 'fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut', 'ripsIn', 'ripsTime', 'cleansesIn', 'cleansesTime', 'downContrib']
 
 #Control Effects Tracking
 squad_offensive = {}
@@ -372,6 +373,7 @@ def fill_config(config_input):
 	config.stats_to_compute = config_input.stats_to_compute
 	config.aurasIn_to_compute = config_input.aurasIn_to_compute
 	config.aurasOut_to_compute = config_input.aurasOut_to_compute
+	config.defenses_to_compute = config_input.defenses_to_compute
 	config.empty_stats = {stat: -1 for stat in config.stats_to_compute}
 	config.empty_stats['time_active'] = -1
 	config.empty_stats['time_in_combat'] = -1
@@ -1797,7 +1799,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 						player.stats_per_fight[fight_number]['time_in_combat'] = 1
 					player.stats_per_fight[fight_number][stat] = player.stats_per_fight[fight_number][stat]/player.stats_per_fight[fight_number]['time_in_combat']
 
-				#print(stat)
+				#print(stat, name)
 				# add stats of this fight and player to total stats of this fight and player
 				if player.stats_per_fight[fight_number][stat] > 0:
 					# buff are generation squad values, using total over time
@@ -2031,10 +2033,20 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 			return 0        
 		return int(player_json['defenses'][0]['deadCount'])
 
-	#if stat == 'kills':
-	#    if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'killed' not in player_json['statsAll'][0]:
-	#        return 0        
-	#    return int(player_json['statsAll'][0]['killed'])
+	if stat == 'downed':
+		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'downCount' not in player_json['defenses'][0]:
+			return 0        
+		return int(player_json['defenses'][0]['downCount'])
+
+	if stat == 'hitsMissed':
+		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'missedCount' not in player_json['defenses'][0]:
+			return 0        
+		return int(player_json['defenses'][0]['missedCount'])
+
+	if stat == 'interupted':
+		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'interruptedCount' not in player_json['defenses'][0]:
+			return 0        
+		return int(player_json['defenses'][0]['interruptedCount'])
 
 	if stat == 'dmg':
 		if 'dpsTargets' not in player_json:
@@ -2078,15 +2090,26 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 			return 0
 		return int(player_json['support'][0]['condiCleanse'])            
 	#Prep work for new addition: incoming Boon Strips
-	if stat == 'rips-In':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'BoonStrips' not in player_json['defenses'][0]:
+	if stat == 'ripsIn':
+		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'boonStrips' not in player_json['defenses'][0]:
 			return 0        
-		return int(player_json['defenses'][0]['BoonStrips'])		
+		return int(player_json['defenses'][0]['boonStrips'])
+
+	if stat == 'ripsTime':
+		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'boonStripsTime' not in player_json['defenses'][0]:
+			return 0        
+		return int(player_json['defenses'][0]['boonStripsTime'])
+
 	#Prep work for new addition: incoming Condition Clears		
-	if stat == 'cleanses-In':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'ConditionCleanses' not in player_json['defenses'][0]:
+	if stat == 'cleansesIn':
+		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'conditionCleanses' not in player_json['defenses'][0]:
 			return 0        
-		return int(player_json['defenses'][0]['ConditionCleanses'])				
+		return int(player_json['defenses'][0]['conditionCleanses'])				
+
+	if stat == 'cleansesTime':
+		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'conditionCleansesTime' not in player_json['defenses'][0]:
+			return 0        
+		return int(player_json['defenses'][0]['conditionCleansesTime'])		
 
 	if stat == 'dodges':
 		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'dodgeCount' not in player_json['defenses'][0]:
@@ -2112,6 +2135,11 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'distToCom' not in player_json['statsAll'][0]:
 			return -1
 		return float(player_json['statsAll'][0]['distToCom'])
+
+	if stat == 'downContrib':
+		if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'downContribution' not in player_json['statsAll'][0]:
+			return -1
+		return float(player_json['statsAll'][0]['downContribution'])
 
 	if stat == 'swaps':
 		if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'swapCount' not in player_json['statsAll'][0]:
@@ -3513,8 +3541,8 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
 	statBoxPlot_names = []
 	statBoxPlot_profs = []
 	statBoxPlot_data = []	
-	chart_per_fight = ['res', 'kills', 'downs', 'swaps', 'dist', 'evades', 'dodges']
-	chart_per_second = ['dmg', 'Pdmg', 'Cdmg', 'dmg_taken', 'rips', 'cleanses', 'superspeed', 'heal', 'barrier', 'barrierDamage'] 
+	chart_per_fight = ['res', 'kills', 'downs', 'swaps', 'dist', 'downContrib', 'hitsMissed', 'interupted', 'invulns', 'evades', 'blocks', 'dodges', 'downed', 'deaths', 'dmg_taken', 'barrierDamage', 'superspeed']
+	chart_per_second = ['dmg', 'Pdmg', 'Cdmg', 'rips', 'cleanses', 'heal', 'barrier', 'ripsIn', 'cleansesIn'] 
 	for i in reversed(range(len(top_players))):
 		player= players[top_players[i]]
 		statBoxPlot_names.append(player.name)
@@ -3557,7 +3585,7 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
 	elif stat in chart_per_second:
 			print_string += "    {text: '"+stat_Name+" per Second for all Fights Present', left: 'center'},\n"
 	else:
-			print_string += "    {text: '"+stat_Name+" per Second for all Fights Present', left: 'center'},\n"
+			print_string += "    {text: '"+stat_Name+" per Fight for all Fights Present', left: 'center'},\n"
 	print_string += "    {text: 'Output in seconds across all fights \\nupper: Q3 + 1.5 * IQR \\nlower: Q1 - 1.5 * IQR', borderColor: '#999', borderWidth: 1, textStyle: {fontSize: 10}, left: '1%', top: '90%'}\n"
 	print_string += "  ],\n"
 	print_string += "dataset: [\n"
