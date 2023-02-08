@@ -307,43 +307,55 @@ if __name__ == '__main__':
 				#end fight Summary
 				myprint(output, '\n<div class="flex-row">\n    <div class="flex-col-1">\n')
 				myprint(output, "|table-caption-top|k")
-				myprint(output, "|Damage by Squad Player Descending|c")
+				myprint(output, "|Damage by Squad Player Descending (Top 20)|c")
 				myprint(output, "|thead-dark table-hover|k")
 				myprint(output, "|!Squad Member | !Damage Output|h")
 				#begin squad DPS totals
 				sorted_squad_Dps = dict(sorted(fight.squad_Dps.items(), key=lambda x: x[1], reverse=True))
+				counter = 0
 				for name in sorted_squad_Dps:
-					myprint(output, '|'+name+'|'+my_value(sorted_squad_Dps[name])+'|')
+					counter +=1
+					if counter <=20:
+						myprint(output, '|'+name+'|'+my_value(sorted_squad_Dps[name])+'|')
 				#end Squad DPS totals
 				myprint(output, '\n</div>\n    <div class="flex-col-1">\n')
 				myprint(output, "|table-caption-top|k")
-				myprint(output, "|Damage by Squad Skill Descending|c")
+				myprint(output, "|Damage by Squad Skill Descending (Top 20)|c")
 				myprint(output, "|thead-dark table-hover|k")
 				myprint(output, "|!Squad Skill Name | !Damage Output|h")
 				#start   Squad Skill Damage totals
 				sorted_squad_skill_dmg = dict(sorted(fight.squad_skill_dmg.items(), key=lambda x: x[1], reverse=True))
+				counter = 0
 				for name in sorted_squad_skill_dmg:
-					myprint(output, '|'+name+'|'+my_value(sorted_squad_skill_dmg[name])+'|')
+					counter +=1
+					if counter <=20:
+						myprint(output, '|'+name+'|'+my_value(sorted_squad_skill_dmg[name])+'|')
 				#end Squad Skill Damage totals
 				myprint(output, '\n</div>\n    <div class="flex-col-1">\n')
 				myprint(output, "|table-caption-top|k")
-				myprint(output, "|Damage by Enemy Player Descending|c")            
+				myprint(output, "|Damage by Enemy Player Descending (Top 20)|c")            
 				myprint(output, "|thead-secondary table-hover|k")
 				myprint(output, "|!Enemy Player | !Damage Output|h")
 				#begin Enemy DPS totals
 				sorted_enemy_Dps = dict(sorted(fight.enemy_Dps.items(), key=lambda x: x[1], reverse=True))
+				counter = 0
 				for name in sorted_enemy_Dps:
-					myprint(output, '|'+name+'|'+my_value(sorted_enemy_Dps[name])+'|')
+					counter +=1
+					if counter <=20:
+						myprint(output, '|'+name+'|'+my_value(sorted_enemy_Dps[name])+'|')
 				#end Enemy DPS totals
 				myprint(output, '\n</div>\n    <div class="flex-col-1">\n')
 				myprint(output, "|table-caption-top|k")
-				myprint(output, "|Damage by Enemy Skill Descending|c")            
+				myprint(output, "|Damage by Enemy Skill Descending (Top 20)|c")            
 				myprint(output, "|thead-secondary table-hover|k")
 				myprint(output, "|!Enemy Skill | !Damage Output|h")
 				#begin Enemy Skill Damage       
 				sorted_enemy_skill_dmg = dict(sorted(fight.enemy_skill_dmg.items(), key=lambda x: x[1], reverse=True))
+				counter = 0
 				for name in sorted_enemy_skill_dmg:
-					myprint(output, '|'+name+'|'+my_value(sorted_enemy_skill_dmg[name])+'|')
+					counter +=1
+					if counter <=20:
+						myprint(output, '|'+name+'|'+my_value(sorted_enemy_skill_dmg[name])+'|')
 				#end Enemy Skill Damage
 				myprint(output, '\n</div>\n</div>\n')
 				myprint(output, "</$reveal>\n")
