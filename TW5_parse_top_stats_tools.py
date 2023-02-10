@@ -168,6 +168,9 @@ squad_Control = {}
 enemy_Control = {} 
 enemy_Control_Player = {} 
 
+#Spike Damage Tracking
+squad_damage_output = {}
+
 #Downed Healing from Instant Revive skills
 downed_Healing = {}
 
@@ -2660,9 +2663,10 @@ def get_stats_from_fight_json(fight_json, config, log):
 	squadDps_profession = ''
 	squadDps_damage = 0
 	squad_spike_dmg = {}
+	fight_name = fight_json['timeEnd'].split(" -",1)[0]
+	squad_damage_output[fight_name] = {}
 
-
-#creat dictionary of skill_ids and skill_names
+	#creat dictionary of skill_ids and skill_names
 	skill_Dict = {}
 
 	skills = fight_json['skillMap']
@@ -2675,9 +2679,6 @@ def get_stats_from_fight_json(fight_json, config, log):
 		x_id=skill_id[1:]
 		if x_id not in skill_Dict:
 			skill_Dict[x_id] = skill['name']    
-
-#[targets][[#][totalDamageDist][#][totaldamage] -Damage Output for Skill Id
-#[targets][[#][totalDamageDist][#][id] -Skill Id
 
 	SiegeSkills = {14627: "Punch", 14639: "Whirling Assualt", 14709: "Rocket Punch", 14710: "Whirling Inferno", 14708: "Rocket Salvo"}
 
@@ -2783,13 +2784,18 @@ def get_stats_from_fight_json(fight_json, config, log):
 				squad_skill_dmg[skill_name] = skill_dmg
 			else:
 				squad_skill_dmg[skill_name] = squad_skill_dmg[skill_name] +skill_dmg        
-		for spike_target in player['targetDamage1S']:
-			for PHASE, DAMAGE1S in enumerate(spike_target[0]):
-				if PHASE not in squad_spike_dmg:
-					squad_spike_dmg[PHASE] = DAMAGE1S
+		#Collect Spike Damage for first 60 seconds of each fight
+		sec_dmg = 0
+		#fight_name = fight_json['timeEnd'].split(" -",1)[0]
+		#squad_damage_output[fight_name] = {}
+		for idx, damage in enumerate(player['damage1S'][0]):
+			if damage > sec_dmg:
+				if idx in squad_damage_output[fight_name]:
+					squad_damage_output[fight_name][idx] += (damage-sec_dmg)
 				else:
-					squad_spike_dmg[PHASE] = squad_spike_dmg[PHASE] + DAMAGE1S
-					
+					squad_damage_output[fight_name][idx] = (damage-sec_dmg)
+			sec_dmg = damage
+
 		player_combat_time = sum_breakpoints(get_combat_time_breakpoints(player)) / 1000
 
 		#Track MOA Activity - Casting of Signet of Humility
@@ -4078,6 +4084,135 @@ def write_box_plot_charts(DPS_List, myDate, input_directory, ChartType):
 		boxPlot_chart_Output.close()
 #	end write bubble charts
 
+#Start Heat Map Chart
+def write_spike_damage_heatmap(squad_damage_output, myDate, input_directory):
+	fileDate = myDate
+	fileTid = input_directory+"/"+fileDate.strftime('%Y%m%d%H%M')+"_spike_damage_heatmap_TW5_Chart.tid"
+	heatmap_Output = open(fileTid, "w",encoding="utf-8")
+	fight_counter = 0
+	fight_output = []
+	fight_list = []
+	fight_seconds = [i for i in range(1,61)]
+	for fight in squad_damage_output:
+		fight_list.append(fight)
+		max_squad_dmg = max(squad_damage_output[fight].values())
+		#print(fight_header)
+		for i in range(1, 61):
+			if i in squad_damage_output[fight]:
+				squad_dmg = squad_damage_output[fight][i]
+			else:
+				squad_dmg = 0
+			fight_sec_data = [fight_counter, i, round((squad_dmg/max_squad_dmg), 1)]
+			fight_output.append(fight_sec_data)
+		fight_counter +=1
+
+	print_string = 'created: '+fileDate.strftime("%Y%m%d%H%M%S")
+	print_string +="\ncreator: Drevarr\n"
+	print_string +="tags: ChartData\n"
+	print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_spike_damage_heatmap_ChartData\n'
+	print_string +="type: application/javascript\n\n\n"
+	print_string +="// prettier-ignore\n"
+	#output HeatMap Seconds
+	jsonStr = json.dumps(fight_seconds)
+	print_string +='const seconds = '+jsonStr+';\n'
+	#output HeatMap Fights
+	jsonStr = json.dumps(fight_list)
+	print_string +='const fights = '+jsonStr+';\n'
+	#output data
+	jsonStr = json.dumps(fight_output)
+	print_string +='const data = '+jsonStr+'\n'
+	print_string +="    .map(function (item) {\n"
+	print_string +="    return [item[1], item[0], item[2] || '-'];\n"
+	print_string +="});	\n"
+	print_string += "option = {\n"
+	print_string += "  title: {\n"
+	print_string += "    left: 'center',\n"
+	print_string += "    text: 'Damage  / Max Damage in 1 Second\\n(limited to first 60 seconds of fight)'\n"
+	print_string +="},\n"
+	heatMapText ="""  tooltip: {
+    position: 'top',
+  },
+  grid: {
+    height: '80%',
+    left: '15%',
+    top: '10%'
+  },
+  xAxis: {
+    type: 'category',
+    data: seconds,
+    splitArea: {
+      show: true
+    }
+  },
+  yAxis: {
+    type: 'category',
+    data: fights,
+    name: 'Fight Ending',
+    splitArea: {
+      show: true
+    }
+  },
+  visualMap: {
+    min: 0,
+    max: 1,
+    calculable: true,
+    orient: 'vertical',
+    left: 'left',
+    bottom: '55%'
+  },
+  dataZoom: [
+    {
+      type: 'slider',
+      show: true,
+      xAxisIndex: [0],
+      start: 0,
+      end: 30
+    },
+    {
+      type: 'inside',
+      xAxisIndex: [0],
+      start: 0,
+      end: 30
+    },
+    {
+      type: 'slider',
+      show: true,
+      yAxisIndex: [0],
+      start: 0,
+      end: 30
+    },
+    {
+      type: 'inside',
+      yAxisIndex: [0],
+      start: 0,
+      end: 30
+    },    
+  ],
+  series: [
+    {
+      name: 'Spike Damage',
+      type: 'heatmap',
+      data: data,
+      label: {
+        show: true
+      },
+      emphasis: {
+        itemStyle: {
+          shadowBlur: 25,
+          shadowColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
+    }
+  ]
+};
+"""
+	print_string += heatMapText
+
+
+	myprint(heatmap_Output, print_string)
+
+	heatmap_Output.close()
+#end Heat Map Chart	
 
 def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, output_file):
 	json_dict = {}
@@ -4109,6 +4244,8 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	json_dict["downed_Healing"] =  {key: value for key, value in downed_Healing.items()}
 	json_dict["MOA_Targets"] =  {key: value for key, value in MOA_Targets.items()}
 	json_dict["MOA_Casters"] =  {key: value for key, value in MOA_Casters.items()}
+	json_dict["squad_damage_output"] =  {key: value for key, value in squad_damage_output.items()}
+
 	
 	
 	with open(output_file, 'w') as json_file:

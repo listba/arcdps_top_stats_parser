@@ -190,23 +190,11 @@ if __name__ == '__main__':
 	myprint(output, '\n---\n')    
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
 
-	output_string = "\nCumulative Squad Damage output by second, limited to first 20 seconds of the engagement\n"
-	output_string = "\n|thead-dark table-hover|k\n"
-	output_string += "|Fight Ending @|"
-
-	for i in range(21):
-		output_string += " "+str(i)+"s |"
-		
-	output_string += "h\n"
-	for fight in fights:
-		output_string += "|"+str(fight.end_time.split(' ')[1])+" |"
-		for phase in fight.squad_spike_dmg:
-			if phase <= 20:
-				output_string += " "+my_value(fight.squad_spike_dmg[phase])+" |"
-				
-		output_string += "\n"
+	output_string = "\nSquad Damage output by second (Mouse Scroll to zoom in/out at location)\n"
 		
 	myprint(output, output_string)
+
+	myprint(output, '<$echarts $text={{'+myDate.strftime("%Y%m%d%H%M")+'_spike_damage_heatmap_ChartData}} $height="800px" $theme="dark"/>')
 
 	#end reveal
 	myprint(output, '\n\n</div>\n\n')
@@ -456,9 +444,26 @@ if __name__ == '__main__':
 	#print Defense details
 	myprint(output,'<$reveal type="match" state="$:/state/curTab" text="Defensive Stats">')
 	myprint(output, '\n!!!<<alert secondary src:"Defensive Stats" class:"leftbar border-dark">>\n')
+	myprint(output, '<$button setTitle="$:/state/curDefense" setTo="Overview" selectedClass="" class="btn btn-sm btn-dark" style=""> Defensive Overview </$button>')
 	for stat in config.defenses_to_compute:
 		myprint(output, '<$button setTitle="$:/state/curDefense" setTo="'+config.stat_names[stat]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+config.stat_names[stat]+' </$button>')
 
+	#Print Overview Table
+	DefensiveOverview = ['dmg_taken', 'barrierDamage', 'hitsMissed', 'interupted', 'invulns', 'evades', 'blocks', 'dodges', 'cleansesIn', 'ripsIn', 'downed', 'deaths']
+	myprint(output,'<$reveal type="match" state="$:/state/curDefense" text="Overview">')	
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
+	myprint(output, "|thead-dark table-hover sortable|k")	
+	myprint(output, "|!Name |!Profession | !{{Damage Taken}} | !{{BarrierDamage}} | !{{MissedHits}} | !{{Interrupted}} | !{{Invuln}} | !{{Evades}} | !{{Blocks}} | !{{Dodges}} | !{{Condition Cleanses}} | !{{Boon Strips}} | !{{Downed}} | !{{Died}} |h")
+	for player in players:
+		player_name = player.name
+		player_prof = player.profession
+		print_string = "|"+player_name+"| {{"+player_prof+"}} "
+		for item in DefensiveOverview:
+			print_string += "| "+my_value(player.total_stats[item])
+		print_string +="|"
+		myprint(output, print_string)
+	myprint(output, '\n</div>')
+	myprint(output, '\n</$reveal>')
 	for stat in config.defenses_to_compute:
 		myprint(output,'<$reveal type="match" state="$:/state/curDefense" text="'+config.stat_names[stat]+'">')
 		myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
@@ -1502,6 +1507,7 @@ if __name__ == '__main__':
 
 	#write out Bubble Charts and Box_Plots
 	write_bubble_charts(players, top_total_stat_players[stat], squad_Control, myDate, args.input_directory)
+	write_spike_damage_heatmap(squad_damage_output, myDate, args.input_directory)
 	write_box_plot_charts(DPS_List, myDate, args.input_directory, "DPS")
 	write_box_plot_charts(SPS_List, myDate, args.input_directory, "SPS")
 	write_box_plot_charts(CPS_List, myDate, args.input_directory, "CPS")
