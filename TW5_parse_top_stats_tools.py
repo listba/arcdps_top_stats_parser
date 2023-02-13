@@ -186,6 +186,9 @@ uptime_Buff_Ids = {1122: 'stability', 717: 'protection', 743: 'aegis', 740: 'mig
 #Stacking Buffs Tracking
 stacking_uptime_Table = {}
 
+#Personal Buff Tracking
+buffs_personal = {}
+
 #Calculate On Tag Death Variables
 On_Tag = 600
 Run_Back = 5000
@@ -2987,7 +2990,33 @@ def get_stats_from_fight_json(fight_json, config, log):
 			Attendance[player_account]['names'][player_name]['professions'][player_prof_role]['duration'] += duration
 			Attendance[player_account]['names'][player_name]['professions'][player_prof_role]['guildStatus'] = guildStatus
 
+	#Personal Buff Tracking
+	personalBuffs = fight_json['personalBuffs']
+	for prof in personalBuffs:
+		if prof not in buffs_personal:
+			buffs_personal[prof] = {}
 
+		for buff in personalBuffs[prof]:
+			if buff not in buffs_personal[prof]:
+				buffs_personal[prof][buff] = {}
+
+	for player in fight_json['players']:
+		player_prof = player['profession']
+		player_name = player['name']
+		player_activeTime = round(player['activeTimes'][0]/1000,2)
+		if player_prof in buffs_personal:
+			for buff in buffs_personal[player_prof]:
+				for activeBuff in player['buffUptimesActive']:
+					if activeBuff['id'] == buff:
+						buffUptime = activeBuff['buffData'][0]['uptime']
+						uptimeSeconds =round(((buffUptime*player_activeTime)/100),2)
+						if player_name not in buffs_personal[player_prof][buff]:
+							buffs_personal[player_prof][buff][player_name]={}
+							buffs_personal[player_prof][buff][player_name]['uptimeSecs']=uptimeSeconds
+							buffs_personal[player_prof][buff][player_name]['activeTime']=player_activeTime
+						else:
+							buffs_personal[player_prof][buff][player_name]['uptimeSecs']+=uptimeSeconds
+							buffs_personal[player_prof][buff][player_name]['activeTime']+=player_activeTime
 
 
 	#Death_OnTag Tracking
@@ -4244,6 +4273,7 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	json_dict["downed_Healing"] =  {key: value for key, value in downed_Healing.items()}
 	json_dict["MOA_Targets"] =  {key: value for key, value in MOA_Targets.items()}
 	json_dict["MOA_Casters"] =  {key: value for key, value in MOA_Casters.items()}
+	json_dict["Buffs_Personal"] =  {key: value for key, value in buffs_personal.items()}
 	json_dict["squad_damage_output"] =  {key: value for key, value in squad_damage_output.items()}
 
 	
