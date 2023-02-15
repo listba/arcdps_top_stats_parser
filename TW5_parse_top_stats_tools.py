@@ -112,7 +112,6 @@ class Fight:
 	enemy_squad: dict = field(default_factory=dict) #profession and count of enemies
 	enemy_Dps: dict = field(default_factory=dict) #enemy name and amount of damage output
 	squad_Dps: dict = field(default_factory=dict) #squad player name and amount of damage output
-	skill_Dict: dict = field(default_factory=dict) #skill id's and skill_names from fight
 	enemy_skill_dmg: dict = field(default_factory=dict) #enemy skill_name and amount of damage output
 	squad_skill_dmg: dict = field(default_factory=dict) #squad skill_name and amount of damage output
 	squad_spike_dmg: dict = field(default_factory=dict) #squad skill_name and amount of damage output
@@ -188,6 +187,9 @@ stacking_uptime_Table = {}
 
 #Personal Buff Tracking
 buffs_personal = {}
+
+#Skill Dictionary from all Fights
+skill_Dict = {}
 
 #Calculate On Tag Death Variables
 On_Tag = 600
@@ -2670,18 +2672,20 @@ def get_stats_from_fight_json(fight_json, config, log):
 	squad_damage_output[fight_name] = {}
 
 	#creat dictionary of skill_ids and skill_names
-	skill_Dict = {}
-
 	skills = fight_json['skillMap']
 	for skill_id, skill in skills.items():
 		x_id=skill_id[1:]
 		if x_id not in skill_Dict:
-			skill_Dict[x_id] = skill['name']
+			skill_Dict[x_id] = {}
+			skill_Dict[x_id]['name'] = skill['name']
+			skill_Dict[x_id]['icon'] = skill['icon']
 	skillBuffs = fight_json['buffMap']
 	for skill_id, skill in skillBuffs.items():
 		x_id=skill_id[1:]
 		if x_id not in skill_Dict:
-			skill_Dict[x_id] = skill['name']    
+			skill_Dict[x_id] = {}
+			skill_Dict[x_id]['name'] = skill['name']
+			skill_Dict[x_id]['icon'] = skill['icon']
 
 	SiegeSkills = {14627: "Punch", 14639: "Whirling Assualt", 14709: "Rocket Punch", 14710: "Whirling Inferno", 14708: "Rocket Salvo"}
 
@@ -2699,7 +2703,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 				if str(skill_id) in SiegeSkills:
 					continue
 				if str(skill_id) in skill_Dict:
-					skill_name = skill_Dict[str(skill_id)]
+					#skill_name = skill_Dict[str(skill_id)]
+					skill_name = skill_Dict[str(skill_id)]['name']
 				else:
 					skill_name = 'Skill-'+str(skill_id)
 				#skill_name = skill_Dict[skill_id]
@@ -2779,7 +2784,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 			if skill_id in SiegeSkills:
 				continue            
 			if str(skill_id) in skill_Dict:
-				skill_name = skill_Dict[str(skill_id)]
+				#skill_name = skill_Dict[str(skill_id)]
+				skill_name = skill_Dict[str(skill_id)]['name']
 			else:
 				skill_name = 'Skill-'+str(skill_id)            
 			skill_dmg = skill_used['totalDamage']
@@ -2995,28 +3001,33 @@ def get_stats_from_fight_json(fight_json, config, log):
 	for prof in personalBuffs:
 		if prof not in buffs_personal:
 			buffs_personal[prof] = {}
+			buffs_personal[prof]['buffList'] = []
+			buffs_personal[prof]['player'] = {}
 
 		for buff in personalBuffs[prof]:
-			if buff not in buffs_personal[prof]:
-				buffs_personal[prof][buff] = {}
+			if buff not in buffs_personal[prof]['buffList']:
+				buffs_personal[prof]['buffList'].append(buff)
 
 	for player in fight_json['players']:
 		player_prof = player['profession']
 		player_name = player['name']
 		player_activeTime = round(player['activeTimes'][0]/1000,2)
 		if player_prof in buffs_personal:
-			for buff in buffs_personal[player_prof]:
+			for buff in buffs_personal[player_prof]['buffList']:
 				for activeBuff in player['buffUptimesActive']:
 					if activeBuff['id'] == buff:
 						buffUptime = activeBuff['buffData'][0]['uptime']
 						uptimeSeconds =round(((buffUptime*player_activeTime)/100),2)
-						if player_name not in buffs_personal[player_prof][buff]:
-							buffs_personal[player_prof][buff][player_name]={}
-							buffs_personal[player_prof][buff][player_name]['uptimeSecs']=uptimeSeconds
-							buffs_personal[player_prof][buff][player_name]['activeTime']=player_activeTime
+						if player_name not in buffs_personal[player_prof]['player']:
+							buffs_personal[player_prof]['player'][player_name]={}
+							buffs_personal[player_prof]['player'][player_name][buff]=0
+							buffs_personal[player_prof]['player'][player_name][buff]=uptimeSeconds
+						elif buff not in buffs_personal[player_prof]['player'][player_name]:
+							buffs_personal[player_prof]['player'][player_name][buff]={}
+							buffs_personal[player_prof]['player'][player_name][buff]=uptimeSeconds
 						else:
-							buffs_personal[player_prof][buff][player_name]['uptimeSecs']+=uptimeSeconds
-							buffs_personal[player_prof][buff][player_name]['activeTime']+=player_activeTime
+							buffs_personal[player_prof]['player'][player_name][buff]+=uptimeSeconds
+
 
 
 	#Death_OnTag Tracking
@@ -3221,7 +3232,6 @@ def get_stats_from_fight_json(fight_json, config, log):
 	fight.squad_spike_dmg = squad_spike_dmg
 	fight.enemy_skill_dmg = enemy_skill_dmg
 	fight.squad_skill_dmg = squad_skill_dmg
-	fight.skill_Dict = skill_Dict
 	fight.allies = num_allies
 	fight.kills = num_kills
 	fight.downs = num_downs
@@ -4275,9 +4285,9 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	json_dict["MOA_Casters"] =  {key: value for key, value in MOA_Casters.items()}
 	json_dict["Buffs_Personal"] =  {key: value for key, value in buffs_personal.items()}
 	json_dict["squad_damage_output"] =  {key: value for key, value in squad_damage_output.items()}
+	json_dict["skill_Dict"] =  {key: value for key, value in skill_Dict.items()}
 
-	
-	
+		
 	with open(output_file, 'w') as json_file:
 		json.dump(json_dict, json_file, indent=4)
 
