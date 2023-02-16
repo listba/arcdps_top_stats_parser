@@ -149,6 +149,7 @@ if __name__ == '__main__':
 					'<$button setTitle="$:/state/curTab" setTo="Control Effects - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Outgoing </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Control Effects - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Incoming </$button>',					
 					'<$button setTitle="$:/state/curTab" setTo="Spike Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Spike Damage </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Personal Buffs" selectedClass="" class="btn btn-sm btn-dark" style=""> Personal Buffs </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Buff Uptime" selectedClass="" class="btn btn-sm btn-dark" style=""> Buff Uptime </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Stacking Buffs" selectedClass="" class="btn btn-sm btn-dark" style=""> Stacking Buffs </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Damage with Buffs" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage with Buffs </$button>',
@@ -200,8 +201,54 @@ if __name__ == '__main__':
 	myprint(output, '\n\n</div>\n\n')
 	myprint(output, "</$reveal>\n")     
 
-
 	# end Squad Spike Damage
+
+	#Personal Buffs
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Personal Buffs">\n')    
+	myprint(output, '\n!!!Personal Buffs Uptime %\n')
+	myprint(output, '\n---\n')    
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
+
+	BP_Header = ""
+	Prof_String = ""
+	Output_String = ""
+	myprint(output, "|thead-dark|k")
+	for profession in buffs_personal:
+		BP_Header += '<$button set="$:/state/PersonalBuffs" class="btn btn-sm btn-dark" setTo="'+profession+'">{{'+profession+'}}'+profession+'</$button> '
+
+	myprint(output, BP_Header)
+	myprint(output, '\n\n---\n\n')
+
+	for profession in buffs_personal:
+		Prof_Header = "|{{"+profession+"}}Name | !Active Time|"
+		for buff in buffs_personal[profession]['buffList']:
+			icon = skill_Dict[str(buff)]['icon']
+			tooltip = skill_Dict[str(buff)]['name']
+			Prof_Header += '![img width=24 tooltip="'+tooltip+'" ['+icon+']]|'
+		myprint(output, '\n<$reveal type="match" state="$:/state/PersonalBuffs" text="'+profession+'">\n')
+		myprint(output, "|thead-dark sortable|k")
+		myprint(output, Prof_Header+"h")
+		for playerName in buffs_personal[profession]['player']:
+			buffUptimes="|"+playerName+" "
+			playerActiveTime = 0
+			#get activeTime from players
+			for player in players:
+				if player.name == playerName and player.profession == profession:
+					playerActiveTime = player.duration_active
+			buffUptimes+="| "+str(playerActiveTime)
+			for buff in buffs_personal[profession]['buffList']:
+				if buff in buffs_personal[profession]['player'][playerName].keys() and playerActiveTime>0:
+					buffUptimes+="| "+str(round((buffs_personal[profession]['player'][playerName][buff]/playerActiveTime)*100,2))
+				else:
+					buffUptimes+="| 0.00"
+			myprint(output, buffUptimes+"|")
+		myprint(output, "\n</$reveal>\n")
+
+	#end reveal
+	myprint(output, '\n\n</div>\n\n')
+	myprint(output, "</$reveal>\n")     
+
+	# end Personal Bufffs
 
 	if include_comp_and_review:
 		#Squad Composition Testing

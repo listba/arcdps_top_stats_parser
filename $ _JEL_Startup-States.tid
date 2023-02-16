@@ -22,3 +22,4 @@ type: text/vnd.tiddlywiki
 <$action-setfield $tiddler="$:/state/toc/OtherLogs-2023-02 KDR-1753190578" $value="open"/>
 <$action-setfield $tiddler="$:/state/curDamageWithBuffs" $value="might"/>
 <$action-setfield $tiddler="$:/state/curDefense" $value="Downed"/>
+<$action-setfield $tiddler="$:/state/PersonalBuffs" $value="Firebrand"/>

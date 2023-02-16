@@ -4134,7 +4134,10 @@ def write_spike_damage_heatmap(squad_damage_output, myDate, input_directory):
 	fight_seconds = [i for i in range(1,61)]
 	for fight in squad_damage_output:
 		fight_list.append(fight)
-		max_squad_dmg = max(squad_damage_output[fight].values())
+		if squad_damage_output[fight].values():
+			max_squad_dmg = max(squad_damage_output[fight].values())
+		else:
+			max_squad_dmg = 1
 		#print(fight_header)
 		for i in range(1, 61):
 			if i in squad_damage_output[fight]:
