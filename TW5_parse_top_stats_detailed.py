@@ -116,7 +116,6 @@ if __name__ == '__main__':
 	Nav_Bar_Items= ('<$button setTitle="$:/state/curTab" setTo="Overview" selectedClass="" class="btn btn-sm btn-dark" style=""> Session Overview </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Attendance" selectedClass="" class="btn btn-sm btn-dark" style=""> Attendance </$button>',
 					*large_items,
-					'<$button setTitle="$:/state/curTab" setTo="Deaths" selectedClass="" class="btn btn-sm btn-dark" style=""> Deaths </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Illusion of Life" selectedClass="" class="btn btn-sm btn-dark" style=""> IOL </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Resurrect" selectedClass="" class="btn btn-sm btn-dark" style=""> Resurrect </$button>',                    
 					'<$button setTitle="$:/state/curTab" setTo="Enemies Downed" selectedClass="" class="btn btn-sm btn-dark" style=""> Enemies Downed </$button>',
