@@ -79,25 +79,14 @@ if __name__ == '__main__':
 
 	myprint(output, 'created: '+myDate.strftime("%Y%m%d%H%M%S"))
 	myprint(output, 'modified: '+myDate.strftime("%Y%m%d%H%M%S"))
-	myprint(output, 'creator: Drevarr ')
+	myprint(output, 'creator: '+config.summary_creator)
 	myprint(output, 'caption: '+myDate.strftime("%Y%m%d")+'-WvW-Log-Review')
-	#myprint(output, 'curTab: Overview')
-	#myprint(output, 'curFight: Fight-1')
-	#myprint(output, 'curControl-In: Blinded')
-	#myprint(output, 'curControl-Out: Blinded')
-	#myprint(output, 'curAuras-Out: Fire')
-	#myprint(output, 'curAuras-In: Fire')
-	#myprint(output, 'curStackingBuffs: might')
-	#myprint(output, 'curDamageWithBuffs: might')
-	#myprint(output, 'curBurstTableDamage: Ch5Ca')
-	#myprint(output, 'curBurstTableType: Cumulative')
-	#myprint(output, 'curChart: Kills/Downs/DPS')
 	myprint(output, 'tags: Logs [['+myDate.strftime("%Y")+'-'+myDate.strftime("%m")+' Log Reviews]]')
 	myprint(output, 'title: '+myDate.strftime("%Y%m%d")+'-WvW-Log-Review\n')
 	#End Tid file header
 
 	#JEL-Tweaked to output TW5 formatting (https://drevarr.github.io/FluxCapacity.html)
-	print_string = "__''Flux Capacity Node Farmers - WVW Log Review''__\n"
+	print_string = "__''"+config.summary_title+"''__\n"
 	myprint(output, print_string)
 
 	# print overall stats

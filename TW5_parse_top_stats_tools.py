@@ -140,6 +140,9 @@ class Config:
 	min_fight_duration: int = 0   # minimum duration of a fight to be considered in the stats
 	min_enemy_players: int = 0    # minimum number of enemies to consider a fight in the stats
 
+	summary_title: str = ""
+	summary_creator: str = ""
+
 	charts: bool = False	# produce charts for stats_to_compute
 
 	stat_names: dict = field(default_factory=dict)
@@ -376,6 +379,9 @@ def fill_config(config_input):
 	config.min_allied_players = config_input.min_allied_players
 	config.min_fight_duration = config_input.min_fight_duration
 	config.min_enemy_players = config_input.min_enemy_players
+
+	config.summary_title = config_input.summary_title
+	config.summary_creator = config_input.summary_creator
 
 	config.stat_names = config_input.stat_names
 	config.profession_abbreviations = config_input.profession_abbreviations
