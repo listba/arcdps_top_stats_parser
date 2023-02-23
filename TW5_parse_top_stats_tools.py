@@ -2651,13 +2651,14 @@ def calculate_dps_stats(fight_json, fight, players_running_healing_addon, config
 def get_stats_from_fight_json(fight_json, config, log):
 	# get fight duration
 	fight_duration_json = fight_json['duration']
-	split_duration = fight_duration_json.split('m ', 1)
-	mins = int(split_duration[0])
-	split_duration = split_duration[1].split('s', 1)
-	secs = int(split_duration[0])
-	if debug:
-		print("duration: ", mins, "m", secs, "s")
-	duration = mins*60 + secs
+	#split_duration = fight_duration_json.split('m ', 1)
+	#mins = int(split_duration[0])
+	#split_duration = split_duration[1].split('s', 1)
+	#secs = int(split_duration[0])
+	#if debug:
+	#	print("duration: ", mins, "m", secs, "s")
+	#duration = mins*60 + secs
+	duration = round(fight_json['durationMS']/1000)
 
 	num_allies = len(fight_json['players'])
 	num_enemies = 0
@@ -3250,7 +3251,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 	# skip fights that last less than min_fight_duration seconds
 	if(duration < config.min_fight_duration):
 		fight.skipped = True
-		print_string = "\nFight only took "+str(mins)+"m "+str(secs)+"s. Skipping fight."
+		print_string = "\nFight only took "+str(duration)+"s. Skipping fight."
 		myprint(log, print_string)
 		
 	# skip fights with less than min_allied_players allies
