@@ -582,8 +582,11 @@ def get_top_players(players, config, stat, total_or_consistent_or_average):
 	elif total_or_consistent_or_average == StatType.CONSISTENT:
 		percentage = float(config.portion_of_top_for_consistent)
 		sorted_index = sort_players_by_consistency(players, stat)
-	elif total_or_consistent_or_average == StatType.AVERAGE:
+	elif total_or_consistent_or_average == StatType.AVERAGE and stat != 'dmg':
 		percentage = float(config.portion_of_top_for_average)
+		sorted_index = sort_players_by_average(players, stat)        
+	elif total_or_consistent_or_average == StatType.AVERAGE and stat == 'dmg':
+		percentage = float(config.portion_of_topDamage_for_total)
 		sorted_index = sort_players_by_average(players, stat)        
 	else:
 		print("ERROR: Called get_top_players for stats that are not total or consistent")
