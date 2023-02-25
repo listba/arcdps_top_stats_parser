@@ -30,6 +30,9 @@ num_players_listed = {'dmg': 100, 'Pdmg': 50, 'Cdmg': 50, 'iol': 50,'rips': 50, 
 # What portion (%) of are considered to be "top" in each fight for each stat?
 num_players_considered_top_percentage = 5
 
+# For the initial sorting of tables: 'total' or 'average'
+player_sorting_stat_type = 'average'
+
 # For what portion of all fights does a player need to be there to be considered for "consistency percentage" awards?
 attendance_percentage_for_percentage = 50
 # For what portion of all fights does a player need to be there to be considered for "late but great" awards?
@@ -38,6 +41,8 @@ attendance_percentage_for_late = 50
 attendance_percentage_for_buildswap = 30
 # For what portion of all fights does a player need to be there to be considered for "top average" awards? 
 attendance_percentage_for_average = 33
+# For what portion of all fights does a player need to be there to be considered at all
+attendance_percentage_for_top = 1
 
 # What portion of the top total player stat does someone need to reach to be considered for total awards?
 percentage_of_top_for_consistent = 10
@@ -45,6 +50,8 @@ percentage_of_top_for_consistent = 10
 percentage_of_top_for_total = 10
 # What portion of the total stat of the top consistent player does someone need to reach to be considered for consistency awards?
 percentage_of_topDamage_for_total = 0
+# What portion of the total stat of the top consistent player does someone need to reach to be considered for consistency awards?
+percentage_of_top_for_average = 10
 # What portion of the percentage the top consistent player reached top does someone need to reach to be considered for percentage awards?
 percentage_of_top_for_percentage = 10
 # What portion of the percentage the top consistent player reached top does someone need to reach to be considered for late but great awards?

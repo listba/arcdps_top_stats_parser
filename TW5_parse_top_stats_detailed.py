@@ -430,7 +430,12 @@ if __name__ == '__main__':
 			else:
 				myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
 				myprint(output, '<div style="overflow-x:auto;">\n\n')
-				top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
+				if config.player_sorting_stat_type == 'average':
+					top_average_stat_players[stat] = get_and_write_sorted_total_by_average(players, config, total_fight_duration, stat, output)
+					top_total_stat_players[stat] = get_top_players(players, config, stat, StatType.TOTAL)
+				else:
+					top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
+					top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)	
 				myprint(output, '\n\n\n\n')
 				top_consistent_stat_players[stat] = get_and_write_sorted_top_consistent(players, config, num_used_fights, stat, output)			
 				myprint(output, '\n\n</div>\n\n')
@@ -1500,6 +1505,7 @@ if __name__ == '__main__':
 	myprint(output, "\n</$reveal>\n")     
 	# end Ch5Ca Burst Damage
 
+	top_players_by_stat = top_average_stat_players if config.player_sorting_stat_type == 'average' else top_total_stat_players
 	for stat in config.stats_to_compute:
 		skip_boxplot_charts = ['deaths', 'iol', 'stealth', 'HiS']
 		#boxplot_Stats = ['stability',  'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration', 'res', 'kills', 'downs', 'swaps', 'dmg', 'Pdmg', 'Cdmg', 'rips', 'cleanses', 'superspeed', 'barrierDamage']
@@ -1514,34 +1520,34 @@ if __name__ == '__main__':
 		#		#write_stats_chart(players, top_average_stat_players[stat], stat, myDate, args.input_directory, config)
 		#		write_stats_box_plots(players, top_average_stat_players[stat], stat, ProfessionColor, myDate, args.input_directory, config)
 		elif stat == 'heal' and found_healing:
-			write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
+			write_stats_xls(players, top_players_by_stat[stat], stat, args.xls_output_filename)
 			if config.charts:
-				#write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
-				write_stats_box_plots(players, top_total_stat_players[stat], stat, ProfessionColor, myDate, args.input_directory, config)
+				#write_stats_chart(players, top_players_by_stat[stat], stat, myDate, args.input_directory, config)
+				write_stats_box_plots(players, top_players_by_stat[stat], stat, ProfessionColor, myDate, args.input_directory, config)
 		elif stat == 'barrier' and found_barrier:
-			write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
+			write_stats_xls(players, top_players_by_stat[stat], stat, args.xls_output_filename)
 			if config.charts:
-				#write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
-				write_stats_box_plots(players, top_total_stat_players[stat], stat, ProfessionColor, myDate, args.input_directory, config)
+				#write_stats_chart(players, top_players_by_stat[stat], stat, myDate, args.input_directory, config)
+				write_stats_box_plots(players, top_players_by_stat[stat], stat, ProfessionColor, myDate, args.input_directory, config)
 		#elif stat == 'deaths':
 		#	write_stats_xls(players, top_consistent_stat_players[stat], stat, args.xls_output_filename)
 		#	if config.charts:
 		#		write_stats_chart(players, top_consistent_stat_players[stat], stat, myDate, args.input_directory, config)
 		elif stat not in skip_boxplot_charts:
-			write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
+			write_stats_xls(players, top_players_by_stat[stat], stat, args.xls_output_filename)
 			if config.charts:
-				#write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
-				write_stats_box_plots(players, top_total_stat_players[stat], stat, ProfessionColor, myDate, args.input_directory, config)
+				#write_stats_chart(players, top_players_by_stat[stat], stat, myDate, args.input_directory, config)
+				write_stats_box_plots(players, top_players_by_stat[stat], stat, ProfessionColor, myDate, args.input_directory, config)
 		else:
-			write_stats_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename)
+			write_stats_xls(players, top_players_by_stat[stat], stat, args.xls_output_filename)
 			if config.charts:
-				write_stats_chart(players, top_total_stat_players[stat], stat, myDate, args.input_directory, config)
-				#write_stats_box_plots(players, top_total_stat_players[stat], stat, ProfessionColor, myDate, args.input_directory, config)
+				write_stats_chart(players, top_players_by_stat[stat], stat, myDate, args.input_directory, config)
+				#write_stats_box_plots(players, top_players_by_stat[stat], stat, ProfessionColor, myDate, args.input_directory, config)
 		if stat == 'rips' or stat == 'cleanses' or stat == 'stability':
-			supportCount = write_support_xls(players, top_total_stat_players[stat], stat, args.xls_output_filename, supportCount)
+			supportCount = write_support_xls(players, top_players_by_stat[stat], stat, args.xls_output_filename, supportCount)
 
 	#write out Bubble Charts and Box_Plots
-	write_bubble_charts(players, top_total_stat_players[stat], squad_Control, myDate, args.input_directory)
+	write_bubble_charts(players, top_players_by_stat[stat], squad_Control, myDate, args.input_directory)
 	write_spike_damage_heatmap(squad_damage_output, myDate, args.input_directory)
 	write_box_plot_charts(DPS_List, myDate, args.input_directory, "DPS")
 	write_box_plot_charts(SPS_List, myDate, args.input_directory, "SPS")
