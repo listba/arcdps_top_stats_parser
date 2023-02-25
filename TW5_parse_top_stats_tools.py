@@ -1468,20 +1468,25 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 		else:
 			per_sec_name = stat[:1].upper() + "PS"
 			print_string += f" !Squad {per_sec_name}| !Group {per_sec_name}| !Self {per_sec_name}|"
-	if stat == 'dmg':
+	elif stat == 'dmg':
 		print_string += " !FightTime DPS| !CombatTime DPS|  !Damage/Enemy|   !Wt. DPS/Enemy|"
-	if stat == 'heal':
+	elif stat == 'heal':
 		print_string += " !Squad HPS| !Group HPS| !Self HPS|"
-	if stat == 'rips' or stat == 'rips-In':
+	elif stat == 'rips' or stat == 'rips-In':
 		print_string += " !FightTime SPS| !CombatTime SPS|"
-	if stat == 'cleanses' or stat == 'cleanses-In':
+	elif stat == 'cleanses' or stat == 'cleanses-In':
 		print_string += " !FightTime CPS| !CombatTime CPS|"
-	if stat == 'barrier':
+	elif stat == 'barrier':
 		print_string += " !Squad BPS| !Group BPS| !Self BPS|"
-	if stat == 'downs':
+	elif stat == 'downs':
 		print_string += " !FightTime Downs/Min| !CombatTime Downs/Min|"
-	if stat == 'kills':
+	elif stat == 'kills':
 		print_string += " !FightTime Kills/Min| !CombatTime Kills/Min|"
+	else:
+		if stat in ['Pdmg', 'Cdmg', 'dmg_taken', 'barrierDamage', 'cleansesIn', 'ripsIn']:
+			print_string += " !Per sec avg|"
+		else:
+			print_string += " !Per min avg|"
 	print_string += "h"
 	myprint(output_file, print_string)    
 
@@ -1574,6 +1579,10 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Self, 4))+' Self Generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'</span>|'
 		else:
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
+			if stat in ['Pdmg', 'Cdmg', 'dmg_taken', 'barrierDamage', 'cleansesIn', 'ripsIn', 'deaths']:
+				print_string += " "+"{:.2f}".format(round(player.average_stats[stat], 2))+"|"
+			else:
+				print_string += " "+"{:.2f}".format(round(player.average_stats[stat] * 60.0, 2))+"|"
 		myprint(output_file, print_string)
 		last_val = player.total_stats[stat]
 	myprint(output_file, "\n")
