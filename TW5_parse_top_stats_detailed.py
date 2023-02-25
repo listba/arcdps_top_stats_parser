@@ -465,7 +465,12 @@ if __name__ == '__main__':
 		myprint(output,'<$reveal type="match" state="$:/state/curAuras-Out" text="'+config.stat_names[stat]+'">')
 		myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
 		myprint(output, '<div style="overflow-x:auto;">\n\n')
-		top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
+		if config.player_sorting_stat_type == 'average':
+			top_average_stat_players[stat] = get_and_write_sorted_total_by_average(players, config, total_fight_duration, stat, output)
+			top_total_stat_players[stat] = get_top_players(players, config, stat, StatType.TOTAL)
+		else:
+			top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
+			top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)
 		myprint(output, '\n\n')
 		top_consistent_stat_players[stat] = get_and_write_sorted_top_consistent(players, config, num_used_fights, stat, output)			
 		myprint(output, '\n</div>')
@@ -475,7 +480,6 @@ if __name__ == '__main__':
 		myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
 		myprint(output, '\n</div>')
 		myprint(output, '\n</div></div>\n')
-		top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)
 		top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
 		myprint(output, "</$reveal>\n")
 	myprint(output, "</$reveal>\n")	
@@ -508,7 +512,12 @@ if __name__ == '__main__':
 		myprint(output,'<$reveal type="match" state="$:/state/curDefense" text="'+config.stat_names[stat]+'">')
 		myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
 		myprint(output, '<div style="overflow-x:auto;">\n\n')
-		top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
+		if config.player_sorting_stat_type == 'average':
+			top_average_stat_players[stat] = get_and_write_sorted_total_by_average(players, config, total_fight_duration, stat, output)
+			top_total_stat_players[stat] = get_top_players(players, config, stat, StatType.TOTAL)
+		else:
+			top_total_stat_players[stat] = get_and_write_sorted_total(players, config, total_fight_duration, stat, output)
+			top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)
 		myprint(output, '\n\n')
 		top_consistent_stat_players[stat] = get_and_write_sorted_top_consistent(players, config, num_used_fights, stat, output)			
 		myprint(output, '\n</div>')
@@ -518,7 +527,6 @@ if __name__ == '__main__':
 		myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData}} $height="800px" $theme="dark"/>')
 		myprint(output, '\n</div>')
 		myprint(output, '\n</div></div>\n')
-		top_average_stat_players[stat] = get_top_players(players, config, stat, StatType.AVERAGE)
 		top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
 		myprint(output, "</$reveal>\n")
 	myprint(output, "</$reveal>\n")	
