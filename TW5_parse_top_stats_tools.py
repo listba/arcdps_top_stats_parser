@@ -2252,8 +2252,13 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		return 0
 
 	if stat == 'heal':
-		if player_json['name'] in players_running_healing_addon and 'extHealingStats' in player_json and 'alliedHealing1S' in player_json['extHealingStats']:
-			return sum([healing[0][-1] for healing in player_json['extHealingStats']['alliedHealing1S']])
+		#if player_json['name'] in players_running_healing_addon and 'extHealingStats' in player_json and 'alliedHealing1S' in player_json['extHealingStats']:
+		if player_json['name'] in players_running_healing_addon and 'extHealingStats' in player_json and 'outgoingHealingAllies' in player_json['extHealingStats']:
+			playerHealing = 0
+			for healingtarget in player_json['extHealingStats']['outgoingHealingAllies']:
+				playerHealing += (healingtarget[0]['actorHealing']-healingtarget[0]['actorDownedHealing'])
+			return playerHealing
+			#return sum([healing[0][-1] for healing in player_json['extHealingStats']['alliedHealing1S']])
 		return -1
 
 	if stat == 'barrier':
