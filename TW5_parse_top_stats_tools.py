@@ -363,15 +363,19 @@ def fill_config(config_input):
 	config = Config()
 	config.num_players_listed = config_input.num_players_listed
 	config.num_players_considered_top = config_input.num_players_considered_top_percentage/100
+	
+	config.player_sorting_stat_type = config_input.player_sorting_stat_type or 'total'
 
 	config.min_attendance_portion_for_percentage = config_input.attendance_percentage_for_percentage/100.
 	config.min_attendance_portion_for_late = config_input.attendance_percentage_for_late/100.    
 	config.min_attendance_portion_for_buildswap = config_input.attendance_percentage_for_buildswap/100.
 	config.min_attendance_percentage_for_average = config_input.attendance_percentage_for_average
+	config.min_attendance_percentage_for_top = config_input.attendance_percentage_for_top
 
 	config.portion_of_top_for_consistent = config_input.percentage_of_top_for_consistent/100.
 	config.portion_of_top_for_total = config_input.percentage_of_top_for_total/100.
 	config.portion_of_topDamage_for_total = config_input.percentage_of_topDamage_for_total/100.	
+	config.portion_of_top_for_average = config_input.percentage_of_top_for_average/100.	
 	config.portion_of_top_for_percentage = config_input.percentage_of_top_for_percentage/100.
 	config.portion_of_top_for_late = config_input.percentage_of_top_for_late/100.    
 	config.portion_of_top_for_buildswap = config_input.percentage_of_top_for_buildswap/100.
@@ -578,14 +582,20 @@ def get_top_players(players, config, stat, total_or_consistent_or_average):
 	elif total_or_consistent_or_average == StatType.CONSISTENT:
 		percentage = float(config.portion_of_top_for_consistent)
 		sorted_index = sort_players_by_consistency(players, stat)
-	elif total_or_consistent_or_average == StatType.AVERAGE:
-		percentage = 0.
+	elif total_or_consistent_or_average == StatType.AVERAGE and stat != 'dmg':
+		percentage = float(config.portion_of_top_for_average)
+		sorted_index = sort_players_by_average(players, stat)        
+	elif total_or_consistent_or_average == StatType.AVERAGE and stat == 'dmg':
+		percentage = float(config.portion_of_topDamage_for_total)
 		sorted_index = sort_players_by_average(players, stat)        
 	else:
 		print("ERROR: Called get_top_players for stats that are not total or consistent")
 		return        
 		
-	top_value = players[sorted_index[0][0]].total_stats[stat] # using total value for both top consistent and top total 
+	if config.player_sorting_stat_type == 'average':
+		top_value = players[sorted_index[0][0]].average_stats[stat]
+	else:
+		top_value = players[sorted_index[0][0]].total_stats[stat]	
 	top_players = list()
 
 	i = 0
@@ -597,10 +607,14 @@ def get_top_players(players, config, stat, total_or_consistent_or_average):
 			break
 		last_value = new_value
 
+		if config.player_sorting_stat_type == 'average':
+			stat_value = players[sorted_index[i][0]].average_stats[stat]
+		else:
+			stat_value = players[sorted_index[i][0]].total_stats[stat]
 		# if stat isn't distance or dmg taken, total value must be at least percentage % of top value
-		if stat == "dist" or stat == "dmg_taken" or players[sorted_index[i][0]].total_stats[stat] >= top_value*percentage:
-			if total_or_consistent_or_average != StatType.AVERAGE or (players[sorted_index[i][0]].attendance_percentage > config.min_attendance_percentage_for_average):
-				top_players.append(sorted_index[i][0])
+		attendance_percentage = players[sorted_index[i][0]].attendance_percentage
+		if (stat_value >= top_value*percentage and attendance_percentage > config.min_attendance_percentage_for_top) or (stat in ["dist", "dmg_taken"] and attendance_percentage > config.min_attendance_percentage_for_average):
+			top_players.append(sorted_index[i][0])
 
 		i += 1
 
@@ -1396,6 +1410,21 @@ def get_and_write_sorted_total(players, config, total_fight_duration, stat, outp
 	write_sorted_total(players, top_total_players, config, total_fight_duration, stat, output_file)
 	return top_total_players
 
+# Get and write the top x people who achieved top total stat.
+# Input:
+# players = list of Players
+# config = the configuration being used to determine topx consistent players
+# total_fight_duration = the total duration of all fights
+# stat = which stat are we considering
+# output_file = where to write to
+# Output:
+# list of top total player indices
+def get_and_write_sorted_total_by_average(players, config, total_fight_duration, stat, output_file):
+	# get players that get an award and their professions
+	top_total_players = get_top_players(players, config, stat, StatType.AVERAGE)
+	write_sorted_total(players, top_total_players, config, total_fight_duration, stat, output_file)
+	return top_total_players
+
 
 
 # Write the top x people who achieved top total stat.
@@ -1439,20 +1468,25 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 		else:
 			per_sec_name = stat[:1].upper() + "PS"
 			print_string += f" !Squad {per_sec_name}| !Group {per_sec_name}| !Self {per_sec_name}|"
-	if stat == 'dmg':
+	elif stat == 'dmg':
 		print_string += " !FightTime DPS| !CombatTime DPS|  !Damage/Enemy|   !Wt. DPS/Enemy|"
-	if stat == 'heal':
+	elif stat == 'heal':
 		print_string += " !Squad HPS| !Group HPS| !Self HPS|"
-	if stat == 'rips' or stat == 'rips-In':
+	elif stat == 'rips' or stat == 'rips-In':
 		print_string += " !FightTime SPS| !CombatTime SPS|"
-	if stat == 'cleanses' or stat == 'cleanses-In':
+	elif stat == 'cleanses' or stat == 'cleanses-In':
 		print_string += " !FightTime CPS| !CombatTime CPS|"
-	if stat == 'barrier':
+	elif stat == 'barrier':
 		print_string += " !Squad BPS| !Group BPS| !Self BPS|"
-	if stat == 'downs':
+	elif stat == 'downs':
 		print_string += " !FightTime Downs/Min| !CombatTime Downs/Min|"
-	if stat == 'kills':
+	elif stat == 'kills':
 		print_string += " !FightTime Kills/Min| !CombatTime Kills/Min|"
+	else:
+		if stat in ['Pdmg', 'Cdmg', 'dmg_taken', 'barrierDamage', 'cleansesIn', 'ripsIn']:
+			print_string += " !Per sec avg|"
+		else:
+			print_string += " !Per min avg|"
 	print_string += "h"
 	myprint(output_file, print_string)    
 
@@ -1545,6 +1579,10 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Self, 4))+' Self Generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'</span>|'
 		else:
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
+			if stat in ['Pdmg', 'Cdmg', 'dmg_taken', 'barrierDamage', 'cleansesIn', 'ripsIn', 'deaths']:
+				print_string += " "+"{:.2f}".format(round(player.average_stats[stat], 2))+"|"
+			else:
+				print_string += " "+"{:.2f}".format(round(player.average_stats[stat] * 60.0, 2))+"|"
 		myprint(output_file, print_string)
 		last_val = player.total_stats[stat]
 	myprint(output_file, "\n")
