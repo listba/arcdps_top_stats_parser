@@ -31,7 +31,7 @@ num_players_listed = {'dmg': 100, 'Pdmg': 50, 'Cdmg': 50, 'iol': 50,'rips': 50, 
 num_players_considered_top_percentage = 5
 
 # For the initial sorting of tables: 'total' or 'average'
-player_sorting_stat_type = 'average'
+player_sorting_stat_type = 'total'
 
 # For what portion of all fights does a player need to be there to be considered for "consistency percentage" awards?
 attendance_percentage_for_percentage = 50
