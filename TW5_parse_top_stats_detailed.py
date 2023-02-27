@@ -851,6 +851,12 @@ if __name__ == '__main__':
 	
 	myprint(output, '\n---\n')
 
+	dps_sorted_stacking_uptime_Table = []
+	for uptime_prof_name in stacking_uptime_Table:
+		dps_sorted_stacking_uptime_Table.append([uptime_prof_name, DPSStats[uptime_prof_name]['Damage_Total'] / DPSStats[uptime_prof_name]['duration']])
+	dps_sorted_stacking_uptime_Table = sorted(dps_sorted_stacking_uptime_Table, key=lambda x: x[1], reverse=True)
+	dps_sorted_stacking_uptime_Table = list(map(lambda x: x[0], dps_sorted_stacking_uptime_Table))
+
 	# Might
 	myprint(output, '<$reveal type="match" state="$:/state/curDamageWithBuffs" text="might">\n')
 	myprint(output, '\n---\n')
@@ -865,7 +871,7 @@ if __name__ == '__main__':
 	output_header += '|h'
 	myprint(output, output_header)
 	
-	for uptime_prof_name in stacking_uptime_Table:
+	for uptime_prof_name in dps_sorted_stacking_uptime_Table:
 		name = stacking_uptime_Table[uptime_prof_name]['name']
 		prof = stacking_uptime_Table[uptime_prof_name]['profession']
 		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_might'] / 1000
@@ -876,7 +882,7 @@ if __name__ == '__main__':
 			continue
 
 		total_damage = DPSStats[uptime_prof_name]["Damage_Total"] or 1
-		playerDPS = total_damage/uptime_Table['{{'+prof+'}} '+name]['duration']
+		playerDPS = total_damage/DPSStats[uptime_prof_name]['duration']
 
 		damage_with_avg_might = sum(stack_num * damage_with_might[stack_num] for stack_num in range(1, 26)) / total_damage
 		damage_with_might_uptime = 1.0 - (damage_with_might[0] / total_damage)
@@ -940,7 +946,7 @@ if __name__ == '__main__':
 	output_header += '|h'
 	myprint(output, output_header)
 	
-	for uptime_prof_name in stacking_uptime_Table:
+	for uptime_prof_name in dps_sorted_stacking_uptime_Table:
 		name = stacking_uptime_Table[uptime_prof_name]['name']
 		prof = stacking_uptime_Table[uptime_prof_name]['profession']
 		uptime_table_prof_name = "{{"+prof+"}} "+name
@@ -952,7 +958,7 @@ if __name__ == '__main__':
 			continue
 
 		total_damage = DPSStats[uptime_prof_name]["Damage_Total"] or 1
-		playerDPS = total_damage/uptime_fight_time
+		playerDPS = total_damage/DPSStats[uptime_prof_name]['duration']
 		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(round(playerDPS))+'| '+my_value(round(fight_time))+'|'
 
 		for damage_buff in other_buffs_with_damage:
