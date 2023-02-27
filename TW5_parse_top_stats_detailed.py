@@ -1338,7 +1338,7 @@ if __name__ == '__main__':
 	
 	output_string = '|!Name | !Class |'
 
-	for i in range(1, 21):
+	for i in list(range(1, 6)) + list(range(10, 21, 5)):
 		output_string += " !"+str(i)+"s |"
 		
 	output_string += "h"
@@ -1349,11 +1349,11 @@ if __name__ == '__main__':
 		prof = DPSStats[DPSStats_prof_name]['profession']
 		fightTime = DPSStats[DPSStats_prof_name]['duration']
 
-		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 500 or fightTime * 10 < max_fightTime:
+		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 250 or (fightTime * 100) / max_fightTime < config.min_attendance_percentage_for_top:
 			continue
 
 		output_string = '|'+name+' |'+' {{'+prof+'}} | '
-		for i in range(1, 21):
+		for i in list(range(1, 6)) + list(range(10, 21, 5)):
 			output_string += ' '+my_value(round(DPSStats[DPSStats_prof_name]['Burst_Damage'][i] / i))+'|'
 				
 		myprint(output, output_string)
@@ -1369,7 +1369,7 @@ if __name__ == '__main__':
 	
 	output_string = '|!Name | !Class |'
 
-	for i in range(1, 21):
+	for i in list(range(1, 6)) + list(range(10, 21, 5)):
 		output_string += " !"+str(i)+"s |"
 		
 	output_string += "h"
@@ -1380,11 +1380,11 @@ if __name__ == '__main__':
 		prof = DPSStats[DPSStats_prof_name]['profession']
 		fightTime = DPSStats[DPSStats_prof_name]['duration']
 
-		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 500 or fightTime * 10 < max_fightTime:
+		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 250 or (fightTime * 100) / max_fightTime < config.min_attendance_percentage_for_top:
 			continue
 
 		output_string = '|'+name+' |'+' {{'+prof+'}} | '
-		for i in range(1, 21):
+		for i in list(range(1, 6)) + list(range(10, 21, 5)):
 			output_string += ' '+my_value(DPSStats[DPSStats_prof_name]['Burst_Damage'][i])+'|'
 				
 		myprint(output, output_string)
@@ -1403,7 +1403,7 @@ if __name__ == '__main__':
 	
 	output_string = '|!Name | !Class |'
 
-	for i in range(1, 21):
+	for i in list(range(1, 6)) + list(range(10, 21, 5)):
 		output_string += " !"+str(i)+"s |"
 		
 	output_string += "h"
@@ -1414,11 +1414,11 @@ if __name__ == '__main__':
 		prof = DPSStats[DPSStats_prof_name]['profession']
 		fightTime = DPSStats[DPSStats_prof_name]['duration']
 
-		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 500 or fightTime * 10 < max_fightTime:
+		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 250 or (fightTime * 100) / max_fightTime < config.min_attendance_percentage_for_top:
 			continue
 
 		output_string = '|'+name+' |'+' {{'+prof+'}} | '
-		for i in range(1, 21):
+		for i in list(range(1, 6)) + list(range(10, 21, 5)):
 			output_string += ' '+my_value(round(DPSStats[DPSStats_prof_name]['Ch5Ca_Burst_Damage'][i] / i))+'|'
 				
 		myprint(output, output_string)
@@ -1434,7 +1434,7 @@ if __name__ == '__main__':
 	
 	output_string = '|!Name | !Class |'
 
-	for i in range(1, 21):
+	for i in list(range(1, 6)) + list(range(10, 21, 5)):
 		output_string += " !"+str(i)+"s |"
 		
 	output_string += "h"
@@ -1445,11 +1445,11 @@ if __name__ == '__main__':
 		prof = DPSStats[DPSStats_prof_name]['profession']
 		fightTime = DPSStats[DPSStats_prof_name]['duration']
 
-		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 500 or fightTime * 10 < max_fightTime:
+		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 250 or (fightTime * 100) / max_fightTime < config.min_attendance_percentage_for_top:
 			continue
 
 		output_string = '|'+name+' |'+' {{'+prof+'}} | '
-		for i in range(1, 21):
+		for i in list(range(1, 6)) + list(range(10, 21, 5)):
 			output_string += ' '+my_value(DPSStats[DPSStats_prof_name]['Ch5Ca_Burst_Damage'][i])+'|'
 				
 		myprint(output, output_string)
