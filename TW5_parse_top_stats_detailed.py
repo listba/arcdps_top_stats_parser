@@ -1274,10 +1274,6 @@ if __name__ == '__main__':
 	myprint(output, '!!! Damage done `t` seconds before an enemy goes down \n')
 	myprint(output, '!!! `Carrior Damage` [`CaDPS`] \n')
 	myprint(output, '!!! Damage done to down enemies that die \n')
-	myprint(output, '!!! `Coordination Damage` [`CDPS`] \n')
-	myprint(output, '!!! Damage weighted by squad coordination \n')
-	myprint(output, '!!! `Combat Time Damage` [`CtDPS`] \n')
-	myprint(output, '!!! Damage done while in combat. If this is substantially higher than DPS, you are probably dying early in fights \n')
 	myprint(output, '\n---\n')
 
 	myprint(output, '|table-caption-top|k')
@@ -1285,27 +1281,23 @@ if __name__ == '__main__':
 	myprint(output, '|thead-dark table-hover sortable|k')
 	output_header =  '|!Name | !Class'
 	output_header += ' | ! <span data-tooltip="Number of seconds player was in squad logs">Seconds</span>'
-	output_header += '| !DPS| !Ch2DPS| !Ch5DPS| !CaDPS| !CDPS| !CtDPS| !Downs/min| !Kills/min'
+	output_header += '| !DPS| !Ch2DPS| !Ch4DPS| !Ch8DPS| !CaDPS'
 	output_header += '|h'
 	myprint(output, output_header)
 	for DPSStats_prof_name in DPSStats:
 		name = DPSStats[DPSStats_prof_name]['name']
 		prof = DPSStats[DPSStats_prof_name]['profession']
 		fightTime = DPSStats[DPSStats_prof_name]['duration']
-		combatTime = DPSStats[DPSStats_prof_name]["combatTime"]
 
-		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 500 or fightTime * 10 < max_fightTime:
+		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 250 or (fightTime * 100) / max_fightTime < config.min_attendance_percentage_for_top:
 			continue
 
 		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(fightTime)
 		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Damage_Total'])+' total damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime))+'</span>'
 		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Chunk_Damage'][2])+' chunk(2) damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Chunk_Damage'][2] / fightTime))+'</span>'
-		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Chunk_Damage'][5])+' chunk (5) damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Chunk_Damage'][5] / fightTime))+'</span>'
+		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Chunk_Damage'][4])+' chunk (4) damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Chunk_Damage'][4] / fightTime))+'</span>'
+		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Chunk_Damage'][8])+' chunk (8) damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Chunk_Damage'][8] / fightTime))+'</span>'
 		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Carrion_Damage'])+' carrion damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Carrion_Damage'] / fightTime))+'</span>'
-		output_string += '| '+'<span data-tooltip="'+my_value(round(DPSStats[DPSStats_prof_name]['Coordination_Damage']))+' coordination weighted damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Coordination_Damage'] / fightTime))+'</span>'
-		output_string += '| '+'<span data-tooltip="In combat '+'{:.2f}'.format(round(100 * combatTime / fightTime, 2))+'% of fights">'+my_value(round(DPSStats[DPSStats_prof_name]['Damage_Total'] / combatTime))+'</span>'
-		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Downs'])+' total downs">'+'{:.2f}'.format(round(DPSStats[DPSStats_prof_name]['Downs'] / (fightTime / 60), 2))+'</span>'
-		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Kills'])+' total kills">'+'{:.2f}'.format(round(DPSStats[DPSStats_prof_name]['Kills'] / (fightTime / 60), 2))+'</span>'
 		output_string += '|'
 
 		myprint(output, output_string)
