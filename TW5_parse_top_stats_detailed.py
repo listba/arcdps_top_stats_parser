@@ -738,6 +738,10 @@ if __name__ == '__main__':
 	write_buff_uptimes_in_xls(uptime_Table, players, uptime_Order, args.xls_output_filename)
 	myprint(output, "</$reveal>\n")
 	#end Buff Uptime Table insert
+
+	max_fightTime = 0
+	for squadDps_prof_name in DPSStats:
+		max_fightTime = max(DPSStats[squadDps_prof_name]['duration'], max_fightTime)
 	
 	#start Stacking Buff Uptime Table insert
 	stacking_buff_Order = ['might', 'stability']
@@ -763,14 +767,24 @@ if __name__ == '__main__':
 	output_header += '|h'
 	myprint(output, output_header)
 	
+	might_sorted_stacking_uptime_Table = []
 	for uptime_prof_name in stacking_uptime_Table:
+		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_might'] / 1000
+		might_stacks = stacking_uptime_Table[uptime_prof_name]['might']
+
+		if (DPSStats[uptime_prof_name]['duration'] * 100) / max_fightTime < config.min_attendance_percentage_for_top:
+			continue
+
+		avg_might = sum(stack_num * might_stacks[stack_num] for stack_num in range(1, 26)) / (fight_time * 1000)
+		might_sorted_stacking_uptime_Table.append([uptime_prof_name, avg_might])
+	might_sorted_stacking_uptime_Table = sorted(might_sorted_stacking_uptime_Table, key=lambda x: x[1], reverse=True)
+	might_sorted_stacking_uptime_Table = list(map(lambda x: x[0], might_sorted_stacking_uptime_Table))
+	
+	for uptime_prof_name in might_sorted_stacking_uptime_Table:
 		name = stacking_uptime_Table[uptime_prof_name]['name']
 		prof = stacking_uptime_Table[uptime_prof_name]['profession']
 		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_might'] / 1000
 		might_stacks = stacking_uptime_Table[uptime_prof_name]['might']
-
-		if stacking_uptime_Table[uptime_prof_name]['duration_might'] * 10 < max_stacking_buff_fight_time:
-			continue
 
 		avg_might = sum(stack_num * might_stacks[stack_num] for stack_num in range(1, 26)) / (fight_time * 1000)
 		might_uptime = 1.0 - (might_stacks[0] / (fight_time * 1000))
@@ -806,15 +820,24 @@ if __name__ == '__main__':
 	output_header += '|h'
 	myprint(output, output_header)
 	
+	stability_sorted_stacking_uptime_Table = []
 	for uptime_prof_name in stacking_uptime_Table:
+		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_stability'] / 1000
+		stability_stacks = stacking_uptime_Table[uptime_prof_name]['stability']
+
+		if (DPSStats[uptime_prof_name]['duration'] * 100) / max_fightTime < config.min_attendance_percentage_for_top:
+			continue
+
+		avg_stab = sum(stack_num * stability_stacks[stack_num] for stack_num in range(1, 26)) / (fight_time * 1000)
+		stability_sorted_stacking_uptime_Table.append([uptime_prof_name, avg_stab])
+	stability_sorted_stacking_uptime_Table = sorted(stability_sorted_stacking_uptime_Table, key=lambda x: x[1], reverse=True)
+	stability_sorted_stacking_uptime_Table = list(map(lambda x: x[0], stability_sorted_stacking_uptime_Table))
+	
+	for uptime_prof_name in stability_sorted_stacking_uptime_Table:
 		name = stacking_uptime_Table[uptime_prof_name]['name']
 		prof = stacking_uptime_Table[uptime_prof_name]['profession']
 		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_stability'] / 1000
 		stability_stacks = stacking_uptime_Table[uptime_prof_name]['stability']
-
-		# todo use stab
-		if stacking_uptime_Table[uptime_prof_name]['duration_stability'] * 10 < max_stacking_buff_fight_time:
-			continue
 
 		avg_stab = sum(stack_num * stability_stacks[stack_num] for stack_num in range(1, 26)) / (fight_time * 1000)
 		stab_uptime = 1.0 - (stability_stacks[0] / (fight_time * 1000))
@@ -1267,11 +1290,7 @@ if __name__ == '__main__':
 	myprint(output, "</$reveal>\n")
 	#end Dashboard insert
 
-	#start DPS Stats insert
-	max_fightTime = 0
-	for squadDps_prof_name in DPSStats:
-		max_fightTime = max(DPSStats[squadDps_prof_name]['duration'], max_fightTime)
-		
+	#start DPS Stats insert		
 	sorted_DPSStats = []
 	for DPSStats_prof_name in DPSStats:
 		name = DPSStats[DPSStats_prof_name]['name']
