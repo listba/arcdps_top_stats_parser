@@ -286,7 +286,8 @@ Heal_Utility = {
     21827: "Toxic Maintenance Oil", 
     34187: "Peppermint Oil", 
     38605: "Magnanimous Maintenance Oil",
-    25879: "Bountiful Maintenance Oil"
+    25879: "Bountiful Maintenance Oil",
+    9968: "Master Maintenance Oil"
     }
 Heal_Food = {
     57276: "Bowl of Spiced Fruit Salad",
@@ -300,48 +301,63 @@ Cele_Food = {
     57201: "Spherified Oyster Soup with Mint Garnish",
     19451: "Dragon's Revelry Starcake"
     }
+DPS_Food= {
+	57051: "Peppercorn-Crusted Sous-Vide Steak",
+	57244: "Cilantro Lime Sous-Vide Steak",
+	57260: "Plate of Peppercorn-Spiced Coq Au Vin"
+	}
+DPS_Utility = {
+	9963: "Superior Sharpening Stone",
+	34657: "Compact Hardened Sharpening Stone",
+	25882: "Furious Sharpening Stone",
+	33297: "Writ of Masterful Strength"
+	}
 
 def find_sub_type(player, fightTime):
-	cons_0 = ""
-	cons_1 = ""
-	if 'consumables' in player:
-		try: cons_0 = player['consumables'][0]['id']
-		except: cons_0 = ""
-		try: cons_1 = player['consumables'][1]['id']
-		except: cons_1 = ""
-		
-	# If the player has on Cele food, they are always cele, since we wont have enough other
-	# information to determine between the sub types
-	if cons_0 in Cele_Food:
-		return "Cele"
-		
-	playerDamage = 0
-	playerPowerDamage = 0
-	playerCondiDamage = 0
-	for target in player['dpsTargets']:
-		playerDamage += target[0]['damage']
-		playerPowerDamage += target[0]['powerDamage']
-		playerCondiDamage += target[0]['condiDamage']
+	supportProf = ["Tempest", "Scrapper", "Druid", "Chronomancer", "Vindicator", "Firebrand", "Spectre", "Spellbreaker", "Willbender", "Guardian"]
+	if player['profession'] not in supportProf:
 
-	# If a player is predominantly condi damage and more than 500 DPS
-	if playerCondiDamage > playerPowerDamage and playerDamage / fightTime > 500:
-		return "Condi"
+		playerDamage = 0
+		playerPowerDamage = 0
+		playerCondiDamage = 0
+		for target in player['dpsTargets']:
+			playerDamage += target[0]['damage']
+			playerPowerDamage += target[0]['powerDamage']
+			playerCondiDamage += target[0]['condiDamage']
 
-	# If the player has over 750 DPS for the fight, assume DPS regardless of food / crit
-	if playerDamage / fightTime > 750:
-		return "Dps"
+		if 'consumables' in player:
+			for item in player['consumables']:
+				if item['id'] in Cele_Food:
+					return "Cele"
+				
+		# If a player is predominantly condi damage
+		if playerCondiDamage > playerPowerDamage:
+			return "Condi"
 		
-	if cons_0 in Heal_Food or cons_1 in Heal_Utility:
-		return "Heal"
-
+		# assume DPS on a nonSupport profession
+		else:
+			return "Dps"
+		
 	criticalCount = sum([stats[0]['criticalRate'] for stats in player['statsTargets']])
 	critableCount = sum([stats[0]['critableDirectDamageCount'] for stats in player['statsTargets']])
 	critPercent = criticalCount / critableCount if critableCount else 0
 
 	# Only healers should have a crit % lower than 40%
 	if critPercent <= 0.4:
-		return "Heal"
- 
+		return "Support"
+
+	#adjusted consumable search since food and utility can reside in any consumable slot
+	if 'consumables' in player:
+		for item in player['consumables']:
+			if item['id'] in Cele_Food:
+				return "Cele"
+		for item in player['consumables']:			
+			if item['id'] in Heal_Food or item['id'] in Heal_Utility:
+				return "Support" 
+		for item in player['consumables']:			
+			if item['id'] in DPS_Food or item['id'] in DPS_Utility:
+				return "Dps"
+
 	# If all other detection fails, fallback to assuming DPS like before
 	return "Dps"
 #end define subtype based on consumables
@@ -818,13 +834,15 @@ def write_support_players(players, top_players, stat, output_file):
 		if stat == 'rips' and (player.profession == 'Chronomancer' or player.profession == 'Spellbreaker'):
 			print_string = "|"+player.account+" |"+player.name+" |"+player.profession+" | "+str(player.num_fights_present)+"| "+str(player.duration_fights_present)+"| "+stat+" |"+guildStatus+" |"
 			myprint(output_file, print_string)
-		if stat == 'cleanses' and (player.profession == 'Scrapper' or player.profession == 'Tempest' or player.profession == 'Druid' or player.profession == 'Vindicator'):
+		if stat == 'cleanses' and (player.profession == 'Scrapper' or player.profession == 'Tempest' or player.profession == 'Druid'):
 			print_string = "|"+player.account+" |"+player.name+" |"+player.profession+" | "+str(player.num_fights_present)+"| "+str(player.duration_fights_present)+"| "+stat+" |"+guildStatus+" |"
 			myprint(output_file, print_string)
 		if stat == 'stability' and (player.profession == 'Firebrand'):
 			print_string = "|"+player.account+" |"+player.name+" |"+player.profession+" | "+str(player.num_fights_present)+"| "+str(player.duration_fights_present)+"| "+stat+" |"+guildStatus+" |"
 			myprint(output_file, print_string)
-
+		if stat == 'heal' and (player.profession == 'Vindicator'):
+			print_string = "|"+player.account+" |"+player.name+" |"+player.profession+" | "+str(player.num_fights_present)+"| "+str(player.duration_fights_present)+"| "+stat+" |"+guildStatus+" |"
+			myprint(output_file, print_string)
 # Write the top x people who achieved top total stat.
 # Input:
 # players = list of Players
@@ -1391,7 +1409,17 @@ def write_support_xls(players, top_players, stat, xls_output_filename, supportCo
 			sheet2.write(supportCount+1, 5, player.duration_fights_present)
 			sheet2.write(supportCount+1, 6, stat)
 			supportCount +=1
-			
+
+		if stat == 'heal' and (player.profession == 'Vindicator'):
+			sheet2.write(supportCount+1, 0, fileDate.strftime("%Y-%m-%d"))
+			sheet2.write(supportCount+1, 1, player.account)
+			sheet2.write(supportCount+1, 2, player.name)
+			sheet2.write(supportCount+1, 3, player.profession)
+			sheet2.write(supportCount+1, 4, player.num_fights_present)
+			sheet2.write(supportCount+1, 5, player.duration_fights_present)
+			sheet2.write(supportCount+1, 6, stat)
+			supportCount +=1
+
 	wb.save(xls_output_filename)
 	return supportCount
 

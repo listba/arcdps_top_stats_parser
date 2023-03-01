@@ -69,7 +69,7 @@ min_enemy_players = 5
 # Produce Charts for stats_to_compute
 charts = True
 # Include the Squad Comp and Fight Review tabs
-include_comp_and_review = True
+include_comp_and_review = False
 
 # names as which each specialization will show up in the stats
 profession_abbreviations = {}
