@@ -543,7 +543,7 @@ if __name__ == '__main__':
 	myprint(output, print_string)    
 
 	for stat in config.stats_to_compute:
-		if (stat == 'rips' or stat == 'cleanses' or stat == 'stability'):
+		if (stat == 'rips' or stat == 'cleanses' or stat == 'stability' or stat == 'heal'):
 			write_support_players(players, top_total_stat_players[stat], stat, output)
 
 	myprint(output, '\n\n</div>\n\n')
@@ -1551,7 +1551,7 @@ if __name__ == '__main__':
 			if config.charts:
 				write_stats_chart(players, top_players_by_stat[stat], stat, myDate, args.input_directory, config)
 				#write_stats_box_plots(players, top_players_by_stat[stat], stat, ProfessionColor, myDate, args.input_directory, config)
-		if stat == 'rips' or stat == 'cleanses' or stat == 'stability':
+		if stat == 'rips' or stat == 'cleanses' or stat == 'stability' or stat == 'heal':
 			supportCount = write_support_xls(players, top_players_by_stat[stat], stat, args.xls_output_filename, supportCount)
 
 	#write out Bubble Charts and Box_Plots
