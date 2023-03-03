@@ -66,7 +66,7 @@ if __name__ == '__main__':
 	print_string = "Considering fights with at least "+str(config.min_allied_players)+" allied players and at least "+str(config.min_enemy_players)+" enemies that took longer than "+str(config.min_fight_duration)+" s."
 	myprint(log, print_string)
 
-	players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats = collect_stat_data(args, config, log, args.anonymize)    
+	players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats = collect_stat_data(args, config, log, args.anonymize)    
 
 	# create xls file if it doesn't exist
 	book = xlwt.Workbook(encoding="utf-8")
@@ -141,8 +141,7 @@ if __name__ == '__main__':
 					'<$button setTitle="$:/state/curTab" setTo="Buff Uptime" selectedClass="" class="btn btn-sm btn-dark" style=""> Buff Uptime </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Stacking Buffs" selectedClass="" class="btn btn-sm btn-dark" style=""> Stacking Buffs </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Damage with Buffs" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage with Buffs </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Auras - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - In </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras - Out </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> Death OnTag </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Downed_Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Downed Healing </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Offensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Offensive Stats </$button>',
@@ -453,7 +452,6 @@ if __name__ == '__main__':
 				#myprint(output, '</div>')
 			#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
 			myprint(output, "</$reveal>\n")
-			#write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, args.json_output_filename)
 
 	#print Auras-Out details
 	myprint(output,'<$reveal type="match" state="$:/state/curTab" text="Auras - Out">')
@@ -483,7 +481,6 @@ if __name__ == '__main__':
 		top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
 		myprint(output, "</$reveal>\n")
 	myprint(output, "</$reveal>\n")	
-	#write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, args.json_output_filename)
 
 	#print Defense details
 	myprint(output,'<$reveal type="match" state="$:/state/curTab" text="Defensive Stats">')
@@ -530,7 +527,7 @@ if __name__ == '__main__':
 		top_percentage_stat_players[stat],comparison_val = get_top_percentage_players(players, config, stat, StatType.PERCENTAGE, num_used_fights, top_consistent_stat_players[stat], top_total_stat_players[stat], list(), list())
 		myprint(output, "</$reveal>\n")
 	myprint(output, "</$reveal>\n")	
-	write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, args.json_output_filename)
+	write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, args.json_output_filename)
 
 	#print table of accounts that fielded support characters
 	myprint(output,'<$reveal type="match" state="$:/state/curTab" text="Support">')
@@ -708,49 +705,6 @@ if __name__ == '__main__':
 
 	myprint(output, "</$reveal>\n")
 	#end Control Effects Incoming insert
-
-	#start Aura Effects Incoming insert
-	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Auras - In">')    
-	myprint(output, '\n<<alert-leftbar danger "Auras by receiving Player" width:60%, class:"font-weight-bold">>\n\n')
-	Auras_Order = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic', 25518: 'Light', 39978: 'Dark', 10332: 'Chaos'}
-	for Aura in Auras_Order:
-		myprint(output, '<$button setTitle="$:/state/curAuras-In" setTo="'+Auras_Order[Aura]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Auras_Order[Aura]+' Aura </$button>')
-	
-	myprint(output, '\n---\n')
-	
-
-	for Aura in Auras_Order:
-		key = Auras_Order[Aura]
-		if key in auras_TableIn:
-			sorted_auras_TableIn = dict(sorted(auras_TableIn[key].items(), key=lambda x: x[1], reverse=True))
-
-			i=1
-		
-			myprint(output, '<$reveal type="match" state="$:/state/curAuras-In" text="'+key+'">\n')
-			myprint(output, '\n---\n')
-			myprint(output, "|table-caption-top|k")
-			myprint(output, "|{{"+key+"}} "+key+" Aura received by Squad Player Descending [TOP 25 Max]|c")
-			myprint(output, "|thead-dark table-hover sortable|k")
-			myprint(output, "|!Place |!Name | !Profession | !Total| !Average|h")
-			
-			for name in sorted_auras_TableIn:
-				prof = "Not Found"
-				fightTime = 99999
-				counter = 0
-				for nameIndex in players:
-					if nameIndex.name == name:
-						prof = nameIndex.profession
-						fightTime = nameIndex.duration_fights_present
-
-				if i <=25:
-					myprint(output, "| "+str(i)+" |"+name+" | {{"+prof+"}} | "+str(round(sorted_auras_TableIn[name], 4))+"| "+"{:.4f}".format(round(sorted_auras_TableIn[name]/fightTime, 4))+"|")
-					i=i+1
-
-			myprint(output, "</$reveal>\n")
-
-			write_auras_in_xls(sorted_auras_TableIn, key, players, args.xls_output_filename)
-	myprint(output, "</$reveal>\n")
-	#end Auras Incoming insert
 
 	#start Buff Uptime Table insert
 	uptime_Order = ['stability',  'protection',  'aegis',  'might',  'fury',  'resistance',  'resolution',  'quickness',  'swiftness',  'alacrity',  'vigor',  'regeneration']
