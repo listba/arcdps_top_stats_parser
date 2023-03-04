@@ -3504,16 +3504,18 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 			print_string += " {{"+config.stat_names[stat]+"}} |"
 	print_string += "h"
 	myprint(output, print_string)
-	for i in range(len(fights)):
-		fight = fights[i]
-		skipped_str = "yes" if fight.skipped else "no"
-		date = fight.start_time.split()[0]
-		end_time = fight.end_time.split()[1]        
-		print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
-		for stat in overall_squad_stats:
-			if stat not in exclude_Stat:
-				print_string += " "+my_value(round(fight.total_stats[stat]))+"|"
-		myprint(output, print_string)
+	#Only write overall raid stats summary for monthly output
+	if config.include_comp_and_review:
+		for i in range(len(fights)):
+			fight = fights[i]
+			skipped_str = "yes" if fight.skipped else "no"
+			date = fight.start_time.split()[0]
+			end_time = fight.end_time.split()[1]        
+			print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
+			for stat in overall_squad_stats:
+				if stat not in exclude_Stat:
+					print_string += " "+my_value(round(fight.total_stats[stat]))+"|"
+			myprint(output, print_string)
 
 	#print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['start_time']:>10}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
 	print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
