@@ -142,7 +142,7 @@ if __name__ == '__main__':
 					'<$button setTitle="$:/state/curTab" setTo="Stacking Buffs" selectedClass="" class="btn btn-sm btn-dark" style=""> Stacking Buffs </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Damage with Buffs" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage with Buffs </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> Death OnTag </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> On Tag Review </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Downed_Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Downed Healing </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Offensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Offensive Stats </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Defensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Defensive Stats </$button>',
@@ -977,7 +977,7 @@ if __name__ == '__main__':
 
 	#start On Tag Death insert
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Death_OnTag">')    
-	myprint(output, '\n<<alert-leftbar light "On Tag Death Review \n Current Formula: (On Tag <= 600 Range, Off Tag >600 and <=5000, Run Back Death > 5000)" width:60%, class:"font-weight-bold">>\n\n')
+	myprint(output, '\n<<alert-leftbar light "Avg Dist calculation stops on initial death avoiding respawn range<br>On Tag Death Review Current Formula: (On Tag <= 600 Range, Off Tag >600 and <=5000, Run Back Death > 5000)" width:60%, class:"font-weight-bold">>\n\n')
 	
 	myprint(output, '\n---\n')
 	myprint(output, '\n---\n')
@@ -985,11 +985,12 @@ if __name__ == '__main__':
 	myprint(output, "|table-caption-top|k")
 	myprint(output, "|Sortable table - Click header item to sort table |c")
 	myprint(output, "|thead-dark table-hover sortable|k")
-	myprint(output, "|!Name | !Profession | !Attendance | !On_Tag |  !Off_Tag | !After_Tag_Death |  !Run_Back |  !Total | Off Tag Ranges |h")
+	myprint(output, "|!Name | !Profession | !Attendance | !Avg Dist| !On-Tag<br>{{Deaths}} |  !Off-Tag<br>{{Deaths}} | !After-Tag<br>{{Deaths}} |  !Run-Back<br>{{Deaths}} |  !Total<br>{{Deaths}} | Off-Tag Deaths Ranges |h")
 	for deathOnTag_prof_name in Death_OnTag:
 		name = Death_OnTag[deathOnTag_prof_name]['name']
 		prof = Death_OnTag[deathOnTag_prof_name]['profession']
 		fightTime = uptime_Table[deathOnTag_prof_name]['duration']
+		Avg_Dist = round(sum(Death_OnTag[deathOnTag_prof_name]["distToTag"])/len(Death_OnTag[deathOnTag_prof_name]["distToTag"]))
 
 		if Death_OnTag[deathOnTag_prof_name]['Off_Tag']:
 			converted_list = [str(round(element)) for element in Death_OnTag[deathOnTag_prof_name]['Ranges']]
@@ -998,7 +999,7 @@ if __name__ == '__main__':
 			Ranges_string = " "
 
 		output_string = "|"+name+" |"
-		output_string += " {{"+prof+"}} | "+my_value(round(fightTime))+" | "+str(Death_OnTag[deathOnTag_prof_name]['On_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Off_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['After_Tag_Death'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Run_Back'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Total'])+" |"+Ranges_string+" |"
+		output_string += " {{"+prof+"}} | "+my_value(round(fightTime))+" | "+str(Avg_Dist)+"| "+str(Death_OnTag[deathOnTag_prof_name]['On_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Off_Tag'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['After_Tag_Death'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Run_Back'])+" | "+str(Death_OnTag[deathOnTag_prof_name]['Total'])+" |"+Ranges_string+" |"
 	
 
 

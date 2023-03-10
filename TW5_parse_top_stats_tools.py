@@ -791,8 +791,6 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 	print_string = "|thead-dark table-hover sortable|k"    
 	myprint(output_file, print_string)
 	print_string = "|!Place |!Name |!Class | !Attendance| !Times Top|"
-	if stat == "dist":
-		print_string += " !Average|"
 	if stat == 'dmg_taken':
 		print_string += " !Total| !Average|"		
 	print_string += "h"
@@ -814,8 +812,6 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 		print_string = "|"+str(place)+". |"+nameWithTooltip+" | {{"+profession_strings[i]+"}} | "+str(player.num_fights_present)+" | "+my_value(round(player.consistency_stats[stat]))+" |"
 		if stat == 'dmg_taken':
 			print_string += " "+my_value(round(player.total_stats[stat],1))+"| "+my_value(round(player.average_stats[stat]))+"|"
-		if stat == 'dist':
-			print_string += " "+my_value(round(player.average_stats[stat]))+"|"			
 
 		myprint(output_file, print_string)
 		last_val = player.consistency_stats[stat]
@@ -1642,7 +1638,7 @@ def write_sorted_top_percentage(players, top_players, comparison_percentage, con
 	if stat != "dist":
 		print_string += " !Total|h"
 	else:
-		print_string += " !Average|h"
+		print_string += "h"
 	myprint(output_file, print_string)    
 
 	# print stats for top players
@@ -1660,9 +1656,6 @@ def write_sorted_top_percentage(players, top_players, comparison_percentage, con
 		print_string = "|"+str(place)+". |"+nameWithTooltip+" | {{"+profession_strings[i]+"}} | "+str(percentage)+"%| "+str(round(player.consistency_stats[stat]))+" | "+ str(player.num_fights_present)+" |"
 		if stat != "dist":
 			print_string += f" {round(player.total_stats[stat]):>7} |"
-		else:
-			print_string += f" {round(player.total_stats[stat]/player.duration_fights_present):>7} |"
-			#print_string += " "+"{:.4f}".format(round(player.total_stats[stat]/player.duration_fights_present, 4))+"|"
 		myprint(output_file, print_string)
 		last_val = player.portion_top_stats[stat]
 	myprint(output_file, "\n")
@@ -3087,10 +3080,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 	for id in fight_json['players']:
 		if id['hasCommanderTag']:
 			commanderFound = True
-			positionId = 0
-			for position in id['combatReplayData']['positions']:
-				tagPositions[positionId] = position
-				positionId = positionId + 1
+			tagPositions = id['combatReplayData']['positions']
 			if id['combatReplayData']['dead']:
 				for death in id['combatReplayData']['dead']:
 					dead_Tag_Mark = death[0]
@@ -3103,25 +3093,28 @@ def get_stats_from_fight_json(fight_json, config, log):
 			commanderMissing = False
 
 	for id in fight_json['players']:
+		playerDistances = []
+		playerDistToTag = id['statsAll'][0]['distToCom']
+		deathOnTag_name = id['name']
+		deathOnTag_profession = id['profession']
+		deathOnTag_prof_name = "{{"+deathOnTag_profession+"}} "+deathOnTag_name
+		if deathOnTag_prof_name not in Death_OnTag:
+			Death_OnTag[deathOnTag_prof_name] = {}
+			Death_OnTag[deathOnTag_prof_name]["name"] = deathOnTag_name
+			Death_OnTag[deathOnTag_prof_name]["profession"] = deathOnTag_profession
+			Death_OnTag[deathOnTag_prof_name]["distToTag"] = []
+			Death_OnTag[deathOnTag_prof_name]["On_Tag"] = 0
+			Death_OnTag[deathOnTag_prof_name]["Off_Tag"] = 0
+			Death_OnTag[deathOnTag_prof_name]["Run_Back"] = 0
+			Death_OnTag[deathOnTag_prof_name]["After_Tag_Death"] = 0
+			Death_OnTag[deathOnTag_prof_name]["Total"] = 0
+			Death_OnTag[deathOnTag_prof_name]["Ranges"] = []
 		if commanderMissing:
 			continue
 		if id['combatReplayData']['dead'] and id['combatReplayData']['down']:
-			deathOnTag_name = id['name']
-			deathOnTag_profession = id['profession']
-			deathOnTag_prof_name = "{{"+deathOnTag_profession+"}} "+deathOnTag_name		
-			
-			if deathOnTag_prof_name not in Death_OnTag:
-				Death_OnTag[deathOnTag_prof_name] = {}
-				Death_OnTag[deathOnTag_prof_name]["name"] = deathOnTag_name
-				Death_OnTag[deathOnTag_prof_name]["profession"] = deathOnTag_profession
-				Death_OnTag[deathOnTag_prof_name]["On_Tag"] = 0
-				Death_OnTag[deathOnTag_prof_name]["Off_Tag"] = 0
-				Death_OnTag[deathOnTag_prof_name]["Run_Back"] = 0
-				Death_OnTag[deathOnTag_prof_name]["After_Tag_Death"] = 0
-				Death_OnTag[deathOnTag_prof_name]["Total"] = 0
-				Death_OnTag[deathOnTag_prof_name]["Ranges"] = []
 			playerDeaths = dict(id['combatReplayData']['dead'])
 			playerDowns = dict(id['combatReplayData']['down'])
+			playerDistToTag = id['statsAll'][0]['distToCom']
 			for deathKey, deathValue in playerDeaths.items():
 				if deathKey < 0: #Handle death on the field before main squad combat log starts
 					Death_OnTag[deathOnTag_prof_name]["Off_Tag"] = Death_OnTag[deathOnTag_prof_name]["Off_Tag"] + 1
@@ -3148,6 +3141,15 @@ def get_stats_from_fight_json(fight_json, config, log):
 						if deathRange > On_Tag and deathRange <= Run_Back:
 							Death_OnTag[deathOnTag_prof_name]["Off_Tag"] = Death_OnTag[deathOnTag_prof_name]["Off_Tag"] + 1
 							Death_OnTag[deathOnTag_prof_name]["Ranges"] += [deathRange]
+				if deathValue:
+					playerDeadPoll = int(deathValue/150)
+					playerPositions = id['combatReplayData']['positions']
+					for position,tagPosition in zip(playerPositions[:playerDeadPoll], tagPositions[:playerDeadPoll]):
+						deltaX = position[0] - tagPosition[0]
+						deltaY = position[1] - tagPosition[1]
+						playerDistances.append(math.sqrt(deltaX * deltaX + deltaY * deltaY))
+					playerDistToTag = (sum(playerDistances) / len(playerDistances))/inchToPixel
+		Death_OnTag[deathOnTag_prof_name]["distToTag"].append(playerDistToTag)
 
 	#Collect Box Plot DPS data by Profession, Prof_Name, Name, Acct
 	durationMS = fight_json['durationMS']
