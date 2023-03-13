@@ -769,7 +769,7 @@ if __name__ == '__main__':
 	
 	might_sorted_stacking_uptime_Table = []
 	for uptime_prof_name in stacking_uptime_Table:
-		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_might'] / 1000
+		fight_time = (stacking_uptime_Table[uptime_prof_name]['duration_might'] / 1000) or 1
 		might_stacks = stacking_uptime_Table[uptime_prof_name]['might']
 
 		if (DPSStats[uptime_prof_name]['duration'] * 100) / max_fightTime < config.min_attendance_percentage_for_top:
@@ -783,7 +783,7 @@ if __name__ == '__main__':
 	for uptime_prof_name in might_sorted_stacking_uptime_Table:
 		name = stacking_uptime_Table[uptime_prof_name]['name']
 		prof = stacking_uptime_Table[uptime_prof_name]['profession']
-		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_might'] / 1000
+		fight_time = (stacking_uptime_Table[uptime_prof_name]['duration_might'] / 1000) or 1
 		might_stacks = stacking_uptime_Table[uptime_prof_name]['might']
 
 		avg_might = sum(stack_num * might_stacks[stack_num] for stack_num in range(1, 26)) / (fight_time * 1000)
@@ -822,7 +822,7 @@ if __name__ == '__main__':
 	
 	stability_sorted_stacking_uptime_Table = []
 	for uptime_prof_name in stacking_uptime_Table:
-		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_stability'] / 1000
+		fight_time = (stacking_uptime_Table[uptime_prof_name]['duration_stability'] / 1000) or 1
 		stability_stacks = stacking_uptime_Table[uptime_prof_name]['stability']
 
 		if (DPSStats[uptime_prof_name]['duration'] * 100) / max_fightTime < config.min_attendance_percentage_for_top:
@@ -836,7 +836,7 @@ if __name__ == '__main__':
 	for uptime_prof_name in stability_sorted_stacking_uptime_Table:
 		name = stacking_uptime_Table[uptime_prof_name]['name']
 		prof = stacking_uptime_Table[uptime_prof_name]['profession']
-		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_stability'] / 1000
+		fight_time = (stacking_uptime_Table[uptime_prof_name]['duration_stability'] / 1000) or 1
 		stability_stacks = stacking_uptime_Table[uptime_prof_name]['stability']
 
 		avg_stab = sum(stack_num * stability_stacks[stack_num] for stack_num in range(1, 26)) / (fight_time * 1000)
@@ -897,7 +897,7 @@ if __name__ == '__main__':
 	for uptime_prof_name in dps_sorted_stacking_uptime_Table:
 		name = stacking_uptime_Table[uptime_prof_name]['name']
 		prof = stacking_uptime_Table[uptime_prof_name]['profession']
-		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_might'] / 1000
+		fight_time = (stacking_uptime_Table[uptime_prof_name]['duration_might'] / 1000) or 1
 		damage_with_might = stacking_uptime_Table[uptime_prof_name]['damage_with_might']
 		might_stacks = stacking_uptime_Table[uptime_prof_name]['might']
 
@@ -974,14 +974,15 @@ if __name__ == '__main__':
 		prof = stacking_uptime_Table[uptime_prof_name]['profession']
 		uptime_table_prof_name = "{{"+prof+"}} "+name
 
-		uptime_fight_time = uptime_Table[uptime_table_prof_name]['duration']
-		fight_time = stacking_uptime_Table[uptime_prof_name]['duration_might'] / 1000
+		uptime_fight_time = uptime_Table[uptime_table_prof_name]['duration'] or 1
+		dps_fight_time = DPSStats[uptime_prof_name]['duration'] or 1
+		fight_time = (stacking_uptime_Table[uptime_prof_name]['duration_might'] / 1000) or 1
 
 		if stacking_uptime_Table[uptime_prof_name]['duration_might'] * 10 < max_stacking_buff_fight_time:
 			continue
 
 		total_damage = DPSStats[uptime_prof_name]["Damage_Total"] or 1
-		playerDPS = total_damage/DPSStats[uptime_prof_name]['duration']
+		playerDPS = total_damage/dps_fight_time
 		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(round(playerDPS))+'| '+my_value(round(fight_time))+'|'
 
 		for damage_buff in other_buffs_with_damage:
@@ -1295,7 +1296,7 @@ if __name__ == '__main__':
 	for DPSStats_prof_name in DPSStats:
 		name = DPSStats[DPSStats_prof_name]['name']
 		prof = DPSStats[DPSStats_prof_name]['profession']
-		fightTime = DPSStats[DPSStats_prof_name]['duration']
+		fightTime = DPSStats[DPSStats_prof_name]['duration'] or 1
 
 		if DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime < 250 or (fightTime * 100) / max_fightTime < config.min_attendance_percentage_for_top:
 			continue
@@ -1325,7 +1326,7 @@ if __name__ == '__main__':
 	for DPSStats_prof_name in sorted_DPSStats:
 		name = DPSStats[DPSStats_prof_name]['name']
 		prof = DPSStats[DPSStats_prof_name]['profession']
-		fightTime = DPSStats[DPSStats_prof_name]['duration']
+		fightTime = DPSStats[DPSStats_prof_name]['duration'] or 1
 
 		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(fightTime)
 		output_string += '| '+'<span data-tooltip="'+my_value(DPSStats[DPSStats_prof_name]['Damage_Total'])+' total damage">'+my_value(round(DPSStats[DPSStats_prof_name]['Damage_Total'] / fightTime))+'</span>'
@@ -1410,7 +1411,7 @@ if __name__ == '__main__':
 	for DPSStats_prof_name in sorted_DPSStats:
 		name = DPSStats[DPSStats_prof_name]['name']
 		prof = DPSStats[DPSStats_prof_name]['profession']
-		fightTime = DPSStats[DPSStats_prof_name]['duration']
+		fightTime = DPSStats[DPSStats_prof_name]['duration'] or 1
 
 		output_string = '|'+name+' |'+' {{'+prof+'}} | '
 		for i in list(range(1, 6)) + list(range(10, 21, 5)):
@@ -1441,7 +1442,7 @@ if __name__ == '__main__':
 	for DPSStats_prof_name in sorted_DPSStats:
 		name = DPSStats[DPSStats_prof_name]['name']
 		prof = DPSStats[DPSStats_prof_name]['profession']
-		fightTime = DPSStats[DPSStats_prof_name]['duration']
+		fightTime = DPSStats[DPSStats_prof_name]['duration'] or 1
 
 		output_string = '|'+name+' |'+' {{'+prof+'}} | '
 		for i in list(range(1, 6)) + list(range(10, 21, 5)):
@@ -1469,7 +1470,7 @@ if __name__ == '__main__':
 	for DPSStats_prof_name in sorted_DPSStats:
 		name = DPSStats[DPSStats_prof_name]['name']
 		prof = DPSStats[DPSStats_prof_name]['profession']
-		fightTime = DPSStats[DPSStats_prof_name]['duration']
+		fightTime = DPSStats[DPSStats_prof_name]['duration'] or 1
 
 		output_string = '|'+name+' |'+' {{'+prof+'}} | '
 		for i in list(range(1, 6)) + list(range(10, 21, 5)):
