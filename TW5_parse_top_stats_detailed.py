@@ -990,7 +990,10 @@ if __name__ == '__main__':
 		name = Death_OnTag[deathOnTag_prof_name]['name']
 		prof = Death_OnTag[deathOnTag_prof_name]['profession']
 		fightTime = uptime_Table[deathOnTag_prof_name]['duration']
-		Avg_Dist = round(sum(Death_OnTag[deathOnTag_prof_name]["distToTag"])/len(Death_OnTag[deathOnTag_prof_name]["distToTag"]))
+		if len(Death_OnTag[deathOnTag_prof_name]["distToTag"]):
+			Avg_Dist = round(sum(Death_OnTag[deathOnTag_prof_name]["distToTag"])/len(Death_OnTag[deathOnTag_prof_name]["distToTag"]))
+		else:
+			Avg_Dist = "N/A"
 
 		if Death_OnTag[deathOnTag_prof_name]['Off_Tag']:
 			converted_list = [str(round(element)) for element in Death_OnTag[deathOnTag_prof_name]['Ranges']]
