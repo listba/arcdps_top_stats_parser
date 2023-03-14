@@ -993,7 +993,7 @@ def write_Death_OnTag_xls(Death_OnTag, uptime_Table, players, xls_output_filenam
 	i = 0
 
 	for prof_name in Death_OnTag:
-		fightTime = uptime_Table[prof_name]['duration']
+		fightTime = uptime_Table.get(prof_name, {}).get('duration', 1)
 		if Death_OnTag[prof_name]['Off_Tag']:
 			converted_list = [str(round(element)) for element in Death_OnTag[prof_name]['Ranges']]
 			Ranges_string = ",".join(converted_list)
@@ -2605,6 +2605,7 @@ def calculate_dps_stats(fight_json, fight, players_running_healing_addon, config
 			stacking_uptime_Table[DPSStats_prof_name]["duration_stability"] = 0
 			stacking_uptime_Table[DPSStats_prof_name]["might"] = [0] * 26
 			stacking_uptime_Table[DPSStats_prof_name]["stability"] = [0] * 26
+			stacking_uptime_Table[DPSStats_prof_name]["firebrand_pages"] = {}
 			for buff_name in damage_with_buff_buffs:
 				stacking_uptime_Table[DPSStats_prof_name]["damage_with_"+buff_name] = [0] * 26 if buff_name == 'might' else [0] * 2
 
@@ -2676,7 +2677,24 @@ def calculate_dps_stats(fight_json, fight, players_running_healing_addon, config
 
 				if buff_name in ['stability', 'might']:
 					stacking_uptime_Table[DPSStats_prof_name]["duration_"+buff_name] += total_time
+		
+		# Track Firebrand Buffs
+		tome1_skill_ids = ["41258", "40635", "42449", "40015", "42898"]
+		tome2_skill_ids = ["45022", "40679", "45128", "42008", "42925"]
+		tome3_skill_ids = ["42986", "41968", "41836", "40988", "44455"]
+		tome_skill_ids = [
+			*tome1_skill_ids,
+			*tome2_skill_ids,
+			*tome3_skill_ids,
+		]
 
+		if player['profession'] == "Firebrand" and "rotation" in player:		
+			for rotation_skill in player['rotation']:
+				skill_id = str(rotation_skill['id'])
+				if skill_id in tome_skill_ids:
+					pages_data = stacking_uptime_Table[DPSStats_prof_name]["firebrand_pages"]
+					pages_data[skill_id] = pages_data.get(skill_id, 0) + len(rotation_skill['skills'])
+ 
 	return DPSStats
 
 # get stats for this fight from fight_json

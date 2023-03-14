@@ -146,6 +146,7 @@ if __name__ == '__main__':
 					'<$button setTitle="$:/state/curTab" setTo="Downed_Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Downed Healing </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Offensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Offensive Stats </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Defensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Defensive Stats </$button>',
+					'<$button setTitle="$:/state/curTab" setTo="FBPages" selectedClass="" class="btn btn-sm btn-dark" style=""> FB Pages </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="DPSStats" selectedClass="" class="btn btn-sm btn-dark" style=""> DPS Stats </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Burst Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Burst Damage </$button>',
 					'<$button setTitle="$:/state/curTab" setTo="Dashboard" selectedClass="" class="btn btn-sm btn-dark" style=""> Dashboard </$button>'
@@ -1019,7 +1020,7 @@ if __name__ == '__main__':
 	for deathOnTag_prof_name in Death_OnTag:
 		name = Death_OnTag[deathOnTag_prof_name]['name']
 		prof = Death_OnTag[deathOnTag_prof_name]['profession']
-		fightTime = uptime_Table[deathOnTag_prof_name]['duration']
+		fightTime = uptime_Table.get(deathOnTag_prof_name, {}).get('duration', 1)
 		if len(Death_OnTag[deathOnTag_prof_name]["distToTag"]):
 			Avg_Dist = round(sum(Death_OnTag[deathOnTag_prof_name]["distToTag"])/len(Death_OnTag[deathOnTag_prof_name]["distToTag"]))
 		else:
@@ -1205,6 +1206,96 @@ if __name__ == '__main__':
 	write_squad_offensive_xls(squad_offensive, args.xls_output_filename)
 	myprint(output, "</$reveal>\n")
 	#end Offensive Stat Table insert
+
+	# Firebrand pages
+	tome1_skill_ids = ["41258", "40635", "42449", "40015", "42898"]
+	tome2_skill_ids = ["45022", "40679", "45128", "42008", "42925"]
+	tome3_skill_ids = ["42986", "41968", "41836", "40988", "44455"]
+	tome_skill_ids = [
+		*tome1_skill_ids,
+		*tome2_skill_ids,
+		*tome3_skill_ids,
+	]
+
+	tome_skill_page_cost = {
+		"41258": 1, "40635": 1, "42449": 1, "40015": 1, "42898": 1,
+		"45022": 1, "40679": 1, "45128": 1, "42008": 2, "42925": 2,
+		"42986": 1, "41968": 1, "41836": 2, "40988": 2, "44455": 2,
+	}
+	
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="FBPages">\n')    
+	myprint(output, '\n<<alert-leftbar light "Firebrand Pages" width:60%, class:"font-weight-bold">>\n\n')
+
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|Firebrand page utilization|c")
+	myprint(output, '|thead-dark table-hover sortable|k')
+	output_header =  '|!Name | !Class'
+	output_header += ' | ! <span data-tooltip="Number of seconds player was in squad logs">Seconds</span>'
+	output_header += '| !Pages/min| | !B1| !P1| !P2| !P3| !P4| !P5| | !B2| !P1| !P2| !P3| !P4| !P5| | !B3| !P1| !P2| !P3| !P4| !P5|'
+	output_header += '|h'
+	myprint(output, output_header)
+	
+	stability_sorted_stacking_uptime_Table = []
+	for uptime_prof_name in stacking_uptime_Table:
+		fight_time = (stacking_uptime_Table[uptime_prof_name]['duration_stability'] / 1000) or 1
+		stability_stacks = stacking_uptime_Table[uptime_prof_name]['stability']
+
+		if (DPSStats[uptime_prof_name]['duration'] * 100) / max_fightTime < config.min_attendance_percentage_for_top:
+			continue
+
+		avg_stab = sum(stack_num * stability_stacks[stack_num] for stack_num in range(1, 26)) / (fight_time * 1000)
+		stability_sorted_stacking_uptime_Table.append([uptime_prof_name, avg_stab])
+	stability_sorted_stacking_uptime_Table = sorted(stability_sorted_stacking_uptime_Table, key=lambda x: x[1], reverse=True)
+	stability_sorted_stacking_uptime_Table = list(map(lambda x: x[0], stability_sorted_stacking_uptime_Table))
+	
+	for uptime_prof_name in stability_sorted_stacking_uptime_Table:
+		name = stacking_uptime_Table[uptime_prof_name]['name']
+		prof = stacking_uptime_Table[uptime_prof_name]['profession']
+		fight_time = DPSStats[uptime_prof_name]['duration'] or 1
+
+		firebrand_pages = stacking_uptime_Table[uptime_prof_name]['firebrand_pages']
+	
+		tome1_total = 0
+		for skill_id in tome1_skill_ids:
+			tome1_total += firebrand_pages.get(skill_id, 0) * tome_skill_page_cost[skill_id]
+	
+		tome2_total = 0
+		for skill_id in tome2_skill_ids:
+			tome2_total += firebrand_pages.get(skill_id, 0) * tome_skill_page_cost[skill_id]
+	
+		tome3_total = 0
+		for skill_id in tome3_skill_ids:
+			tome3_total += firebrand_pages.get(skill_id, 0) * tome_skill_page_cost[skill_id]
+	
+		all_tomes_total = tome1_total + tome2_total + tome3_total
+
+		if all_tomes_total == 0:
+			continue
+
+		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(round(fight_time))+' | '
+		output_string += "{:.2f}".format(round(60 * all_tomes_total / fight_time, 4)) + '|'
+
+		output_string += "| "+"{:.2f}".format(round(100 * tome1_total / all_tomes_total, 4))+"%"	
+		for skill_id in tome1_skill_ids:
+			output_string += "| "+"{:.2f}".format(round(100 * firebrand_pages.get(skill_id, 0) / all_tomes_total, 4))+"%"
+		output_string += " |"
+
+		output_string += "| "+"{:.2f}".format(round(100 * tome2_total / all_tomes_total, 4))+"%"	
+		for skill_id in tome2_skill_ids:
+			output_string += "| "+"{:.2f}".format(round(100 * firebrand_pages.get(skill_id, 0) / all_tomes_total, 4))+"%"
+		output_string += " |"
+
+		output_string += "| "+"{:.2f}".format(round(100 * tome3_total / all_tomes_total, 4))+"%"	
+		for skill_id in tome3_skill_ids:
+			output_string += "| "+"{:.2f}".format(round(100 * firebrand_pages.get(skill_id, 0) / all_tomes_total, 4))+"%"
+
+
+		output_string += '|'
+
+		myprint(output, output_string)
+
+	myprint(output, "</$reveal>\n")
+	#End Firebrand pages
 
 	#start Dashboard insert
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Dashboard">')    
