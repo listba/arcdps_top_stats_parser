@@ -1227,15 +1227,15 @@ if __name__ == '__main__':
 	myprint(output, '\n<<alert-leftbar light "Firebrand Pages" width:60%, class:"font-weight-bold">>\n\n')
 
 	myprint(output, "|table-caption-top|k")
-	myprint(output, "|Firebrand page utilization|c")
+	myprint(output, "|Firebrand page utilization, pages/minute|c")
 	myprint(output, '|thead-dark table-hover sortable|k')
-	output_header =  '|!Name | !Class'
+	output_header =  '|!Name '
 	output_header += ' | ! <span data-tooltip="Number of seconds player was in squad logs">Seconds</span>'
-	output_header += '| !Pages/min| | !B1| !P1| !P2| !P3| !P4| !P5| | !B2| !P1| !P2| !P3| !P4| !P5| | !B3| !P1| !P2| !P3| !P4| !P5|'
+	output_header += '| !Pages/min| | !T1| !C1| !C2| !C3| !C4| !Epi| | !T2| !C1| !C2| !C3| !C4| !Epi| | !T3| !C1| !C2| !C3| !C4| !Epi'
 	output_header += '|h'
 	myprint(output, output_header)
 	
-	stability_sorted_stacking_uptime_Table = []
+	pages_sorted_stacking_uptime_Table = []
 	for uptime_prof_name in stacking_uptime_Table:
 		fight_time = (stacking_uptime_Table[uptime_prof_name]['duration_stability'] / 1000) or 1
 		stability_stacks = stacking_uptime_Table[uptime_prof_name]['stability']
@@ -1243,14 +1243,41 @@ if __name__ == '__main__':
 		if (DPSStats[uptime_prof_name]['duration'] * 100) / max_fightTime < config.min_attendance_percentage_for_top:
 			continue
 
-		avg_stab = sum(stack_num * stability_stacks[stack_num] for stack_num in range(1, 26)) / (fight_time * 1000)
-		stability_sorted_stacking_uptime_Table.append([uptime_prof_name, avg_stab])
-	stability_sorted_stacking_uptime_Table = sorted(stability_sorted_stacking_uptime_Table, key=lambda x: x[1], reverse=True)
-	stability_sorted_stacking_uptime_Table = list(map(lambda x: x[0], stability_sorted_stacking_uptime_Table))
+		firebrand_pages = stacking_uptime_Table[uptime_prof_name]['firebrand_pages']
+		
+		all_tomes_total = 0
+		for skill_id in tome_skill_ids:
+			all_tomes_total += firebrand_pages.get(skill_id, 0) * tome_skill_page_cost[skill_id]
+
+		pages_sorted_stacking_uptime_Table.append([uptime_prof_name, all_tomes_total / fight_time])
+	pages_sorted_stacking_uptime_Table = sorted(pages_sorted_stacking_uptime_Table, key=lambda x: x[1], reverse=True)
+	pages_sorted_stacking_uptime_Table = list(map(lambda x: x[0], pages_sorted_stacking_uptime_Table))
+
+	def fmt_firebrand_page_total(page_casts, page_cost, fight_time, page_total):
+		output_string = ' <span data-tooltip="'
+
+		if page_cost:
+			output_string += "{:.2f}".format(round(100 * page_casts * page_cost / page_total, 4))
+			output_string += '% of total pages '
+			output_string += "{:.2f}".format(round(60 * page_casts / fight_time, 4))
+			output_string += ' casts / minute">'
+		else:
+			output_string += "{:.2f}".format(round(100 * page_casts / page_total, 4))
+			output_string += '% of total pages">'
+
+		if page_cost:
+			output_string += "{:.2f}".format(round(60 * page_casts * page_cost / fight_time, 4))
+		else:
+			output_string += "{:.2f}".format(round(60 * page_casts / fight_time, 4))
+
+		output_string += '</span>|'
+
+		return output_string
+
 	
-	for uptime_prof_name in stability_sorted_stacking_uptime_Table:
+	for uptime_prof_name in pages_sorted_stacking_uptime_Table:
 		name = stacking_uptime_Table[uptime_prof_name]['name']
-		prof = stacking_uptime_Table[uptime_prof_name]['profession']
+		role = stacking_uptime_Table[uptime_prof_name]['role']
 		fight_time = DPSStats[uptime_prof_name]['duration'] or 1
 
 		firebrand_pages = stacking_uptime_Table[uptime_prof_name]['firebrand_pages']
@@ -1272,25 +1299,32 @@ if __name__ == '__main__':
 		if all_tomes_total == 0:
 			continue
 
-		output_string = '|'+name+' |'+' {{'+prof+'}} | '+my_value(round(fight_time))+' | '
+		output_string = '|'+name
+		if role != "Support":
+			output_string += ' (' + role + ')'
+		output_string += ' | ' + my_value(round(fight_time))+' | '
 		output_string += "{:.2f}".format(round(60 * all_tomes_total / fight_time, 4)) + '|'
+		output_string += ' |'
 
-		output_string += "| "+"{:.2f}".format(round(100 * tome1_total / all_tomes_total, 4))+"%"	
+		output_string += fmt_firebrand_page_total(tome1_total, 0, fight_time, all_tomes_total)
 		for skill_id in tome1_skill_ids:
-			output_string += "| "+"{:.2f}".format(round(100 * firebrand_pages.get(skill_id, 0) / all_tomes_total, 4))+"%"
+			page_total = firebrand_pages.get(skill_id, 0)
+			page_cost = tome_skill_page_cost[skill_id]
+			output_string += fmt_firebrand_page_total(page_total, page_cost, fight_time, all_tomes_total)
 		output_string += " |"
 
-		output_string += "| "+"{:.2f}".format(round(100 * tome2_total / all_tomes_total, 4))+"%"	
+		output_string += fmt_firebrand_page_total(tome2_total, 0, fight_time, all_tomes_total)
 		for skill_id in tome2_skill_ids:
-			output_string += "| "+"{:.2f}".format(round(100 * firebrand_pages.get(skill_id, 0) / all_tomes_total, 4))+"%"
+			page_total = firebrand_pages.get(skill_id, 0)
+			page_cost = tome_skill_page_cost[skill_id]
+			output_string += fmt_firebrand_page_total(page_total, page_cost, fight_time, all_tomes_total)
 		output_string += " |"
 
-		output_string += "| "+"{:.2f}".format(round(100 * tome3_total / all_tomes_total, 4))+"%"	
+		output_string += fmt_firebrand_page_total(tome3_total, 0, fight_time, all_tomes_total)
 		for skill_id in tome3_skill_ids:
-			output_string += "| "+"{:.2f}".format(round(100 * firebrand_pages.get(skill_id, 0) / all_tomes_total, 4))+"%"
-
-
-		output_string += '|'
+			page_total = firebrand_pages.get(skill_id, 0)
+			page_cost = tome_skill_page_cost[skill_id]
+			output_string += fmt_firebrand_page_total(page_total, page_cost, fight_time, all_tomes_total)
 
 		myprint(output, output_string)
 
