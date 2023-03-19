@@ -1231,7 +1231,7 @@ if __name__ == '__main__':
 	myprint(output, '|thead-dark table-hover sortable|k')
 	output_header =  '|!Name '
 	output_header += ' | ! <span data-tooltip="Number of seconds player was in squad logs">Seconds</span>'
-	output_header += '| !Pages/min| | !T1| !C1| !C2| !C3| !C4| !Epi| | !T2| !C1| !C2| !C3| !C4| !Epi| | !T3| !C1| !C2| !C3| !C4| !Epi'
+	output_header += '| !Pages/min| | !T1 {{Tome_of_Justice}}| !C1 {{Chapter_1_Unflinching_Charge}}| !C2 {{Chapter_2_Daring_Challenge}}| !C3 {{Chapter_3_Valiant_Bulwark}}| !C4 {{Chapter_4_Stalwart_Stand}}| !Epi {{Epilogue_Unbroken_Lines}}| | !T2 {{Tome_of_Resolve}}| !C1 {{Chapter_1_Searing_Spell}}| !C2 {{Chapter_2_Igniting_Burst}}| !C3 {{Chapter_3_Heated_Rebuke}}| !C4 {{Chapter_4_Scorched_Aftermath}}| !Epi {{Epilogue_Ashes_of_the_Just}}| | !T3 {{Tome_of_Courage}}| !C1 {{Chapter_1_Desert_Bloom}}| !C2 {{Chapter_2_Radiant_Recovery}}| !C3 {{Chapter_3_Azure_Sun}}| !C4 {{Chapter_4_Shining_River}}| !Epi {{Epilogue_Eternal_Oasis}}'
 	output_header += '|h'
 	myprint(output, output_header)
 	
