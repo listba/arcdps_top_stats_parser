@@ -1008,7 +1008,7 @@ if __name__ == '__main__':
 
 	#start On Tag Death insert
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Death_OnTag">')    
-	myprint(output, '\n<<alert-leftbar light "Avg Dist calculation stops on initial death avoiding respawn range<br>On Tag Death Review Current Formula: (On Tag <= 600 Range, Off Tag >600 and <=5000, Run Back Death > 5000)" width:60%, class:"font-weight-bold">>\n\n')
+	myprint(output, '\n<<alert-leftbar light "Avg Dist calculation stops on initial player death or Tag Death to avoiding respawn range<br>On Tag Death Review Current Formula: (On Tag <= 600 Range, Off Tag >600 and <=5000, Run Back Death > 5000)" width:60%, class:"font-weight-bold">>\n\n')
 	
 	myprint(output, '\n---\n')
 	myprint(output, '\n---\n')

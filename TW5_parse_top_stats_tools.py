@@ -237,6 +237,9 @@ DPSStats = {}
 MOA_Targets = {}
 MOA_Casters = {}
 
+#Collect Commander Tags:
+Cmd_Tags = {}
+
 #fetch Guild Data and Check Guild Status function
 #members: Dict[str, Any] = {}
 members: dict = field(default_factory=dict) 
@@ -3096,8 +3099,12 @@ def get_stats_from_fight_json(fight_json, config, log):
 	inchToPixel = fight_json['combatReplayMetaData']['inchToPixel']
 	i=0
 	for id in fight_json['players']:
-		if id['hasCommanderTag']:
+		if id['hasCommanderTag'] and not id['notInSquad']:
 			commanderFound = True
+			if id['name'] not in Cmd_Tags:
+				Cmd_Tags[id['name']] = 1
+			else:
+				Cmd_Tags[id['name']] += 1
 			tagPositions = id['combatReplayData']['positions']
 			if id['combatReplayData']['dead']:
 				for death in id['combatReplayData']['dead']:
@@ -3159,7 +3166,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 						if deathRange > On_Tag and deathRange <= Run_Back:
 							Death_OnTag[deathOnTag_prof_name]["Off_Tag"] = Death_OnTag[deathOnTag_prof_name]["Off_Tag"] + 1
 							Death_OnTag[deathOnTag_prof_name]["Ranges"] += [deathRange]
-				if deathValue:
+				if deathValue and not dead_Tag:
 					playerDeadPoll = int(deathValue/150)
 					playerPositions = id['combatReplayData']['positions']
 					for position,tagPosition in zip(playerPositions[:playerDeadPoll], tagPositions[:playerDeadPoll]):
@@ -3167,6 +3174,17 @@ def get_stats_from_fight_json(fight_json, config, log):
 						deltaY = position[1] - tagPosition[1]
 						playerDistances.append(math.sqrt(deltaX * deltaX + deltaY * deltaY))
 					playerDistToTag = (sum(playerDistances) / len(playerDistances))/inchToPixel
+				elif deathValue and dead_Tag:
+					if deathValue > dead_Tag_Mark:
+						playerDeadPoll = int(dead_Tag_Mark/150)
+					else:
+						playerDeadPoll = int(deathValue/150)
+					playerPositions = id['combatReplayData']['positions']
+					for position,tagPosition in zip(playerPositions[:playerDeadPoll], tagPositions[:playerDeadPoll]):
+						deltaX = position[0] - tagPosition[0]
+						deltaY = position[1] - tagPosition[1]
+						playerDistances.append(math.sqrt(deltaX * deltaX + deltaY * deltaY))
+					playerDistToTag = (sum(playerDistances) / len(playerDistances))/inchToPixel					
 		Death_OnTag[deathOnTag_prof_name]["distToTag"].append(playerDistToTag)
 
 	#Collect Box Plot DPS data by Profession, Prof_Name, Name, Acct
@@ -3434,6 +3452,12 @@ def print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, fou
 		Raid_KDR = (round((overall_raid_stats['total_kills']/(round(overall_squad_stats['deaths']))),2))
 	except:
 		Raid_KDR = overall_raid_stats['total_kills']
+
+	print_string += "\n|Commander | # Fights|h"
+	if Cmd_Tags:
+		for name in Cmd_Tags:
+			print_string +='\n|'+name+' | '+str(Cmd_Tags[name])+'|'
+	print_string +='\n'
 
 	print_string += "\nKill Death Ratio for the session was ''"+str(Raid_KDR)+"''.\n"
 	#JEL - Added beginning newline for TW5 spacing
