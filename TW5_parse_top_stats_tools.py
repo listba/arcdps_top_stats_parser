@@ -3749,7 +3749,7 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
       fromTransformResult: 1
     }
   ],
-  dataZoom: [{id: 'dataZoomX', type: 'slider', xAxisIndex: [0], left: 10, height: 10, filterMode: 'empty', start: 0, end: 100},{id: 'dataZoomY', type: 'slider', yAxisIndex: [0], filterMode: 'empty', start: 0, end: 100}],
+  dataZoom: [{type: 'slider', show: true, yAxisIndex: [0], start: 100, end: 50 },{type: 'inside', yAxisIndex: [0], start: 100, end: 50 },],
   tooltip: {trigger: 'item'},
   grid: {left: '20%', right: '10%', bottom: '15%'},
   yAxis: {type: 'category', boundaryGap: true, nameGap: 30, splitArea: {show: true}, splitLine: {show: true}},
