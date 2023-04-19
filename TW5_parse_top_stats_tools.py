@@ -163,7 +163,7 @@ class Config:
 
 
 #Stats to exlucde from overview summary
-exclude_Stat = ["iol", "dist", "res", "Cdmg", "Pdmg",  "kills", "downs", 'downed', "HiS", "stealth", "superspeed", "swaps", "barrierDamage", "dodges", "evades", "blocks", "invulns", 'hitsMissed', 'interupted', 'fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut', 'ripsIn', 'ripsTime', 'cleansesIn', 'cleansesTime', 'downContrib']
+exclude_Stat = ["iol", "dist", "res", "Cdmg", "Pdmg",  "kills", "downs", 'downed', "HiS", "stealth", "superspeed", "swaps", "barrierDamage", "dodges", "evades", "blocks", "invulns", 'hitsMissed', 'interupted', 'fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut', 'ripsIn', 'ripsTime', 'cleansesIn', 'cleansesTime', 'downContrib', 'resOutTime', 'cleansesOutTime', 'ripsOutTime']
 
 #Control Effects Tracking
 squad_offensive = {}
@@ -1751,10 +1751,8 @@ def collect_stat_data(args, config, log, anonymize=False):
 			
 		if first:
 			first = False
-			#if args.filetype == "json":
 			get_buff_ids_from_json(json_data, config)
-			#else:
-			#    get_buff_ids_from_xml(xml_root, config)
+
 					
 		# add new entry for this fight in all players
 		for player in players:
@@ -2129,16 +2127,31 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 			return 0
 		return int(player_json['support'][0]['resurrects'])
 
+	if stat == 'resOutTime':
+		if 'support' not in player_json or len(player_json['support']) != 1 or 'resurrectTime' not in player_json['support'][0]:
+			return 0
+		return int(player_json['support'][0]['resurrectTime'])
+	
 	if stat == 'rips':
 		if 'support' not in player_json or len(player_json['support']) != 1 or 'boonStrips' not in player_json['support'][0]:
 			return 0
 		return int(player_json['support'][0]['boonStrips'])
-	
+
+	if stat == 'ripsOutTime':
+		if 'support' not in player_json or len(player_json['support']) != 1 or 'boonStripsTime' not in player_json['support'][0]:
+			return 0
+		return int(player_json['support'][0]['boonStripsTime'])
+		
 	if stat == 'cleanses':
 		if 'support' not in player_json or len(player_json['support']) != 1 or 'condiCleanse' not in player_json['support'][0]:
 			return 0
-		return int(player_json['support'][0]['condiCleanse'])            
-	#Prep work for new addition: incoming Boon Strips
+		return int(player_json['support'][0]['condiCleanse'])
+
+	if stat == 'cleansesOutTime':
+		if 'support' not in player_json or len(player_json['support']) != 1 or 'condiCleanseTime' not in player_json['support'][0]:
+			return 0
+		return int(player_json['support'][0]['condiCleanseTime'])
+	
 	if stat == 'ripsIn':
 		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'boonStrips' not in player_json['defenses'][0]:
 			return 0        
@@ -2149,7 +2162,6 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 			return 0        
 		return int(player_json['defenses'][0]['boonStripsTime'])
 
-	#Prep work for new addition: incoming Condition Clears		
 	if stat == 'cleansesIn':
 		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'conditionCleanses' not in player_json['defenses'][0]:
 			return 0        
@@ -2736,6 +2748,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 	fight_name = fight_json['timeEnd'].split(" -",1)[0]
 	squad_damage_output[fight_name] = {}
 
+	current_Tag = ''
+
 	#creat dictionary of skill_ids and skill_names
 	skills = fight_json['skillMap']
 	for skill_id, skill in skills.items():
@@ -2753,6 +2767,22 @@ def get_stats_from_fight_json(fight_json, config, log):
 			skill_Dict[x_id]['icon'] = skill['icon']
 
 	SiegeSkills = {14627: "Punch", 14639: "Whirling Assualt", 14709: "Rocket Punch", 14710: "Whirling Inferno", 14708: "Rocket Salvo"}
+
+	for player in fight_json['players']:
+		if player['notInSquad']:
+			continue
+		if player['hasCommanderTag']:
+			current_Tag = player['name']
+			if current_Tag not in Cmd_Tags:
+				Cmd_Tags[current_Tag] = {}
+				Cmd_Tags[current_Tag]['Fights'] = 1
+				Cmd_Tags[current_Tag]['Downs'] = 0
+				Cmd_Tags[current_Tag]['Kills'] = 0
+				Cmd_Tags[current_Tag]['Downed'] = 0
+				Cmd_Tags[current_Tag]['Deaths'] = 0
+
+			else:
+				Cmd_Tags[current_Tag]['Fights'] += 1
 
 	for enemy in fight_json['targets']:
 		if 'enemyPlayer' in enemy and enemy['enemyPlayer'] == True:
@@ -3101,10 +3131,6 @@ def get_stats_from_fight_json(fight_json, config, log):
 	for id in fight_json['players']:
 		if id['hasCommanderTag'] and not id['notInSquad']:
 			commanderFound = True
-			if id['name'] not in Cmd_Tags:
-				Cmd_Tags[id['name']] = 1
-			else:
-				Cmd_Tags[id['name']] += 1
 			tagPositions = id['combatReplayData']['positions']
 			if id['combatReplayData']['dead']:
 				for death in id['combatReplayData']['dead']:
@@ -3306,6 +3332,9 @@ def get_stats_from_fight_json(fight_json, config, log):
 			HPS_List['prof'][prof].append(playerHPS)
 		#End HPS Box Plot Data Collection
 
+
+	
+
 	# initialize fight         
 	fight = Fight()
 	fight.duration = duration
@@ -3322,7 +3351,26 @@ def get_stats_from_fight_json(fight_json, config, log):
 	fight.start_time = fight_json['timeStartStd']
 	fight.end_time = fight_json['timeEndStd']        
 	fight.total_stats = {key: 0 for key in config.stats_to_compute}
-			
+
+	#Capture Tag Stats for fight
+	if current_Tag:
+
+		Cmd_Tags[current_Tag]['Downs'] += num_downs
+		Cmd_Tags[current_Tag]['Kills'] += num_kills
+		
+		for player in fight_json['players']:
+			if player['notInSquad']:
+				continue
+			if 'defenses' not in player or len(player['defenses']) != 1 or 'deadCount' not in player['defenses'][0]:
+				Cmd_Tags[current_Tag]['Deaths'] += 0
+			else:
+				Cmd_Tags[current_Tag]['Deaths'] += int(player['defenses'][0]['deadCount'])
+				
+			if 'defenses' not in player or len(player['defenses']) != 1 or 'downCount' not in player['defenses'][0]:
+				Cmd_Tags[current_Tag]['Downed'] += 0
+			else:
+				Cmd_Tags[current_Tag]['Downed'] += int(player['defenses'][0]['downCount'])
+
 	# skip fights that last less than min_fight_duration seconds
 	if(duration < config.min_fight_duration):
 		fight.skipped = True
@@ -3453,13 +3501,18 @@ def print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, fou
 	except:
 		Raid_KDR = overall_raid_stats['total_kills']
 
-	print_string += "\n|Commander | # Fights|h"
+	print_string += '\n|thead-dark table-caption-top sortable|k\n|Summary by Command Tag|c'
+	print_string += "\n|!Commander | !# Fights| !Downs| !Kills| !{{Downed}}| !{{Deaths}}| !Tag KDR|h"
 	if Cmd_Tags:
 		for name in Cmd_Tags:
-			print_string +='\n|'+name+' | '+str(Cmd_Tags[name])+'|'
-	print_string +='\n'
-
-	print_string += "\nKill Death Ratio for the session was ''"+str(Raid_KDR)+"''.\n"
+			print_string +='\n|'+name+' |'
+			for item in Cmd_Tags[name]:
+				print_string +=" "+str(Cmd_Tags[name][item])+"|"
+			print_string += " "+str(round(Cmd_Tags[name]['Kills']/Cmd_Tags[name]['Deaths'], 2))+"|"
+	print_string += "\n|Totals: | "+str(sum(tag['Fights'] for tag in Cmd_Tags.values() if tag))+"| "+str(sum(tag['Downs'] for tag in Cmd_Tags.values() if tag))+"| "+str(sum(tag['Kills'] for tag in Cmd_Tags.values() if tag))+"| "+str(sum(tag['Downed'] for tag in Cmd_Tags.values() if tag))+"| "+str(sum(tag['Deaths'] for tag in Cmd_Tags.values() if tag))+"| "
+	totalKDR = round((sum(tag['Kills'] for tag in Cmd_Tags.values() if tag)) / (sum(tag['Deaths'] for tag in Cmd_Tags.values() if tag)),2)
+	print_string += str(totalKDR)+"|\n"
+	#print_string += "\nKill Death Ratio for the session was ''"+str(Raid_KDR)+"''.\n"
 	#JEL - Added beginning newline for TW5 spacing
 	print_string += "\nThere were between "+str(overall_raid_stats['min_allies'])+" and "+str(overall_raid_stats['max_allies'])+" allied players involved (average "+str(round(overall_raid_stats['mean_allies'], 1))+" players).\n"
 	print_string += "\nThe squad faced between "+str(overall_raid_stats['min_enemies'])+" and "+str(overall_raid_stats['max_enemies'])+" enemy players (average "+str(round(overall_raid_stats['mean_enemies'], 1))+" players).\n"    
