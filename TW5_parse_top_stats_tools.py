@@ -3511,7 +3511,7 @@ def print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, fou
 			print_string += " "+str(round(Cmd_Tags[name]['Kills']/Cmd_Tags[name]['Deaths'], 2))+"|"
 	print_string += "\n|Totals: | "+str(sum(tag['Fights'] for tag in Cmd_Tags.values() if tag))+"| "+str(sum(tag['Downs'] for tag in Cmd_Tags.values() if tag))+"| "+str(sum(tag['Kills'] for tag in Cmd_Tags.values() if tag))+"| "+str(sum(tag['Downed'] for tag in Cmd_Tags.values() if tag))+"| "+str(sum(tag['Deaths'] for tag in Cmd_Tags.values() if tag))+"| "
 	totalKDR = round((sum(tag['Kills'] for tag in Cmd_Tags.values() if tag)) / (sum(tag['Deaths'] for tag in Cmd_Tags.values() if tag)),2)
-	print_string += str(totalKDR)+"|\n"
+	print_string += str(totalKDR)+"|f\n"
 	#print_string += "\nKill Death Ratio for the session was ''"+str(Raid_KDR)+"''.\n"
 	#JEL - Added beginning newline for TW5 spacing
 	print_string += "\nThere were between "+str(overall_raid_stats['min_allies'])+" and "+str(overall_raid_stats['max_allies'])+" allied players involved (average "+str(round(overall_raid_stats['mean_allies'], 1))+" players).\n"

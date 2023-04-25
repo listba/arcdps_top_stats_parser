@@ -102,61 +102,37 @@ if __name__ == '__main__':
 	] if include_comp_and_review else []
 
 	#Start nav_bar_menu for TW5
-	Nav_Bar_Items= ('<$button setTitle="$:/state/curTab" setTo="Overview" selectedClass="" class="btn btn-sm btn-dark" style=""> Session Overview </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Attendance" selectedClass="" class="btn btn-sm btn-dark" style=""> Attendance </$button>',
-					*large_items,
-					'<$button setTitle="$:/state/curTab" setTo="Illusion of Life" selectedClass="" class="btn btn-sm btn-dark" style=""> IOL </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Resurrect" selectedClass="" class="btn btn-sm btn-dark" style=""> Resurrect </$button>',                    
-					'<$button setTitle="$:/state/curTab" setTo="Enemies Downed" selectedClass="" class="btn btn-sm btn-dark" style=""> Enemies Downed </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Enemies Killed" selectedClass="" class="btn btn-sm btn-dark" style=""> Enemies Killed </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Power Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Power Damage </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Condi Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Condi Damage </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Boon Strips" selectedClass="" class="btn btn-sm btn-dark" style=""> Boon Strips </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Duration of Boons Stripped" selectedClass="" class="btn btn-sm btn-dark" style=""> Duration of Strips </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Condition Cleanses" selectedClass="" class="btn btn-sm btn-dark" style=""> Condition Cleanses</$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Duration of Conditions Cleansed" selectedClass="" class="btn btn-sm btn-dark" style=""> Duration of Cleanses</$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Superspeed" selectedClass="" class="btn btn-sm btn-dark" style=""> Superspeed </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Stealth" selectedClass="" class="btn btn-sm btn-dark" style=""> Stealth </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Hide in Shadows" selectedClass="" class="btn btn-sm btn-dark" style=""> Hide in Shadows </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Distance to Tag" selectedClass="" class="btn btn-sm btn-dark" style=""> Distance to Tag </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Stability" selectedClass="" class="btn btn-sm btn-dark" style=""> Stability </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Protection" selectedClass="" class="btn btn-sm btn-dark" style=""> Protection </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Aegis" selectedClass="" class="btn btn-sm btn-dark" style=""> Aegis </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Might" selectedClass="" class="btn btn-sm btn-dark" style=""> Might </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Fury" selectedClass="" class="btn btn-sm btn-dark" style=""> Fury </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Resistance" selectedClass="" class="btn btn-sm btn-dark" style=""> Resistance </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Resolution" selectedClass="" class="btn btn-sm btn-dark" style=""> Resolution </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Quickness" selectedClass="" class="btn btn-sm btn-dark" style=""> Quickness </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Swiftness" selectedClass="" class="btn btn-sm btn-dark" style=""> Swiftness </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Alacrity" selectedClass="" class="btn btn-sm btn-dark" style=""> Alacrity </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Vigor" selectedClass="" class="btn btn-sm btn-dark" style=""> Vigor </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Regeneration" selectedClass="" class="btn btn-sm btn-dark" style=""> Regeneration </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Support" selectedClass="" class="btn btn-sm btn-dark" style=""> Support Players </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Healing </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Barrier" selectedClass="" class="btn btn-sm btn-dark" style=""> Barrier </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Weapon Swaps" selectedClass="" class="btn btn-sm btn-dark" style=""> Weapon Swaps </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Control Effects - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Outgoing </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Control Effects - In" selectedClass="" class="btn btn-sm btn-dark" style=""> Control Effects Incoming </$button>',					
-					'<$button setTitle="$:/state/curTab" setTo="Spike Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Spike Damage </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Personal Buffs" selectedClass="" class="btn btn-sm btn-dark" style=""> Personal Buffs </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Buff Uptime" selectedClass="" class="btn btn-sm btn-dark" style=""> Buff Uptime </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Stacking Buffs" selectedClass="" class="btn btn-sm btn-dark" style=""> Stacking Buffs </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Damage with Buffs" selectedClass="" class="btn btn-sm btn-dark" style=""> Damage with Buffs </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Auras - Out" selectedClass="" class="btn btn-sm btn-dark" style=""> Auras </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Death_OnTag" selectedClass="" class="btn btn-sm btn-dark" style=""> On Tag Review </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Downed_Healing" selectedClass="" class="btn btn-sm btn-dark" style=""> Downed Healing </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Offensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Offensive Stats </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Defensive Stats" selectedClass="" class="btn btn-sm btn-dark" style=""> Defensive Stats </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="FBPages" selectedClass="" class="btn btn-sm btn-dark" style=""> FB Pages </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="DPSStats" selectedClass="" class="btn btn-sm btn-dark" style=""> DPS Stats </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Burst Damage" selectedClass="" class="btn btn-sm btn-dark" style=""> Burst Damage </$button>',
-					'<$button setTitle="$:/state/curTab" setTo="Dashboard" selectedClass="" class="btn btn-sm btn-dark" style=""> Dashboard </$button>'
-	)
-	for item in Nav_Bar_Items:
-		myprint(output, item)
+	MenuTabs = ['General', 'Offensive', 'Defensive', 'Support', 'Boons & Buffs', 'Dashboard']
+
+	SubMenuTabs = {
+	'General': ['Overview', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'Death_OnTag'],
+	'Offensive': ['Offensive Stats', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Power Damage', 'Condi Damage', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
+	'Defensive': ['Defensive Stats', 'Control Effects - In'],
+	'Support': ['Healing', 'Barrier', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
+	'Boons & Buffs': ['Stability', 'Protection', 'Aegis', 'Might', 'Fury', 'Resistance', 'Resolution', 'Quickness', 'Swiftness', 'Superspeed', 'Alacrity', 'Vigor', 'Regeneration', 'Auras - Out', 'Personal Buffs', 'Buff Uptime', 'Stacking Buffs'],
+	'Dashboard': ["Dashboard"]
+		}
+
+	alertColors = ["primary", "danger", "warning", "success", "info", "light"]
+
+	excludeForMonthly = ['Squad Composition','Fight Review', 'Spike Damage']
+
+	for item in MenuTabs:
+		myprint(output, '<$button class="btn btn-sm btn-dark"> <$action-setfield $tiddler="$:/state/MenuTab" $field="text" $value="'+item+'"/> <$action-setfield $tiddler="$:/state/curTab" $field="text" $value="'+SubMenuTabs[item][0]+'"/> '+item+' </$button>')
 	
-	myprint(output, '\n---\n')
+	for item in MenuTabs:
+		myprint(output, '<$reveal type="match" state="$:/state/MenuTab" text="'+item+'">')
+		myprint(output, '\n')
+		myprint(output, '<<alert-leftbar '+alertColors[MenuTabs.index(item)]+' "'+item+'" width:60%, class:"font-weight-bold">>')
+		myprint(output, '\n')
+		myprint(output, '---')
+		for tab in SubMenuTabs[item]:
+			if not include_comp_and_review and tab in excludeForMonthly:
+				continue
+			myprint(output, '<$button setTitle="$:/state/curTab" setTo="'+tab+'" class="btn btn-sm btn-dark"> '+tab+' </$button>')
+		myprint(output, '\n')
+		myprint(output, '</$reveal>')
+		myprint(output, '\n')			
 
 	#End nav_bar_menu for TW5
 
@@ -176,20 +152,21 @@ if __name__ == '__main__':
 	#Move Squad Composition and Spike Damage here so it is first under the fight summaries
 
 	#Squad Spike Damage
-	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Spike Damage">\n')    
-	myprint(output, '\n!!!SPIKE DAMAGE\n')
-	myprint(output, '\n---\n')    
-	myprint(output, '<div style="overflow-x:auto;">\n\n')
+	if include_comp_and_review:
+		myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Spike Damage">\n')    
+		myprint(output, '\n!!!SPIKE DAMAGE\n')
+		myprint(output, '\n---\n')    
+		myprint(output, '<div style="overflow-x:auto;">\n\n')
 
-	output_string = "\nSquad Damage output by second (Mouse Scroll to zoom in/out at location)\n"
-		
-	myprint(output, output_string)
+		output_string = "\nSquad Damage output by second (Mouse Scroll to zoom in/out at location)\n"
+			
+		myprint(output, output_string)
 
-	myprint(output, '<$echarts $text={{'+myDate.strftime("%Y%m%d%H%M")+'_spike_damage_heatmap_ChartData}} $height="800px" $theme="dark"/>')
+		myprint(output, '<$echarts $text={{'+myDate.strftime("%Y%m%d%H%M")+'_spike_damage_heatmap_ChartData}} $height="800px" $theme="dark"/>')
 
-	#end reveal
-	myprint(output, '\n\n</div>\n\n')
-	myprint(output, "</$reveal>\n")     
+		#end reveal
+		myprint(output, '\n\n</div>\n\n')
+		myprint(output, "</$reveal>\n")     
 
 	# end Squad Spike Damage
 
@@ -1657,7 +1634,8 @@ if __name__ == '__main__':
 
 	#write out Bubble Charts and Box_Plots
 	write_bubble_charts(players, top_players_by_stat[stat], squad_Control, myDate, args.input_directory)
-	write_spike_damage_heatmap(squad_damage_output, myDate, args.input_directory)
+	if include_comp_and_review:
+		write_spike_damage_heatmap(squad_damage_output, myDate, args.input_directory)
 	write_box_plot_charts(DPS_List, myDate, args.input_directory, "DPS")
 	write_box_plot_charts(SPS_List, myDate, args.input_directory, "SPS")
 	write_box_plot_charts(CPS_List, myDate, args.input_directory, "CPS")
