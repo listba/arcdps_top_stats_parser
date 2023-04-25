@@ -138,7 +138,7 @@ if __name__ == '__main__':
 
 	#Overview reveal
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Overview">')
-	myprint(output, '\n!!!OVERVIEW\n')
+	myprint(output, '\n<<alert dark "OVERVIEW" width:60%>>\n')
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
 
 	print_fights_overview(fights, overall_squad_stats, overall_raid_stats, config, output)
@@ -154,7 +154,7 @@ if __name__ == '__main__':
 	#Squad Spike Damage
 	if include_comp_and_review:
 		myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Spike Damage">\n')    
-		myprint(output, '\n!!!SPIKE DAMAGE\n')
+		myprint(output, '\n<<alert dark "SPIKE DAMAGE" width:60%>>\n')
 		myprint(output, '\n---\n')    
 		myprint(output, '<div style="overflow-x:auto;">\n\n')
 
@@ -172,7 +172,7 @@ if __name__ == '__main__':
 
 	#Personal Buffs
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Personal Buffs">\n')    
-	myprint(output, '\n!!!Personal Buffs Uptime %\n')
+	myprint(output, '\n<<alert dark "Personal Buffs Uptime %" width:60%>>\n')	
 	myprint(output, '\n---\n')    
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
 
@@ -220,9 +220,8 @@ if __name__ == '__main__':
 	if include_comp_and_review:
 		#Squad Composition Testing
 		myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Squad Composition">')    
-		myprint(output, '\n<<alert dark "Excludes skipped fights in the overview" width:60%>>\n')
-		myprint(output, '\n<div class="flex-row">\n    <div class="flex-col-2 border">\n')
-		myprint(output, '\n!!!SQUAD COMPOSITION\n')    
+		myprint(output, '\n<<alert dark "SQUAD COMPOSITION" width:60%>>\n')
+		myprint(output, '\n<div class="flex-row">\n    <div class="flex-col-2 border">\n\n')
 		sort_order = ['Firebrand', 'Scrapper', 'Spellbreaker', "Herald", "Chronomancer", "Reaper", "Scourge", "Dragonhunter", "Guardian", "Elementalist", "Tempest", "Revenant", "Weaver", "Willbender", "Renegade", "Vindicator", "Warrior", "Berserker", "Bladesworn", "Engineer", "Holosmith", "Mechanist", "Ranger", "Druid", "Soulbeast", "Untamed", "Thief", "Daredevil", "Deadeye", "Specter", "Catalyst", "Mesmer", "Mirage", "Virtuoso", "Necromancer", "Harbinger"]
 
 		myprint(output, '<div style="overflow-x:auto;">\n\n')
@@ -279,8 +278,7 @@ if __name__ == '__main__':
 
 		#start Fight DPS Review insert
 		myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Fight Review">')    
-		myprint(output, '\n<<alert dark "Excludes skipped fights in the overview" width:60%>>\n')
-		myprint(output, '\n!!!Damage Output Review by Fight-#\n\n')
+		myprint(output, '\n<<alert dark "Damage Output Review by Fight-#" width:60%>>\n\n')
 		FightNum=0
 		for fight in fights:
 			FightNum = FightNum+1
@@ -388,7 +386,7 @@ if __name__ == '__main__':
 
 			#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
 			myprint(output,'<$reveal type="match" state="$:/state/curTab" text="'+config.stat_names[stat]+'">')
-			myprint(output, "\n!!!<<alert secondary src:'"+config.stat_names[stat].upper()+"' class:'leftbar border-dark'>>\n")
+			myprint(output, "\n!!!<<alert dark src:'"+config.stat_names[stat].upper()+"' width:60%>>\n")
 			
 			if stat == 'dist':
 				myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
@@ -435,7 +433,7 @@ if __name__ == '__main__':
 
 	#print Auras-Out details
 	myprint(output,'<$reveal type="match" state="$:/state/curTab" text="Auras - Out">')
-	myprint(output, '\n!!!<<alert secondary src:"Auras - Out" class:"leftbar border-dark">>\n')
+	myprint(output, '\n!!!<<alert dark src:"Auras - Out" width:60%>>\n')
 	for stat in config.aurasOut_to_compute:
 		myprint(output, '<$button setTitle="$:/state/curAuras-Out" setTo="'+config.stat_names[stat]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+config.stat_names[stat]+' </$button>')
 
@@ -464,7 +462,7 @@ if __name__ == '__main__':
 
 	#print Defense details
 	myprint(output,'<$reveal type="match" state="$:/state/curTab" text="Defensive Stats">')
-	myprint(output, '\n!!!<<alert secondary src:"Defensive Stats" class:"leftbar border-dark">>\n')
+	myprint(output, '\n!!!<<alert dark src:"Defensive Stats" width:60%>>\n')
 	myprint(output, '<$button setTitle="$:/state/curDefense" setTo="Overview" selectedClass="" class="btn btn-sm btn-dark" style=""> Defensive Overview </$button>')
 	for stat in config.defenses_to_compute:
 		myprint(output, '<$button setTitle="$:/state/curDefense" setTo="'+config.stat_names[stat]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+config.stat_names[stat]+' </$button>')
@@ -511,6 +509,7 @@ if __name__ == '__main__':
 
 	#print table of accounts that fielded support characters
 	myprint(output,'<$reveal type="match" state="$:/state/curTab" text="Support">')
+	myprint(output, '\n<<alert dark "Support Players" width:60%>>\n')
 	myprint(output, "\n")
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
 	# print table header
@@ -530,6 +529,7 @@ if __name__ == '__main__':
 
 	#print table of accounts with attendance details
 	myprint(output,'<$reveal type="match" state="$:/state/curTab" text="Attendance">')
+	myprint(output, '\n<<alert dark "Attendance" width:60%>>\n')
 	myprint(output, "\n")
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
 	# print table header
@@ -556,7 +556,7 @@ if __name__ == '__main__':
 
 	#start Control Effects Outgoing insert
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Control Effects - Out">')    
-	myprint(output, '\n<<alert-leftbar success "Outgoing Control Effects generated by the Squad" width:60%, class:"font-weight-bold">>\n\n')
+	myprint(output, '\n<<alert dark "Outgoing Control Effects generated by the Squad" width:60%>>\n\n')
 	Control_Effects = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: "Hunter's Mark"}
 	for C_E in Control_Effects:
 		myprint(output, '<$button setTitle="$:/state/curControl-Out" setTo="'+Control_Effects[C_E]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Control_Effects[C_E]+' </$button>')
@@ -620,7 +620,7 @@ if __name__ == '__main__':
 
 	#start Control Effects Incoming insert
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Control Effects - In">')    
-	myprint(output, '\n<<alert-leftbar danger "Incoming Control Effects generated by the Enemy" width:60%, class:"font-weight-bold">>\n\n')
+	myprint(output, '\n<<alert dark "Incoming Control Effects generated by the Enemy" width:60%>>\n\n')
 	Control_Effects = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: "Hunter's Mark"}
 	for C_E in Control_Effects:
 		myprint(output, '<$button setTitle="$:/state/curControl-In" setTo="'+Control_Effects[C_E]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Control_Effects[C_E]+' </$button>')
@@ -689,7 +689,7 @@ if __name__ == '__main__':
 	#start Buff Uptime Table insert
 	uptime_Order = ['stability',  'protection',  'aegis',  'might',  'fury',  'resistance',  'resolution',  'quickness',  'swiftness',  'alacrity',  'vigor',  'regeneration']
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Buff Uptime">')    
-	myprint(output, '\n<<alert-leftbar light "Total Buff Uptime % across all fights attended.\n Current Formula: (((Sum of (fight duration * Uptime%))/Attendance)*100)" width:60%, class:"font-weight-bold">>\n\n')
+	myprint(output, '\n<<alert dark "Total Buff Uptime %" width:60%>>\n\n')
 	
 	myprint(output, '\n---\n')
 	myprint(output, '\n---\n')
@@ -729,7 +729,7 @@ if __name__ == '__main__':
 	for uptime_prof_name in stacking_uptime_Table:
 		max_stacking_buff_fight_time = max(stacking_uptime_Table[uptime_prof_name]['duration_might'], max_stacking_buff_fight_time)
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Stacking Buffs">')    
-	myprint(output, '\n<<alert-leftbar info "Stacking Buffs" width:60%, class:"font-weight-bold">>\n\n')
+	myprint(output, '\n<<alert dark "Stacking Buffs" width:60%>>\n\n')
 	for stacking_buff in stacking_buff_Order:
 		myprint(output, '<$button setTitle="$:/state/curStackingBuffs" setTo="'+stacking_buff+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+stacking_buff+'</$button>')
 	
@@ -842,7 +842,7 @@ if __name__ == '__main__':
 
 	#start Stacking Buff Uptime Table insert
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Damage with Buffs">')    
-	myprint(output, '\n<<alert-leftbar light "Damage with Buffs" width:60%, class:"font-weight-bold">>\n\n')
+	myprint(output, '\n<<alert dark "Damage with Buffs" width:60%>>\n\n')
 	myprint(output, '\n---\n')
 	myprint(output, '!!! `Damage with buff %` \n')
 	myprint(output, '!!! Percentage of damage done with a buff, similar to uptime %, but based on damage dealt \n')
@@ -987,8 +987,9 @@ if __name__ == '__main__':
 
 	#start On Tag Death insert
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Death_OnTag">')    
-	myprint(output, '\n<<alert-leftbar light "Avg Dist calculation stops on initial player death or Tag Death to avoiding respawn range<br>On Tag Death Review Current Formula: (On Tag <= 600 Range, Off Tag >600 and <=5000, Run Back Death > 5000)" width:60%, class:"font-weight-bold">>\n\n')
-	
+	myprint(output, '\n<<alert dark "On Tag Death Review" width:60%>>\n\n')
+	myprint(output, '\nAvg Dist calculation stops on initial player death or Tag Death to avoiding respawn range')
+	myprint(output, '\nOn Tag Death Review Current Formula: (On Tag <= 600 Range, Off Tag >600 and <=5000, Run Back Death > 5000)\n')
 	myprint(output, '\n---\n')
 	myprint(output, '\n---\n')
 
@@ -1025,8 +1026,8 @@ if __name__ == '__main__':
 	#Downed Healing
 	down_Heal_Order = {14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Renewal of Water', 5762: 'Renewal of Fire', 5760: 'Renewal of Air', 5761: 'Renewal of Earth', 10611: 'Signet of Undeath', 12596: "Nature's Renewal"}
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Downed_Healing">')    
-	myprint(output, '\n<<alert-leftbar light "Healing to downed players (Instant Revive Skills) - requires Heal Stat addon for ARCDPS to track" width:60%, class:"font-weight-bold">>\n\n')
-	
+	myprint(output, '\n<<alert dark "Healing to downed players" width:60%>>\n\n')
+	myprint(output, '\nRequires Heal Stat addon for ARCDPS to track\n')
 	myprint(output, '\n---\n')
 	myprint(output, '\n---\n')
 
@@ -1084,7 +1085,7 @@ if __name__ == '__main__':
 	#start Offensive Stat Table insert
 	offensive_Order = ['Critical',  'Flanking',  'Glancing',  'Moving',  'Blinded',  'Interupt',  'Invulnerable',  'Evaded',  'Blocked']
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Offensive Stats">')    
-	myprint(output, '\n<<alert-leftbar light "Offensive Stats across all fights attended." width:60%, class:"font-weight-bold">>\n\n')
+	myprint(output, '\n<<alert dark "Offensive Stats across all fights attended." width:60%>>\n\n')
 	
 	myprint(output, '\n---\n')
 	myprint(output, '\n---\n')
@@ -1203,7 +1204,7 @@ if __name__ == '__main__':
 	}
 	
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="FBPages">\n')    
-	myprint(output, '\n<<alert-leftbar light "Firebrand Pages" width:60%, class:"font-weight-bold">>\n\n')
+	myprint(output, '\n<<alert dark "Firebrand Pages" width:60%>>\n\n')
 
 	myprint(output, "|table-caption-top|k")
 	myprint(output, "|Firebrand page utilization, pages/minute|c")
@@ -1312,7 +1313,7 @@ if __name__ == '__main__':
 
 	#start Dashboard insert
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Dashboard">')    
-	myprint(output, '\n<<alert-leftbar light "Dashboard for various charts" width:60%, class:"font-weight-bold">>\n\n')
+	myprint(output, '\n<<alert dark "Dashboard for various charts" width:60%>>\n\n')
 	Dashboard_Charts = ["Kills/Downs/DPS", "Fury/Might/DPS", "Deaths/DamageTaken/DistanceFromTag", "Cleanses/Heals/BoonScore", "BoonStrips/OutgoingControlScore/DPS", "Profession_DPS_BoxPlot", "Player_DPS_BoxPlot", "Profession_SPS_BoxPlot", "Player_SPS_BoxPlot", "Profession_CPS_BoxPlot", "Player_CPS_BoxPlot", "Profession_HPS_BoxPlot", "Player_HPS_BoxPlot"]
 	
 	for chart in Dashboard_Charts:
@@ -1413,7 +1414,7 @@ if __name__ == '__main__':
 	sorted_DPSStats = list(map(lambda x: x[0], sorted_DPSStats))
 
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="DPSStats">')    
-	myprint(output, '\n<<alert-leftbar light "Experimental DPS stats" width:60%, class:"font-weight-bold">>\n\n')
+	myprint(output, '\n<<alert dark "Experimental DPS stats" width:60%>>\n\n')
 	
 	myprint(output, '\n---\n')
 	myprint(output, '!!! `Chunk Damage(t)` [`Ch(t)DPS`] \n')
@@ -1455,7 +1456,7 @@ if __name__ == '__main__':
 
 	# Burst Damage
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Burst Damage">\n')    
-	myprint(output, '\n<<alert-leftbar light "Experimental DPS stats" width:60%, class:"font-weight-bold">>\n\n')
+	myprint(output, '\n<<alert dark "Experimental DPS stats" width:60%>>\n\n')
 	
 	myprint(output, '---\n')
 	myprint(output, '!!! `Burst Damage(t)` [`Bur(t)`] \n')
