@@ -1831,7 +1831,14 @@ def collect_stat_data(args, config, log, anonymize=False):
 			if 'rotation' in player_data:
 				for rotation_skill in player_data['rotation']:
 					skill_id = str(rotation_skill['id'])
-					player.skill_usage[skill_id] = player.skill_usage.get(skill_id, 0) + len(rotation_skill['skills'])
+
+					skill_casts = 0
+					for skill_usage in rotation_skill['skills']:
+						# When the duration equals the timeLost, the skill was interrupted or cancelled	
+						if skill_usage['duration'] == 0 or skill_usage['duration'] != -skill_usage['timeGained']:
+							skill_casts += 1
+
+					player.skill_usage[skill_id] = player.skill_usage.get(skill_id, 0) + skill_casts
 
 					if skill_id not in profession_skills[profession]:
 						profession_skills[profession].append(skill_id)
