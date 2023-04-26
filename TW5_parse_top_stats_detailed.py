@@ -676,7 +676,15 @@ if __name__ == '__main__':
 	Output_String = ""
 	myprint(output, "|thead-dark|k")
 	for profession in profession_skills_to_include:
-		BP_Header += '<$button set="$:/state/SkillUsage" class="btn btn-sm btn-dark" setTo="'+profession+'">{{'+profession+'}}'+profession+'</$button> '
+		has_player_of_profession = False
+		for player in players:
+			if player.profession != profession:
+				continue
+			has_player_of_profession = True
+			break
+
+		if has_player_of_profession:
+			BP_Header += '<$button set="$:/state/SkillUsage" class="btn btn-sm btn-dark" setTo="'+profession+'">{{'+profession+'}}'+profession+'</$button> '
 
 	myprint(output, BP_Header)
 	myprint(output, '\n\n---\n\n')
