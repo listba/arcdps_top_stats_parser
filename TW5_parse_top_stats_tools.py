@@ -90,6 +90,8 @@ class Player:
 	wt_dps_duration: list = field(default_factory=list)     # list of enemies present by fight
 	wt_dps_damage: list = field(default_factory=list)       # list of enemies present by fight
 
+	skill_usage: dict = field(default_factory=dict)           # Skill usage statistics
+
 	def initialize(self, config):
 		self.total_stats = {key: 0 for key in config.stats_to_compute}
 		self.total_stats_group = {key: 0 for key in config.stats_to_compute}
@@ -190,6 +192,9 @@ stacking_uptime_Table = {}
 
 #Personal Buff Tracking
 buffs_personal = {}
+
+#Profession Skills Tracking
+profession_skills = {}
 
 #Skill Dictionary from all Fights
 skill_Dict = {}
@@ -1819,6 +1824,17 @@ def collect_stat_data(args, config, log, anonymize=False):
 				players.append(player)
 
 			player = players[player_index[name_and_prof]]
+
+			if profession not in profession_skills:
+				profession_skills[profession] = []
+
+			if 'rotation' in player_data:
+				for rotation_skill in player_data['rotation']:
+					skill_id = str(rotation_skill['id'])
+					player.skill_usage[skill_id] = player.skill_usage.get(skill_id, 0) + len(rotation_skill['skills'])
+
+					if skill_id not in profession_skills[profession]:
+						profession_skills[profession].append(skill_id)
 
 			#if args.filetype == "xml":
 			#    player.stats_per_fight[fight_number]['time_active'] = get_stat_from_player_xml(player_data, players_running_healing_addon, 'time_active', config)

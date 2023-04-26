@@ -109,7 +109,7 @@ if __name__ == '__main__':
 	'Offensive': ['Offensive Stats', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Power Damage', 'Condi Damage', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In'],
 	'Support': ['Healing', 'Barrier', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
-	'Boons & Buffs': ['Stability', 'Protection', 'Aegis', 'Might', 'Fury', 'Resistance', 'Resolution', 'Quickness', 'Swiftness', 'Superspeed', 'Alacrity', 'Vigor', 'Regeneration', 'Auras - Out', 'Personal Buffs', 'Buff Uptime', 'Stacking Buffs'],
+	'Boons & Buffs': ['Stability', 'Protection', 'Aegis', 'Might', 'Fury', 'Resistance', 'Resolution', 'Quickness', 'Swiftness', 'Superspeed', 'Alacrity', 'Vigor', 'Regeneration', 'Auras - Out', 'Personal Buffs', 'Skill Casts', 'Buff Uptime', 'Stacking Buffs'],
 	'Dashboard': ["Dashboard"]
 		}
 
@@ -216,6 +216,527 @@ if __name__ == '__main__':
 	myprint(output, "</$reveal>\n")     
 
 	# end Personal Bufffs
+
+	#Skill casts
+	all_classes_post = [
+		'12836', # Water Blast Combo
+		'9284', # Flame Blast
+		'9428', # Frost Burst
+		'9292', # Lightning Strike
+	]
+	profession_skills_to_include = {		
+		"Tempest": [
+			'5492', # Fire Attunement
+			'5493', # Water Attunement
+			'5494', # Air Attunement
+			'5495', # Earth Attunement
+			'29706', # Overload Fire
+			'29415', # Overload Water
+			'29719', # Overload Air
+			'29618', # Overload Earth
+			'51711', # Transmute Fire
+			'51646', # Transmute Frost
+			'51662', # Transmute Lightning
+			'51684', # Transmute Earth			
+			'29535', # 'Wash the Pain Away!'
+			'30432', # 'Aftershock!'
+			'29948', # 'Flash-Freeze!'
+			'30047', # 'Eye of the Storm!'
+			'30662', # 'Feel the Burn!'
+			'29968', # 'Rebound!'
+			'5762', # Renewal of Fire
+			'5763', # Renewal of Water
+			'5760', # Renewal of Air
+			'5761', # Renewal of Earth
+		],
+		"Weaver": [
+			'43470', # Dual Fire Attunement
+			'41166', # Dual Water Attunement
+			'42264', # Dual Air Attunement
+			'44857', # Dual Earth Attunement
+			'-7', # Fire Earth Attunement
+			'-14', # Earth Fire Attunement
+			'-6', # Fire Air Attunement
+			'-11', # Air Fire Attunement						
+			'5491', # Fireball
+			'5548', # Lava Font
+			'5679', # Flame Burst
+			'5680', # Burning Retreat
+			'5501', # Meteor Shower			
+			'5550', # Ice Spike
+			'5515', # Frozen Ground
+			'5551', # Healing Rain
+			'5528', # Eruption
+			'5683', # Unsteady Ground
+			'5553', # Gust
+			'5682', # Windborne Speed
+			'5671', # Static Field
+			'41125', # Plasma Blast
+			'43762', # Pyroclastic Blast
+			'5507', # Ether Renewal
+			'5736', # Firestorm
+			'5737', # Lightning Storm
+			'5738', # Sandstorm
+			'5641', # Arcane Shield
+			'15795', # Mist Form
+			'5536', # Lightning Flash
+			'45746', # Twist of Fate
+			'5567', # Conjure Frost Bow
+			'5516', # Conjure Fiery Greatsword
+		],
+		"Catalyst": [
+			'5492', # Fire Attunement
+			'5493', # Water Attunement
+			'5494', # Air Attunement
+			'5495', # Earth Attunement			
+			'5491', # Fireball
+			'5548', # Lava Font
+			'5679', # Flame Burst
+			'5680', # Burning Retreat
+			'5501', # Meteor Shower			
+			'5550', # Ice Spike
+			'5515', # Frozen Ground
+			'5551', # Healing Rain
+			'5528', # Eruption
+			'5683', # Unsteady Ground			
+			'5553', # Gust
+			'5682', # Windborne Speed
+			'5671', # Static Field
+			'5507', # Ether Renewal
+			'5736', # Firestorm
+			'5737', # Lightning Storm
+			'5738', # Sandstorm
+			'5641', # Arcane Shield
+			'15795', # Mist Form
+			'5536', # Lightning Flash
+			'62965', # Relentless Fire
+			'5567', # Conjure Frost Bow
+			'62725', # Elemental Celerity
+			'62813', # Deploy Jade Sphere
+			'62723', # Deploy Jade Sphere
+			'62940', # Deploy Jade Sphere
+			'62837', # Deploy Jade Sphere
+		],
+		"Spellbreaker": [
+			'44165', # Full Counter
+			'40601', # Earthshaker
+			'42494', # Flurry
+			'14366', # Savage Leap
+			'14393', # Charge
+			'14394', # Call of Valor
+			'14358', # Hammer Swing
+			'14386', # Fierce Blow
+			'14482', # Hammer Shock
+			'14359', # Staggering Blow
+			'14511', # Backbreaker
+			'21815', # Defiant Stance
+			'43123', # Break Enchantments
+			'14408', # Banner of Tactics
+			'14412', # Balanced Stance
+			'14392', # Endure Pain
+			'45333', # Winds of Disenchantment
+			'14419', # Battle Standard
+			'14268', # Reckless Impact
+			'45534', # Loss Aversion
+		],
+		"Berserker": [
+			'29923', # Scorched Earth
+			'29852', # Arc Divider
+			'30879', # Rupturing Smash
+			'29644', # Gun Flame			
+			'14545', # Arcing Slice
+			'14546', # Arcing Slice
+			'14547', # Arcing Slice
+			'14375', # Arcing Slice			
+			'14520', # Combustive Shot
+			'14521', # Combustive Shot
+			'14522', # Combustive Shot
+			'14506', # Combustive Shot		
+			'14512', # Earthshaker
+			'14513', # Earthshaker
+			'14514', # Earthshaker
+			'40601', # Earthshaker		
+			'14356', # Greatsword Swing
+			'14554', # Hundred Blades
+			'14447', # Whirlwind Attack
+			'14510', # Bladetrail
+			'14446', # Rush
+			'14431', # Dual Shot
+			'14519', # Fan of Fire
+			'14381', # Arcing Arrow
+			'14505', # Smoldering Arrow
+			'14504', # Pin Down
+			'30189', # Blood Reckoning
+			'14410', # Signet of Fury
+			'14406', # Berserker Stance
+			'14412', # Balanced Stance
+			'14392', # Endure Pain
+			'29613', # Sundering Leap
+			'14405', # Banner of Strength
+			'14404', # Signet of Might
+			'14419', # Battle Standard
+			'14355', # Signet of Rage
+		],
+		"Firebrand": [
+			'13594', # Selfless Daring
+			'42449', # Chapter 3: Heated Rebuke
+			'42898', # Epilogue: Ashes of the Just
+			'42008', # Chapter 4: Shining River
+			'42925', # Epilogue: Eternal Oasis
+			'41836', # Chapter 3: Valiant Bulwark
+			'40988', # Chapter 4: Stalwart Stand
+			'44455', # Epilogue: Unbroken Lines
+			'9122', # Bolt of Wrath
+			'9140', # Holy Strike
+			'9143', # Symbol of Swiftness
+			'9265', # Empower
+			'9144', # Line of Warding
+			'9109', # True Strike
+			'9111', # Symbol of Faith
+			'9086', # Protector's Strike
+			'9121', # Protector's Strike
+			'9087', # Shield of Judgment
+			'9091', # Shield of Absorption
+			'45047', # Core Cleave
+			'40624', # Symbol of Vengeance
+			'45402', # Blazing Edge
+			'41714', # Mantra of Solace
+			'-20', # Restoring Reprieve or Rejunevating Respite
+			'9253', # Hallowed Ground
+			'9128', # Sanctuary
+			'9163', # Signet of Mercy
+			'9251', # Wall of Reflection
+			'31159', # Purging Flames
+			'9247', # Judge's Intervention
+			'45460', # Mantra of Lore
+			'-21', # Opening Passage or Clarified Conclusion			
+			'43357', # Mantra of Liberation
+			'-23', # Portent of Freedom or Unhindered Delivery
+			'9154', # Renewed Focus
+			'29965', # 'Feel My Wrath!'
+		],
+		"Dragonhunter": [
+			'29887', # Spear of Justice
+			'33134', # Hunter's Verdict
+			'30783', # Wings of Resolve
+			'30029', # Shield of Courage			
+			'9098', # Orb of Wrath
+			'9090', # Symbol of Punishment
+			'9099', # Chains of Light
+			'9104', # Zealot's Flame
+			'9089', # Zealot's Fire
+			'9088', # Cleansing Flame			
+			'9122', # Bolt of Wrath
+			'9140', # Holy Strike
+			'9143', # Symbol of Swiftness
+			'9265', # Empower
+			'9144', # Line of Warding			
+			'30471', # Puncture Shot
+			'30229', # True Shot
+			'29630', # Deflecting Shot
+			'29789', # Symbol of Energy
+			'30628', # Hunter's Ward			
+			'9102', # Shelter
+			'30364', # Procession of Blades
+			'9168', # Sword of Justice
+			'29786', # Test of Faith
+			'9163', # Signet of Mercy
+			'9093', # Bane Signet			
+			'9154', # Renewed Focus
+			'30273', # Dragon's Maw
+		],
+		"Chronomancer": [
+			'56930', # Split Second
+			'56925', # Split Second
+			'56928', # Rewinder
+			'56873', # Time Sink
+			'10192', # Distortion
+			'29830', # Continuum Split
+			'10334', # Blurred Frenzy
+			'10186', # Temporal Curtain
+			'30769', # Echo of Memory
+			'29649', # Deja Vu
+			'30643', # Tides of Time
+			'30305', # Well of Eternity
+			'29578', # Mimic
+			'10244', # Illusion of Life
+			'10203', # Null Field
+			'10187', # Veil
+			'10302', # Feedback
+			'10237', # Mantra of Concentration
+			'10238', # Power Break
+			'30359', # Gravity Well
+			'29519', # Signet of Humility
+		],
+		"Druid": [
+			'31869', # Celestial Avatar
+			'31411', # Release Celestial Avatar
+			'31710', # Solar Beam
+			'31889', # Astral Wisp
+			'31535', # Ancestral Grace
+			'31700', # Vine Surge
+			'31496', # Sublime Conversion
+			'31796', # Cosmic Ray
+			'32242', # Seed of Life
+			'31318', # Lunar Impact
+			'31894', # Rejuvenating Tides
+			'31503', # Natural Convergence
+			'12480', # Splitblade
+			'12466', # Ricochet
+			'12490', # Winter's Bite
+			'12620', # Hunter's Call
+			'12621', # Call of the Wild
+			'12489', # Healing Spring
+			'31914', # 'We Heal As One!'
+			'12631', # 'Protect Me!'
+			'31819', # Glyph of Rejuvenation
+			'31607', # Glyph of Alignment
+			'31658', # Glyph of Equality
+			'55046', # Glyph of the Stars
+			'31867', # Glyph of Rejuvenation
+			'31348', # Glyph of Alignment
+			'31401', # Glyph of Equality
+			'55024', # Glyph of the Stars
+		],
+		"Herald": [
+			'28085', # Legendary Dragon Stance
+			'28419', # Legendary Dwarf Stance
+			'28134', # Legendary Assassin Stance
+			'28494', # Legendary Demon Stance
+			'28549', # Hammer Bolt
+			'28253', # Coalescence of Ruin
+			'27976', # Phase Smash
+			'28110', # Drop the Hammer
+			'29057', # Preparation Thrust
+			'29233', # Chilling Isolation
+			'27220', # Facet of Light
+			'28379', # Facet of Darkness
+			'27014', # Facet of Elements
+			'26644', # Facet of Strength
+			'27760', # Facet of Chaos			
+			'27162', # Elemental Blast
+			'28113', # Burst of Strength
+			'28075', # Chaotic Release
+			'28516', # Inspiring Reinforcement
+			'26557', # Vengeful Hammers			
+			'27975', # Rite of the Great Dwarf
+		],
+		"Vindicator": [
+			'28419', # Legendary Dwarf Stance
+			'28494', # Legendary Demon Stance
+			'28134', # Legendary Assassin Stance
+			'28195', # Legendary Centaur Stance
+			'62749', # Legendary Alliance
+			'62757', # Energy Meld
+			'62693', # Death Drop
+			'62689', # Saint's Shield
+			'28549', # Hammer Bolt
+			'28253', # Coalescence of Ruin
+			'27976', # Phase Smash
+			'28110', # Drop the Hammer
+			'62913', # Mist Swing
+			'62692', # Mist Unleashed
+			'62895', # Phantom's Onslaught
+			'62713', # Phantom's Onslaught
+			'62921', # Imperial Guard
+			'62929', # Eternity's Requiem
+			'28516', # Inspiring Reinforcement
+			'26557', # Vengeful Hammers			
+			'27975', # Rite of the Great Dwarf
+			'62719', # Selfish Spirit
+			'62832', # Nomad's Advance
+			'62962', # Scavenger Burst
+			'62878', # Reaver's Rage
+			'62942', # Spear of Archemorus
+			'62680', # Selfless Spirit
+			'62702', # Battle Dance
+			'62941', # Tree Song
+			'62687', # Urn of Saint Viktor
+			'62738', # Drop Urn of Saint Viktor
+			'28427', # Ventari's Will
+			'29310', # Protective Solace
+			'29197', # Purifying Essence
+			'29114', # Energy Expulsion
+		],
+		"Scrapper": [
+			'59562', # Explosive Entrance
+			'29505', # Reconstruction Field
+			'30027', # Defense Field
+			'30279', # Chemical Field
+			'31167', # Spare Capacitor
+			'29665', # Bypass Coating			
+			'56920', # Function Gyro
+			'30501', # Positive Strike
+			'30088', # Electro-whirl
+			'30665', # Rocket Charge
+			'29840', # Shock Shield
+			'30713', # Thunderclap
+			'30357', # Medic Gyro
+			'29921', # Shredder Gyro
+			'31248', # Blast Gyro	
+			'29739', # Purge Gyro
+			'5927', # Flamethrower
+			'5928', # Flame Jet
+			'5931', # Flame Blast
+			'5930', # Air Blast
+			'5929', # Napalm
+			'5996', # Magnet
+			'5868', # Supply Crate
+			'30800', # Elite Mortar Kit
+			'30371', # Mortar Shot
+			'30885', # Poison Gas Shell
+			'30307', # Endothermic Shell
+			'30121', # Flash Shell
+			'30032', # Elixir Shell
+		],
+		"Scourge": [
+			'44946', # Manifest Sand Shade
+			'43448', # Sand Cascade
+			'44663', # Desert Shroud			
+			'10561', # Rending Claws
+			'10528', # Ghastly Claws
+			'10701', # Unholy Feast
+			'55050', # Soul Grasp
+			'10555', # Spinal Shivers			
+			'10698', # Blood Curse
+			'10532', # Grasping Dead
+			'10709', # Feast of Corruption
+			'51647', # Devouring Darkness
+			'10705', # Deathly Swarm
+			'10706', # Enfeebling Blood	
+			'10596', # Necrotic Grasp
+			'19117', # Mark of Blood
+			'10605', # Chillblains
+			'19116', # Putrid Mark
+			'19115', # Reaper's Mark	
+			'43148', # Sand Flare			
+			'10548', # Consume Conditions
+			'10546', # Well of Suffering
+			'10545', # Well of Corruption
+			'10607', # Well of Darkness
+			'10609', # Well of Power
+			'40274', # Trail of Anguish
+			'42917', # Sand Swell
+			'42355', # Ghastly Breach
+			'13906', # Lesser Spinal Shivers
+		],
+		"Reaper": [
+			'30792', # Reaper's Shroud
+			'29442', # Life Rend
+			'29458', # Life Slash
+			'30278', # Life Reap
+			'30825', # Death's Charge
+			'29958', # Infusing Terror
+			'29709', # Terrify
+			'30504', # Soul Spiral
+			'30557', # Executioner's Scythe
+			'10561', # Rending Claws
+			'10528', # Ghastly Claws
+			'10701', # Unholy Feast
+			'55050', # Soul Grasp
+			'10555', # Spinal Shivers
+			'10698', # Blood Curse
+			'10532', # Grasping Dead
+			'10709', # Feast of Corruption
+			'51647', # Devouring Darkness
+			'10705', # Deathly Swarm
+			'10706', # Enfeebling Blood
+			'29705', # Dusk Strike
+			'30799', # Fading Twilight
+			'29867', # Chilling Scythe
+			'30163', # Gravedigger
+			'30860', # Death Spiral
+			'29855', # Nightfall
+			'29740', # Grasping Darkness
+			'10596', # Necrotic Grasp
+			'19117', # Mark of Blood
+			'10605', # Chillblains
+			'19116', # Putrid Mark
+			'19115', # Reaper's Mark
+			'10546', # Well of Suffering
+			'10545', # Well of Corruption
+			'10607', # Well of Darkness
+			'10609', # Well of Power
+			'30488', # 'Your Soul Is Mine!'
+			'21762', # Signet of Vampirism
+			'29666', # 'Nothing Can Save You!'
+			'30105', # 'Chilled to the Bone!'
+			'10550', # Lich Form
+			'10549', # Plaguelands
+		],
+	}
+	
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Skill Casts">\n')    
+	myprint(output, '\n!!!Skill casts / minute\n')
+	myprint(output, '\n---\n')    
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
+
+	BP_Header = ""
+	Prof_String = ""
+	Output_String = ""
+	myprint(output, "|thead-dark|k")
+	for profession in profession_skills_to_include:
+		BP_Header += '<$button set="$:/state/SkillUsage" class="btn btn-sm btn-dark" setTo="'+profession+'">{{'+profession+'}}'+profession+'</$button> '
+
+	myprint(output, BP_Header)
+	myprint(output, '\n\n---\n\n')
+
+	for profession in profession_skills_to_include:
+		skills_to_include = [
+			*profession_skills_to_include[profession],
+			*all_classes_post,
+		]
+
+		Prof_Header = "|{{"+profession+"}}Name | !Active Time|"
+		for buff in skills_to_include:
+			# We only want to show skil casts if they happened in these logs
+			if profession not in profession_skills or buff not in profession_skills[profession]:
+				continue
+
+			icon = skill_Dict[buff]['icon']
+			tooltip = skill_Dict[buff]['name'].replace('"',"'")
+			Prof_Header += '![img width=24 tooltip="'+tooltip+'" ['+icon+']]|'
+
+		myprint(output, '\n<$reveal type="match" state="$:/state/SkillUsage" text="'+profession+'">\n')
+		myprint(output, "|thead-dark sortable|k")
+		myprint(output, Prof_Header+"h")
+
+		professionMaxActiveTime = 0
+		for player in players:
+			if player.profession != profession:
+				continue
+
+			professionMaxActiveTime = max(professionMaxActiveTime, player.duration_active)
+
+		for player in players:
+			if player.profession != profession:
+				continue
+			
+			playerName = player.name
+			playerActiveTime = player.duration_active
+
+			if (playerActiveTime * 100) / professionMaxActiveTime < config.min_attendance_percentage_for_top:
+				continue
+
+			buffUptimes="|"+playerName+" "
+			buffUptimes+="| "+str(playerActiveTime)
+			for buff in skills_to_include:
+				# We only want to show skil casts if they happened in these logs
+				if profession not in profession_skills or buff not in profession_skills[profession]:
+					continue
+
+				if buff in player.skill_usage and playerActiveTime > 0:
+					buffUptimes+="| "+str(round((60 * player.skill_usage[buff]) / playerActiveTime, 2))
+				else:
+					buffUptimes+="| 0.00"
+			myprint(output, buffUptimes+"|")
+		myprint(output, "\n</$reveal>\n")
+
+	#end reveal
+	myprint(output, '\n\n</div>\n\n')
+	myprint(output, "</$reveal>\n")     
+
+	# end Skill casts
 
 	if include_comp_and_review:
 		#Squad Composition Testing
