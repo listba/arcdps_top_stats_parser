@@ -23,3 +23,4 @@ type: text/vnd.tiddlywiki
 <$action-setfield $tiddler="$:/state/curDamageWithBuffs" $value="might"/>
 <$action-setfield $tiddler="$:/state/curDefense" $value="Downed"/>
 <$action-setfield $tiddler="$:/state/PersonalBuffs" $value="Firebrand"/>
+<$action-setfield $tiddler="$:/state/SkillUsage" $value="Firebrand"/>
