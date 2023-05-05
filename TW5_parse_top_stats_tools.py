@@ -195,6 +195,7 @@ buffs_personal = {}
 
 #Profession Skills Tracking
 profession_skills = {}
+prof_role_skills = {}
 
 #Skill Dictionary from all Fights
 skill_Dict = {}
@@ -837,7 +838,7 @@ def write_support_players(players, top_players, stat, output_file):
 		if stat == 'rips' and (player.profession == 'Chronomancer' or player.profession == 'Spellbreaker'):
 			print_string = "|"+player.account+" |"+player.name+" |"+player.profession+" | "+str(player.num_fights_present)+"| "+str(player.duration_fights_present)+"| "+stat+" |"+guildStatus+" |"
 			myprint(output_file, print_string)
-		if stat == 'cleanses' and (player.profession == 'Scrapper' or player.profession == 'Tempest' or player.profession == 'Druid'):
+		if stat == 'cleanses' and (player.profession == 'Scrapper' or player.profession == 'Tempest' or player.profession == 'Druid' or player.profession == 'Willbender'):
 			print_string = "|"+player.account+" |"+player.name+" |"+player.profession+" | "+str(player.num_fights_present)+"| "+str(player.duration_fights_present)+"| "+stat+" |"+guildStatus+" |"
 			myprint(output_file, print_string)
 		if stat == 'stability' and (player.profession == 'Firebrand'):
@@ -1361,7 +1362,7 @@ def write_support_xls(players, top_players, stat, xls_output_filename, supportCo
 			sheet2.write(supportCount+1, 6, stat)
 			supportCount +=1
 
-		if stat == 'cleanses' and (player.profession == 'Scrapper' or player.profession == 'Tempest' or player.profession == 'Druid'):
+		if stat == 'cleanses' and (player.profession == 'Scrapper' or player.profession == 'Tempest' or player.profession == 'Druid' or player.profession == 'Willbender'):
 			sheet2.write(supportCount+1, 0, fileDate.strftime("%Y-%m-%d"))
 			sheet2.write(supportCount+1, 1, player.account)
 			sheet2.write(supportCount+1, 2, player.name)
@@ -1825,13 +1826,48 @@ def collect_stat_data(args, config, log, anonymize=False):
 
 			player = players[player_index[name_and_prof]]
 
+			playerRole=find_sub_type(player_data, 1)
+
+			if profession+' '+playerRole not in prof_role_skills:
+				prof_role_skills[profession+' '+playerRole] = {}
+				prof_role_skills[profession+' '+playerRole]['castTotals'] = {}
+				prof_role_skills[profession+' '+playerRole]['player'] = {}
+
 			if profession not in profession_skills:
 				profession_skills[profession] = []
+
+			if name not in prof_role_skills[profession+' '+playerRole]['player']:
+				prof_role_skills[profession+' '+playerRole]['player'][name] = {}
+				prof_role_skills[profession+' '+playerRole]['player'][name]['Fights'] = 1
+				prof_role_skills[profession+' '+playerRole]['player'][name]['Skills'] = {}
+			else:
+				prof_role_skills[profession+' '+playerRole]['player'][name]['Fights'] += 1
+				
 
 			if 'rotation' in player_data:
 				for rotation_skill in player_data['rotation']:
 					skill_id = str(rotation_skill['id'])
-
+					skill_name = json_data['skillMap']['s'+skill_id]['name']
+					skill_auto = json_data['skillMap']['s'+skill_id]['autoAttack']
+					#skip unknown skills:
+					if skill_name.isnumeric():
+						continue
+					#skip downed skills, bandage, resurrect and generic excludes
+					downed_skills = {'9149': 'Wrath', '9096': 'Wave of Light', '9095': 'Symbol of Judgement', '28180': 'Essence Sap', '27063': 'Forceful Displacement', '27792': 'Vengeful Blast', '14390': 'Throw Rock', '14515': 'Hammer Toss', '14391': 'Vengeance', '5820': 'Throw Junk', '5962': 'Grappling Line', '5963': 'Booby Trap', '12486': 'Throw Dirt', '12485': 'Thunderclap', '12515': 'Lick Wounds', '13003': 'Trail of Knives', '13138': 'Venomous Knife', '13140': 'Shadow Escape', '13033': 'Smoke Bomb', '5504': 'Discharge Lightning', '5564': 'Vapor Form', '5505': 'Grasping Earth', '10196': 'Mind Blast', '10366': 'Deception', '10224': 'Phantasmal Rogue', '10560': 'Life Leech', '10660': 'Fear', '10559': 'Fetid Ground', '1175': 'Bandage'}
+					heal_downed = {'1006': 'Resurrect', '1066': 'Resurrect', '1175': 'Bandage'}
+					generic_exclude = {'14601': 'Turn Left', '14600':  'Turn Right', '23284':  'Weapon Draw', '23285':  'Weapon Stow', '-2':  'Weapon Swap', '58083':  'Lance', '20285':  'Fire Hollowed Boulder', '9284':  'Flame Blast', '23275':  'Dodge', '21615':  '((276158))', '23267':  '((290194))', '18792':  '((300969))', '18793':  '((300969))', '25533':  '((300969))', '27927':  '((300969))', '30765':  '((300969))'}
+					if skill_id in downed_skills or skill_id in heal_downed or skill_id in generic_exclude:
+						continue
+					#skip auto attack skills
+					if skill_auto:
+						continue
+					#skip node gathering and finishers
+					if 'Gather' in skill_name or 'Finisher' in skill_name or 'Harvest Plants' in skill_name or 'Unbound Magic' in skill_name:
+						continue
+					#skip siege deployment
+					if 'Deploy' in skill_name and 'Jade Sphere' not in skill_name:
+						continue
+				
 					skill_casts = 0
 					for skill_usage in rotation_skill['skills']:
 						# When the duration equals the timeLost, the skill was interrupted or cancelled	
@@ -1840,6 +1876,9 @@ def collect_stat_data(args, config, log, anonymize=False):
 
 					player.skill_usage[skill_id] = player.skill_usage.get(skill_id, 0) + skill_casts
 
+					prof_role_skills[profession+' '+playerRole]['player'][name]['Skills'][skill_id] = prof_role_skills[profession+' '+playerRole]['player'][name]['Skills'].get(skill_id, 0) + skill_casts
+					prof_role_skills[profession+' '+playerRole]['castTotals'][skill_id] = prof_role_skills[profession+' '+playerRole]['castTotals'].get(skill_id, 0) + skill_casts
+					
 					if skill_id not in profession_skills[profession]:
 						profession_skills[profession].append(skill_id)
 
@@ -1952,6 +1991,8 @@ def collect_stat_data(args, config, log, anonymize=False):
 			player.swapped_build |= build_swapped
 			player.stats_per_fight[fight_number]['fight_duration'] = fight.duration
 			player.stats_per_fight[fight_number]['allies'] = fight.allies
+			player.stats_per_fight[fight_number]['role'] = find_sub_type(player_data, fight.duration)
+
 
 		# create lists sorted according to stats
 		sortedStats = {key: list() for key in config.stats_to_compute}
@@ -3531,7 +3572,10 @@ def print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, fou
 			print_string +='\n|'+name+' |'
 			for item in Cmd_Tags[name]:
 				print_string +=" "+str(Cmd_Tags[name][item])+"|"
-			print_string += " "+str(round(Cmd_Tags[name]['Kills']/Cmd_Tags[name]['Deaths'], 2))+"|"
+			if Cmd_Tags[name]['Deaths']:
+				print_string += " "+str(round(Cmd_Tags[name]['Kills']/Cmd_Tags[name]['Deaths'], 2))+"|"
+			else:
+				print_string += " "+str(round(Cmd_Tags[name]['Kills'], 2))+"|"
 	print_string += "\n|Totals: | "+str(sum(tag['Fights'] for tag in Cmd_Tags.values() if tag))+"| "+str(sum(tag['Downs'] for tag in Cmd_Tags.values() if tag))+"| "+str(sum(tag['Kills'] for tag in Cmd_Tags.values() if tag))+"| "+str(sum(tag['Downed'] for tag in Cmd_Tags.values() if tag))+"| "+str(sum(tag['Deaths'] for tag in Cmd_Tags.values() if tag))+"| "
 	totalKDR = round((sum(tag['Kills'] for tag in Cmd_Tags.values() if tag)) / (sum(tag['Deaths'] for tag in Cmd_Tags.values() if tag)),2)
 	print_string += str(totalKDR)+"|f\n"
@@ -4439,23 +4483,25 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	json_dict["squad_offensive"] =  {key: value for key, value in squad_offensive.items()}
 	json_dict["squad_Control"] =  {key: value for key, value in squad_Control.items()}
 	json_dict["enemy_Control"] =  {key: value for key, value in enemy_Control.items()}
-	json_dict["enemy_Control_Player"] =  {key: value for key, value in enemy_Control_Player.items()}
-	json_dict["uptime_Table"] =  {key: value for key, value in uptime_Table.items()}
-	json_dict["stacking_uptime_Table"] =  {key: value for key, value in stacking_uptime_Table.items()}
-	json_dict["auras_TableOut"] =  {key: value for key, value in auras_TableOut.items()}
-	json_dict["Death_OnTag"] =  {key: value for key, value in Death_OnTag.items()}
-	json_dict["Attendance"] =  {key: value for key, value in Attendance.items()}
-	json_dict["DPS_List"] =  {key: value for key, value in DPS_List.items()}
-	json_dict["CPS_List"] =  {key: value for key, value in CPS_List.items()}
-	json_dict["SPS_List"] =  {key: value for key, value in SPS_List.items()}
-	json_dict["HPS_List"] =  {key: value for key, value in HPS_List.items()}
-	json_dict["DPSStats"] =  {key: value for key, value in DPSStats.items()}
-	json_dict["downed_Healing"] =  {key: value for key, value in downed_Healing.items()}
-	json_dict["MOA_Targets"] =  {key: value for key, value in MOA_Targets.items()}
-	json_dict["MOA_Casters"] =  {key: value for key, value in MOA_Casters.items()}
-	json_dict["Buffs_Personal"] =  {key: value for key, value in buffs_personal.items()}
-	json_dict["squad_damage_output"] =  {key: value for key, value in squad_damage_output.items()}
+	#json_dict["enemy_Control_Player"] =  {key: value for key, value in enemy_Control_Player.items()}
+	#json_dict["uptime_Table"] =  {key: value for key, value in uptime_Table.items()}
+	#json_dict["stacking_uptime_Table"] =  {key: value for key, value in stacking_uptime_Table.items()}
+	#json_dict["auras_TableOut"] =  {key: value for key, value in auras_TableOut.items()}
+	#json_dict["Death_OnTag"] =  {key: value for key, value in Death_OnTag.items()}
+	#json_dict["Attendance"] =  {key: value for key, value in Attendance.items()}
+	#json_dict["DPS_List"] =  {key: value for key, value in DPS_List.items()}
+	#json_dict["CPS_List"] =  {key: value for key, value in CPS_List.items()}
+	#json_dict["SPS_List"] =  {key: value for key, value in SPS_List.items()}
+	#json_dict["HPS_List"] =  {key: value for key, value in HPS_List.items()}
+	#json_dict["DPSStats"] =  {key: value for key, value in DPSStats.items()}
+	#json_dict["downed_Healing"] =  {key: value for key, value in downed_Healing.items()}
+	#json_dict["MOA_Targets"] =  {key: value for key, value in MOA_Targets.items()}
+	#json_dict["MOA_Casters"] =  {key: value for key, value in MOA_Casters.items()}
+	#json_dict["Buffs_Personal"] =  {key: value for key, value in buffs_personal.items()}
+	#json_dict["squad_damage_output"] =  {key: value for key, value in squad_damage_output.items()}
 	json_dict["skill_Dict"] =  {key: value for key, value in skill_Dict.items()}
+	json_dict["prof_role_skills"] =  {key: value for key, value in prof_role_skills.items()}
+	
 
 		
 	with open(output_file, 'w') as json_file:
