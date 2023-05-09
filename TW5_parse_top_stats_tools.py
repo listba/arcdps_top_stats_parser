@@ -2966,46 +2966,47 @@ def get_stats_from_fight_json(fight_json, config, log):
 		player_combat_time = sum_breakpoints(get_combat_time_breakpoints(player)) / 1000
 
 		#Collect Outgoing Healing adn Barrier by Target
-		if 'usedExtensions' not in fight_json:
-			players_running_healing_addon = []
-		else:
-			extensions = fight_json['usedExtensions']
-			for extension in extensions:
-				if extension['name'] == "Healing Stats":
-					players_running_healing_addon = extension['runningExtension']
-						
-		if player['name'] in players_running_healing_addon:
-			healerName = player['name']
-			healerGroup = player['group']
-			healerProf = player['profession']
-			if healerName not in OutgoingHealing:
-				OutgoingHealing[healerName] = {}
-				OutgoingHealing[healerName]['Targets'] = {}
-				OutgoingHealing[healerName]['Group'] = healerGroup
-				OutgoingHealing[healerName]['Prof'] = healerProf
-			if 'extHealingStats' in player:
-				for index, target in enumerate(player['extHealingStats']['outgoingHealingAllies']):
-					targetHealing = target[0]['healing']
-					targetName = fight_json['players'][index]['name']
-					targetGroup = fight_json['players'][index]['group']
-					if targetName not in OutgoingHealing[healerName]['Targets']:
-						OutgoingHealing[healerName]['Targets'][targetName] = {}
-						OutgoingHealing[healerName]['Targets'][targetName]['Group'] = targetGroup
-						OutgoingHealing[healerName]['Targets'][targetName]['Healing'] = targetHealing
-						OutgoingHealing[healerName]['Targets'][targetName]['Barrier'] = 0
-					else:
-						OutgoingHealing[healerName]['Targets'][targetName]['Healing'] += targetHealing
-			if 'extBarrierStats' in player:
-				for index, target in enumerate(player['extBarrierStats']['outgoingBarrierAllies']):
-					targetBarrier = target[0]['barrier']
-					targetName = fight_json['players'][index]['name']
-					targetGroup = fight_json['players'][index]['group']
-					if targetName not in OutgoingHealing[healerName]['Targets']:
-						OutgoingHealing[healerName]['Targets'][targetName] = {}
-						OutgoingHealing[healerName]['Targets'][targetName]['Group'] = targetGroup
-						OutgoingHealing[healerName]['Targets'][targetName]['Barrier'] = targetBarrier
-					else:
-						OutgoingHealing[healerName]['Targets'][targetName]['Barrier'] += targetBarrier
+		if config.include_comp_and_review:
+			if 'usedExtensions' not in fight_json:
+				players_running_healing_addon = []
+			else:
+				extensions = fight_json['usedExtensions']
+				for extension in extensions:
+					if extension['name'] == "Healing Stats":
+						players_running_healing_addon = extension['runningExtension']
+
+			if player['name'] in players_running_healing_addon:
+				healerName = player['name']
+				healerGroup = player['group']
+				healerProf = player['profession']
+				if healerName not in OutgoingHealing:
+					OutgoingHealing[healerName] = {}
+					OutgoingHealing[healerName]['Targets'] = {}
+					OutgoingHealing[healerName]['Group'] = healerGroup
+					OutgoingHealing[healerName]['Prof'] = healerProf
+				if 'extHealingStats' in player:
+					for index, target in enumerate(player['extHealingStats']['outgoingHealingAllies']):
+						targetHealing = target[0]['healing']
+						targetName = fight_json['players'][index]['name']
+						targetGroup = fight_json['players'][index]['group']
+						if targetName not in OutgoingHealing[healerName]['Targets']:
+							OutgoingHealing[healerName]['Targets'][targetName] = {}
+							OutgoingHealing[healerName]['Targets'][targetName]['Group'] = targetGroup
+							OutgoingHealing[healerName]['Targets'][targetName]['Healing'] = targetHealing
+							OutgoingHealing[healerName]['Targets'][targetName]['Barrier'] = 0
+						else:
+							OutgoingHealing[healerName]['Targets'][targetName]['Healing'] += targetHealing
+				if 'extBarrierStats' in player:
+					for index, target in enumerate(player['extBarrierStats']['outgoingBarrierAllies']):
+						targetBarrier = target[0]['barrier']
+						targetName = fight_json['players'][index]['name']
+						targetGroup = fight_json['players'][index]['group']
+						if targetName not in OutgoingHealing[healerName]['Targets']:
+							OutgoingHealing[healerName]['Targets'][targetName] = {}
+							OutgoingHealing[healerName]['Targets'][targetName]['Group'] = targetGroup
+							OutgoingHealing[healerName]['Targets'][targetName]['Barrier'] = targetBarrier
+						else:
+							OutgoingHealing[healerName]['Targets'][targetName]['Barrier'] += targetBarrier
 	
 		#Track MOA Activity - Casting of Signet of Humility
 		if player['profession'] in ['Mesmer', 'Mirage', 'Chronomancer']:
