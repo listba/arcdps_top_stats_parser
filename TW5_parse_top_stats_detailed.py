@@ -106,16 +106,16 @@ if __name__ == '__main__':
 
 	SubMenuTabs = {
 	'General': ['Overview', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'Death_OnTag'],
-	'Offensive': ['Offensive Stats', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Power Damage', 'Condi Damage', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
+	'Offensive': ['Offensive Stats', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Power Damage', 'Condi Damage', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In'],
-	'Support': ['Healing', 'Barrier', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
+	'Support': ['Healing', 'Barrier', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages', 'Outgoing Healing'],
 	'Boons & Buffs': ['Stability', 'Protection', 'Aegis', 'Might', 'Fury', 'Resistance', 'Resolution', 'Quickness', 'Swiftness', 'Superspeed', 'Alacrity', 'Vigor', 'Regeneration', 'Auras - Out', 'Personal Buffs', 'Skill Casts', 'Buff Uptime', 'Stacking Buffs'],
 	'Dashboard': ["Dashboard"]
 		}
 
 	alertColors = ["primary", "danger", "warning", "success", "info", "light"]
 
-	excludeForMonthly = ['Squad Composition','Fight Review', 'Spike Damage']
+	excludeForMonthly = ['Squad Composition','Fight Review', 'Spike Damage', 'Outgoing Healing']
 
 	for item in MenuTabs:
 		myprint(output, '<$button class="btn btn-sm btn-dark"> <$action-setfield $tiddler="$:/state/MenuTab" $field="text" $value="'+item+'"/> <$action-setfield $tiddler="$:/state/curTab" $field="text" $value="'+SubMenuTabs[item][0]+'"/> '+item+' </$button>')
@@ -169,6 +169,35 @@ if __name__ == '__main__':
 		myprint(output, "</$reveal>\n")     
 
 	# end Squad Spike Damage
+
+	#Outgoing Healing and Barrier by Target
+	if include_comp_and_review:
+		myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Outgoing Healing">\n')    
+		myprint(output, '\n<<alert dark "Outgoing Healing/Barrier by Target" width:60%>>\n')
+		myprint(output, '\n---\n')    
+		myprint(output, '<div style="overflow-x:auto;">\n\n')		
+
+		for name in OutgoingHealing:
+			myprint(output, '<$button setTitle="$:/state/outgoingHealing" setTo="'+name+'_'+OutgoingHealing[name]['Prof']+'" selectedClass="" class="btn btn-sm btn-dark" style=""> '+name+'{{'+OutgoingHealing[name]['Prof']+'}} </$button>')
+
+		for name in OutgoingHealing:
+			myprint(output, '<$reveal type="match" state="$:/state/outgoingHealing" text="'+name+'_'+OutgoingHealing[name]['Prof']+'">')
+			myprint(output, '<div style="overflow-x:auto;">\n\n')
+			myprint(output, "\n|Healer Name | Party|h")
+			myprint (output, "|"+name+" | "+str(OutgoingHealing[name]['Group'])+" |")
+			myprint(output, "\n\n---\n")
+			myprint(output, "|thead-dark table-caption-top sortable|k")
+			myprint(output, "|Sortable Table: Click header to sort|c")
+			myprint(output, "|!Player Name | !Party | !Healing| !Barrier|h")
+			for target in OutgoingHealing[name]['Targets']:
+				if OutgoingHealing[name]['Targets'][target]['Healing'] >0 or OutgoingHealing[name]['Targets'][target]['Barrier']:
+					myprint(output, "|"+target+" | "+str(OutgoingHealing[name]['Targets'][target]['Group'])+" | "+str(OutgoingHealing[name]['Targets'][target]['Healing'])+"| "+str(OutgoingHealing[name]['Targets'][target]['Barrier'])+"|")    
+			myprint(output, '\n\n</div>\n\n')
+			myprint(output, '</$reveal>')
+
+		#end reveal
+		myprint(output, '\n\n</div>\n\n')
+		myprint(output, "</$reveal>\n")   	
 
 	#Personal Buffs
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Personal Buffs">\n')    
