@@ -3290,35 +3290,37 @@ def get_stats_from_fight_json(fight_json, config, log):
 						Death_OnTag[deathOnTag_prof_name]["Total"] = Death_OnTag[deathOnTag_prof_name]["Total"] + 1
 						if int(downKey) > int(dead_Tag_Mark) and dead_Tag:
 							Death_OnTag[deathOnTag_prof_name]["After_Tag_Death"] = Death_OnTag[deathOnTag_prof_name]["After_Tag_Death"] + 1
-							continue
+							#Calc Avg distance through dead tag final mark
+							playerDeadPoll = int(dead_Tag_Mark/150)
+							playerPositions = id['combatReplayData']['positions']
+							for position,tagPosition in zip(playerPositions[:playerDeadPoll], tagPositions[:playerDeadPoll]):
+								deltaX = position[0] - tagPosition[0]
+								deltaY = position[1] - tagPosition[1]
+								playerDistances.append(math.sqrt(deltaX * deltaX + deltaY * deltaY))
+							playerDistToTag = (sum(playerDistances) / len(playerDistances))/inchToPixel
+							#Death_OnTag[deathOnTag_prof_name]["distToTag"].append(playerDistToTag)
+						else:
+							playerDeadPoll = positionMark
+							playerPositions = id['combatReplayData']['positions']
+							for position,tagPosition in zip(playerPositions[:playerDeadPoll], tagPositions[:playerDeadPoll]):
+								deltaX = position[0] - tagPosition[0]
+								deltaY = position[1] - tagPosition[1]
+								playerDistances.append(math.sqrt(deltaX * deltaX + deltaY * deltaY))
+							playerDistToTag = (sum(playerDistances) / len(playerDistances))/inchToPixel
+
 						if deathRange <= On_Tag:
 							Death_OnTag[deathOnTag_prof_name]["On_Tag"] = Death_OnTag[deathOnTag_prof_name]["On_Tag"] + 1
-						if deathRange > Run_Back:
-							Death_OnTag[deathOnTag_prof_name]["Run_Back"] = Death_OnTag[deathOnTag_prof_name]["Run_Back"] + 1
+
 						if deathRange > On_Tag and deathRange <= Run_Back:
 							Death_OnTag[deathOnTag_prof_name]["Off_Tag"] = Death_OnTag[deathOnTag_prof_name]["Off_Tag"] + 1
 							Death_OnTag[deathOnTag_prof_name]["Ranges"] += [deathRange]
-				if deathValue and not dead_Tag:
-					playerDeadPoll = int(deathValue/150)
-					playerPositions = id['combatReplayData']['positions']
-					for position,tagPosition in zip(playerPositions[:playerDeadPoll], tagPositions[:playerDeadPoll]):
-						deltaX = position[0] - tagPosition[0]
-						deltaY = position[1] - tagPosition[1]
-						playerDistances.append(math.sqrt(deltaX * deltaX + deltaY * deltaY))
-					playerDistToTag = (sum(playerDistances) / len(playerDistances))/inchToPixel
-				elif deathValue and dead_Tag:
-					if deathValue > dead_Tag_Mark:
-						playerDeadPoll = int(dead_Tag_Mark/150)
-					else:
-						playerDeadPoll = int(deathValue/150)
-					playerPositions = id['combatReplayData']['positions']
-					for position,tagPosition in zip(playerPositions[:playerDeadPoll], tagPositions[:playerDeadPoll]):
-						deltaX = position[0] - tagPosition[0]
-						deltaY = position[1] - tagPosition[1]
-						playerDistances.append(math.sqrt(deltaX * deltaX + deltaY * deltaY))
-					playerDistToTag = (sum(playerDistances) / len(playerDistances))/inchToPixel					
-		Death_OnTag[deathOnTag_prof_name]["distToTag"].append(playerDistToTag)
 
+						if deathRange > Run_Back:
+							Death_OnTag[deathOnTag_prof_name]["Run_Back"] = Death_OnTag[deathOnTag_prof_name]["Run_Back"] + 1
+
+		if playerDistToTag <= Run_Back:
+			Death_OnTag[deathOnTag_prof_name]["distToTag"].append(playerDistToTag)
+		
 	#Collect Box Plot DPS data by Profession, Prof_Name, Name, Acct
 	durationMS = fight_json['durationMS']
 	num_enemies = len(fight_json['targets'])
@@ -4530,7 +4532,7 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	#json_dict["uptime_Table"] =  {key: value for key, value in uptime_Table.items()}
 	#json_dict["stacking_uptime_Table"] =  {key: value for key, value in stacking_uptime_Table.items()}
 	#json_dict["auras_TableOut"] =  {key: value for key, value in auras_TableOut.items()}
-	#json_dict["Death_OnTag"] =  {key: value for key, value in Death_OnTag.items()}
+	json_dict["Death_OnTag"] =  {key: value for key, value in Death_OnTag.items()}
 	#json_dict["Attendance"] =  {key: value for key, value in Attendance.items()}
 	#json_dict["DPS_List"] =  {key: value for key, value in DPS_List.items()}
 	#json_dict["CPS_List"] =  {key: value for key, value in CPS_List.items()}
