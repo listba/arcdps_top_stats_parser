@@ -353,10 +353,6 @@ def find_sub_type(player, fightTime):
 	critableCount = sum([stats[0]['critableDirectDamageCount'] for stats in player['statsTargets']])
 	critPercent = criticalCount / critableCount if critableCount else 0
 
-	# Only healers should have a crit % lower than 40%
-	if critPercent <= 0.4:
-		return "Support"
-
 	#adjusted consumable search since food and utility can reside in any consumable slot
 	if 'consumables' in player:
 		for item in player['consumables']:
@@ -369,6 +365,10 @@ def find_sub_type(player, fightTime):
 			if item['id'] in DPS_Food or item['id'] in DPS_Utility:
 				return "Dps"
 
+	# Only healers should have a crit % lower than 40%
+	if critPercent <= 0.4:
+		return "Support"
+	
 	# If all other detection fails, fallback to assuming DPS like before
 	return "Dps"
 #end define subtype based on consumables
