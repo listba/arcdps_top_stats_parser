@@ -303,7 +303,8 @@ Heal_Utility = {
 Heal_Food = {
     57276: "Bowl of Spiced Fruit Salad",
     57100: "Bowl of Fruit Salad with Mint Garnish",
-    26529: "Delicious Rice Ball"
+    26529: "Delicious Rice Ball",
+    57299: "Plate of Peppercorn-Spiced Poultry Aspic"
     }
 Cele_Food = {
     57165: "Spherified Peppercorn-Spiced Oyster Soup",
@@ -315,13 +316,15 @@ Cele_Food = {
 DPS_Food= {
 	57051: "Peppercorn-Crusted Sous-Vide Steak",
 	57244: "Cilantro Lime Sous-Vide Steak",
-	57260: "Plate of Peppercorn-Spiced Coq Au Vin"
+	57260: "Plate of Peppercorn-Spiced Coq Au Vin",
+	57129: "Spiced Peppercorn Cheesecake"
 	}
 DPS_Utility = {
 	9963: "Superior Sharpening Stone",
 	34657: "Compact Hardened Sharpening Stone",
 	25882: "Furious Sharpening Stone",
-	33297: "Writ of Masterful Strength"
+	33297: "Writ of Masterful Strength",
+	34211: "Tin of Fruitcake"
 	}
 
 def find_sub_type(player, fightTime):
