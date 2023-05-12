@@ -181,6 +181,7 @@ downed_Healing = {}
 
 #Aura Tracking 
 auras_TableOut = {}
+auras_TableIn = {}
 
 #Uptime Tracking
 uptime_Table = {}
@@ -446,7 +447,7 @@ def fill_config(config_input):
 	config.buff_abbrev["Illusion of Life"] = 'iol'
 
 	config.condition_ids = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: "Hunter's Mark"}
-	config.auras_ids = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic'}
+	config.auras_ids = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic', 25518: 'Light', 39978: 'Dark', 10332: 'Chaos'}
 
 	config.charts = config_input.charts
 	config.include_comp_and_review = config_input.include_comp_and_review
@@ -471,8 +472,9 @@ def reset_globals():
 	downed_Healing = {}
 
 	#Aura Tracking 
-	global auras_TableOut
+	global auras_TableOut, auras_TableIn
 	auras_TableOut = {}
+	auras_TableIn = {}
 
 	#Uptime Tracking
 	global uptime_Table
@@ -1290,6 +1292,38 @@ def write_squad_offensive_xls(squad_offensive, xls_output_filename):
 		i=i+1
 	wb.save(xls_output_filename)
 
+def write_auras_in_xls(sorted_auras_TableIn, stat, players, xls_output_filename):
+	fileDate = datetime.datetime.now()
+	book = xlrd.open_workbook(xls_output_filename)
+	wb = copy(book)
+	sheet1 = wb.add_sheet(stat+" Aura-In")
+
+	sheet1.write(0, 0, "Date")
+	sheet1.write(0, 1, "Place")
+	sheet1.write(0, 2, "Name")
+	sheet1.write(0, 3, "Profession")
+	sheet1.write(0, 4, "Total "+stat+" Aura-In")
+
+	i = 0
+
+	for name in sorted_auras_TableIn:
+		prof = "Not Found"
+		fightTime = 999999
+
+		for nameIndex in players:
+			if nameIndex.name == name:
+				prof = nameIndex.profession
+				fightTime = nameIndex.duration_fights_present
+		if i < 25:
+			sheet1.write(i+1, 0, fileDate.strftime("%Y-%m-%d"))
+			sheet1.write(i+1, 1, i+1)
+			sheet1.write(i+1, 2, name)
+			sheet1.write(i+1, 3, prof)
+			sheet1.write(i+1, 4, round(sorted_auras_TableIn[name], 4))
+			sheet1.write(i+1, 5, round(sorted_auras_TableIn[name]/fightTime, 4))
+			i=i+1
+	wb.save(xls_output_filename)
+
 def write_auras_out_xls(sorted_auras_TableOut, stat, players, xls_output_filename):
 	fileDate = datetime.datetime.now()
 	book = xlrd.open_workbook(xls_output_filename)
@@ -1854,7 +1888,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 			json_datafile = open(file_path, encoding='utf-8')
 			json_data = json.load(json_datafile)
 		# get fight stats
-		fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats = get_stats_from_fight_json(json_data, config, log)
+		fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats = get_stats_from_fight_json(json_data, config, log)
 			
 		if first:
 			first = False
@@ -2147,7 +2181,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 	if anonymize:
 		anonymize_players(players, account_index)
 	
-	return players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats
+	return players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats
 			
 
 # replace all acount names with "account <number>" and all player names with "anon <number>"
@@ -3190,10 +3224,16 @@ def get_stats_from_fight_json(fight_json, config, log):
 			if auraId not in Auras_Id:
 				continue
 			skill_name = Auras_Id[auraId]
+			if skill_name not in auras_TableIn:
+				auras_TableIn[skill_name] = {}
 			if skill_name not in auras_TableOut:
 				auras_TableOut[skill_name] = {}				
 			for cc in item['buffData']:
 				for key, value in cc['generated'].items():
+					if player['name'] not in auras_TableIn[skill_name]:
+						auras_TableIn[skill_name][player['name']] = float((value/100)*player_combat_time)
+					else:
+						auras_TableIn[skill_name][player['name']] = auras_TableIn[skill_name][player['name']] + float((value/100)*player_combat_time)
 					if key not in auras_TableOut[skill_name]:
 						auras_TableOut[skill_name][key] = float((value/100)*player_combat_time)
 					else:
@@ -3605,7 +3645,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 
 	calculate_dps_stats(fight_json, fight, players_running_healing_addon, config)
 		
-	return fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats
+	return fight, players_running_healing_addon, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats
 
 
 
@@ -4611,7 +4651,7 @@ def write_spike_damage_heatmap(squad_damage_output, myDate, input_directory):
 	heatmap_Output.close()
 #end Heat Map Chart	
 
-def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, output_file):
+def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_Tablein, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, output_file):
 	json_dict = {}
 	json_dict["overall_raid_stats"] = {key: value for key, value in overall_raid_stats.items()}
 	json_dict["overall_squad_stats"] = {key: value for key, value in overall_squad_stats.items()}
@@ -4630,7 +4670,8 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	#json_dict["uptime_Table"] =  {key: value for key, value in uptime_Table.items()}
 	#json_dict["stacking_uptime_Table"] =  {key: value for key, value in stacking_uptime_Table.items()}
 	#json_dict["auras_TableOut"] =  {key: value for key, value in auras_TableOut.items()}
-	json_dict["Death_OnTag"] =  {key: value for key, value in Death_OnTag.items()}
+	#json_dict["auras_TableIn"] =  {key: value for key, value in auras_TableIn.items()}
+	#json_dict["Death_OnTag"] =  {key: value for key, value in Death_OnTag.items()}
 	#json_dict["Attendance"] =  {key: value for key, value in Attendance.items()}
 	#json_dict["DPS_List"] =  {key: value for key, value in DPS_List.items()}
 	#json_dict["CPS_List"] =  {key: value for key, value in CPS_List.items()}
