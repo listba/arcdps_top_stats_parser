@@ -1962,6 +1962,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 			player = players[player_index[name_and_prof]]
 
 			playerRole=find_sub_type(player_data, 1)
+			playerRoleActiveTime = get_stat_from_player_json(player_data, players_running_healing_addon, 'time_active', config)
 
 			if profession+' '+playerRole not in prof_role_skills:
 				prof_role_skills[profession+' '+playerRole] = {}
@@ -1973,10 +1974,12 @@ def collect_stat_data(args, config, log, anonymize=False):
 
 			if name not in prof_role_skills[profession+' '+playerRole]['player']:
 				prof_role_skills[profession+' '+playerRole]['player'][name] = {}
+				prof_role_skills[profession+' '+playerRole]['player'][name]['ActiveTime'] = playerRoleActiveTime
 				prof_role_skills[profession+' '+playerRole]['player'][name]['Fights'] = 1
 				prof_role_skills[profession+' '+playerRole]['player'][name]['Skills'] = {}
 			else:
 				prof_role_skills[profession+' '+playerRole]['player'][name]['Fights'] += 1
+				prof_role_skills[profession+' '+playerRole]['player'][name]['ActiveTime'] += playerRoleActiveTime
 				
 
 			if 'rotation' in player_data:
