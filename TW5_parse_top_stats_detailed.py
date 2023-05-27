@@ -105,11 +105,11 @@ if __name__ == '__main__':
 	MenuTabs = ['General', 'Offensive', 'Defensive', 'Support', 'Boons & Buffs', 'Dashboard']
 
 	SubMenuTabs = {
-	'General': ['Overview', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'Death_OnTag'],
+	'General': ['Overview', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'Death_OnTag', 'Skill Casts'],
 	'Offensive': ['Offensive Stats', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Power Damage', 'Condi Damage', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In'],
 	'Support': ['Healing', 'Barrier', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages', 'Outgoing Healing'],
-	'Boons & Buffs': ['Stability', 'Protection', 'Aegis', 'Might', 'Fury', 'Resistance', 'Resolution', 'Quickness', 'Swiftness', 'Superspeed', 'Alacrity', 'Vigor', 'Regeneration', 'Auras - Out', 'Auras - In', 'Personal Buffs', 'Skill Casts', 'Buff Uptime', 'Stacking Buffs'],
+	'Boons & Buffs': ['Stability', 'Protection', 'Aegis', 'Might', 'Fury', 'Resistance', 'Resolution', 'Quickness', 'Swiftness', 'Superspeed', 'Alacrity', 'Vigor', 'Regeneration', 'Auras - Out', 'Auras - In', 'Personal Buffs', 'Buff Uptime', 'Stacking Buffs'],
 	'Dashboard': ["Dashboard"]
 		}
 
