@@ -6,9 +6,9 @@ import os.path
 import sys
 import importlib
 import json
-import xlwt
 import datetime
 import gzip
+import xlsxwriter
 
 from TW5_parse_top_stats_tools import fill_config, reset_globals, get_stats_from_fight_json, get_stat_from_player_json, get_buff_ids_from_json, get_combat_time_breakpoints, sum_breakpoints, BuffGenerationType
 
@@ -29,8 +29,10 @@ if __name__ == '__main__':
 	config = fill_config(parser_config)
 	
 	# create xls file if it doesn't exist
-	book = xlwt.Workbook(encoding="utf-8")
-	sheet1 = book.add_sheet("Player Stats")
+	#book = xlwt.Workbook(encoding="utf-8")
+	book = xlsxwriter.Workbook(args.input_directory+"/TW5_top_stats_per_fight.xlsx")
+	#sheet1 = book.add_sheet("Player Stats")
+	sheet1 = book.add_worksheet("Player Stats")
 
 	sheet1.write(0, 0, "Account")
 	sheet1.write(0, 1, "Name")
@@ -333,4 +335,5 @@ if __name__ == '__main__':
 		
 		fight_num += 1
 
-	book.save(args.input_directory+"/TW5_top_stats_per_fight.xls")
+	#book.save(args.input_directory+"/TW5_top_stats_per_fight.xls")
+	book.close()
