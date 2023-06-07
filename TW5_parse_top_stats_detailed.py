@@ -712,7 +712,7 @@ if __name__ == '__main__':
 				fightTime = 99999 
 				counter = 0
 				for nameIndex in players:
-					if nameIndex.name == name:
+					if nameIndex.name+"_{{"+nameIndex.profession+"}}" == name:
 						fightTime = nameIndex.duration_fights_present
 
 				if i <=25:
