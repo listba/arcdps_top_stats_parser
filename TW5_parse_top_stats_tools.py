@@ -3029,10 +3029,15 @@ def get_stats_from_fight_json(fight_json, config, log):
 					squad_Control[skill_name] = {}
 				for cc in item['buffData']:
 					for key, value in cc['generated'].items():
-						if key not in squad_Control[skill_name]:
-							squad_Control[skill_name][key] = float((value/100)*duration)
+						key_Prof = ""
+						for player in fight_json['players']:
+							if player['name'] == key:
+								prof = player['profession']
+								key_Prof = key+"_{{"+prof+"}}"
+						if key_Prof not in squad_Control[skill_name]:
+							squad_Control[skill_name][key_Prof] = float((value/100)*duration)
 						else:
-							squad_Control[skill_name][key] = squad_Control[skill_name][key] + float((value/100)*duration)
+							squad_Control[skill_name][key_Prof] = squad_Control[skill_name][key_Prof] + float((value/100)*duration)
 
 			if enemy_name not in enemy_squad:
 				enemy_squad[enemy_name] = 1
