@@ -708,15 +708,16 @@ if __name__ == '__main__':
 			
 			for name in sorted_squadControl:
 				playerName = name.split("_")[0]
-				prof = name.split("_")[1]
+				#prof = name.split("_")[1]
 				fightTime = 99999 
 				counter = 0
 				for nameIndex in players:
 					if nameIndex.name+"_{{"+nameIndex.profession+"}}" == name:
 						fightTime = nameIndex.duration_fights_present
+						prof = nameIndex.profession
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+playerName+" | "+prof+" | "+str(round(sorted_squadControl[name], 4))+"| "+"{:.4f}".format(round(sorted_squadControl[name]/fightTime, 4))+"|")
+					myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+str(round(sorted_squadControl[name], 4))+"| "+"{:.4f}".format(round(sorted_squadControl[name]/fightTime, 4))+"|")
 					i=i+1
 
 			myprint(output, "</$reveal>\n")
