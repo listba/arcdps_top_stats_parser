@@ -2987,8 +2987,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 			if 'teamID' in enemy:
 				enemy_team = int(enemy['teamID'])
 
-			#Check teamId against team colors
-			if enemy_team:
+				#Check teamId against team colors
 				if teamID[enemy_team] == 'Red':
 					num_enemies_Red += 1
 					
