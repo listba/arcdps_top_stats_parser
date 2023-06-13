@@ -106,6 +106,9 @@ class Fight:
 	duration: int = 0
 	total_stats: dict = field(default_factory=dict) # what's the over total value for the whole squad for each stat in this fight?
 	enemies: int = 0
+	enemies_Red: int = 0
+	enemies_Blue: int = 0
+	enemies_Green: int = 0
 	allies: int = 0
 	kills: int = 0
 	start_time: str = ""
@@ -2919,6 +2922,9 @@ def get_stats_from_fight_json(fight_json, config, log):
 
 	num_allies = len(fight_json['players'])
 	num_enemies = 0
+	num_enemies_Red = 0
+	num_enemies_Blue = 0
+	num_enemies_Green = 0
 	enemy_name = ''
 	enemy_squad = {}
 	num_kills = 0
@@ -2937,6 +2943,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 	squad_damage_output[fight_name] = {}
 
 	current_Tag = ''
+	teamID = {705: 'Red', 2739: 'Green', 2741: 'Green', 432: 'Blue'}
 
 	#creat dictionary of skill_ids and skill_names
 	skills = fight_json['skillMap']
@@ -2973,8 +2980,25 @@ def get_stats_from_fight_json(fight_json, config, log):
 				Cmd_Tags[current_Tag]['Fights'] += 1
 
 	for enemy in fight_json['targets']:
-		if 'enemyPlayer' in enemy and enemy['enemyPlayer'] == True:
+		if enemy['enemyPlayer'] == True:
 			num_enemies += 1
+
+			#Validate EI version supports teamID
+			if 'teamID' in enemy:
+				enemy_team = int(enemy['teamID'])
+
+			#Check teamId against team colors
+			if enemy_team:
+				if teamID[enemy_team] == 'Red':
+					num_enemies_Red += 1
+					
+				elif teamID[enemy_team] == 'Blue':
+					num_enemies_Blue += 1
+
+				elif teamID[enemy_team] == 'Green':
+					num_enemies_Green += 1
+
+
 			#append enemy['name'] to enemy_list
 			enemy_name = enemy['name'].split(' pl')[0]
 			enemyDps_name = "{{"+enemy_name+"}} "+enemy['name']
@@ -3459,8 +3483,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 		
 	#Collect Box Plot DPS data by Profession, Prof_Name, Name, Acct
 	durationMS = fight_json['durationMS']
-	num_enemies = len(fight_json['targets'])
-	num_allies = len(fight_json['players'])
+	#num_enemies = len(fight_json['targets']-1)
+	#num_allies = len(fight_json['players'])
 
 	for player in fight_json['players']:
 		if player['notInSquad']:
@@ -3583,6 +3607,9 @@ def get_stats_from_fight_json(fight_json, config, log):
 	fight = Fight()
 	fight.duration = duration
 	fight.enemies = num_enemies
+	fight.enemies_Red = num_enemies_Red
+	fight.enemies_Blue = num_enemies_Blue
+	fight.enemies_Green = num_enemies_Green
 	fight.enemy_squad = enemy_squad
 	fight.enemy_Dps = enemy_Dps
 	fight.squad_Dps = squad_Dps
@@ -3842,7 +3869,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 	myprint(output, print_string)
 	print_string = "|thead-dark table-hover w-auto scrollable|k"
 	myprint(output, print_string)
-	print_string = "| Fight # | Date | Ending | Secs | Skip | Allies | Enemies | Downs | Kills |"
+	print_string = "| Fight # | Date | Ending | Secs | Skip | Allies | Enemies | R/B/G | Downs | Kills |"
 	for stat in overall_squad_stats:
 		if stat not in exclude_Stat:
 			stat_len[stat] = max(len(config.stat_names[stat]), len(str(overall_squad_stats[stat])))
@@ -3856,14 +3883,14 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 			skipped_str = "yes" if fight.skipped else "no"
 			date = fight.start_time.split()[0]
 			end_time = fight.end_time.split()[1]        
-			print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
+			print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.enemies_Red)+"/"+str(fight.enemies_Blue)+"/"+str(fight.enemies_Green)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
 			for stat in overall_squad_stats:
 				if stat not in exclude_Stat:
 					print_string += " "+my_value(round(fight.total_stats[stat]))+"|"
 			myprint(output, print_string)
 
 	#print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['start_time']:>10}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
-	print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
+	print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" |  | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
 	for stat in overall_squad_stats:
 		if stat not in exclude_Stat:
 			print_string += " "+my_value(round(overall_squad_stats[stat]))+"|"
