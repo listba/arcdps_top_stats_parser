@@ -4247,6 +4247,7 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 		#player = players[top_players[i]]
 		player = players[i]
 		prof_name = "{{"+player.profession+"}} "+player.name
+		name_prof = player.name+"_{{"+player.profession+"}}"
 		if prof_name not in Bubble_Chart:
 			Bubble_Chart[prof_name]={}
 			Bubble_Chart[prof_name]['name'] = player.name
@@ -4268,10 +4269,10 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 		#gather control score per player
 		sum_Control = 0
 		for effect in squad_Control:
-			if player.name not in squad_Control[effect]:
+			if name_prof not in squad_Control[effect]:
 				continue
 			else:
-				sum_Control += squad_Control[effect][player.name]
+				sum_Control += squad_Control[effect][name_prof]
 		Bubble_Chart[prof_name]['control'] = sum_Control
 		
 		#gather boon score per player
