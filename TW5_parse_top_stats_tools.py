@@ -2943,7 +2943,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 	squad_damage_output[fight_name] = {}
 
 	current_Tag = ''
-	teamID = {705: 'Red', 2739: 'Green', 2741: 'Green', 432: 'Blue'}
+	teamID = {705: 'Red', 882: 'Red', 2520: 'Red', 2739: 'Green', 2741: 'Green', 432: 'Blue', 1277: 'Blue'}
 
 	#creat dictionary of skill_ids and skill_names
 	skills = fight_json['skillMap']
