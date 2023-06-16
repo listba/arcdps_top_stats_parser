@@ -105,10 +105,10 @@ if __name__ == '__main__':
 	MenuTabs = ['General', 'Offensive', 'Defensive', 'Support', 'Boons & Buffs', 'Dashboard']
 
 	SubMenuTabs = {
-	'General': ['Overview', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'Death_OnTag', 'Skill Casts'],
+	'General': ['Overview', 'Fight Logs', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'Death_OnTag', 'Skill Casts'],
 	'Offensive': ['Offensive Stats', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Power Damage', 'Condi Damage', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In'],
-	'Support': ['Healing', 'Barrier', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages', 'Outgoing Healing'],
+	'Support': ['Healing', 'Barrier', 'Outgoing Healing', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
 	'Boons & Buffs': ['Stability', 'Protection', 'Aegis', 'Might', 'Fury', 'Resistance', 'Resolution', 'Quickness', 'Swiftness', 'Superspeed', 'Alacrity', 'Vigor', 'Regeneration', 'Auras - Out', 'Auras - In', 'Personal Buffs', 'Buff Uptime', 'Stacking Buffs'],
 	'Dashboard': ["Dashboard"]
 		}
@@ -142,6 +142,25 @@ if __name__ == '__main__':
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
 
 	print_fights_overview(fights, overall_squad_stats, overall_raid_stats, config, output)
+
+	#End reveal
+	myprint(output, '\n\n</div>\n\n')
+	myprint(output, '</$reveal>')
+
+	#Overview reveal
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Fight Logs">')
+	myprint(output, '\n<<alert dark "Fight Logs" width:60%>>\n')
+	myprint(output, '\n---\n')
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
+	myprint(output, "|thead-dark table-caption-top sortable|k")
+	myprint(output, "|Requires Upload to DPSReport to Elite Insight activated to show links|c")
+	myprint(output, "|Date |Start Time |End Time |GMT |Location |Duration |Link |h")
+	for fight in Fight_Logs:
+		print_string="|"
+		for item in fight:
+			print_string+=item.strip()+" |"
+			
+		myprint(output, print_string)
 
 	#End reveal
 	myprint(output, '\n\n</div>\n\n')

@@ -250,6 +250,9 @@ Cmd_Tags = {}
 #Collect Outgoing Healing by target
 OutgoingHealing = {}
 
+#Collect FightLinks on DPS Reports
+Fight_Logs = []
+
 #fetch Guild Data and Check Guild Status function
 #members: Dict[str, Any] = {}
 members: dict = field(default_factory=dict) 
@@ -1811,6 +1814,20 @@ def get_basic_player_data_from_json(player_json):
 	profession = player_json['profession']
 	return account, name, profession
 
+def get_fight_log_link_data(json_data):
+    currentFight = []
+    fightName = json_data['fightName']
+    fightDuration = json_data['duration']
+    fightLink = json_data['uploadLinks'][0]
+    fightStart = json_data['timeStart']
+    fightEnd = json_data['timeEnd']
+    if "-" in fightName:
+        fightName = fightName.split("-")[1]
+    fightDate, fightTime, fightGMT = fightStart.split()
+    endTime = fightEnd.split()[1]
+    
+    currentFight.extend([fightDate, fightTime, endTime, fightGMT, fightName, fightDuration, fightLink])
+    return currentFight
 
 def get_buff_ids_from_json(json_data, config):
 	buffs = json_data['buffMap']
@@ -1893,7 +1910,9 @@ def collect_stat_data(args, config, log, anonymize=False):
 			first = False
 			get_buff_ids_from_json(json_data, config)
 
-					
+		#Collect Fight Link Data
+		Fight_Logs.append(get_fight_log_link_data(json_data))
+
 		# add new entry for this fight in all players
 		for player in players:
 			player.stats_per_fight.append({key: value for key, value in config.empty_stats.items()})   
