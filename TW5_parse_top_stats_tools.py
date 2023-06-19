@@ -3154,8 +3154,10 @@ def get_stats_from_fight_json(fight_json, config, log):
 				if healerName not in OutgoingHealing:
 					OutgoingHealing[healerName] = {}
 					OutgoingHealing[healerName]['Targets'] = {}
+					OutgoingHealing[healerName]['Skills'] = {}
 					OutgoingHealing[healerName]['Group'] = healerGroup
 					OutgoingHealing[healerName]['Prof'] = healerProf
+					
 				if 'extHealingStats' in player:
 					for index, target in enumerate(player['extHealingStats']['outgoingHealingAllies']):
 						targetHealing = target[0]['healing']
@@ -3168,6 +3170,18 @@ def get_stats_from_fight_json(fight_json, config, log):
 							OutgoingHealing[healerName]['Targets'][targetName]['Barrier'] = 0
 						else:
 							OutgoingHealing[healerName]['Targets'][targetName]['Healing'] += targetHealing
+
+					for ally in player['extHealingStats']['alliedHealingDist']:
+						for skill in ally[0]:
+							skillID = skill['id']
+							skillHits = skill['hits']
+							skillHealing = skill['totalHealing']
+							if skillID not in OutgoingHealing[healerName]['Skills']:
+								OutgoingHealing[healerName]['Skills'][skillID]=[skillHits, skillHealing]
+							else:
+								OutgoingHealing[healerName]['Skills'][skillID][0] += skillHits
+								OutgoingHealing[healerName]['Skills'][skillID][1] += skillHealing
+
 				if 'extBarrierStats' in player:
 					for index, target in enumerate(player['extBarrierStats']['outgoingBarrierAllies']):
 						targetBarrier = target[0]['barrier']
@@ -3475,7 +3489,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 								deltaX = position[0] - tagPosition[0]
 								deltaY = position[1] - tagPosition[1]
 								playerDistances.append(math.sqrt(deltaX * deltaX + deltaY * deltaY))
-							playerDistToTag = (sum(playerDistances) / len(playerDistances))/inchToPixel
+							#playerDistToTag = (sum(playerDistances) / len(playerDistances))/inchToPixel
 							#Death_OnTag[deathOnTag_prof_name]["distToTag"].append(playerDistToTag)
 						else:
 							playerDeadPoll = positionMark
@@ -3484,7 +3498,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 								deltaX = position[0] - tagPosition[0]
 								deltaY = position[1] - tagPosition[1]
 								playerDistances.append(math.sqrt(deltaX * deltaX + deltaY * deltaY))
-							playerDistToTag = (sum(playerDistances) / len(playerDistances))/inchToPixel
+						
+						playerDistToTag = (sum(playerDistances) / len(playerDistances))/inchToPixel
 
 						if deathRange <= On_Tag:
 							Death_OnTag[deathOnTag_prof_name]["On_Tag"] = Death_OnTag[deathOnTag_prof_name]["On_Tag"] + 1

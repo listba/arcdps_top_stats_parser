@@ -205,13 +205,28 @@ if __name__ == '__main__':
 			myprint(output, "\n|Healer Name | Party|h")
 			myprint (output, "|"+name+" | "+str(OutgoingHealing[name]['Group'])+" |")
 			myprint(output, "\n\n---\n")
+			myprint(output, '<div class="flex-row">')
+			myprint(output, '    <div class="flex-col border">\n')
 			myprint(output, "|thead-dark table-caption-top sortable|k")
 			myprint(output, "|Sortable Table: Click header to sort|c")
 			myprint(output, "|!Player Name | !Party | !Healing| !Barrier|h")
 			for target in OutgoingHealing[name]['Targets']:
 				if OutgoingHealing[name]['Targets'][target]['Healing'] >0 or OutgoingHealing[name]['Targets'][target]['Barrier']:
 					myprint(output, "|"+target+" | "+str(OutgoingHealing[name]['Targets'][target]['Group'])+" | "+str(OutgoingHealing[name]['Targets'][target]['Healing'])+"| "+str(OutgoingHealing[name]['Targets'][target]['Barrier'])+"|")    
+			
 			myprint(output, '\n\n</div>\n\n')
+			myprint(output, '    <div class="flex-col border">\n')
+			myprint(output, "|thead-dark table-caption-top sortable|k")
+			myprint(output, "|Sortable Table: Click header to sort|c")
+			myprint(output, "|!Skill |!Skill Name | !Hits| !Total Healing| !Heal/Hit|h")
+			for skill in OutgoingHealing[name]['Skills']:
+				hits=OutgoingHealing[name]['Skills'][skill][0]
+				heals=OutgoingHealing[name]['Skills'][skill][1]
+				skillName = skill_Dict[str(skill)]['name']
+				healString = "|"+str(skill)+" |"+str(skillName)+" | "+my_value(hits)+"| "+my_value(heals)+"| "+my_value(round(heals/hits,2))+"|"
+				myprint(output, healString)
+
+			myprint(output, '\n</div>\n</div>\n</div>\n')
 			myprint(output, '</$reveal>')
 
 		#end reveal
