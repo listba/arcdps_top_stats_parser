@@ -3175,8 +3175,10 @@ def get_stats_from_fight_json(fight_json, config, log):
 						for skill in ally[0]:
 							skillID = skill['id']
 							skillHits = skill['hits']
-							skillHealing = skill['totalHealing']
-							if skillID not in OutgoingHealing[healerName]['Skills']:
+							if skill['totalDownedHealing'] == skill['totalHealing']:
+								continue
+							skillHealing = skill['totalHealing'] - skill['totalDownedHealing']
+							if skillID not in OutgoingHealing[healerName]['Skills'] and skillHealing >0:
 								OutgoingHealing[healerName]['Skills'][skillID]=[skillHits, skillHealing]
 							else:
 								OutgoingHealing[healerName]['Skills'][skillID][0] += skillHits
