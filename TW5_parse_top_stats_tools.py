@@ -2972,6 +2972,11 @@ def get_stats_from_fight_json(fight_json, config, log):
 			skill_Dict[x_id] = {}
 			skill_Dict[x_id]['name'] = skill['name']
 			skill_Dict[x_id]['icon'] = skill['icon']
+		elif skill_Dict[x_id]['name'] == "UNKNOWN" and skill['name'] != "UNKNOWN":
+			skill_Dict[x_id]['name'] = skill['name']
+			skill_Dict[x_id]['icon'] = skill['icon']
+
+
 	skillBuffs = fight_json['buffMap']
 	for skill_id, skill in skillBuffs.items():
 		x_id=skill_id[1:]
@@ -2979,6 +2984,9 @@ def get_stats_from_fight_json(fight_json, config, log):
 			skill_Dict[x_id] = {}
 			skill_Dict[x_id]['name'] = skill['name']
 			skill_Dict[x_id]['icon'] = skill['icon']
+		elif skill_Dict[x_id]['name'] == "UNKNOWN" and skill['name'] != "UNKNOWN":
+			skill_Dict[x_id]['name'] = skill['name']
+			skill_Dict[x_id]['icon'] = skill['icon']			
 
 	SiegeSkills = {14627: "Punch", 14639: "Whirling Assualt", 14709: "Rocket Punch", 14710: "Whirling Inferno", 14708: "Rocket Salvo"}
 
