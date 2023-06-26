@@ -3097,8 +3097,12 @@ def get_stats_from_fight_json(fight_json, config, log):
 				enemy_squad[enemy_name] = enemy_squad[enemy_name] + 1
 			
 			if 'combatReplayData' in enemy:
-				num_kills += len(enemy['combatReplayData']['dead'])
-				num_downs += len(enemy['combatReplayData']['down'])
+				for item in enemy['combatReplayData']['dead']:
+					if abs(item[1]) <= fight_json['durationMS']:
+						num_kills += 1
+				for item in enemy['combatReplayData']['down']:
+					if abs(item[1]) <= fight_json['durationMS']:						
+						num_downs += 1
 
 	for player in fight_json['players']:
 		if player['notInSquad']:
