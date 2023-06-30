@@ -175,6 +175,7 @@ squad_offensive = {}
 squad_Control = {} 
 enemy_Control = {} 
 enemy_Control_Player = {} 
+battle_Standard = {}
 
 #Spike Damage Tracking
 squad_damage_output = {}
@@ -466,7 +467,8 @@ def reset_globals():
 	squad_offensive = {}
 	squad_Control = {} 
 	enemy_Control = {} 
-	enemy_Control_Player = {} 
+	enemy_Control_Player = {}
+	battle_Standard = {} 
 
 	#Spike Damage Tracking
 	global squad_damage_output
@@ -3136,7 +3138,20 @@ def get_stats_from_fight_json(fight_json, config, log):
 			if skill_name not in squad_skill_dmg:
 				squad_skill_dmg[skill_name] = skill_dmg
 			else:
-				squad_skill_dmg[skill_name] = squad_skill_dmg[skill_name] +skill_dmg        
+				squad_skill_dmg[skill_name] = squad_skill_dmg[skill_name] +skill_dmg
+
+			#Collect Offensive Battle Standard Data
+			if skill_id == 14419 and squadDps_profession in ['Berserker', 'Warrior', 'Bladesworn', 'Spellbreaker']:
+				skillData=skill_used
+				if squadDps_prof_name not in battle_Standard:
+					battle_Standard[squadDps_prof_name]={}
+					for item in skillData:
+						battle_Standard[squadDps_prof_name][item]=skillData[item]
+				else:
+					for item in skillData:
+						battle_Standard[squadDps_prof_name][item]+=skillData[item]
+
+
 		#Collect Spike Damage for first 60 seconds of each fight
 		sec_dmg = 0
 		#fight_name = fight_json['timeEnd'].split(" -",1)[0]

@@ -723,6 +723,7 @@ if __name__ == '__main__':
 	for C_E in Control_Effects:
 		myprint(output, '<$button setTitle="$:/state/curControl-Out" setTo="'+Control_Effects[C_E]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Control_Effects[C_E]+' </$button>')
 	myprint(output, '<$button setTitle="$:/state/curControl-Out" setTo="MOA Tracking" selectedClass="" class="btn btn-sm btn-dark" style="">MOA Tracking </$button>')
+	myprint(output, '<$button setTitle="$:/state/curControl-Out" setTo="BS_Tracking" selectedClass="" class="btn btn-sm btn-dark" style="">Battle Standard Tracking </$button>')
 	myprint(output, '\n---\n')
 	
 
@@ -763,19 +764,32 @@ if __name__ == '__main__':
 	myprint(output, '<$reveal type="match" state="$:/state/curControl-Out" text="MOA Tracking">\n')
 	myprint(output, '\n---\n')
 	myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')
-	myprint(output, "|table-caption-top|k")
+	myprint(output, "|thead-dark table-hover sortable table-caption-top|k")
 	myprint(output, "|MOA Attempts by Squad Player|c")
-	myprint(output, "|!Name | Attempted MOA Casting |h")	
+	myprint(output, "|!Name | !Attempted MOA Casting |h")	
 	for name in MOA_Casters:
 		myprint(output, "|"+name+" | "+str(MOA_Casters[name]['attempts'])+" |")
-	myprint(output, '\n    </div>\n    <div class="flex-col border">\n')
+	myprint(output, '\n    </div>\n    <div class="flex-col">\n')
 	#MOA Target Table
-	myprint(output, "|table-caption-top|k")
+	myprint(output, "|thead-dark table-hover sortable table-caption-top|k")
 	myprint(output, "|Confirmed Missed MOA Attempts by Target|c")
-	myprint(output, "|!Name | Missed | Blocked | Invulned |h")	
+	myprint(output, "|!Name | !Missed | !Blocked | !Invulned |h")	
 	for name in MOA_Targets:
 		myprint(output, "|"+name+" | "+str(MOA_Targets[name]['missed'])+" | "+str(MOA_Targets[name]['blocked'])+" | "+str(MOA_Targets[name]['invulned'])+" |")
 	myprint(output, '\n    </div>\n</div>\n')
+	myprint(output, "</$reveal>\n")
+
+	#Add Offensive Battle Standard Tracking Tables
+	myprint(output, '<$reveal type="match" state="$:/state/curControl-Out" text="BS_Tracking">\n')
+	myprint(output, '\n---\n')
+	myprint(output, '\n<div class="flex-row">\n    <div class="flex-col">\n')
+	myprint(output, "|thead-dark table-hover sortable table-caption-top|k")
+	myprint(output, "|Offensive Battle Standard Attempts by Squad Player|c")
+	myprint(output, "|!Player|!Damage|!Hits|!Connected Hits|!Crit|!Missed|!Invulned|!Interrupted|!Evaded|!Blocked|!Shield Damage|!Crit Damage|h")	
+	for name in battle_Standard:
+		myprint(output, "|"+name+" | "+my_value(battle_Standard[name]['totalDamage'])+"| "+my_value(battle_Standard[name]['hits'])+"| "+my_value(battle_Standard[name]['connectedHits'])+"| "+my_value(battle_Standard[name]['crit'])+"| "+my_value(battle_Standard[name]['missed'])+"| "+my_value(battle_Standard[name]['invulned'])+"| "+my_value(battle_Standard[name]['interrupted'])+"| "+my_value(battle_Standard[name]['evaded'])+" |"+my_value(battle_Standard[name]['blocked'])+"| "+my_value(battle_Standard[name]['shieldDamage'])+"| "+my_value(battle_Standard[name]['critDamage'])+"|")
+	myprint(output, '\n    </div>\n')
+	myprint(output, '\n    </div>\n')
 	myprint(output, "</$reveal>\n")
 
 	myprint(output, "</$reveal>\n")	
