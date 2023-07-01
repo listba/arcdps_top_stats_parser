@@ -3184,8 +3184,14 @@ def get_stats_from_fight_json(fight_json, config, log):
 					OutgoingHealing[healerName] = {}
 					OutgoingHealing[healerName]['Targets'] = {}
 					OutgoingHealing[healerName]['Skills'] = {}
-					OutgoingHealing[healerName]['Group'] = healerGroup
+					OutgoingHealing[healerName]['Group'] = {}
+					OutgoingHealing[healerName]['Group'][healerGroup] = 1
 					OutgoingHealing[healerName]['Prof'] = healerProf
+				else:
+					if healerGroup in OutgoingHealing[healerName]['Group']:
+						OutgoingHealing[healerName]['Group'][healerGroup] += 1
+					else:
+						OutgoingHealing[healerName]['Group'][healerGroup] = 1
 					
 				if 'extHealingStats' in player:
 					for index, target in enumerate(player['extHealingStats']['outgoingHealingAllies']):
@@ -3194,11 +3200,16 @@ def get_stats_from_fight_json(fight_json, config, log):
 						targetGroup = fight_json['players'][index]['group']
 						if targetName not in OutgoingHealing[healerName]['Targets']:
 							OutgoingHealing[healerName]['Targets'][targetName] = {}
-							OutgoingHealing[healerName]['Targets'][targetName]['Group'] = targetGroup
+							OutgoingHealing[healerName]['Targets'][targetName]['Group'] = {}
+							OutgoingHealing[healerName]['Targets'][targetName]['Group'][targetGroup] = 1
 							OutgoingHealing[healerName]['Targets'][targetName]['Healing'] = targetHealing
 							OutgoingHealing[healerName]['Targets'][targetName]['Barrier'] = 0
 						else:
 							OutgoingHealing[healerName]['Targets'][targetName]['Healing'] += targetHealing
+							if targetGroup in OutgoingHealing[healerName]['Targets'][targetName]['Group']:
+								OutgoingHealing[healerName]['Targets'][targetName]['Group'][targetGroup] += 1
+							else:
+								OutgoingHealing[healerName]['Targets'][targetName]['Group'][targetGroup] = 1
 
 					for ally in player['extHealingStats']['alliedHealingDist']:
 						for skill in ally[0]:
@@ -3220,7 +3231,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 						targetGroup = fight_json['players'][index]['group']
 						if targetName not in OutgoingHealing[healerName]['Targets']:
 							OutgoingHealing[healerName]['Targets'][targetName] = {}
-							OutgoingHealing[healerName]['Targets'][targetName]['Group'] = targetGroup
+							OutgoingHealing[healerName]['Targets'][targetName]['Group'][targetGroup] = 1
 							OutgoingHealing[healerName]['Targets'][targetName]['Barrier'] = targetBarrier
 						else:
 							OutgoingHealing[healerName]['Targets'][targetName]['Barrier'] += targetBarrier

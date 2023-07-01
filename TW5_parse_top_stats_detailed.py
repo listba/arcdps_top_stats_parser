@@ -200,10 +200,11 @@ if __name__ == '__main__':
 			myprint(output, '<$button setTitle="$:/state/outgoingHealing" setTo="'+name+'_'+OutgoingHealing[name]['Prof']+'" selectedClass="" class="btn btn-sm btn-dark" style=""> '+name+'{{'+OutgoingHealing[name]['Prof']+'}} </$button>')
 
 		for name in OutgoingHealing:
+			healerMaxGroup = max(OutgoingHealing[name]['Group'], key=OutgoingHealing[name]['Group'].get)
 			myprint(output, '<$reveal type="match" state="$:/state/outgoingHealing" text="'+name+'_'+OutgoingHealing[name]['Prof']+'">')
 			myprint(output, '<div style="overflow-x:auto;">\n\n')
 			myprint(output, "\n|Healer Name | Party|h")
-			myprint (output, "|"+name+" | "+str(OutgoingHealing[name]['Group'])+" |")
+			myprint (output, "|"+name+" | "+str(healerMaxGroup)+" |")
 			myprint(output, "\n\n---\n")
 			myprint(output, '<div class="flex-row">')
 			myprint(output, '    <div class="flex-col border">\n')
@@ -211,8 +212,9 @@ if __name__ == '__main__':
 			myprint(output, "|Sortable Table: Click header to sort|c")
 			myprint(output, "|!Player Name | !Party | !Healing| !Barrier|h")
 			for target in OutgoingHealing[name]['Targets']:
+				targetMaxGroup = max(OutgoingHealing[name]['Targets'][target]['Group'], key=OutgoingHealing[name]['Targets'][target]['Group'].get)
 				if OutgoingHealing[name]['Targets'][target]['Healing'] >0 or OutgoingHealing[name]['Targets'][target]['Barrier']:
-					myprint(output, "|"+target+" | "+str(OutgoingHealing[name]['Targets'][target]['Group'])+" | "+str(OutgoingHealing[name]['Targets'][target]['Healing'])+"| "+str(OutgoingHealing[name]['Targets'][target]['Barrier'])+"|")    
+					myprint(output, "|"+target+" | "+str(targetMaxGroup)+" | "+str(OutgoingHealing[name]['Targets'][target]['Healing'])+"| "+str(OutgoingHealing[name]['Targets'][target]['Barrier'])+"|")    
 			
 			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '    <div class="flex-col border">\n')
