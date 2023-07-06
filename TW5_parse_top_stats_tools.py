@@ -3097,14 +3097,19 @@ def get_stats_from_fight_json(fight_json, config, log):
 				enemy_squad[enemy_name] = 1
 			else:
 				enemy_squad[enemy_name] = enemy_squad[enemy_name] + 1
-			
-			if 'combatReplayData' in enemy:
-				for item in enemy['combatReplayData']['dead']:
-					if abs(item[1]) <= fight_json['durationMS']:
-						num_kills += 1
-				for item in enemy['combatReplayData']['down']:
-					if abs(item[1]) <= fight_json['durationMS']:						
-						num_downs += 1
+#       Broke in EI v2.55.2.0
+#			if 'combatReplayData' in enemy:
+#				for item in enemy['combatReplayData']['dead']:
+#					if abs(item[1]) <= fight_json['durationMS']:
+#						num_kills += 1
+#				for item in enemy['combatReplayData']['down']:
+#					if abs(item[1]) <= fight_json['durationMS']:						
+#						num_downs += 1
+
+			if enemy['defenses'][0]['downCount']:
+				num_downs += enemy['defenses'][0]['downCount']
+			if enemy['defenses'][0]['deadCount']:
+				num_kills += enemy['defenses'][0]['deadCount']				
 
 	for player in fight_json['players']:
 		if player['notInSquad']:
@@ -3988,7 +3993,7 @@ def write_stats_chart(players, top_players, stat, myDate, input_directory, confi
 	print_string +="\ncreator: Drevarr\n"
 	print_string +="tags: ChartData\n"
 	print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData\n'
-	print_string +="type: application/javascript\n\n\n"
+	print_string +="type: text/vnd.tiddlywiki\n\n\n"
 
 	print_string += "option = {\n\tlegend: {},\n\tgrid: {left: '20%'},\n\ttooltip: {},\n\tdataset: [\n\t\t{\n\t\tsource: [\n\t\t\t["
 	
@@ -4108,7 +4113,7 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
 	print_string +="\ncreator: Drevarr\n"
 	print_string +="tags: ChartData\n"
 	print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_'+stat+'_ChartData\n'
-	print_string +="type: application/javascript\n\n\n"
+	print_string +="type: text/vnd.tiddlywiki\n\n\n"
 	#output Box Plot Names
 	jsonStr = json.dumps(statBoxPlot_names)
 	print_string +='const names = '+jsonStr+';\n'
@@ -4238,7 +4243,7 @@ def write_DPSStats_bubble_charts(uptime_Table, DPSStats, myDate, input_directory
 	print_string +="\ncreator: Drevarr\n"
 	print_string +="tags: ChartData\n"
 	print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_DPSStats_BubbleChartData\n'
-	print_string +="type: application/javascript\n\n\n"
+	print_string +="type: text/vnd.tiddlywiki\n\n\n"
 
 	print_string +='\nvar option = {\n  dataset: [{\n    source: ['
 	print_string += '\n            ["Name", "Profession", "DPS", "Ch2DPS", "Ch5DPS", "CaDPS", "CDPS", "Downs", "Kills", "color", "Fight Time"],'
@@ -4387,7 +4392,7 @@ def write_bubble_charts(players, top_players, squad_Control, myDate, input_direc
 		print_string +="\ncreator: Drevarr\n"
 		print_string +="tags: ChartData\n"
 		print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_'+chart+'_BubbleChartData\n'
-		print_string +="type: application/javascript\n\n\n"
+		print_string +="type: text/vnd.tiddlywiki\n\n\n"
 
 		print_string +='\nvar option = {\n  dataset: [{\n    source: ['
 		
@@ -4539,7 +4544,7 @@ def write_box_plot_charts(DPS_List, myDate, input_directory, ChartType):
 		print_string +="\ncreator: Drevarr\n"
 		print_string +="tags: ChartData\n"
 		print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_'+ChartType+'_'+chart+'_Box_PlotChartData\n'
-		print_string +="type: application/javascript\n"
+		print_string +="type: text/vnd.tiddlywiki\n"
 
 		#print_string +='const colors = '
 		print_string +='\nconst professions = '
@@ -4648,7 +4653,7 @@ def write_spike_damage_heatmap(squad_damage_output, myDate, input_directory):
 	print_string +="\ncreator: Drevarr\n"
 	print_string +="tags: ChartData\n"
 	print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_spike_damage_heatmap_ChartData\n'
-	print_string +="type: application/javascript\n\n\n"
+	print_string +="type: text/vnd.tiddlywiki\n\n\n"
 	print_string +="// prettier-ignore\n"
 	#output HeatMap Seconds
 	jsonStr = json.dumps(fight_seconds)
