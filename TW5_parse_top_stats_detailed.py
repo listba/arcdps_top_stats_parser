@@ -1203,7 +1203,7 @@ if __name__ == '__main__':
 	#end On Tag Death insert
 
 	#Downed Healing
-	down_Heal_Order = {14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Renewal of Water', 5762: 'Renewal of Fire', 5760: 'Renewal of Air', 5761: 'Renewal of Earth', 10611: 'Signet of Undeath', 12596: "Nature's Renewal"}
+	down_Heal_Order = {55026: 'Glyph of Stars - CA', 14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Renewal of Water', 5762: 'Renewal of Fire', 5760: 'Renewal of Air', 5761: 'Renewal of Earth', 10611: 'Signet of Undeath', 12596: "Nature's Renewal"}
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Downed_Healing">')    
 	myprint(output, '\n<<alert dark "Healing to downed players" width:60%>>\n\n')
 	myprint(output, '\nRequires Heal Stat addon for ARCDPS to track\n')
