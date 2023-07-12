@@ -4123,7 +4123,7 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
 	#output Box Plot Professions
 	jsonStr = json.dumps(ProfessionColor)
 	print_string +='const ProfessionColor = '+jsonStr+';\n'
-	
+	print_string +='const short_Prof = {"Guardian": "Gdn", "Dragonhunter": "Dgh",	"Firebrand": "Fbd",	"Willbender": "Wbd", "Warrior": "War", "Berserker": "Brs", "Spellbreaker": "Spb", "Bladesworn": "Bds", "Engineer": "Eng", "Scrapper": "Scr", "Holosmith": "Hls", "Mechanist": "Mec", "Ranger": "Rgr", "Druid": "Dru", "Soulbeast": "Slb", "Untamed": "Unt", "Thief": "Thf", "Daredevil": "Dar", "Deadeye": "Ded", "Specter": "Spe", "Elementalist": "Ele", "Tempest": "Tmp", "Weaver": "Wea", "Catalyst": "Cat", "Mesmer": "Mes", "Chronomancer": "Chr", "Mirage": "Mir", "Virtuoso": "Vir", "Necromancer": "Nec", "Reaper": "Rea", "Scourge": "Scg", "Harbinger": "Har", "Revenant": "Rev", "Herald": "Her", "Renegade": "Ren", "Vindicator": "Vin", "Unknown": "Ukn"};\n'
 	print_string += "option = {\n"
 	print_string += "  title: [\n"
 	if stat in chart_per_fight:
@@ -4147,7 +4147,7 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
         type: 'boxplot',
         config: {
           itemNameFormatter: function (params) {
-            return names[params.value];
+            return names[params.value]+" ("+short_Prof[professions[params.value]]+")";
           }
         }
       },
@@ -4159,7 +4159,7 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
   ],
   dataZoom: [{type: 'slider', show: true, yAxisIndex: [0], start: 100, end: 50 },{type: 'inside', yAxisIndex: [0], start: 100, end: 50 },],
   tooltip: {trigger: 'item'},
-  grid: {left: '20%', right: '10%', bottom: '15%'},
+  grid: {left: '25%', right: '10%', bottom: '15%'},
   yAxis: {type: 'category', boundaryGap: true, nameGap: 30, splitArea: {show: true}, splitLine: {show: true}},
   xAxis: {type: 'value', name: 'Sec', splitArea: {show: true}},
   series: [
@@ -4169,8 +4169,7 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
       datasetIndex: 1,
       tooltip: {trigger: 'item',
           formatter: function (params) {
-            console.log(params.value);
-            //Low = params.value[1]
+            //console.log(params.value);
           return `<u><b>${params.value[0]}</b></u>
     <table>
       <tr>
@@ -4203,7 +4202,7 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
         axisPointer: {type: 'shadow'}},      
       itemStyle: {
         borderColor: function (seriesIndex) {
-          let myIndex = names.indexOf(seriesIndex.name);
+          let myIndex = names.indexOf(seriesIndex.name.split(" (")[0]);
           return ProfessionColor[professions[myIndex]];
                 },
         borderWidth: 2
