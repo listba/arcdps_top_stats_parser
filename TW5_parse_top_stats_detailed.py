@@ -214,7 +214,7 @@ if __name__ == '__main__':
 			for target in OutgoingHealing[name]['Targets']:
 				targetMaxGroup = max(OutgoingHealing[name]['Targets'][target]['Group'], key=OutgoingHealing[name]['Targets'][target]['Group'].get)
 				if OutgoingHealing[name]['Targets'][target]['Healing'] >0 or OutgoingHealing[name]['Targets'][target]['Barrier']:
-					myprint(output, "|"+target+" | "+str(targetMaxGroup)+" | "+str(OutgoingHealing[name]['Targets'][target]['Healing'])+"| "+str(OutgoingHealing[name]['Targets'][target]['Barrier'])+"|")    
+					myprint(output, "|"+target+" | "+str(targetMaxGroup)+" | "+my_value(OutgoingHealing[name]['Targets'][target]['Healing'])+"| "+my_value(OutgoingHealing[name]['Targets'][target]['Barrier'])+"|")    
 			
 			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '    <div class="flex-col border">\n')
@@ -1167,7 +1167,7 @@ if __name__ == '__main__':
 
 	#start On Tag Death insert
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="On Tag Review">')    
-	myprint(output, '\n<<alert dark "On Tag Death Review" width:60%>>\n\n')
+	myprint(output, '\n<<alert dark "On Tag Review" width:60%>>\n\n')
 	myprint(output, '\nAvg Dist calculation stops on initial player death or Tag Death to avoiding respawn range')
 	myprint(output, '\nOn Tag Death Review Current Formula: (On Tag <= 600 Range, Off Tag >600 and <=5000, Run Back Death > 5000)\n')
 	myprint(output, '\n---\n')
@@ -1226,10 +1226,10 @@ if __name__ == '__main__':
 		prof = downed_Healing[squadDps_prof_name]['prof']
 		fightTime = uptime_Table[squadDps_prof_name]['duration']
 
-		output_string = "|"+name+" |{{"+prof+"}}|"+my_value(round(fightTime))+"| "
+		output_string = "|"+name+" | {{"+prof+"}} | "+my_value(round(fightTime))+" | "
 		for skill in down_Heal_Order:
 			if down_Heal_Order[skill] in downed_Healing[squadDps_prof_name]:
-				output_string += my_value(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Heals'])+"|"
+				output_string += my_value(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Heals'])+"| "
 			else:
 				output_string += " |"
 		myprint(output, output_string)
@@ -1249,10 +1249,10 @@ if __name__ == '__main__':
 		prof = downed_Healing[squadDps_prof_name]['prof']
 		fightTime = uptime_Table[squadDps_prof_name]['duration']
 
-		output_string = "|"+name+" |{{"+prof+"}}|"+my_value(round(fightTime))+"| "
+		output_string = "|"+name+" | {{"+prof+"}} | "+my_value(round(fightTime))+" | "
 		for skill in down_Heal_Order:
 			if down_Heal_Order[skill] in downed_Healing[squadDps_prof_name]:
-				output_string += my_value(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Hits'])+" |"
+				output_string += my_value(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Hits'])+"| "
 			else:
 				output_string += " |"
 		myprint(output, output_string)
