@@ -12,7 +12,7 @@ Edit ```Example_Guild_Data.py``` to update with your guild id and API token then
 
 Follow the ``` Preparation ``` steps further down in this document then utilize the ```TW5 Top Stats Generation Steps ``` to generate the wiki for online hosting.
 
-![Example Output](ExampleOutput.PNG)
+![Example Output](images/ExampleOutput.PNG)
 
 # What is it all about? #
 
@@ -34,18 +34,15 @@ Currently supported stats are:
 
 Healing and barrier output can only be analyzed when contained in the logs, i.e., the [healing addon for arcdps](https://github.com/Krappa322/arcdps_healing_stats/releases) is installed. They will only be analyzed for players who also have the addon installed, since data may be incomplete for others.
 
-Provided are two scripts: ```parse_top_stats_overview.py``` and ```parse_top_stats_detailed.py```. The first gives an overview of top players considering consistency and total values of all desired stats (exceptions: average distance to tag and damage taken as explained on the [wiki](https://github.com/Freyavf/arcdps_top_stats_parser/wiki/Award-Types)). The second shows the performance of all players contributing to each desired stat (with the same exceptions).
+Provided are two scripts: ```TW5_parse_top_stats_detailed.py``` and ```TW5_parse_top_stats_per_fight.py```. The first gives an overview of top players considering consistency and total values of all desired stats. The second provides an .xlsw output showing the performance of all players contributing to each desired stat on a per fight basis.
 
-Output is given as .txt, and as .xls and .json file for further processing. 
-Here are some example output files: ![example output](/example_output/). They are explained in detail on the ![wiki](https://github.com/Freyavf/arcdps_top_stats_parser/wiki/Output-Files).
-
-Note that currently, this tool is meant mainly for analyzing wwv fights, and I am not sure how applicable it is for pve raids since I don't do them - feel free to test and give me a shout if anything is not working though (contact details below).
+Note that currently, this tool is meant only for analyzing wwv fights.
 
 # How does it work? #
 ## Preparation ##
 To be able to generate the top stats, you need to install/download a few things.
 1. Install python3 if you don't have it yet (https://www.python.org/downloads/).
-2. Install xlrd, xlutils, xlwt and jsons it you don't have them yet: Open a terminal (on windows press windows key + r, type "cmd", enter), and type ```pip3 install xlrd xlutils xlwt jsons requests```, enter.
+2. Install xlrd, xlutils, xlwt and jsons it you don't have them yet: Open a terminal (on windows press windows key + r, type "cmd", enter), and type ```pip3 install xlrd xlutils xlwt jsons requests xlsxwriter```, enter.
 3. Get the Elite Insights parser for arcdps logs (https://github.com/baaron4/GW2-Elite-Insights-Parser/releases). For parsing including barrier, you will need version 2.41 or higher. In the following, we assume the path to it is ```C:\Users\Example\Downloads\EliteInsights\```.
 4. Download this repository if you don't have it yet. We here assume the path is ```C:\Users\Example\Downloads\arcdps_top_stats_parser\```.
 
@@ -59,17 +56,17 @@ There are three methods for generating the top stats.
 6. Open ```/example_output/TW5_Top_Stat_Parse.html``` in your browser of choice
 7. Drag and Drop the resulting file ```TW5_top_stats_detailed.tid``` located in the \<folder> with your json files onto the top of the web page.
   
-  ![Screenshot_1](Screenshot_1.png)
+  ![Screenshot_1](images/Screenshot_1.png)
 
 8. Click the Import button on the popup
   
-  ![Screenshot_2](Screenshot_2.png)
+  ![Screenshot_2](images/Screenshot_2.png)
 
 9. Log file link will be added to the WVW Log Review
   
-  ![Screenshot_3](Screenshot_3.png)
+  ![Screenshot_3](images/Screenshot_3.png)
   
-10. Click the ![Save Button](Screenshot_4.png) button upper left side, complete the save dialog.
+10. Click the ![Save Button](images/Screenshot_4.png) button upper left side, complete the save dialog.
   
 11. Upload to hosting site of choice
 
