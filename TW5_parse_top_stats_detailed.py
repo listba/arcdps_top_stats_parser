@@ -286,6 +286,7 @@ if __name__ == '__main__':
 	
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Skill Casts">\n')    
 	myprint(output, '\n!!!Skill casts / minute\n')
+	myprint(output, '\n!!!Excludes Auto Attack\n')
 	myprint(output, '\n---\n')    
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
 
@@ -300,7 +301,7 @@ if __name__ == '__main__':
 
 	for skillRole in SkillCast:
 		myprint(output, '\n<$reveal type="match" state="$:/state/ProfSkillUsage" text="'+skillRole+'">\n')
-
+		myprint(output, '\n{{'+skillRole.split(' ')[0]+'}}'+skillRole+'\n')
 		skillOrder = sorted(SkillCast[skillRole]['castTotals'].items(), key = lambda x:x[1], reverse = True)
 		myprint(output, "|thead-dark sortable|k")
 		print_string = ("|Name | Fights| ActiveTime| ")
