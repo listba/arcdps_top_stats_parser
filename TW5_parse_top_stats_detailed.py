@@ -105,7 +105,7 @@ if __name__ == '__main__':
 	MenuTabs = ['General', 'Offensive', 'Defensive', 'Support', 'Boons & Buffs', 'Dashboard']
 
 	SubMenuTabs = {
-	'General': ['Overview', 'Fight Logs', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'Death_OnTag', 'Skill Casts'],
+	'General': ['Overview', 'Fight Logs', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts'],
 	'Offensive': ['Offensive Stats', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Power Damage', 'Condi Damage', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In'],
 	'Support': ['Healing', 'Barrier', 'Outgoing Healing', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
@@ -1165,7 +1165,7 @@ if __name__ == '__main__':
 
 
 	#start On Tag Death insert
-	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Death_OnTag">')    
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="On Tag Review">')    
 	myprint(output, '\n<<alert dark "On Tag Death Review" width:60%>>\n\n')
 	myprint(output, '\nAvg Dist calculation stops on initial player death or Tag Death to avoiding respawn range')
 	myprint(output, '\nOn Tag Death Review Current Formula: (On Tag <= 600 Range, Off Tag >600 and <=5000, Run Back Death > 5000)\n')
