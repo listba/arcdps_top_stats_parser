@@ -416,7 +416,7 @@ if __name__ == '__main__':
 				myprint(output, '\n<div class="flex-row">\n    <div class="flex-col">\n')
 				#begin fight summary
 				myprint(output, "|thead-dark table-hover|k")
-				myprint(output, "|Fight Summary:|<|h")
+				myprint(output, "|Fight Summary:| #"+str(FightNum)+"|h")
 				myprint(output, '|Squad Members: |'+str(fight.allies)+' |')
 				myprint(output, '|Squad Deaths: |'+str(fight.total_stats['deaths'])+' |')
 				myprint(output, '|Enemies: |'+str(fight.enemies)+' |')
@@ -1228,7 +1228,7 @@ if __name__ == '__main__':
 		output_string = "|"+name+" |{{"+prof+"}}|"+my_value(round(fightTime))+"| "
 		for skill in down_Heal_Order:
 			if down_Heal_Order[skill] in downed_Healing[squadDps_prof_name]:
-				output_string += str(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Heals'])+"|"
+				output_string += my_value(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Heals'])+"|"
 			else:
 				output_string += " |"
 		myprint(output, output_string)
@@ -1251,7 +1251,7 @@ if __name__ == '__main__':
 		output_string = "|"+name+" |{{"+prof+"}}|"+my_value(round(fightTime))+"| "
 		for skill in down_Heal_Order:
 			if down_Heal_Order[skill] in downed_Healing[squadDps_prof_name]:
-				output_string += str(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Hits'])+" |"
+				output_string += my_value(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Hits'])+" |"
 			else:
 				output_string += " |"
 		myprint(output, output_string)
