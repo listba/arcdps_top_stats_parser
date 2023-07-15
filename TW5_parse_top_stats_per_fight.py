@@ -121,7 +121,17 @@ if __name__ == '__main__':
 		headers.append('Burst Damage (' + str(i) + ')')
 	for i in range(1, 21):
 		headers.append('Ch5Ca Burst Damage (' + str(i) + ')')
-		
+
+	Control_Effects = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: "Hunter's Mark", 738:'Vulnerability'}
+	for conditionId in Control_Effects:
+		headers.append(Control_Effects[conditionId] + ' Gen')
+	
+	Auras_Order = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic', 25518: 'Light', 39978: 'Dark', 10332: 'Chaos'}
+	for auraId in Auras_Order:
+		headers.append(Auras_Order[auraId] + ' Aura Out')
+	for auraId in Auras_Order:
+		headers.append(Auras_Order[auraId] + ' Aura In')
+ 
 	for i, header in enumerate(headers):
 		sheet1.write(0, i, header)
 
@@ -175,14 +185,16 @@ if __name__ == '__main__':
 
 		for squadDps_prof_name in DPSStats:
 			player = [p for p in json_data["players"] if p['account'] == DPSStats[squadDps_prof_name]['account']][0]
-			player_prof_name = "{{"+player['profession']+"}} "+player['name']
+			player_name = player['name']
+			player_prof_name = "{{"+player['profession']+"}} "+player_name
+			player_prof_name_alt = player_name + "_{{"+player['profession']+"}}"
 
 			fight_duration = json_data["durationMS"] / 1000
 			combat_time = sum_breakpoints(get_combat_time_breakpoints(player)) / 1000
 			num_party_members = party_member_counts[player['group']]
 
 			# Calculate healing values
-			if player['name'] in players_running_healing_addon and 'extHealingStats' in player:
+			if player_name in players_running_healing_addon and 'extHealingStats' in player:
 				total_healing = 0
 				total_healing_group = 0
 				power_healing = 0
@@ -343,7 +355,30 @@ if __name__ == '__main__':
 			for i in range(1, 21):
 				row_data.append(DPSStats[squadDps_prof_name]['Ch5Ca_Burst_Damage'][i])
 
-		
+			for conditionId in Control_Effects:
+				key = Control_Effects[conditionId]
+				condition_value = 0
+				if key in squad_Control and player_prof_name_alt in squad_Control[key]:
+					condition_value = squad_Control[key][player_prof_name_alt]
+
+				row_data.append(condition_value)
+
+			for auraId in Auras_Order:
+				key = Auras_Order[auraId]
+				aura_value = 0
+				if key in auras_TableOut and player_name in auras_TableOut[key]:
+					aura_value = auras_TableOut[key][player_name]
+
+				row_data.append(aura_value)
+
+			for auraId in Auras_Order:
+				key = Auras_Order[auraId]
+				aura_value = 0
+				if key in auras_TableIn and player_name in auras_TableIn[key]:
+					aura_value = auras_TableIn[key][player_name]
+
+				row_data.append(aura_value)
+
 			for i, cell_data in enumerate(row_data):
 				sheet1.write(row, i, cell_data)
 
