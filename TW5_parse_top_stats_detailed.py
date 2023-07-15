@@ -425,6 +425,9 @@ if __name__ == '__main__':
 				myprint(output, '|Enemies Killed: |'+str(fight.kills)+' |')
 				myprint(output, '|Fight Duration: |'+str(fight.duration)+' |')
 				myprint(output, '|Fight End Time: |'+str(fight.end_time)+' |')
+				myprint(output, '|Squad Target Damage: |'+my_value(fight.total_stats['dmg'])+' |')
+				myprint(output, '|Squad All Damage: |'+my_value(fight.total_stats['dmgAll'])+' |')
+				myprint(output, '|Damage Delta (Target/All): |'+my_value(fight.total_stats['dmg'] - fight.total_stats['dmgAll'])+' |')
 				myprint(output, '</div></div>\n\n')
 				#end fight Summary
 				myprint(output, '\n<div class="flex-row">\n    <div class="flex-col-1">\n')
