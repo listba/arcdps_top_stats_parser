@@ -106,7 +106,7 @@ if __name__ == '__main__':
 
 	SubMenuTabs = {
 	'General': ['Overview', 'Fight Logs', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts'],
-	'Offensive': ['Offensive Stats', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Power Damage', 'Condi Damage', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
+	'Offensive': ['Offensive Stats', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Power Damage', 'Condi Damage', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In'],
 	'Support': ['Healing', 'Barrier', 'Outgoing Healing', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
 	'Boons & Buffs': ['Stability', 'Protection', 'Aegis', 'Might', 'Fury', 'Resistance', 'Resolution', 'Quickness', 'Swiftness', 'Superspeed', 'Alacrity', 'Vigor', 'Regeneration', 'Auras - Out', 'Auras - In', 'Personal Buffs', 'Buff Uptime', 'Stacking Buffs'],
@@ -508,7 +508,12 @@ if __name__ == '__main__':
 
 			#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
 			myprint(output,'<$reveal type="match" state="$:/state/curTab" text="'+config.stat_names[stat]+'">')
-			myprint(output, "\n!!!<<alert dark src:'"+config.stat_names[stat].upper()+"' width:60%>>\n")
+			if stat in ['dmg', 'Pdmg', 'Cdmg']:
+				myprint(output, "\n!!!<<alert dark src:'"+config.stat_names[stat].upper()+"  -  Targets Only' width:60%>>\n")
+			elif stat == 'dmgAll':
+				myprint(output, "\n!!!<<alert dark src:'"+config.stat_names[stat].upper()+"  -  includes NPC, Pets, Minions, siege, etc.' width:60%>>\n")
+			else:
+				myprint(output, "\n!!!<<alert dark src:'"+config.stat_names[stat].upper()+"' width:60%>>\n")
 			
 			if stat == 'dist':
 				myprint(output, '\n<div class="flex-row">\n    <div class="flex-col border">\n')

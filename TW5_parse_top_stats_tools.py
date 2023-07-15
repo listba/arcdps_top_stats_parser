@@ -168,7 +168,7 @@ class Config:
 
 
 #Stats to exlucde from overview summary
-exclude_Stat = ["iol", "dist", "res", "Cdmg", "Pdmg",  "kills", "downs", 'downed', "HiS", "stealth", "superspeed", "swaps", "barrierDamage", "dodges", "evades", "blocks", "invulns", 'hitsMissed', 'interupted', 'fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut', 'ripsIn', 'ripsTime', 'cleansesIn', 'cleansesTime', 'downContrib', 'resOutTime', 'cleansesOutTime', 'ripsOutTime', 'downContribution']
+exclude_Stat = ["iol", "dist", "res", "dmgAll", "Cdmg", "Pdmg",  "kills", "downs", 'downed', "HiS", "stealth", "superspeed", "swaps", "barrierDamage", "dodges", "evades", "blocks", "invulns", 'hitsMissed', 'interupted', 'fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut', 'ripsIn', 'ripsTime', 'cleansesIn', 'cleansesTime', 'downContrib', 'resOutTime', 'cleansesOutTime', 'ripsOutTime', 'downContribution']
 
 #Control Effects Tracking
 squad_offensive = {}
@@ -1627,7 +1627,7 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 	elif stat == 'kills':
 		print_string += " !FightTime Kills/Min| !CombatTime Kills/Min|"
 	else:
-		if stat in ['Pdmg', 'Cdmg', 'dmg_taken', 'barrierDamage', 'downContribution']:
+		if stat in ['dmgAll', 'Pdmg', 'Cdmg', 'dmg_taken', 'barrierDamage', 'downContribution']:
 			print_string += " !Per sec avg|"
 		else:
 			print_string += " !Per min avg|"
@@ -1723,7 +1723,7 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Self, 4))+' Self Generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'</span>|'
 		else:
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			if stat in ['Pdmg', 'Cdmg', 'dmg_taken', 'barrierDamage', 'downContribution', 'deaths']:
+			if stat in ['dmgAll', 'Pdmg', 'Cdmg', 'dmg_taken', 'barrierDamage', 'downContribution', 'deaths']:
 				print_string += " "+"{:.2f}".format(round(player.average_stats[stat], 2))+"|"
 			else:
 				print_string += " "+"{:.2f}".format(round(player.average_stats[stat] * 60.0, 2))+"|"
@@ -2323,7 +2323,12 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		for target in player_json['dpsTargets']:
 			sumDamage = sumDamage + int(target[0]['damage'])
 		return int(sumDamage)
-		#return int(player_json['dpsAll'][0]['damage'])            
+     
+	if stat == 'dmgAll':
+		if 'dpsAll' not in player_json:
+			return 0
+		return int(player_json['dpsAll'][0]['damage'])
+	
 	#Add Power and Condition Damage Tracking
 	if stat == 'Cdmg':
 		if 'dpsTargets' not in player_json:
@@ -4091,7 +4096,7 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
 	statBoxPlot_profs = []
 	statBoxPlot_data = []	
 	chart_per_fight = ['res', 'kills', 'downs', 'swaps', 'dist', 'hitsMissed', 'interupted', 'invulns', 'evades', 'blocks', 'dodges', 'downed', 'deaths', 'dmg_taken', 'barrierDamage', 'superspeed']
-	chart_per_second = ['dmg', 'downContribution','Pdmg', 'Cdmg', 'rips', 'cleanses', 'heal', 'barrier', 'ripsIn', 'cleansesIn', 'cleansesOutTime', 'ripsOutTime', 'ripsTime', 'cleansesTime'] 
+	chart_per_second = ['dmg', 'downContribution', 'dmgAll', 'Pdmg', 'Cdmg', 'rips', 'cleanses', 'heal', 'barrier', 'ripsIn', 'cleansesIn', 'cleansesOutTime', 'ripsOutTime', 'ripsTime', 'cleansesTime'] 
 	for i in reversed(range(len(top_players))):
 		player= players[top_players[i]]
 		statBoxPlot_names.append(player.name)

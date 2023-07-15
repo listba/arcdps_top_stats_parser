@@ -14,7 +14,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-stats_to_compute = ['deaths', 'downed', 'iol', 'res', 'kills', 'downs','dmg', 'Pdmg', 'Cdmg', 'dmg_taken', 'rips', 'cleanses', 'superspeed', 'stealth', 'HiS', 'dist', 'stability', 'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration', 'heal', 'barrier', 'barrierDamage', 'swaps', 'dodges', 'evades', 'invulns', 'hitsMissed', 'interupted', 'blocks', 'fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut', 'ripsIn', 'cleansesIn', 'resOutTime', 'cleansesOutTime', 'ripsOutTime', 'downContribution']
+stats_to_compute = ['deaths', 'downed', 'iol', 'res', 'kills', 'downs','dmg', 'Pdmg', 'Cdmg', 'dmgAll','dmg_taken', 'rips', 'cleanses', 'superspeed', 'stealth', 'HiS', 'dist', 'stability', 'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration', 'heal', 'barrier', 'barrierDamage', 'swaps', 'dodges', 'evades', 'invulns', 'hitsMissed', 'interupted', 'blocks', 'fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut', 'ripsIn', 'cleansesIn', 'resOutTime', 'cleansesOutTime', 'ripsOutTime', 'downContribution']
 aurasIn_to_compute = ['fireIn', 'shockingIn', 'frostIn', 'magneticIn', 'lightIn', 'darkIn', 'chaosIn']
 aurasOut_to_compute = ['fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut']
 defenses_to_compute = ['dmg_taken', 'barrierDamage', 'hitsMissed', 'interupted', 'invulns', 'evades', 'blocks', 'dodges', 'cleansesIn', 'ripsIn', 'downed', 'deaths']
@@ -26,7 +26,7 @@ summary_title = "WVW Log Review"
 summary_creator = "Drevarr"
 
 # How many players will be listed who achieved top stats most often for each stat?
-num_players_listed = {'dmg': 100, 'Pdmg': 50, 'Cdmg': 50, 'iol': 50,'rips': 50, 'cleanses': 50, 'dist': 50, 'stability': 50, 'protection': 50, 'aegis': 50, 'might': 50, 'fury': 50, 'dmg_taken': 50, 'deaths': 50, 'downed': 50,'res': 50, 'superspeed': 50, 'stealth': 50, 'HiS': 50, 'resistance': 50, 'resolution': 50, 'quickness': 50, 'swiftness': 50, 'alacrity': 50, 'vigor': 50, 'regeneration': 50, 'heal': 50, 'barrier': 50, 'barrierDamage': 50, 'swaps': 50, 'kills': 50, 'downs': 50, 'dodges': 50, 'evades': 50, 'hitsMissed': 50, 'interupted': 50, 'blocks': 50, 'invulns': 50, 'fireOut': 50, 'shockingOut': 50, 'frostOut': 50, 'magneticOut': 50, 'lightOut': 50, 'darkOut': 50, 'chaosOut': 50, 'ripsIn': 50, 'cleansesIn': 50, 'resOutTime': 50, 'cleansesOutTime': 50, 'ripsOutTime': 50, 'downContribution': 50}
+num_players_listed = {'dmg': 100, 'Pdmg': 50, 'Cdmg': 50, 'dmgAll': 100, 'iol': 50,'rips': 50, 'cleanses': 50, 'dist': 50, 'stability': 50, 'protection': 50, 'aegis': 50, 'might': 50, 'fury': 50, 'dmg_taken': 50, 'deaths': 50, 'downed': 50,'res': 50, 'superspeed': 50, 'stealth': 50, 'HiS': 50, 'resistance': 50, 'resolution': 50, 'quickness': 50, 'swiftness': 50, 'alacrity': 50, 'vigor': 50, 'regeneration': 50, 'heal': 50, 'barrier': 50, 'barrierDamage': 50, 'swaps': 50, 'kills': 50, 'downs': 50, 'dodges': 50, 'evades': 50, 'hitsMissed': 50, 'interupted': 50, 'blocks': 50, 'invulns': 50, 'fireOut': 50, 'shockingOut': 50, 'frostOut': 50, 'magneticOut': 50, 'lightOut': 50, 'darkOut': 50, 'chaosOut': 50, 'ripsIn': 50, 'cleansesIn': 50, 'resOutTime': 50, 'cleansesOutTime': 50, 'ripsOutTime': 50, 'downContribution': 50}
 # What portion (%) of are considered to be "top" in each fight for each stat?
 num_players_considered_top_percentage = 5
 
@@ -123,6 +123,7 @@ stat_names = {}
 stat_names["dmg"] = "Damage"
 stat_names["Pdmg"] = "Power Damage"
 stat_names["Cdmg"] = "Condi Damage"
+stat_names["dmgAll"] = "Damage All"
 stat_names["dmg_taken"] = "Damage Taken"
 stat_names["rips"] = "Boon Strips"
 stat_names["stability"] = "Stability"
