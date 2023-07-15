@@ -310,6 +310,7 @@ Heal_Utility = {
 Heal_Food = {
     57276: "Bowl of Spiced Fruit Salad",
     57100: "Bowl of Fruit Salad with Mint Garnish",
+    99804: "Bowl of Mists-Infused Fruit Salad with Mint Garnish",
     26529: "Delicious Rice Ball",
     57299: "Plate of Peppercorn-Spiced Poultry Aspic"
     }
@@ -318,10 +319,12 @@ Cele_Food = {
     57374: "Spherified Clove-Spiced Oyster Soup",
     57037: "Spherified Sesame Oyster Soup",
     57201: "Spherified Oyster Soup with Mint Garnish",
+    99794: "Mists-Infused Spherified Peppercorn-Spiced Oyster Soup",
     19451: "Dragon's Revelry Starcake"
     }
 DPS_Food= {
 	57051: "Peppercorn-Crusted Sous-Vide Steak",
+	99785: "Mists-Infused Peppercorn-Crusted Sous-Vide Steak",
 	57244: "Cilantro Lime Sous-Vide Steak",
 	57260: "Plate of Peppercorn-Spiced Coq Au Vin",
 	57129: "Spiced Peppercorn Cheesecake"
