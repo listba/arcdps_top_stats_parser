@@ -256,6 +256,25 @@ OutgoingHealing = {}
 #Collect FightLinks on DPS Reports
 Fight_Logs = []
 
+#WvW Specific Buffs
+wvwBuffs = {
+	32699: 'PresenceOfTheKeep',
+	33794: 'GuildObjectiveAuraI',
+	32477: 'GuildObjectiveAuraII',
+	33249: 'GuildObjectiveAuraIII',
+	33375: 'GuildObjectiveAuraIV',
+	33791: 'GuildObjectiveAuraV',
+	32928: 'GuildObjectiveAuraVI',
+	33010: 'GuildObjectiveAuraVII',
+	33594: 'GuildObjectiveAuraVIII',
+	14772: 'MinorBorderlandsBloodlust',
+	14773: 'MajorBorderlandsBloodlust',
+	14774: 'SuperiorBorderlandsBloodlust',
+	20893: 'SpeedOfTheBattlefield'
+}
+squadWvWBuffs = {}
+enemyWvWBuffs = {}
+
 #fetch Guild Data and Check Guild Status function
 #members: Dict[str, Any] = {}
 members: dict = field(default_factory=dict) 
