@@ -2975,6 +2975,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 	num_enemies_Red = 0
 	num_enemies_Blue = 0
 	num_enemies_Green = 0
+	num_enemies_Unk = 0
 	enemy_name = ''
 	enemy_squad = {}
 	num_kills = 0
@@ -3045,15 +3046,18 @@ def get_stats_from_fight_json(fight_json, config, log):
 			if 'teamID' in enemy:
 				enemy_team = int(enemy['teamID'])
 
+				if enemy_team in teamID:
 				#Check teamId against team colors
-				if teamID[enemy_team] == 'Red':
-					num_enemies_Red += 1
-					
-				elif teamID[enemy_team] == 'Blue':
-					num_enemies_Blue += 1
+					if teamID[enemy_team] == 'Red':
+						num_enemies_Red += 1
+						
+					elif teamID[enemy_team] == 'Blue':
+						num_enemies_Blue += 1
 
-				elif teamID[enemy_team] == 'Green':
-					num_enemies_Green += 1
+					elif teamID[enemy_team] == 'Green':
+						num_enemies_Green += 1
+				else:
+					num_enemies_Unk +=1
 
 
 			#append enemy['name'] to enemy_list
