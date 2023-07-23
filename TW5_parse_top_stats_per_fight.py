@@ -131,9 +131,20 @@ if __name__ == '__main__':
 		headers.append(Auras_Order[auraId] + ' Aura Out')
 	for auraId in Auras_Order:
 		headers.append(Auras_Order[auraId] + ' Aura In')
- 
+
+	#Set formatting for header
+	header_format = book.add_format()
+	header_format.set_bold()
+	header_format.set_text_wrap()
+	header_format.set_align('center')
+	header_format.set_align('bottom')
+	header_format.set_font_color('navy') # Go Navy! Beat Army.
+	#Set Top Row frozen
+	sheet1.freeze_panes(1, 0)
+
+
 	for i, header in enumerate(headers):
-		sheet1.write(0, i, header)
+		sheet1.write(0, i, header, header_format)
 
 	# iterating over all fights in directory
 	files = listdir(args.input_directory)
