@@ -33,6 +33,7 @@ import math
 import requests
 import datetime
 import gzip
+import csv
 from collections import OrderedDict
 
 from GW2_Color_Scheme import ProfessionColor
@@ -275,6 +276,9 @@ wvwBuffs = {
 squadWvWBuffs = {}
 enemyWvWBuffs = {}
 
+#Collect PlenBot Log Links for summary
+Plen_Bot_Logs={}
+
 #fetch Guild Data and Check Guild Status function
 #members: Dict[str, Any] = {}
 members: dict = field(default_factory=dict) 
@@ -301,7 +305,6 @@ else:
 	members = {}
 	API_response = " "
 
-
 def findMember(json_object, name):
 	if API_response == requests.codes.ok:
 		guildStatus = "--==Non Member==--"
@@ -313,6 +316,7 @@ def findMember(json_object, name):
 		guildStatus = ""
 		return guildStatus
 # End fetch Guild Data and Check Guild Status
+
 
 #define subtype based on consumables
 
@@ -479,6 +483,8 @@ def fill_config(config_input):
 
 	config.charts = config_input.charts
 	config.include_comp_and_review = config_input.include_comp_and_review
+	config.use_PlenBot = config_input.use_PlenBot
+	config.PlenBotPath = config_input.PlenBotPath
 			
 	return config
 	
@@ -1840,6 +1846,18 @@ def get_basic_player_data_from_json(player_json):
 	profession = player_json['profession']
 	return account, name, profession
 
+def getPlenBotLogs(PlenBotPath):
+	filename="uploaded_logs.csv"
+	with open(PlenBotPath+filename,'r') as data:
+		for line in csv.reader(data, delimiter=';'):
+			LOG = line[-2]
+			if LOG == "Permalink":
+				continue
+			else:
+				LOG_KEY = LOG.split("-",1)[1].split('_')[0]
+			Plen_Bot_Logs[LOG_KEY]=LOG
+		return
+		
 def get_fight_log_link_data(json_data):
     currentFight = []
     fightName = json_data['fightName']
@@ -1851,8 +1869,15 @@ def get_fight_log_link_data(json_data):
         fightName = fightName.split("-")[1]
     fightDate, fightTime, fightGMT = fightStart.split()
     endTime = fightEnd.split()[1]
+    PBtime_obj = datetime.datetime.strptime(endTime, "%H:%M:%S")
+    PB_endTime = (PBtime_obj + datetime.timedelta(seconds=-1)).strftime("%H%M%S")
+    PB_fightDate = fightDate.replace('-', '')
+    PlenBot_Key = str(PB_fightDate)+"-"+str(PB_endTime)
     
+    if PlenBot_Key in Plen_Bot_Logs:
+        fightLink = Plen_Bot_Logs[PlenBot_Key]
     currentFight.extend([fightDate, fightTime, endTime, fightGMT, fightName, fightDuration, fightLink])
+        
     return currentFight
 
 def get_buff_ids_from_json(json_data, config):
@@ -4821,6 +4846,7 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	#json_dict["squad_damage_output"] =  {key: value for key, value in squad_damage_output.items()}
 	json_dict["skill_Dict"] =  {key: value for key, value in skill_Dict.items()}
 	json_dict["prof_role_skills"] =  {key: value for key, value in prof_role_skills.items()}
+	json_dict["Plen_Bot_Logs"] =  {key: value for key, value in Plen_Bot_Logs.items()}
 	
 
 		

@@ -61,6 +61,10 @@ if __name__ == '__main__':
 	
 	config = fill_config(parser_config)
 
+	if config.use_PlenBot:
+		PlenBotPath = config.PlenBotPath
+		getPlenBotLogs(PlenBotPath)
+		
 	print_string = "Using input directory "+args.input_directory+", writing output to "+args.output_filename+" and log to "+args.log_file
 	print(print_string)
 	print_string = "Considering fights with at least "+str(config.min_allied_players)+" allied players and at least "+str(config.min_enemy_players)+" enemies that took longer than "+str(config.min_fight_duration)+" s."

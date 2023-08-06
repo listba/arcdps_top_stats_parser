@@ -71,6 +71,13 @@ charts = True
 # Include the Squad Comp and Fight Review tabs
 include_comp_and_review = True
 
+# Use PlenBot Logs? Set to True
+# Requires the "save logs to a CSV file" option to be checked in PlenBot
+use_PlenBot = False
+# Plenbot Install Directory, change to match your installation
+PlenBotPath = "d:\\PlenBot\\"
+
+
 # names as which each specialization will show up in the stats
 profession_abbreviations = {}
 profession_abbreviations["Guardian"] = "Guardian"
