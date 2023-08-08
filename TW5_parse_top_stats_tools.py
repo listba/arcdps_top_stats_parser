@@ -1872,10 +1872,15 @@ def get_fight_log_link_data(json_data):
     PBtime_obj = datetime.datetime.strptime(endTime, "%H:%M:%S")
     PB_endTime = (PBtime_obj + datetime.timedelta(seconds=-1)).strftime("%H%M%S")
     PB_fightDate = fightDate.replace('-', '')
+    #Build key based on date and time less 1 second
     PlenBot_Key = str(PB_fightDate)+"-"+str(PB_endTime)
-    
+    #Build key based on date and time
+    EI_Key = str(PB_fightDate)+"-"+str(PBtime_obj.strftime("%H%M%S"))
+    #If either key found in Plenbot logs, use plenbot link instead
     if PlenBot_Key in Plen_Bot_Logs:
         fightLink = Plen_Bot_Logs[PlenBot_Key]
+    elif EI_Key in Plen_Bot_Logs:
+        fightLink = Plen_Bot_Logs[EI_Key]
     currentFight.extend([fightDate, fightTime, endTime, fightGMT, fightName, fightDuration, fightLink])
         
     return currentFight
