@@ -278,6 +278,7 @@ enemyWvWBuffs = {}
 
 #Collect PlenBot Log Links for summary
 Plen_Bot_Logs={}
+Session_Fights=[]
 
 #fetch Guild Data and Check Guild Status function
 #members: Dict[str, Any] = {}
@@ -1866,7 +1867,7 @@ def getPlenBotLogs(PlenBotPath):
 			Plen_Bot_Logs[LOG_KEY]=LOG
 		return
 		
-def get_fight_log_link_data(json_data):
+def get_fight_log_link_data(json_data, fightStamp):
     currentFight = []
     fightName = json_data['fightName']
     fightDuration = json_data['duration']
@@ -1877,18 +1878,8 @@ def get_fight_log_link_data(json_data):
         fightName = fightName.split("-")[1]
     fightDate, fightTime, fightGMT = fightStart.split()
     endTime = fightEnd.split()[1]
-    PBtime_obj = datetime.datetime.strptime(endTime, "%H:%M:%S")
-    PB_endTime = (PBtime_obj + datetime.timedelta(seconds=-1)).strftime("%H%M%S")
-    PB_fightDate = fightDate.replace('-', '')
-    #Build key based on date and time less 1 second
-    PlenBot_Key = str(PB_fightDate)+"-"+str(PB_endTime)
-    #Build key based on date and time
-    EI_Key = str(PB_fightDate)+"-"+str(PBtime_obj.strftime("%H%M%S"))
-    #If either key found in Plenbot logs, use plenbot link instead
-    if PlenBot_Key in Plen_Bot_Logs:
-        fightLink = Plen_Bot_Logs[PlenBot_Key]
-    elif EI_Key in Plen_Bot_Logs:
-        fightLink = Plen_Bot_Logs[EI_Key]
+    if fightStamp in Plen_Bot_Logs:
+        fightLink = Plen_Bot_Logs[fightStamp]
     currentFight.extend([fightDate, fightTime, endTime, fightGMT, fightName, fightDuration, fightLink])
         
     return currentFight
@@ -1975,7 +1966,8 @@ def collect_stat_data(args, config, log, anonymize=False):
 			get_buff_ids_from_json(json_data, config)
 
 		#Collect Fight Link Data
-		Fight_Logs.append(get_fight_log_link_data(json_data))
+		fightStamp = filename.split("_",1)[0]
+		Fight_Logs.append(get_fight_log_link_data(json_data, fightStamp))
 
 		# add new entry for this fight in all players
 		for player in players:
