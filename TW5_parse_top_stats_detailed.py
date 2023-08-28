@@ -881,11 +881,14 @@ if __name__ == '__main__':
 	#start Buff Uptime Table insert
 	uptime_Order = ['stability',  'protection',  'aegis',  'might',  'fury',  'resistance',  'resolution',  'quickness',  'swiftness',  'alacrity',  'vigor',  'regeneration']
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Buff Uptime">')    
-	myprint(output, '\n<<alert dark "Total Buff Uptime %" width:60%>>\n\n')
+	myprint(output, '\n<<alert dark "Total Buff Uptime % across all fights" width:60%>>\n\n')
 	
 	myprint(output, '\n---\n')
+	myprint(output, '<$button setTitle="$:/state/curUptime" setTo="Player" selectedClass="" class="btn btn-sm btn-dark" style=""> Player Uptime Overview </$button>')
+	myprint(output, '<$button setTitle="$:/state/curUptime" setTo="Party" selectedClass="" class="btn btn-sm btn-dark" style=""> Squad/Party Uptime Overview </$button>')
 	myprint(output, '\n---\n')
 
+	myprint(output, '<$reveal type="match" state="$:/state/curUptime" text="Player">\n')
 	myprint(output, "|table-caption-top|k")
 	myprint(output, "|Sortable table - Click header item to sort table |c")
 	myprint(output, "|thead-dark table-hover sortable|k")
@@ -899,16 +902,51 @@ if __name__ == '__main__':
 		output_string += " {{"+prof+"}} | "+my_value(round(fightTime))+"|"
 		for item in uptime_Order:
 			if item in uptime_Table[squadDps_prof_name] and fightTime >0:
-				output_string += " "+"{:.4f}".format(round(((uptime_Table[squadDps_prof_name][item]/fightTime)*100), 4))+"|"
+				output_string += " "+"{:.2f}".format(round(((uptime_Table[squadDps_prof_name][item]/fightTime)*100), 2))+"%|"
 			else:
-				output_string += " 0.00|"
+				output_string += " 0.00%|"
 				
 
 
 		myprint(output, output_string)
+	myprint(output, "\n</$reveal>\n")
+
+	#Display Squad and Party Buff Uptime Tables
+	myprint(output, '<$reveal type="match" state="$:/state/curUptime" text="Party">\n')
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|Squad Composite Uptime % for Buffs |c")
+	myprint(output, "|thead-dark table-hover sortable|k")
+	myprint(output, "|!Squad/Party | !{{Stability}}|  !{{Protection}}|  !{{Aegis}}|  !{{Might}}|  !{{Fury}}|  !{{Resistance}}|  !{{Resolution}}|  !{{Quickness}}|  !{{Swiftness}}|  !{{Alacrity}}|  !{{Vigor}}|  !{{Regeneration}}|h")
+	output_string = "|Squad |"
+	for item in uptime_Order:
+		if item in squadUptimes['buffs']:
+			output_string += " "+"{:.2f}".format(round(((squadUptimes['buffs'][item]/squadUptimes['FightTime'])*100), 2))+"%|"
+		else:
+			output_string += " 0.00%|"
+	myprint(output, output_string)
+	#myprint(output, "</$reveal>\n")
+
+	#myprint(output, "\n</$reveal>\n")
+	myprint(output, '\n---\n')
+	#party Uptimes
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|Party Composite Uptime % for Buffs - Sortable table - Click header item to sort table |c")
+	myprint(output, "|thead-dark table-hover sortable|k")
+	myprint(output, "|!Squad/Party | !{{Stability}}|  !{{Protection}}|  !{{Aegis}}|  !{{Might}}|  !{{Fury}}|  !{{Resistance}}|  !{{Resolution}}|  !{{Quickness}}|  !{{Swiftness}}|  !{{Alacrity}}|  !{{Vigor}}|  !{{Regeneration}}|h")
+	for party in partyUptimes:
+		output_string = "|Party: "+str(party)+" |"
+
+		for item in uptime_Order:
+			if item in partyUptimes[party]['buffs']:
+				output_string += " "+"{:.2f}".format(round(((partyUptimes[party]['buffs'][item]/partyUptimes[party]['totalFightTime'])*100), 2))+"%|"
+			else:
+				output_string += " 0.00%|"
+		myprint(output, output_string)
+	myprint(output, "</$reveal>\n")
 
 	write_buff_uptimes_in_xls(uptime_Table, players, uptime_Order, args.xls_output_filename)
-	myprint(output, "</$reveal>\n")
+	myprint(output, "\n</$reveal>\n")
+
 	#end Buff Uptime Table insert
 
 	max_fightTime = 0
