@@ -192,6 +192,11 @@ auras_TableIn = {}
 uptime_Table = {}
 uptime_Buff_Ids = {1122: 'stability', 717: 'protection', 743: 'aegis', 740: 'might', 725: 'fury', 26980: 'resistance', 873: 'resolution', 1187: 'quickness', 719: 'swiftness', 30328: 'alacrity', 726: 'vigor', 718: 'regeneration'}
 #uptime_Buff_Names = { 'stability': 1122,  'protection': 717,  'aegis': 743,  'might': 740,  'fury': 725,  'resistance': 26980,  'resolution': 873,  'quickness': 1187,  'swiftness': 719,  'alacrity': 30328,  'vigor': 726,  'regeneration': 718}
+#Composite Uptime Tracking
+partyUptimes = {}
+squadUptimes = {}
+squadUptimes['FightTime'] = 0
+squadUptimes['buffs'] = {}
 
 #Stacking Buffs Tracking
 stacking_uptime_Table = {}
@@ -3179,6 +3184,11 @@ def get_stats_from_fight_json(fight_json, config, log):
 		squadDps_profession = player['profession']
 		squadDps_prof_name = "{{"+squadDps_profession+"}} "+squadDps_name
 		squadDps_damage = 0
+		squadDps_group = player['group']
+		if squadDps_group not in partyUptimes:
+			partyUptimes[squadDps_group]={}
+			partyUptimes[squadDps_group]['buffs']={}
+			partyUptimes[squadDps_group]['totalFightTime']=0
 
 		if squadDps_prof_name not in uptime_Table:
 			uptime_Table[squadDps_prof_name]={}
@@ -3418,7 +3428,17 @@ def get_stats_from_fight_json(fight_json, config, log):
 				uptime_Table[squadDps_prof_name][buff_name] = uptime_duration
 			else:
 				uptime_Table[squadDps_prof_name][buff_name] = uptime_Table[squadDps_prof_name][buff_name] + uptime_duration
+			if buff_name not in partyUptimes[squadDps_group]['buffs']:
+				partyUptimes[squadDps_group]['buffs'][buff_name] = uptime_duration
+			else:
+				partyUptimes[squadDps_group]['buffs'][buff_name] += uptime_duration
+			if buff_name not in squadUptimes['buffs']:
+				squadUptimes['buffs'][buff_name] = uptime_duration
+			else:
+				squadUptimes['buffs'][buff_name] += uptime_duration
 		uptime_Table[squadDps_prof_name]['duration'] = uptime_Table[squadDps_prof_name]['duration'] + player_combat_time
+		partyUptimes[squadDps_group]['totalFightTime']+=player_combat_time
+		squadUptimes['FightTime'] += player_combat_time
 
 	#Attendance Tracking
 	#duration in secs
@@ -4844,14 +4864,16 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	#json_dict["SPS_List"] =  {key: value for key, value in SPS_List.items()}
 	#json_dict["HPS_List"] =  {key: value for key, value in HPS_List.items()}
 	#json_dict["DPSStats"] =  {key: value for key, value in DPSStats.items()}
-	json_dict["downed_Healing"] =  {key: value for key, value in downed_Healing.items()}
+	#json_dict["downed_Healing"] =  {key: value for key, value in downed_Healing.items()}
 	#json_dict["MOA_Targets"] =  {key: value for key, value in MOA_Targets.items()}
 	#json_dict["MOA_Casters"] =  {key: value for key, value in MOA_Casters.items()}
 	#json_dict["Buffs_Personal"] =  {key: value for key, value in buffs_personal.items()}
 	#json_dict["squad_damage_output"] =  {key: value for key, value in squad_damage_output.items()}
 	json_dict["skill_Dict"] =  {key: value for key, value in skill_Dict.items()}
-	json_dict["prof_role_skills"] =  {key: value for key, value in prof_role_skills.items()}
-	json_dict["Plen_Bot_Logs"] =  {key: value for key, value in Plen_Bot_Logs.items()}
+	#json_dict["prof_role_skills"] =  {key: value for key, value in prof_role_skills.items()}
+	#json_dict["Plen_Bot_Logs"] =  {key: value for key, value in Plen_Bot_Logs.items()}
+	json_dict["partyUptimes"] =  {key: value for key, value in partyUptimes.items()}
+	json_dict["squadUptimes"] =  {key: value for key, value in squadUptimes.items()}
 	
 
 		
