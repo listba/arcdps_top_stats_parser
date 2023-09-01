@@ -39,9 +39,9 @@ from collections import OrderedDict
 from GW2_Color_Scheme import ProfessionColor
 
 try:
-    import Guild_Data
+	import Guild_Data
 except ImportError:
-    Guild_Data = None
+	Guild_Data = None
 
 def set_guild_data(guild_data):
 	Guild_Data = guild_data
@@ -285,6 +285,9 @@ enemyWvWBuffs = {}
 Plen_Bot_Logs={}
 Session_Fights=[]
 
+#Capture High Scores for stats
+HighScores={}
+
 #fetch Guild Data and Check Guild Status function
 #members: Dict[str, Any] = {}
 members: dict = field(default_factory=dict) 
@@ -331,34 +334,49 @@ def findMember(json_object, name):
 		return guildStatus
 # End fetch Guild Data and Check Guild Status
 
+#High Score capture
+def findLowest(dict):
+	temp = min(dict.values())
+	res = []
+	for key, value in dict.items():
+		if(value == temp):
+			res.append(key)
+	return res[0]
 
+def updateHighScore(Stat, Key, Value):
+	if len(HighScores[Stat]) <5:
+		HighScores[Stat][Key]=Value
+	elif Value > HighScores[Stat][findLowest(HighScores[Stat])]:
+		del HighScores[Stat][findLowest(HighScores[Stat])]
+		HighScores[Stat][Key]=Value
+	
 #define subtype based on consumables
 
 #consumable dictionaries
 Heal_Utility = {
-    53374: "Potent Lucent Oil", 
-    53304: "Enhanced Lucent Oil", 
-    21827: "Toxic Maintenance Oil", 
-    34187: "Peppermint Oil", 
-    38605: "Magnanimous Maintenance Oil",
-    25879: "Bountiful Maintenance Oil",
-    9968: "Master Maintenance Oil"
-    }
+	53374: "Potent Lucent Oil", 
+	53304: "Enhanced Lucent Oil", 
+	21827: "Toxic Maintenance Oil", 
+	34187: "Peppermint Oil", 
+	38605: "Magnanimous Maintenance Oil",
+	25879: "Bountiful Maintenance Oil",
+	9968: "Master Maintenance Oil"
+	}
 Heal_Food = {
-    57276: "Bowl of Spiced Fruit Salad",
-    57100: "Bowl of Fruit Salad with Mint Garnish",
-    69105: "Bowl of Mists-Infused Fruit Salad with Mint Garnish",
-    26529: "Delicious Rice Ball",
-    57299: "Plate of Peppercorn-Spiced Poultry Aspic"
-    }
+	57276: "Bowl of Spiced Fruit Salad",
+	57100: "Bowl of Fruit Salad with Mint Garnish",
+	69105: "Bowl of Mists-Infused Fruit Salad with Mint Garnish",
+	26529: "Delicious Rice Ball",
+	57299: "Plate of Peppercorn-Spiced Poultry Aspic"
+	}
 Cele_Food = {
-    57165: "Spherified Peppercorn-Spiced Oyster Soup",
-    57374: "Spherified Clove-Spiced Oyster Soup",
-    57037: "Spherified Sesame Oyster Soup",
-    57201: "Spherified Oyster Soup with Mint Garnish",
-    69124: "Mists-Infused Spherified Peppercorn-Spiced Oyster Soup",
-    19451: "Dragon's Revelry Starcake"
-    }
+	57165: "Spherified Peppercorn-Spiced Oyster Soup",
+	57374: "Spherified Clove-Spiced Oyster Soup",
+	57037: "Spherified Sesame Oyster Soup",
+	57201: "Spherified Oyster Soup with Mint Garnish",
+	69124: "Mists-Infused Spherified Peppercorn-Spiced Oyster Soup",
+	19451: "Dragon's Revelry Starcake"
+	}
 DPS_Food= {
 	57051: "Peppercorn-Crusted Sous-Vide Steak",
 	69141: "Mists-Infused Peppercorn-Crusted Sous-Vide Steak",
@@ -1873,21 +1891,21 @@ def getPlenBotLogs(PlenBotPath):
 		return
 		
 def get_fight_log_link_data(json_data, fightStamp):
-    currentFight = []
-    fightName = json_data['fightName']
-    fightDuration = json_data['duration']
-    fightLink = json_data['uploadLinks'][0]
-    fightStart = json_data['timeStart']
-    fightEnd = json_data['timeEnd']
-    if "-" in fightName:
-        fightName = fightName.split("-")[1]
-    fightDate, fightTime, fightGMT = fightStart.split()
-    endTime = fightEnd.split()[1]
-    if fightStamp in Plen_Bot_Logs:
-        fightLink = Plen_Bot_Logs[fightStamp]
-    currentFight.extend([fightDate, fightTime, endTime, fightGMT, fightName, fightDuration, fightLink])
-        
-    return currentFight
+	currentFight = []
+	fightName = json_data['fightName']
+	fightDuration = json_data['duration']
+	fightLink = json_data['uploadLinks'][0]
+	fightStart = json_data['timeStart']
+	fightEnd = json_data['timeEnd']
+	if "-" in fightName:
+		fightName = fightName.split("-")[1]
+	fightDate, fightTime, fightGMT = fightStart.split()
+	endTime = fightEnd.split()[1]
+	if fightStamp in Plen_Bot_Logs:
+		fightLink = Plen_Bot_Logs[fightStamp]
+	currentFight.extend([fightDate, fightTime, endTime, fightGMT, fightName, fightDuration, fightLink])
+		
+	return currentFight
 
 def get_buff_ids_from_json(json_data, config):
 	buffs = json_data['buffMap']
@@ -2164,6 +2182,11 @@ def collect_stat_data(args, config, log, anonymize=False):
 									if player_data['name'] == json_data['players'][index]['name']:
 										player.total_stats_self[stat] += allied_healing_1s[index][0][-1]
 						player.total_stats_group[stat] += total_healing_group
+						if stat not in HighScores:
+							HighScores[stat]={}
+							HighScores[stat+'_PS']={}						
+						updateHighScore(stat, "{{"+player_data['profession']+"}}"+player_data['name']+" |"+fightStamp, player.stats_per_fight[fight_number][stat])
+						updateHighScore(stat+'_PS', "{{"+player_data['profession']+"}}"+player_data['name']+" |"+fightStamp, (player.stats_per_fight[fight_number][stat]/player.stats_per_fight[fight_number]['time_in_combat']))				
 					elif stat == 'barrier':
 						fight.total_stats[stat] += player.stats_per_fight[fight_number][stat]
 						player.total_stats[stat] += player.stats_per_fight[fight_number][stat]
@@ -2178,11 +2201,22 @@ def collect_stat_data(args, config, log, anonymize=False):
 									if player_data['name'] == json_data['players'][index]['name']:
 										player.total_stats_self[stat] += allied_barrier_1s[index][0][-1]
 						player.total_stats_group[stat] += total_barrier_group
+						if stat not in HighScores:
+							HighScores[stat]={}
+							HighScores[stat+'_PS']={}						
+						updateHighScore(stat, "{{"+player_data['profession']+"}}"+player_data['name']+" |"+fightStamp, player.stats_per_fight[fight_number][stat])
+						updateHighScore(stat+'_PS', "{{"+player_data['profession']+"}}"+player_data['name']+" |"+fightStamp, (player.stats_per_fight[fight_number][stat]/player.stats_per_fight[fight_number]['time_in_combat']))						
 					else:
 						# all non-buff stats
 						fight.total_stats[stat] += player.stats_per_fight[fight_number][stat]
 						player.total_stats[stat] += player.stats_per_fight[fight_number][stat]
-					
+						if stat not in HighScores:
+							HighScores[stat]={}
+							HighScores[stat+'_PS']={}
+			
+						updateHighScore(stat, "{{"+player_data['profession']+"}}"+player_data['name']+" |"+fightStamp, player.stats_per_fight[fight_number][stat])
+						updateHighScore(stat+'_PS', "{{"+player_data['profession']+"}}"+player_data['name']+" |"+fightStamp, (player.stats_per_fight[fight_number][stat]/player.stats_per_fight[fight_number]['time_in_combat']))
+
 			if debug:
 				print("\n")
 				print(name)
@@ -2377,7 +2411,7 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		for target in player_json['dpsTargets']:
 			sumDamage = sumDamage + int(target[0]['damage'])
 		return int(sumDamage)
-     
+	 
 	if stat == 'dmgAll':
 		if 'dpsAll' not in player_json:
 			return 0
@@ -3357,7 +3391,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 			squad_offensive[squadDps_prof_name]['name']= squadDps_name
 			squad_offensive[squadDps_prof_name]['prof']= squadDps_profession
 			squad_offensive[squadDps_prof_name]['stats']= {}
-            
+			
 		for stat in statAll:
 			if stat not in squad_offensive[squadDps_prof_name]['stats']:
 				squad_offensive[squadDps_prof_name]['stats'][stat] = sum([stats[0][stat] for stats in player['statsTargets']])
@@ -4186,7 +4220,7 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
 					statPerFight.append(round(fight[stat]/duration, 4))
 				else:
 					statPerFight.append(round(fight[stat]/100*duration*(fightAllies-1),4))
-        
+		
 		statBoxPlot_data.append(statPerFight)
 
 
@@ -4223,20 +4257,20 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
 	print_string += jsonStr+'\n'
 
 	chartText_2 ="""    },
-    {
-      transform: {
-        type: 'boxplot',
-        config: {
-          itemNameFormatter: function (params) {
-            return names[params.value]+" ("+short_Prof[professions[params.value]]+")";
-          }
-        }
-      },
-    },
-    {
-      fromDatasetIndex: 1,
-      fromTransformResult: 1
-    }
+	{
+	  transform: {
+		type: 'boxplot',
+		config: {
+		  itemNameFormatter: function (params) {
+			return names[params.value]+" ("+short_Prof[professions[params.value]]+")";
+		  }
+		}
+	  },
+	},
+	{
+	  fromDatasetIndex: 1,
+	  fromTransformResult: 1
+	}
   ],
   dataZoom: [{type: 'slider', show: true, yAxisIndex: [0], start: 100, end: 50 },{type: 'inside', yAxisIndex: [0], start: 100, end: 50 },],
   tooltip: {trigger: 'item'},
@@ -4244,58 +4278,58 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
   yAxis: {type: 'category', boundaryGap: true, nameGap: 30, splitArea: {show: true}, splitLine: {show: true}},
   xAxis: {type: 'value', name: 'Sec', splitArea: {show: true}},
   series: [
-    {
-      name: 'boxplot',
-      type: 'boxplot',
-      datasetIndex: 1,
-      tooltip: {trigger: 'item',
-          formatter: function (params) {
-            //console.log(params.value);
-          return `<u><b>${params.value[0]}</b></u>
-    <table>
-      <tr>
-      	<td align="right">&#x2022;</td>
-        <td align="left">Low   :</td>
-        <td style="color:blue;"align="right"><b>${params.value[1].toFixed(2)}</b></td>
-      </tr>
-      <tr>
-      	<td align="right">&#x2022;</td>
-        <td align="left">Q1    :</td>
-        <td style="color:blue;"align="right"><b>${params.value[2].toFixed(2)}</b></td>
-      </tr>
-      <tr>
-      	<td align="right">&#x2022;</td>
-        <td align="left">Q2    :</td>
-        <td style="color:blue;"align="right"><b>${params.value[3].toFixed(2)}</b></td>
-      </tr>
-      <tr>
-      	<td align="right">&#x2022;</td>
-        <td align="left">Q3    :</td>
-        <td style="color:blue;"align="right"><b>${params.value[4].toFixed(2)}</b></td>
-      </tr>
-      <tr>
-      	<td align="right">&#x2022;</td>
-        <td align="left">High  :</td>
-        <td style="color:blue;"align="right"><b>${params.value[5].toFixed(2)}</b></td>
-      </tr>  
-    </table>`;              
-        },    
-        axisPointer: {type: 'shadow'}},      
-      itemStyle: {
-        borderColor: function (seriesIndex) {
-          let myIndex = names.indexOf(seriesIndex.name.split(" (")[0]);
-          return ProfessionColor[professions[myIndex]];
-                },
-        borderWidth: 2
-      },
-      encode:{tooltip: [ 1, 2, 3, 4, 5]},
-      },
-    {
-      name: 'outlier',
-      type: 'scatter',
-      encode: { x: 1, y: 0 },
-      datasetIndex: 2,
-    }
+	{
+	  name: 'boxplot',
+	  type: 'boxplot',
+	  datasetIndex: 1,
+	  tooltip: {trigger: 'item',
+		  formatter: function (params) {
+			//console.log(params.value);
+		  return `<u><b>${params.value[0]}</b></u>
+	<table>
+	  <tr>
+	  	<td align="right">&#x2022;</td>
+		<td align="left">Low   :</td>
+		<td style="color:blue;"align="right"><b>${params.value[1].toFixed(2)}</b></td>
+	  </tr>
+	  <tr>
+	  	<td align="right">&#x2022;</td>
+		<td align="left">Q1    :</td>
+		<td style="color:blue;"align="right"><b>${params.value[2].toFixed(2)}</b></td>
+	  </tr>
+	  <tr>
+	  	<td align="right">&#x2022;</td>
+		<td align="left">Q2    :</td>
+		<td style="color:blue;"align="right"><b>${params.value[3].toFixed(2)}</b></td>
+	  </tr>
+	  <tr>
+	  	<td align="right">&#x2022;</td>
+		<td align="left">Q3    :</td>
+		<td style="color:blue;"align="right"><b>${params.value[4].toFixed(2)}</b></td>
+	  </tr>
+	  <tr>
+	  	<td align="right">&#x2022;</td>
+		<td align="left">High  :</td>
+		<td style="color:blue;"align="right"><b>${params.value[5].toFixed(2)}</b></td>
+	  </tr>  
+	</table>`;              
+		},    
+		axisPointer: {type: 'shadow'}},      
+	  itemStyle: {
+		borderColor: function (seriesIndex) {
+		  let myIndex = names.indexOf(seriesIndex.name.split(" (")[0]);
+		  return ProfessionColor[professions[myIndex]];
+				},
+		borderWidth: 2
+	  },
+	  encode:{tooltip: [ 1, 2, 3, 4, 5]},
+	  },
+	{
+	  name: 'outlier',
+	  type: 'scatter',
+	  encode: { x: 1, y: 0 },
+	  datasetIndex: 2,
+	}
   ]
 };
 """
@@ -4753,79 +4787,79 @@ def write_spike_damage_heatmap(squad_damage_output, myDate, input_directory):
 	print_string += "    text: 'Damage  / Max Damage in 1 Second\\n(limited to first 60 seconds of fight)'\n"
 	print_string +="},\n"
 	heatMapText ="""  tooltip: {
-    position: 'top',
+	position: 'top',
   },
   grid: {
-    height: '80%',
-    left: '15%',
-    top: '10%'
+	height: '80%',
+	left: '15%',
+	top: '10%'
   },
   xAxis: {
-    type: 'category',
-    data: seconds,
-    splitArea: {
-      show: true
-    }
+	type: 'category',
+	data: seconds,
+	splitArea: {
+	  show: true
+	}
   },
   yAxis: {
-    type: 'category',
-    data: fights,
-    name: 'Fight Ending',
-    splitArea: {
-      show: true
-    }
+	type: 'category',
+	data: fights,
+	name: 'Fight Ending',
+	splitArea: {
+	  show: true
+	}
   },
   visualMap: {
-    min: 0,
-    max: 1,
-    calculable: true,
-    orient: 'vertical',
-    left: 'left',
-    bottom: '55%'
+	min: 0,
+	max: 1,
+	calculable: true,
+	orient: 'vertical',
+	left: 'left',
+	bottom: '55%'
   },
   dataZoom: [
-    {
-      type: 'slider',
-      show: true,
-      xAxisIndex: [0],
-      start: 0,
-      end: 30
-    },
-    {
-      type: 'inside',
-      xAxisIndex: [0],
-      start: 0,
-      end: 30
-    },
-    {
-      type: 'slider',
-      show: true,
-      yAxisIndex: [0],
-      start: 0,
-      end: 30
-    },
-    {
-      type: 'inside',
-      yAxisIndex: [0],
-      start: 0,
-      end: 30
-    },    
+	{
+	  type: 'slider',
+	  show: true,
+	  xAxisIndex: [0],
+	  start: 0,
+	  end: 30
+	},
+	{
+	  type: 'inside',
+	  xAxisIndex: [0],
+	  start: 0,
+	  end: 30
+	},
+	{
+	  type: 'slider',
+	  show: true,
+	  yAxisIndex: [0],
+	  start: 0,
+	  end: 30
+	},
+	{
+	  type: 'inside',
+	  yAxisIndex: [0],
+	  start: 0,
+	  end: 30
+	},    
   ],
   series: [
-    {
-      name: 'Spike Damage',
-      type: 'heatmap',
-      data: data,
-      label: {
-        show: true
-      },
-      emphasis: {
-        itemStyle: {
-          shadowBlur: 25,
-          shadowColor: 'rgba(0, 0, 0, 0.5)'
-        }
-      }
-    }
+	{
+	  name: 'Spike Damage',
+	  type: 'heatmap',
+	  data: data,
+	  label: {
+		show: true
+	  },
+	  emphasis: {
+		itemStyle: {
+		  shadowBlur: 25,
+		  shadowColor: 'rgba(0, 0, 0, 0.5)'
+		}
+	  }
+	}
   ]
 };
 """
@@ -4874,6 +4908,7 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	#json_dict["Plen_Bot_Logs"] =  {key: value for key, value in Plen_Bot_Logs.items()}
 	json_dict["partyUptimes"] =  {key: value for key, value in partyUptimes.items()}
 	json_dict["squadUptimes"] =  {key: value for key, value in squadUptimes.items()}
+	json_dict["HighScores"] =  {key: value for key, value in HighScores.items()}
 	
 
 		

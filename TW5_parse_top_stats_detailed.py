@@ -109,7 +109,7 @@ if __name__ == '__main__':
 	MenuTabs = ['General', 'Offensive', 'Defensive', 'Support', 'Boons & Buffs', 'Dashboard']
 
 	SubMenuTabs = {
-	'General': ['Overview', 'Fight Logs', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts'],
+	'General': ['Overview', 'Fight Logs', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores'],
 	'Offensive': ['Offensive Stats', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Power Damage', 'Condi Damage', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In'],
 	'Support': ['Healing', 'Barrier', 'Outgoing Healing', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
@@ -151,7 +151,7 @@ if __name__ == '__main__':
 	myprint(output, '\n\n</div>\n\n')
 	myprint(output, '</$reveal>')
 
-	#Overview reveal
+	#Fight Logs reveal
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Fight Logs">')
 	myprint(output, '\n<<alert dark "Fight Logs" width:60%>>\n')
 	myprint(output, '\n---\n')
@@ -171,7 +171,75 @@ if __name__ == '__main__':
 	myprint(output, '</$reveal>')
 
 	write_fights_overview_xls(fights, overall_squad_stats, overall_raid_stats, config, args.xls_output_filename)
+
+	#High Scores reveal
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="High Scores">')
+	myprint(output, '\n<<alert dark "High Scores from all Fights" width:60%>>\n')
+	myprint(output, '\n---\n')
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
 	
+	offensiveHighScores = ['dmg_PS',  'downContribution_PS', 'downs_PS', 'kills_PS']
+	supportHighScores = ['rips_PS', 'cleanses_PS', 'heal_PS', 'barrier_PS']
+	defensiveHighScores = ['dodges_PS', 'evades_PS', 'blocks_PS', 'invulns_PS']
+	labelTopFive = {'dmg': 'Damage', 'dmg_PS': 'Damage per Second', 'downContribution': 'Down Contribution', 'downContribution_PS': 'Down Contribution per Second', 'downs': 'Downs', 'downs_PS': 'Downs per Second', 'invulns_PS': 'Invulnerable per Second', 'invulns': 'Invulnerable', 'kills': 'Kills', 'kills_PS': 'Kills per Second', 'rips': 'Boon Strips', 'rips_PS': 'Boon Strips per Second', 'cleanses': 'Condition Cleanses', 'cleanses_PS': 'Condition Cleanses per Second', 'heal': 'Healing', 'heal_PS': 'Healing per Second', 'barrier': 'Barrier', 'barrier_PS': 'Barrier per Second', 'dodges': 'Dodges', 'dodges_PS': 'Dodges per Second', 'evades': 'Evades', 'evades_PS': 'Evades per Second', 'blocks': 'Blocks', 'blocks_PS': 'Blocks per Second', 'downed': 'Downed', 'interupted_PS': 'Downed per Second'}
+	myprint(output, '\n\n<<h1 "Offensive High Scores" IndianRed>>\n\n')	
+	myprint(output, '<div class="flex-row">\n\n')
+
+	for stat in offensiveHighScores:
+		myprint(output, '    <div class="flex-col">\n')
+		myprint(output, "|thead-dark table-caption-top sortable|k")
+		#<<hl "Simple highlight" aqua>>
+		myprint(output, '| <<hl "'+labelTopFive[stat]+'" IndianRed>> |c')
+		myprint(output, "|Player |Fight | Score|h")
+		sortedHighScore = sorted(HighScores[stat].items(), key = lambda x:x[1], reverse = True)
+		for item, value in sortedHighScore:
+			print_string="|"
+			print_string+=item+" | "
+			print_string+=my_value(round(value,2))+"|"
+			
+			myprint(output, print_string)
+		myprint(output, '\n    </div>')
+	myprint(output, '\n    </div>')
+
+	myprint(output, '\n\n<<h1 "Support High Scores" LightGreen>>\n\n')
+	myprint(output, '<div class="flex-row">\n\n')
+
+	for stat in supportHighScores:
+		myprint(output, '    <div class="flex-col">\n')
+		myprint(output, "|thead-dark table-caption-top sortable|k")
+		myprint(output, '| <<hl "'+labelTopFive[stat]+'" LightGreen>> |c')
+		myprint(output, "|Player |Fight | Score|h")
+		sortedHighScore = sorted(HighScores[stat].items(), key = lambda x:x[1], reverse = True)
+		for item, value in sortedHighScore:
+			print_string="|"
+			print_string+=item+" | "
+			print_string+=my_value(round(value,2))+"|"
+			
+			myprint(output, print_string)
+		myprint(output, '\n    </div>')
+	myprint(output, '\n    </div>')
+
+	myprint(output, '\n\n<<h1 "Defensive High Scores" LightSalmon>>\n\n')
+	myprint(output, '<div class="flex-row">\n\n')
+
+	for stat in defensiveHighScores:
+		myprint(output, '    <div class="flex-col">\n')
+		myprint(output, "|thead-dark table-caption-top sortable|k")
+		myprint(output, '| <<hl "'+labelTopFive[stat]+'" LightSalmon>> |c')
+		myprint(output, "|Player |Fight | Score|h")
+		sortedHighScore = sorted(HighScores[stat].items(), key = lambda x:x[1], reverse = True)
+		for item, value in sortedHighScore:
+			print_string="|"
+			print_string+=item+" | "
+			print_string+=my_value(round(value,2))+"|"
+			
+			myprint(output, print_string)
+		myprint(output, '\n    </div>')
+	myprint(output, '\n    </div>')		
+	#End reveal
+	myprint(output, '\n\n</div>\n\n')
+	myprint(output, '</$reveal>')
+
 	#Move Squad Composition and Spike Damage here so it is first under the fight summaries
 
 	#Squad Spike Damage
