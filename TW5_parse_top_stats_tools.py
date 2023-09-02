@@ -2186,7 +2186,11 @@ def collect_stat_data(args, config, log, anonymize=False):
 							HighScores[stat]={}
 							HighScores[stat+'_PS']={}						
 						updateHighScore(stat, "{{"+player_data['profession']+"}}"+player_data['name']+" |"+fightStamp, player.stats_per_fight[fight_number][stat])
-						updateHighScore(stat+'_PS', "{{"+player_data['profession']+"}}"+player_data['name']+" |"+fightStamp, (player.stats_per_fight[fight_number][stat]/player.stats_per_fight[fight_number]['time_in_combat']))				
+						if player.stats_per_fight[fight_number]['time_in_combat'] > 0:
+							stat_per_sec = (player.stats_per_fight[fight_number][stat]/player.stats_per_fight[fight_number]['time_in_combat'])
+						else:
+							stat_per_sec = 0
+						updateHighScore(stat+'_PS', "{{"+player_data['profession']+"}}"+player_data['name']+" |"+fightStamp, stat_per_sec)
 					elif stat == 'barrier':
 						fight.total_stats[stat] += player.stats_per_fight[fight_number][stat]
 						player.total_stats[stat] += player.stats_per_fight[fight_number][stat]
@@ -2205,7 +2209,11 @@ def collect_stat_data(args, config, log, anonymize=False):
 							HighScores[stat]={}
 							HighScores[stat+'_PS']={}						
 						updateHighScore(stat, "{{"+player_data['profession']+"}}"+player_data['name']+" |"+fightStamp, player.stats_per_fight[fight_number][stat])
-						updateHighScore(stat+'_PS', "{{"+player_data['profession']+"}}"+player_data['name']+" |"+fightStamp, (player.stats_per_fight[fight_number][stat]/player.stats_per_fight[fight_number]['time_in_combat']))						
+						if player.stats_per_fight[fight_number]['time_in_combat'] > 0:
+							stat_per_sec = (player.stats_per_fight[fight_number][stat]/player.stats_per_fight[fight_number]['time_in_combat'])
+						else:
+							stat_per_sec = 0
+						updateHighScore(stat+'_PS', "{{"+player_data['profession']+"}}"+player_data['name']+" |"+fightStamp, stat_per_sec)
 					else:
 						# all non-buff stats
 						fight.total_stats[stat] += player.stats_per_fight[fight_number][stat]
@@ -2215,7 +2223,11 @@ def collect_stat_data(args, config, log, anonymize=False):
 							HighScores[stat+'_PS']={}
 			
 						updateHighScore(stat, "{{"+player_data['profession']+"}}"+player_data['name']+" |"+fightStamp, player.stats_per_fight[fight_number][stat])
-						updateHighScore(stat+'_PS', "{{"+player_data['profession']+"}}"+player_data['name']+" |"+fightStamp, (player.stats_per_fight[fight_number][stat]/player.stats_per_fight[fight_number]['time_in_combat']))
+						if player.stats_per_fight[fight_number]['time_in_combat'] > 0:
+							stat_per_sec = (player.stats_per_fight[fight_number][stat]/player.stats_per_fight[fight_number]['time_in_combat'])
+						else:
+							stat_per_sec = 0
+						updateHighScore(stat+'_PS', "{{"+player_data['profession']+"}}"+player_data['name']+" |"+fightStamp, stat_per_sec)
 
 			if debug:
 				print("\n")
