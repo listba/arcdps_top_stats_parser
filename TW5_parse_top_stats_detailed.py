@@ -175,6 +175,7 @@ if __name__ == '__main__':
 	#High Scores reveal
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="High Scores">')
 	myprint(output, '\n<<alert dark "High Scores from all Fights" width:60%>>\n')
+	myprint(output, "\nStat per second based on `player.stats_per_fight[fight_number]['time_active']`\n\n")	
 	myprint(output, '\n---\n')
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
 	
@@ -182,7 +183,8 @@ if __name__ == '__main__':
 	supportHighScores = ['rips_PS', 'cleanses_PS', 'heal_PS', 'barrier_PS']
 	defensiveHighScores = ['dodges_PS', 'evades_PS', 'blocks_PS', 'invulns_PS']
 	labelTopFive = {'dmg': 'Damage', 'dmg_PS': 'Damage per Second', 'downContribution': 'Down Contribution', 'downContribution_PS': 'Down Contribution per Second', 'downs': 'Downs', 'downs_PS': 'Downs per Second', 'invulns_PS': 'Invulnerable per Second', 'invulns': 'Invulnerable', 'kills': 'Kills', 'kills_PS': 'Kills per Second', 'rips': 'Boon Strips', 'rips_PS': 'Boon Strips per Second', 'cleanses': 'Condition Cleanses', 'cleanses_PS': 'Condition Cleanses per Second', 'heal': 'Healing', 'heal_PS': 'Healing per Second', 'barrier': 'Barrier', 'barrier_PS': 'Barrier per Second', 'dodges': 'Dodges', 'dodges_PS': 'Dodges per Second', 'evades': 'Evades', 'evades_PS': 'Evades per Second', 'blocks': 'Blocks', 'blocks_PS': 'Blocks per Second', 'downed': 'Downed', 'interupted_PS': 'Downed per Second'}
-	myprint(output, '\n\n<<h1 "Offensive High Scores" IndianRed>>\n\n')	
+	#myprint(output, '\n\n<<h1 "Offensive High Scores" IndianRed>>\n\n')	
+		
 	myprint(output, '<div class="flex-row">\n\n')
 
 	for stat in offensiveHighScores:
@@ -191,17 +193,18 @@ if __name__ == '__main__':
 		#<<hl "Simple highlight" aqua>>
 		myprint(output, '| <<hl "'+labelTopFive[stat]+'" IndianRed>> |c')
 		myprint(output, "|Player |Fight | Score|h")
-		sortedHighScore = sorted(HighScores[stat].items(), key = lambda x:x[1], reverse = True)
-		for item, value in sortedHighScore:
-			print_string="|"
-			print_string+=item+" | "
-			print_string+=my_value(round(value,2))+"|"
-			
-			myprint(output, print_string)
+		if stat in  HighScores:
+			sortedHighScore = sorted(HighScores[stat].items(), key = lambda x:x[1], reverse = True)
+			for item, value in sortedHighScore:
+				print_string="|"
+				print_string+=item+" | "
+				print_string+=my_value(round(value,2))+"|"
+				
+				myprint(output, print_string)
 		myprint(output, '\n    </div>')
 	myprint(output, '\n    </div>')
 
-	myprint(output, '\n\n<<h1 "Support High Scores" LightGreen>>\n\n')
+	#myprint(output, '\n\n<<h1 "Support High Scores" LightGreen>>\n\n')
 	myprint(output, '<div class="flex-row">\n\n')
 
 	for stat in supportHighScores:
@@ -209,17 +212,18 @@ if __name__ == '__main__':
 		myprint(output, "|thead-dark table-caption-top sortable|k")
 		myprint(output, '| <<hl "'+labelTopFive[stat]+'" LightGreen>> |c')
 		myprint(output, "|Player |Fight | Score|h")
-		sortedHighScore = sorted(HighScores[stat].items(), key = lambda x:x[1], reverse = True)
-		for item, value in sortedHighScore:
-			print_string="|"
-			print_string+=item+" | "
-			print_string+=my_value(round(value,2))+"|"
+		if stat in  HighScores:
+			sortedHighScore = sorted(HighScores[stat].items(), key = lambda x:x[1], reverse = True)
+			for item, value in sortedHighScore:
+				print_string="|"
+				print_string+=item+" | "
+				print_string+=my_value(round(value,2))+"|"
 			
-			myprint(output, print_string)
+				myprint(output, print_string)
 		myprint(output, '\n    </div>')
 	myprint(output, '\n    </div>')
 
-	myprint(output, '\n\n<<h1 "Defensive High Scores" LightSalmon>>\n\n')
+	#myprint(output, '\n\n<<h1 "Defensive High Scores" LightSalmon>>\n\n')
 	myprint(output, '<div class="flex-row">\n\n')
 
 	for stat in defensiveHighScores:
@@ -227,13 +231,14 @@ if __name__ == '__main__':
 		myprint(output, "|thead-dark table-caption-top sortable|k")
 		myprint(output, '| <<hl "'+labelTopFive[stat]+'" LightSalmon>> |c')
 		myprint(output, "|Player |Fight | Score|h")
-		sortedHighScore = sorted(HighScores[stat].items(), key = lambda x:x[1], reverse = True)
-		for item, value in sortedHighScore:
-			print_string="|"
-			print_string+=item+" | "
-			print_string+=my_value(round(value,2))+"|"
+		if stat in  HighScores:
+			sortedHighScore = sorted(HighScores[stat].items(), key = lambda x:x[1], reverse = True)
+			for item, value in sortedHighScore:
+				print_string="|"
+				print_string+=item+" | "
+				print_string+=my_value(round(value,2))+"|"
 			
-			myprint(output, print_string)
+				myprint(output, print_string)
 		myprint(output, '\n    </div>')
 	myprint(output, '\n    </div>')		
 	#End reveal
