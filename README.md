@@ -1,4 +1,6 @@
 # TW5 Modifications #
+![GitHub all releases](https://img.shields.io/github/downloads/Drevarr/arcdps_top_stats_parser/total)
+
 ```TW5_parse_top_stats_detailed.py``` and ```TW5_parse_top_stats_tools.py``` provide alternative output to support posting to a TW5 wiki with shiraz plugin.
 Example available at (https://flux-capacity.tiddlyhost.com)
 
