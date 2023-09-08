@@ -308,8 +308,8 @@ if Guild_Data:
 		api_url = "https://api.guildwars2.com/v2/guild/"+Guild_ID+"/members?access_token="+API_Key
 	
 	try:
-		response = requests.options(api_url)
-		if response.ok:
+		response = requests.get(api_url)
+		if response.status_code == requests.codes.ok:
 			response = requests.get(api_url)
 			members = json.loads(response.text)
 			print("response code: "+str(response.status_code))
