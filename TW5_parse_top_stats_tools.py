@@ -3606,6 +3606,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 			tagPositions = id['combatReplayData']['positions']
 			if id['combatReplayData']['dead']:
 				for death in id['combatReplayData']['dead']:
+					if death[0]<0:
+						continue
 					dead_Tag_Mark = death[0]
 					dead_Tag = 1
 			else:
@@ -3640,7 +3642,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 			playerDistToTag = id['statsAll'][0]['distToCom']
 			for deathKey, deathValue in playerDeaths.items():
 				if deathKey < 0: #Handle death on the field before main squad combat log starts
-					Death_OnTag[deathOnTag_prof_name]["Off_Tag"] = Death_OnTag[deathOnTag_prof_name]["Off_Tag"] + 1
+					continue
+					#Death_OnTag[deathOnTag_prof_name]["Off_Tag"] = Death_OnTag[deathOnTag_prof_name]["Off_Tag"] + 1
 				for downKey, downValue in playerDowns.items():
 					if deathKey == downValue:
 						#process data for downKey
@@ -3672,7 +3675,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 								deltaX = position[0] - tagPosition[0]
 								deltaY = position[1] - tagPosition[1]
 								playerDistances.append(math.sqrt(deltaX * deltaX + deltaY * deltaY))
-						
+						print(player_name, "Calculating PlayerDistToTag =========================================")
 						playerDistToTag = (sum(playerDistances) / len(playerDistances))/inchToPixel
 
 						if deathRange <= On_Tag:
