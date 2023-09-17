@@ -288,6 +288,11 @@ Session_Fights=[]
 #Capture High Scores for stats
 HighScores={}
 
+#Capture Condition Uptime Data for player, party and squad
+conditionData = {}
+conditionDataGroups = {}
+conditionDataSquad = {}
+
 #fetch Guild Data and Check Guild Status function
 #members: Dict[str, Any] = {}
 members: dict = field(default_factory=dict) 
@@ -3229,8 +3234,13 @@ def get_stats_from_fight_json(fight_json, config, log):
 		squadDps_name = player['name']
 		squadDps_profession = player['profession']
 		squadDps_prof_name = "{{"+squadDps_profession+"}} "+squadDps_name
+		conditionPlayerName = "|{{"+player['profession']+"}} |"+player['name']+" | "+str(player['group'])
+		conditionFightTime = round(player['activeTimes'][0]/1000, 1)
+		incomingClears = player['defenses'][0]['conditionCleanses']
 		squadDps_damage = 0
 		squadDps_group = player['group']
+		if conditionFightTime <= 0:
+			continue
 		if squadDps_group not in partyUptimes:
 			partyUptimes[squadDps_group]={}
 			partyUptimes[squadDps_group]['buffs']={}
@@ -3241,7 +3251,28 @@ def get_stats_from_fight_json(fight_json, config, log):
 			uptime_Table[squadDps_prof_name]['name']=squadDps_name
 			uptime_Table[squadDps_prof_name]['prof']=squadDps_profession
 			uptime_Table[squadDps_prof_name]['duration'] = 0
-			print('Added player to uptime_Table: '+ squadDps_prof_name)		
+			#Debug Msg: print('Added player to uptime_Table: '+ squadDps_prof_name)	
+	
+		if conditionPlayerName not in conditionData:
+			conditionData[conditionPlayerName]={}
+			conditionData[conditionPlayerName]['totalFightTime']=conditionFightTime
+		else:
+			conditionData[conditionPlayerName]['totalFightTime']+=conditionFightTime
+		
+		if squadDps_group not in conditionDataGroups:
+			conditionDataGroups[squadDps_group]={}
+			conditionDataGroups[squadDps_group]['totalFightTime']=conditionFightTime
+			conditionDataGroups[squadDps_group]['IncomingClears']=incomingClears
+		else:
+			conditionDataGroups[squadDps_group]['totalFightTime']+=conditionFightTime
+			conditionDataGroups[squadDps_group]['IncomingClears']+=incomingClears
+		
+		if conditionDataSquad:
+			conditionDataSquad['totalFightTime']+=conditionFightTime
+			conditionDataSquad['IncomingClears']+=incomingClears
+		else:
+			conditionDataSquad['totalFightTime']=conditionFightTime
+			conditionDataSquad['IncomingClears']=incomingClears
 
 		for target in player['dpsTargets']:
 			squadDps_damage = squadDps_damage + int(target[0]['damage'])
@@ -3486,6 +3517,36 @@ def get_stats_from_fight_json(fight_json, config, log):
 		partyUptimes[squadDps_group]['totalFightTime']+=player_combat_time
 		squadUptimes['FightTime'] += player_combat_time
 
+		#Track Condition Uptime
+		condition_ids = {736: 'Bleeding', 737: 'Burning',861: 'Confusion', 723: 'Poison', 19426: 'Torment', 720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 738: 'Vulnerability'}
+		#conditionFightTime = round(player['activeTimes'][0]/1000, 1)
+		for item in player['buffUptimesActive']:
+			itemID = item['id']	
+			if itemID in condition_ids:
+				conditionName = condition_ids[itemID]
+				conditionUptime = item['buffData'][0]['uptime']
+				conditionPresence = item['buffData'][0]['presence']
+
+				if conditionPresence:
+					conditionDuration = round((conditionPresence/100) *conditionFightTime, 1)
+				else:
+					conditionDuration = round((conditionUptime/100) *conditionFightTime, 1)
+					
+				if conditionName not in conditionData[conditionPlayerName]:
+					conditionData[conditionPlayerName][conditionName]=conditionDuration
+				else:
+					conditionData[conditionPlayerName][conditionName]+=conditionDuration
+
+				if conditionName not in conditionDataGroups[squadDps_group]:
+					conditionDataGroups[squadDps_group][conditionName]=conditionDuration
+				else:
+					conditionDataGroups[squadDps_group][conditionName]+=conditionDuration
+					
+				if conditionName not in conditionDataSquad:
+					conditionDataSquad[conditionName]=conditionDuration
+				else:
+					conditionDataSquad[conditionName]+=conditionDuration
+
 	#Attendance Tracking
 	#duration in secs
 	for player in fight_json['players']:
@@ -3675,8 +3736,9 @@ def get_stats_from_fight_json(fight_json, config, log):
 								deltaX = position[0] - tagPosition[0]
 								deltaY = position[1] - tagPosition[1]
 								playerDistances.append(math.sqrt(deltaX * deltaX + deltaY * deltaY))
-						print(player_name, "Calculating PlayerDistToTag =========================================")
-						playerDistToTag = (sum(playerDistances) / len(playerDistances))/inchToPixel
+						#Debug Msg: print(player_name, "Calculating PlayerDistToTag =========================================", playerDistances)
+						if playerDistances:
+							playerDistToTag = (sum(playerDistances) / len(playerDistances))/inchToPixel
 
 						if deathRange <= On_Tag:
 							Death_OnTag[deathOnTag_prof_name]["On_Tag"] = Death_OnTag[deathOnTag_prof_name]["On_Tag"] + 1
@@ -4921,9 +4983,9 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	json_dict["skill_Dict"] =  {key: value for key, value in skill_Dict.items()}
 	#json_dict["prof_role_skills"] =  {key: value for key, value in prof_role_skills.items()}
 	#json_dict["Plen_Bot_Logs"] =  {key: value for key, value in Plen_Bot_Logs.items()}
-	json_dict["partyUptimes"] =  {key: value for key, value in partyUptimes.items()}
-	json_dict["squadUptimes"] =  {key: value for key, value in squadUptimes.items()}
-	json_dict["HighScores"] =  {key: value for key, value in HighScores.items()}
+	json_dict["conditionData"] =  {key: value for key, value in conditionData.items()}
+	json_dict["conditionDataGroups"] =  {key: value for key, value in conditionDataGroups.items()}
+	json_dict["conditionDataSquad"] =  {key: value for key, value in conditionDataSquad.items()}
 	
 
 		
