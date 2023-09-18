@@ -292,6 +292,9 @@ HighScores={}
 conditionData = {}
 conditionDataGroups = {}
 conditionDataSquad = {}
+ResistanceData = {}
+ResistanceData['Squad'] = {}
+ResistanceData['Group'] = {}
 
 #fetch Guild Data and Check Guild Status function
 #members: Dict[str, Any] = {}
@@ -3273,6 +3276,14 @@ def get_stats_from_fight_json(fight_json, config, log):
 		else:
 			conditionDataSquad['totalFightTime']=conditionFightTime
 			conditionDataSquad['IncomingClears']=incomingClears
+		if conditionPlayerName not in ResistanceData:
+			ResistanceData[conditionPlayerName]={}
+			ResistanceData[conditionPlayerName]['Condition']={}
+			ResistanceData[conditionPlayerName]['ResistOffset']={}
+			ResistanceData[conditionPlayerName]['ResistStates']={}
+		if squadDps_group not in ResistanceData['Group']:
+			ResistanceData['Group'][squadDps_group]={}
+			ResistanceData['Group'][squadDps_group]['ResistOffset']={}
 
 		for target in player['dpsTargets']:
 			squadDps_damage = squadDps_damage + int(target[0]['damage'])
@@ -3519,6 +3530,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 
 		#Track Condition Uptime
 		condition_ids = {736: 'Bleeding', 737: 'Burning',861: 'Confusion', 723: 'Poison', 19426: 'Torment', 720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 738: 'Vulnerability'}
+		NonDamagingConditions = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 26766: 'Slow', 27705: 'Taunt'}
 		#conditionFightTime = round(player['activeTimes'][0]/1000, 1)
 		for item in player['buffUptimesActive']:
 			itemID = item['id']	
@@ -3546,6 +3558,70 @@ def get_stats_from_fight_json(fight_json, config, log):
 					conditionDataSquad[conditionName]=conditionDuration
 				else:
 					conditionDataSquad[conditionName]+=conditionDuration
+
+			ResistanceBuff = [26980]
+			if itemID in ResistanceBuff:
+				#ResistanceUptime = itemID['buffData'][0]['uptime']
+				ResistanceStates = item['states']
+				resistStart = []
+				resistEnd = []
+				for x, y in ResistanceStates:
+					if x == 0 and y == 0:
+						continue
+					elif y == 1:
+						resistStart.append(x)
+					elif y == 0:
+						resistEnd.append(x)
+					resDict = dict(zip(resistStart, resistEnd))
+					ResistanceData[conditionPlayerName]['ResistStates'] = resDict
+			if itemID in NonDamagingConditions:
+				#conditionUptime = itemID['buffData'][0]['uptime']
+				conditionStates = item['states']
+				conditionStart = []
+				conditionEnd = []
+				for x, y in conditionStates:
+					if x == 0 and y == 0:
+						continue
+					elif y == 1:
+						conditionStart.append(x)
+					elif y == 0:
+						conditionEnd.append(x)
+					conditionDict = dict(zip(conditionStart, conditionEnd))
+					ResistanceData[conditionPlayerName]['Condition'][NonDamagingConditions[itemID]] = conditionDict
+		for itemID in NonDamagingConditions:
+			conditionName = NonDamagingConditions[itemID]
+			if conditionName in ResistanceData[conditionPlayerName]['Condition']:
+				offset = 0
+				time_applied = 0
+				for value in ResistanceData[conditionPlayerName]['Condition'][conditionName]:
+					ConditionStart = value
+					ConditionEnd = ResistanceData[conditionPlayerName]['Condition'][conditionName][value]
+					time_applied += ConditionEnd - ConditionStart
+					for item in ResistanceData[conditionPlayerName]['ResistStates']:
+						ResStart = item
+						ResEnd = ResistanceData[conditionPlayerName]['ResistStates'][item]
+						if ResStart <= ConditionEnd <= ResEnd and ConditionStart >= ResStart:
+							offset += ConditionEnd - ConditionStart
+						elif ConditionEnd > ResEnd and ConditionStart >=ResStart and ConditionStart <= ResEnd:
+							offset += ResEnd - ConditionStart
+						elif ConditionEnd < ResEnd and ConditionEnd >= ResStart and ConditionStart < ResStart:
+							offset += ConditionEnd - ResStart
+				if time_applied:
+					ResistReduction = offset/1000
+					if conditionName not in ResistanceData[conditionPlayerName]['ResistOffset']:
+						ResistanceData[conditionPlayerName]['ResistOffset'][conditionName] = ResistReduction
+					else:
+						ResistanceData[conditionPlayerName]['ResistOffset'][conditionName] += ResistReduction
+					if conditionName not in ResistanceData['Group'][squadDps_group]['ResistOffset']:
+						ResistanceData['Group'][squadDps_group]['ResistOffset'][conditionName] = ResistReduction
+					else:
+						ResistanceData['Group'][squadDps_group]['ResistOffset'][conditionName] += ResistReduction
+					if conditionName not in ResistanceData['Squad']:
+						ResistanceData['Squad'][conditionName] = ResistReduction
+					else:
+						ResistanceData['Squad'][conditionName] += ResistReduction
+
+
 
 	#Attendance Tracking
 	#duration in secs
@@ -4986,6 +5062,7 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	json_dict["conditionData"] =  {key: value for key, value in conditionData.items()}
 	json_dict["conditionDataGroups"] =  {key: value for key, value in conditionDataGroups.items()}
 	json_dict["conditionDataSquad"] =  {key: value for key, value in conditionDataSquad.items()}
+	json_dict["ResistanceData"] =  {key: value for key, value in ResistanceData.items()}
 	
 
 		
