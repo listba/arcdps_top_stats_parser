@@ -5034,11 +5034,11 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	json_dict["top_average_players"] =  {key: value for key, value in top_average_stat_players.items()}
 	json_dict["top_consistent_players"] =  {key: value for key, value in top_consistent_stat_players.items()}
 	json_dict["top_percentage_players"] =  {key: value for key, value in top_percentage_stat_players.items()}
-	json_dict["top_late_players"] =  {key: value for key, value in top_late_players.items()}
-	json_dict["top_jack_of_all_trades_players"] =  {key: value for key, value in top_jack_of_all_trades_players.items()}
-	json_dict["squad_offensive"] =  {key: value for key, value in squad_offensive.items()}
-	json_dict["squad_Control"] =  {key: value for key, value in squad_Control.items()}
-	json_dict["enemy_Control"] =  {key: value for key, value in enemy_Control.items()}
+	#json_dict["top_late_players"] =  {key: value for key, value in top_late_players.items()}
+	#json_dict["top_jack_of_all_trades_players"] =  {key: value for key, value in top_jack_of_all_trades_players.items()}
+	#json_dict["squad_offensive"] =  {key: value for key, value in squad_offensive.items()}
+	#json_dict["squad_Control"] =  {key: value for key, value in squad_Control.items()}
+	#json_dict["enemy_Control"] =  {key: value for key, value in enemy_Control.items()}
 	#json_dict["enemy_Control_Player"] =  {key: value for key, value in enemy_Control_Player.items()}
 	#json_dict["uptime_Table"] =  {key: value for key, value in uptime_Table.items()}
 	#json_dict["stacking_uptime_Table"] =  {key: value for key, value in stacking_uptime_Table.items()}
@@ -5059,10 +5059,10 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	json_dict["skill_Dict"] =  {key: value for key, value in skill_Dict.items()}
 	#json_dict["prof_role_skills"] =  {key: value for key, value in prof_role_skills.items()}
 	#json_dict["Plen_Bot_Logs"] =  {key: value for key, value in Plen_Bot_Logs.items()}
-	json_dict["conditionData"] =  {key: value for key, value in conditionData.items()}
-	json_dict["conditionDataGroups"] =  {key: value for key, value in conditionDataGroups.items()}
-	json_dict["conditionDataSquad"] =  {key: value for key, value in conditionDataSquad.items()}
-	json_dict["ResistanceData"] =  {key: value for key, value in ResistanceData.items()}
+	#json_dict["conditionData"] =  {key: value for key, value in conditionData.items()}
+	#json_dict["conditionDataGroups"] =  {key: value for key, value in conditionDataGroups.items()}
+	#json_dict["conditionDataSquad"] =  {key: value for key, value in conditionDataSquad.items()}
+	#json_dict["ResistanceData"] =  {key: value for key, value in ResistanceData.items()}
 	
 
 		
