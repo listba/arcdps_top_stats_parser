@@ -109,7 +109,7 @@ if __name__ == '__main__':
 	MenuTabs = ['General', 'Offensive', 'Defensive', 'Support', 'Boons & Buffs', 'Dashboard']
 
 	SubMenuTabs = {
-	'General': ['Overview', 'Fight Logs', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores'],
+	'General': ['Overview', 'Fight Logs', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores', 'Relic Data'],
 	'Offensive': ['Offensive Stats', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Power Damage', 'Condi Damage', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In', 'Condition Uptimes'],
 	'Support': ['Healing', 'Barrier', 'Outgoing Healing', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
@@ -119,7 +119,7 @@ if __name__ == '__main__':
 
 	alertColors = ["primary", "danger", "warning", "success", "info", "light"]
 
-	excludeForMonthly = ['Squad Composition','Fight Review', 'Spike Damage', 'Outgoing Healing']
+	excludeForMonthly = ['Squad Composition','Fight Review', 'Spike Damage', 'Outgoing Healing', 'Relic Data']
 
 	for item in MenuTabs:
 		myprint(output, '<$button class="btn btn-sm btn-dark"> <$action-setfield $tiddler="$:/state/MenuTab" $field="text" $value="'+item+'"/> <$action-setfield $tiddler="$:/state/curTab" $field="text" $value="'+SubMenuTabs[item][0]+'"/> '+item+' </$button>')
@@ -244,8 +244,77 @@ if __name__ == '__main__':
 	#End reveal
 	myprint(output, '\n\n</div>\n\n')
 	myprint(output, '</$reveal>')
+	#End High Scores reveal
 
-	#Move Squad Composition and Spike Damage here so it is first under the fight summaries
+	#Relic Data reveal
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Relic Data">')
+	myprint(output, '\n<<alert dark "Relic Data from all Fights" width:60%>>\n')
+	myprint(output, "\nStat per second based on `player.stats_per_fight[fight_number]['time_active']`\n\n")	
+	myprint(output, '\n---\n')
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
+
+	myprint(output, "!!Relic Buff Uptimes\n\n")
+	
+	Header = "|thead-dark table-hover table-caption-top|k\n"
+	Header += "|Mouseover for details available|c\n"
+	Header +="|Player |"
+	for relicName in usedRelicBuff:
+		Header += relicName+" |"
+	Header +="h"
+	myprint(output, Header)
+	details=""
+	for player in RelicDataBuffs:
+		if RelicDataBuffs[player]:
+			details += "|"+player
+		else:
+			continue
+		for relic in usedRelicBuff:
+			if relic in RelicDataBuffs[player] and RelicDataBuffs[player][relic]['buffDuration']:
+				numFights = "Fights: "+str(len(RelicDataBuffs[player][relic]['fightTime']))
+				totalUptime = (sum(RelicDataBuffs[player][relic]['buffDuration']) / sum(RelicDataBuffs[player][relic]['fightTime']))*100
+				avgStacks = "Average Stacks: "+str(round(sum(RelicDataBuffs[player][relic]['buffStacks'])/len(RelicDataBuffs[player][relic]['buffStacks']), 3))
+				hitData = str(sum(RelicDataBuffs[player][relic]['hitCount']))+" out of "+str(sum(RelicDataBuffs[player][relic]['totalHits']))+" hits"
+				damageGain = "Damage Gain: "+my_value(round(sum(RelicDataBuffs[player][relic]['damageGain'])))
+				tooltip = avgStacks+" <br> "+numFights
+				if sum(RelicDataBuffs[player][relic]['hitCount']) >0:
+					tooltip += " <br> "+hitData
+				if sum(RelicDataBuffs[player][relic]['damageGain']) >0:
+					tooltip += " <br> "+damageGain
+				details += ' | <div class="xtooltip">'+str(round(totalUptime,2))+'% <span class="xtooltiptext">'+tooltip+'</span></div>'
+			else:
+				details +=' | '
+		details +="|\n"
+	myprint(output, details)
+	
+	myprint(output, "\n\n---\n\n")
+	myprint(output, "!!Relic Skill Data\n\n")
+	
+	RelicTableKeys = ['casts', 'totalDamage', 'hits', 'connectedHits', 'crit', 'glance', 'flank', 'missed', 'invulned', 'interrupted', 'evaded', 'blocked', 'shieldDamage', 'critDamage']
+	Header = "|thead-dark table-hover table-caption-top sortable|k\n"
+	Header += "|Sortable Table, click header to sort|c\n"
+	Header +="|!Player |!Relic |"
+	for key in RelicTableKeys:
+		Header +="!"+ key+" |"
+	Header +="h"
+	myprint(output, Header)
+
+	details=""
+	for player in RelicDataSkills:
+		for relic in RelicDataSkills[player]:
+			details +="|"+player
+			details += ' |[img width=24 ['+relic+' |'+usedRelicSkill[relic]+']] - '+relic
+			for stat in RelicTableKeys:
+				if stat in RelicDataSkills[player][relic]:
+					details += " | "+my_value(RelicDataSkills[player][relic][stat])
+				else:
+					details += " | N/A"
+			details+="|\n"
+	myprint(output, details)
+	myprint(output, "\n\n---\n\n")
+	#End reveal
+	myprint(output, '\n\n</div>\n\n')
+	myprint(output, '</$reveal>')
+	#End Relic Data Reveal
 
 	#Squad Spike Damage
 	if include_comp_and_review:
@@ -1346,8 +1415,10 @@ if __name__ == '__main__':
 		name = stacking_uptime_Table[uptime_prof_name]['name']
 		prof = stacking_uptime_Table[uptime_prof_name]['profession']
 		uptime_table_prof_name = "{{"+prof+"}} "+name
-
-		uptime_fight_time = uptime_Table[uptime_table_prof_name]['duration'] or 1
+		if uptime_table_prof_name in uptime_Table:
+			uptime_fight_time = uptime_Table[uptime_table_prof_name]['duration'] or 1
+		else:
+			uptime_fight_time = 1
 		dps_fight_time = DPSStats[uptime_prof_name]['duration'] or 1
 		fight_time = (stacking_uptime_Table[uptime_prof_name]['duration_might'] / 1000) or 1
 

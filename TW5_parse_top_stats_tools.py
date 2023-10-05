@@ -296,6 +296,37 @@ ResistanceData = {}
 ResistanceData['Squad'] = {}
 ResistanceData['Group'] = {}
 
+#Capture Relic Buff and Relic Skill Data
+relic_Stacks = {
+    "Relic Player Buff (Dragonhunter / Isgarren / Peitha)": 999,
+    "Relic of the Dragonhunter": 999,
+    "Relic of the Aristocracy": 5,
+    "Relic of the Monk": 10,
+    "Relic of the Brawler": 0,
+    "Relic of the Thief": 5,
+    "Relic of Fireworks": 0,
+    "Relic of the Daredevil": 3,
+    "Relic of the Deadeye": 0,
+    "Relic of the Defender": 0,
+    "Relic of the Firebrand": 0,
+    "Relic of the Herald": 10,
+    "Relic of the Scourge": 10,
+    "Relic of the Weaver": 0,
+    "Relic of the Zephyrite": 0,
+    "Relic of Cerus": 0,
+    "Relic of Dagda": 0,
+    "Relic of Isgarren": 999,
+    "Relic of Lyhr": 0,
+    "Mabon's Strength": 10,
+    "Relic of Mabon": 0,
+    "Relic of Peitha": 999,
+    "Relic of Vass": 3
+}
+usedRelicBuff = {}
+usedRelicSkill = {}
+RelicDataBuffs = {}
+RelicDataSkills = {}
+
 #fetch Guild Data and Check Guild Status function
 #members: Dict[str, Any] = {}
 members: dict = field(default_factory=dict) 
@@ -1976,13 +2007,6 @@ def collect_stat_data(args, config, log, anonymize=False):
 		file_path = "".join((args.input_directory,"/",filename))
 
 		# load file
-#        if args.filetype == "xml":
-#            # create xml tree
-#            xml_tree = ET.parse(file_path)
-#            xml_root = xml_tree.getroot()
-#            # get fight stats
-#            fight, players_running_healing_addon = get_stats_from_fight_xml(xml_root, config, log)
-#        else: # filetype == "json"
 		if file_extension == '.gz':
 			with gzip.open(file_path, mode="r") as f:
 				json_data = json.loads(f.read().decode('utf-8'))
@@ -2022,8 +2046,17 @@ def collect_stat_data(args, config, log, anonymize=False):
 		used_fights += 1
 		#fight_number = used_fights-1
 		squad_comp[fight_number]={}
+
+		#Collect Damage Modifiers for this fight
+		activeMods = {}
+		damageModMap = json_data['damageModMap']
+		for Modifier in damageModMap:
+			if 'Relic' in damageModMap[Modifier]['name']:
+				if damageModMap[Modifier]['name'] not in activeMods:
+					activeMods[damageModMap[Modifier]['name']] = Modifier[1:]
+		#End Damage Modifier collection
+
 		# get stats for each player
-		#for player_data in (xml_root.iter('players') if args.filetype == "xml" else json_data['players']):
 		for player_data in json_data['players']:
 			create_new_player = False
 			build_swapped = False
@@ -2083,6 +2116,103 @@ def collect_stat_data(args, config, log, anonymize=False):
 				prof_role_skills[profession+' '+playerRole]['player'][name]['Fights'] += 1
 				prof_role_skills[profession+' '+playerRole]['player'][name]['ActiveTime'] += playerRoleActiveTime
 				
+			#Collect Relic Buff Data for each player
+			if config.include_comp_and_review:
+				buffMap = json_data['buffMap']
+				playerName_Prof = "{{"+profession+"}} "+name
+				
+				for index, buff in enumerate(player_data['selfBuffs']):
+					selfGen = buff['buffData'][0]['generation']
+					buffID = "b"+str(buff['id'])
+					generated=0
+					buffStacks=0
+					if "Relic" in buffMap[buffID]['name']:
+						relicName = buffMap[buffID]['name']
+						relicIcon = buffMap[buffID]['icon']
+						if playerName_Prof not in RelicDataBuffs:
+							RelicDataBuffs[playerName_Prof]={}
+						if name in player_data['buffUptimesActive'][index]['buffData'][0]['generated']:
+							if relic_Stacks[relicName]:
+								generated = player_data['buffUptimesActive'][index]['buffData'][0]['presence']
+								buffStacks = player_data['buffUptimesActive'][index]['buffData'][0]['uptime']
+							else:
+								generated = player_data['buffUptimesActive'][index]['buffData'][0]['uptime']
+							print(name, relicName, generated, buffStacks)
+							damageGained = 0
+							hitCount = 0
+							totalHits = 0
+							if relicName not in RelicDataBuffs[playerName_Prof] and generated >0:
+								if relicName not in usedRelicBuff:
+									usedRelicBuff[relicName] = relicIcon
+								RelicDataBuffs[playerName_Prof][relicName]={}
+								RelicDataBuffs[playerName_Prof][relicName]['fightTime']=[]
+								RelicDataBuffs[playerName_Prof][relicName]['buffDuration'] =[]
+								RelicDataBuffs[playerName_Prof][relicName]['buffStacks'] =[]
+								RelicDataBuffs[playerName_Prof][relicName]['damageGain'] =[]
+								RelicDataBuffs[playerName_Prof][relicName]['hitCount'] =[]
+								RelicDataBuffs[playerName_Prof][relicName]['totalHits'] =[]
+								buffDuration = (generated*playerRoleActiveTime)/100
+
+								RelicDataBuffs[playerName_Prof][relicName]['fightTime'].append(playerRoleActiveTime)
+								RelicDataBuffs[playerName_Prof][relicName]['buffDuration'].append(buffDuration)
+								RelicDataBuffs[playerName_Prof][relicName]['buffStacks'].append(buffStacks)
+								if relicName in activeMods:
+									for target in player_data['damageModifiersTarget']:
+										for Modifier in target:
+											if str(Modifier['id']) == str(activeMods[relicName]):
+												damageGained += Modifier['damageModifiers'][0]['damageGain']
+												hitCount += Modifier['damageModifiers'][0]['hitCount']
+												totalHits += Modifier['damageModifiers'][0]['totalHitCount']
+							else:
+								buffDuration = (generated*playerRoleActiveTime)/100
+								RelicDataBuffs[playerName_Prof][relicName]['fightTime'].append(playerRoleActiveTime)
+								RelicDataBuffs[playerName_Prof][relicName]['buffDuration'].append(buffDuration)
+								RelicDataBuffs[playerName_Prof][relicName]['buffStacks'].append(buffStacks)
+								if relicName in activeMods:
+									for target in player_data['damageModifiersTarget']:
+										for Modifier in target:
+											if str(Modifier['id']) == str(activeMods[relicName]):
+												damageGained += Modifier['damageModifiers'][0]['damageGain']
+												hitCount += Modifier['damageModifiers'][0]['hitCount']
+												totalHits += Modifier['damageModifiers'][0]['totalHitCount']
+							RelicDataBuffs[playerName_Prof][relicName]['damageGain'].append(damageGained)
+							RelicDataBuffs[playerName_Prof][relicName]['hitCount'].append(hitCount)
+							RelicDataBuffs[playerName_Prof][relicName]['totalHits'].append(totalHits)
+				#End Collect Relic Buff Data for each player				
+
+			#Collect Relic Skill Data for each player
+			if config.include_comp_and_review:
+				skillMap = json_data['skillMap']
+				for skill in skillMap:
+					if 'Relic' in skillMap[skill]['name']:
+						relicName = skillMap[skill]['name']
+						relicIcon = skillMap[skill]['icon']
+						if relicName not in usedRelicSkill:
+							usedRelicSkill[relicName] = relicIcon
+
+				for item in player_data['totalDamageDist'][0]:
+					itemID = item['id']
+					if "s"+str(itemID) in skillMap:
+						itemName = skillMap["s"+str(itemID)]['name']
+					else:
+						continue
+					if itemName in usedRelicSkill:
+						if playerName_Prof not in RelicDataSkills:
+							RelicDataSkills[playerName_Prof]={}
+							if itemName not in RelicDataSkills[playerName_Prof]:
+								RelicDataSkills[playerName_Prof][itemName]={}
+								for stat in item:
+									RelicDataSkills[playerName_Prof][itemName][stat]=item[stat]
+							else:
+								for stat in item:
+									RelicDataSkills[playerName_Prof][itemName][stat]+=item[stat]
+							for cast in player_data['rotation']:
+								if cast['id'] == itemID:
+									if 'casts' not in RelicDataSkills[playerName_Prof][itemName]:
+										RelicDataSkills[playerName_Prof][itemName]['casts'] = len(cast['skills'])
+									else:
+										RelicDataSkills[playerName_Prof][itemName]['casts'] += len(cast['skills'])
+			#End Collect Relic Skill Data for each player
 
 			if 'rotation' in player_data:
 				for rotation_skill in player_data['rotation']:
@@ -2119,9 +2249,6 @@ def collect_stat_data(args, config, log, anonymize=False):
 					prof_role_skills[profession+' '+playerRole]['castTotals'][skill_id] = prof_role_skills[profession+' '+playerRole]['castTotals'].get(skill_id, 0) + skill_casts
 					
 
-			#if args.filetype == "xml":
-			#    player.stats_per_fight[fight_number]['time_active'] = get_stat_from_player_xml(player_data, players_running_healing_addon, 'time_active', config)
-			#else:
 			player.stats_per_fight[fight_number]['time_active'] = get_stat_from_player_json(player_data, players_running_healing_addon, 'time_active', config)
 			player.stats_per_fight[fight_number]['time_in_combat'] = get_stat_from_player_json(player_data, players_running_healing_addon, 'time_in_combat', config)
 			player.stats_per_fight[fight_number]['group'] = get_stat_from_player_json(player_data, players_running_healing_addon, 'group', config)
@@ -2130,9 +2257,6 @@ def collect_stat_data(args, config, log, anonymize=False):
 			
 			# get all stats that are supposed to be computed from the player data
 			for stat in config.stats_to_compute:
-				#if args.filetype == "xml":
-				#    player.stats_per_fight[fight_number][stat] = get_stat_from_player_xml(player_data, players_running_healing_addon, stat, config)
-				#else:
 				player.stats_per_fight[fight_number][stat] = get_stat_from_player_json(player_data, players_running_healing_addon, stat, config)
 					
 				if stat == 'heal' and player.stats_per_fight[fight_number][stat] >= 0:
@@ -3743,7 +3867,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 			tagPositions = id['combatReplayData']['positions']
 			if id['combatReplayData']['dead']:
 				for death in id['combatReplayData']['dead']:
-					if death[0]<0:
+					if death[0]<=0:
 						continue
 					dead_Tag_Mark = death[0]
 					dead_Tag = 1
@@ -5063,6 +5187,8 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	#json_dict["conditionDataGroups"] =  {key: value for key, value in conditionDataGroups.items()}
 	#json_dict["conditionDataSquad"] =  {key: value for key, value in conditionDataSquad.items()}
 	#json_dict["ResistanceData"] =  {key: value for key, value in ResistanceData.items()}
+	json_dict["RelicDataBuffs"] =  {key: value for key, value in RelicDataBuffs.items()}
+	json_dict["RelicDataSkills"] =  {key: value for key, value in RelicDataSkills.items()}
 	
 
 		
