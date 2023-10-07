@@ -169,7 +169,7 @@ class Config:
 
 
 #Stats to exlucde from overview summary
-exclude_Stat = ["iol", "dist", "res", "dmgAll", "Cdmg", "Pdmg",  "kills", "downs", 'downed', "HiS", "stealth", "superspeed", "swaps", "barrierDamage", "dodges", "evades", "blocks", "invulns", 'hitsMissed', 'interupted', 'fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut', 'ripsIn', 'ripsTime', 'cleansesIn', 'cleansesTime', 'downContrib', 'resOutTime', 'cleansesOutTime', 'ripsOutTime', 'downContribution']
+exclude_Stat = ["iol", "dist", "res", "dmgAll", "Cdmg", "Pdmg", "shieldDmg", "kills", "downs", 'downed', "HiS", "stealth", "superspeed", "swaps", "barrierDamage", "dodges", "evades", "blocks", "invulns", 'hitsMissed', 'interupted', 'fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut', 'ripsIn', 'ripsTime', 'cleansesIn', 'cleansesTime', 'downContrib', 'resOutTime', 'cleansesOutTime', 'ripsOutTime', 'downContribution']
 
 #Control Effects Tracking
 squad_offensive = {}
@@ -2555,7 +2555,16 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		for target in player_json['dpsTargets']:
 			sumDamage = sumDamage + int(target[0]['damage'])
 		return int(sumDamage)
-	 
+	#Add Shield Damage Tracking
+	if stat == 'shieldDmg':
+		if 'targetDamageDist' not in player_json:
+			return 0
+		sumDamage = 0
+		for target in player_json['targetDamageDist']:
+			for skill in target[0]:
+				sumDamage += skill['shieldDamage']
+		return int(sumDamage)
+	
 	if stat == 'dmgAll':
 		if 'dpsAll' not in player_json:
 			return 0
