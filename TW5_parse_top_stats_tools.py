@@ -4489,7 +4489,7 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
 	statBoxPlot_profs = []
 	statBoxPlot_data = []	
 	chart_per_fight = ['res', 'kills', 'downs', 'swaps', 'dist', 'hitsMissed', 'interupted', 'invulns', 'evades', 'blocks', 'dodges', 'downed', 'deaths', 'dmg_taken', 'barrierDamage', 'superspeed']
-	chart_per_second = ['dmg', 'downContribution', 'dmgAll', 'Pdmg', 'Cdmg', 'rips', 'cleanses', 'heal', 'barrier', 'ripsIn', 'cleansesIn', 'cleansesOutTime', 'ripsOutTime', 'ripsTime', 'cleansesTime'] 
+	chart_per_second = ['dmg', 'downContribution', 'shieldDmg', 'dmgAll', 'Pdmg', 'Cdmg', 'rips', 'cleanses', 'heal', 'barrier', 'ripsIn', 'cleansesIn', 'cleansesOutTime', 'ripsOutTime', 'ripsTime', 'cleansesTime'] 
 	for i in reversed(range(len(top_players))):
 		player= players[top_players[i]]
 		statBoxPlot_names.append(player.name)
