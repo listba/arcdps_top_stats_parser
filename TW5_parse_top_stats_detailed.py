@@ -109,7 +109,7 @@ if __name__ == '__main__':
 	MenuTabs = ['General', 'Offensive', 'Defensive', 'Support', 'Boons & Buffs', 'Dashboard']
 
 	SubMenuTabs = {
-	'General': ['Overview', 'Fight Logs', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores', 'Relic Data'],
+	'General': ['Overview', 'Fight Logs', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores', 'Gear Buffs'],
 	'Offensive': ['Offensive Stats', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In', 'Condition Uptimes'],
 	'Support': ['Healing', 'Barrier', 'Outgoing Healing', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
@@ -119,7 +119,7 @@ if __name__ == '__main__':
 
 	alertColors = ["primary", "danger", "warning", "success", "info", "light"]
 
-	excludeForMonthly = ['Squad Composition','Fight Review', 'Spike Damage', 'Outgoing Healing', 'Relic Data']
+	excludeForMonthly = ['Squad Composition','Fight Review', 'Spike Damage', 'Outgoing Healing', 'Gear Buffs']
 
 	for item in MenuTabs:
 		myprint(output, '<$button class="btn btn-sm btn-dark"> <$action-setfield $tiddler="$:/state/MenuTab" $field="text" $value="'+item+'"/> <$action-setfield $tiddler="$:/state/curTab" $field="text" $value="'+SubMenuTabs[item][0]+'"/> '+item+' </$button>')
@@ -246,20 +246,22 @@ if __name__ == '__main__':
 	myprint(output, '</$reveal>')
 	#End High Scores reveal
 
-	#Relic Data reveal
-	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Relic Data">')
-	myprint(output, '\n<<alert dark "Relic Data from all Fights" width:60%>>\n')
+	#Gear Buffs reveal
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Gear Buffs">')
+	myprint(output, '\n<<alert dark "Gear Buff Data from all Fights" width:60%>>\n')
 	myprint(output, "\nStat per second based on `player.stats_per_fight[fight_number]['time_active']`\n\n")	
 	myprint(output, '\n---\n')
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
 
-	myprint(output, "!!Relic Buff Uptimes\n\n")
+	myprint(output, "!!Gear Buff Uptimes\n\n")
 	
-	Header = "|thead-dark table-hover table-caption-top|k\n"
-	Header += "|Mouseover for details available|c\n"
-	Header +="|Player |"
-	for relicName in usedRelicBuff:
-		Header += relicName+" |"
+	Header = "|thead-dark table-hover table-caption-top sortable|k\n"
+	Header += "|Mouseover for details available - Sortable on header click|c\n"
+	Header +="|!Player |"
+	sortedUsedRelic = OrderedDict(sorted(usedRelicBuff.items()))
+	for relicName in sortedUsedRelic:
+		headerIcon = ' ![img width=24 ['+relicName+'|'+sortedUsedRelic[relicName]+']] |'
+		Header += headerIcon
 	Header +="h"
 	myprint(output, Header)
 	details=""
@@ -268,7 +270,7 @@ if __name__ == '__main__':
 			details += "|"+player
 		else:
 			continue
-		for relic in usedRelicBuff:
+		for relic in sortedUsedRelic:
 			if relic in RelicDataBuffs[player] and RelicDataBuffs[player][relic]['buffDuration']:
 				numFights = "Fights: "+str(len(RelicDataBuffs[player][relic]['fightTime']))
 				totalUptime = (sum(RelicDataBuffs[player][relic]['buffDuration']) / sum(RelicDataBuffs[player][relic]['fightTime']))*100
@@ -314,7 +316,7 @@ if __name__ == '__main__':
 	#End reveal
 	myprint(output, '\n\n</div>\n\n')
 	myprint(output, '</$reveal>')
-	#End Relic Data Reveal
+	#End Gear Buffs Reveal
 
 	#Squad Spike Damage
 	if include_comp_and_review:

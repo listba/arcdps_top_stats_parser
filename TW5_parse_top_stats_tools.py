@@ -302,25 +302,34 @@ relic_Stacks = {
     "Relic of the Dragonhunter": 999,
     "Relic of the Aristocracy": 5,
     "Relic of the Monk": 10,
-    "Relic of the Brawler": 0,
+    #"Relic of the Brawler": 0,
     "Relic of the Thief": 5,
-    "Relic of Fireworks": 0,
+    #"Relic of Fireworks": 0,
     "Relic of the Daredevil": 3,
-    "Relic of the Deadeye": 0,
-    "Relic of the Defender": 0,
-    "Relic of the Firebrand": 0,
+    #"Relic of the Deadeye": 0,
+    #"Relic of the Defender": 0,
+    #"Relic of the Firebrand": 0,
     "Relic of the Herald": 10,
     "Relic of the Scourge": 10,
-    "Relic of the Weaver": 0,
-    "Relic of the Zephyrite": 0,
-    "Relic of Cerus": 0,
-    "Relic of Dagda": 0,
+    #"Relic of the Weaver": 0,
+    #"Relic of the Zephyrite": 0,
+    #"Relic of Cerus": 0,
+    #"Relic of Dagda": 0,
     "Relic of Isgarren": 999,
-    "Relic of Lyhr": 0,
+    #"Relic of Lyhr": 0,
     "Mabon's Strength": 10,
-    "Relic of Mabon": 0,
+    #"Relic of Mabon": 0,
     "Relic of Peitha": 999,
-    "Relic of Vass": 3
+    "Relic of Vass": 3,
+    'Superior Sigil of Bounty': 25,
+    'Superior Sigil of Corruption': 25,
+    'Superior Sigil of Cruelty': 25,
+    'Superior Sigil of Benevolence': 25,
+    'Superior Sigil of Life': 25,
+    'Superior Sigil of Bloodlust': 25,
+    'Superior Sigil of Perception': 25,
+    'Superior Sigil of Momentum': 25,
+    'Superior Sigil of the Stars': 25	
 }
 usedRelicBuff = {}
 usedRelicSkill = {}
@@ -2116,7 +2125,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 				prof_role_skills[profession+' '+playerRole]['player'][name]['Fights'] += 1
 				prof_role_skills[profession+' '+playerRole]['player'][name]['ActiveTime'] += playerRoleActiveTime
 				
-			#Collect Relic Buff Data for each player
+			#Collect Gear Buff Data for each player
 			if config.include_comp_and_review:
 				buffMap = json_data['buffMap']
 				playerName_Prof = "{{"+profession+"}} "+name
@@ -2126,18 +2135,18 @@ def collect_stat_data(args, config, log, anonymize=False):
 					buffID = "b"+str(buff['id'])
 					generated=0
 					buffStacks=0
-					if "Relic" in buffMap[buffID]['name']:
+					if "Relic" in buffMap[buffID]['name'] or "Superior Sigil of" in buffMap[buffID]['name']:
 						relicName = buffMap[buffID]['name']
 						relicIcon = buffMap[buffID]['icon']
 						if playerName_Prof not in RelicDataBuffs:
 							RelicDataBuffs[playerName_Prof]={}
 						if name in player_data['buffUptimesActive'][index]['buffData'][0]['generated']:
-							if relic_Stacks[relicName]:
+							if relicName in relic_Stacks:
 								generated = player_data['buffUptimesActive'][index]['buffData'][0]['presence']
 								buffStacks = player_data['buffUptimesActive'][index]['buffData'][0]['uptime']
 							else:
 								generated = player_data['buffUptimesActive'][index]['buffData'][0]['uptime']
-							print(name, relicName, generated, buffStacks)
+							#print(name, relicName, generated, buffStacks)
 							damageGained = 0
 							hitCount = 0
 							totalHits = 0
