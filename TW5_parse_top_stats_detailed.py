@@ -277,7 +277,10 @@ if __name__ == '__main__':
 				avgStacks = "Average Stacks: "+str(round(sum(RelicDataBuffs[player][relic]['buffStacks'])/len(RelicDataBuffs[player][relic]['buffStacks']), 3))
 				hitData = str(sum(RelicDataBuffs[player][relic]['hitCount']))+" out of "+str(sum(RelicDataBuffs[player][relic]['totalHits']))+" hits"
 				damageGain = "Damage Gain: "+my_value(round(sum(RelicDataBuffs[player][relic]['damageGain'])))
-				tooltip = avgStacks+" <br> "+numFights
+				if sum(RelicDataBuffs[player][relic]['buffStacks']):
+					tooltip = avgStacks+" <br> "+numFights
+				else:
+					tooltip = numFights
 				if sum(RelicDataBuffs[player][relic]['hitCount']) >0:
 					tooltip += " <br> "+hitData
 				if sum(RelicDataBuffs[player][relic]['damageGain']) >0:
