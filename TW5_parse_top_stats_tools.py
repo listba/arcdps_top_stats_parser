@@ -2150,7 +2150,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 							damageGained = 0
 							hitCount = 0
 							totalHits = 0
-							if relicName not in RelicDataBuffs[playerName_Prof] and generated >0:
+							if relicName not in RelicDataBuffs[playerName_Prof]: #changed to handle sigil of doom?
 								if relicName not in usedRelicBuff:
 									usedRelicBuff[relicName] = relicIcon
 								RelicDataBuffs[playerName_Prof][relicName]={}
