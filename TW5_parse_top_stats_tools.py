@@ -986,7 +986,7 @@ def get_and_write_sorted_average(players, config, num_used_fights, stat, output_
 # Output:
 # list of player indices that got a top consistency award
 def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, num_used_fights, stat, consistent_or_avg, output_file):
-	#max_name_length = max([len(players[i].name) for i in top_consistent_players])
+
 	profession_strings, profession_length = get_professions_and_length(players, top_consistent_players, config)
 
 	if consistent_or_avg == StatType.CONSISTENT:
@@ -1005,8 +1005,6 @@ def write_sorted_top_consistent_or_avg(players, top_consistent_players, config, 
 		else:
 			print_string = "*Top average "+config.stat_names[stat]+" awards (Max. "+str(config.num_players_listed[stat])+" places)"
 			myprint(output_file, print_string)
-			#print_string = "*''FightTime avg'': Total/total duration of fights | ''CombatTime avg''= Total/total time player alive during fights"
-			#myprint(output_file, print_string)			
 			print_string = "*Attendance = number of fights a player was present out of "+str(num_used_fights)+" total fights."
 			myprint(output_file, print_string)
 	print_string = "\n"    
@@ -1694,8 +1692,7 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 	else:
 		print_string = "*Top overall "+config.stat_names[stat]+" awards (Max. "+str(config.num_players_listed[stat])+" places, min. "+str(round(config.portion_of_top_for_total*100.))+"% of 1st place)"
 	myprint(output_file, print_string)
-	#print_string = "*''FightTime avg'': Total/total duration of fights | ''CombatTime avg''= Total/total time player alive during fights"
-	#myprint(output_file, print_string)
+
 	print_string = "*Attendance = total duration of fights attended out of "
 	if total_fight_duration["h"] > 0:
 		print_string += str(total_fight_duration["h"])+"h "
@@ -1705,9 +1702,6 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 	myprint(output_file, print_string)
 
 	#JEL - Adjust for TW5 table output
-	#print_string = "|Place |Name |Class | Attendance| Total| "
-	#    print_string += " Average|h"
-	# print table header
 	print_string = "|thead-dark table-hover sortable|k"
 	myprint(output_file, print_string)
 	print_string = "|!Place |!Name |!Class | !Attendance| !Total|"
@@ -1758,7 +1752,6 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 		#JEL - Adjust for TW5 table output
 		nameWithTooltip = '<span data-tooltip="'+player.account+'">'+player.name+'</span>'
 		print_string = "|"+str(place)+". |"+nameWithTooltip+" | {{"+profession_strings[i]+"}} | "
-		#print_string = f"{place:>2}"+f". {player.name:<{max_name_length}} "+f" {profession_strings[i]:<{profession_length}} "
 
 		if fight_time_h > 0:
 			print_string += f" {fight_time_h:>2}h {fight_time_m:>2}m {fight_time_s:>2}s |"
@@ -1986,8 +1979,6 @@ def get_buff_ids_from_json(json_data, config):
 # list of all fights (also the skipped ones)
 # was healing found in the logs?
 def collect_stat_data(args, config, log, anonymize=False):
-#    if args.filetype != "json" and args.filetype != "xml":
-#        print("unsupported filetype "+args.filetype+". Please choose json or xml.")
 
 	# healing only in logs if addon was installed
 	found_healing = False # Todo what if some logs have healing and some don't
@@ -2146,7 +2137,6 @@ def collect_stat_data(args, config, log, anonymize=False):
 								buffStacks = player_data['buffUptimesActive'][index]['buffData'][0]['uptime']
 							else:
 								generated = player_data['buffUptimesActive'][index]['buffData'][0]['uptime']
-							#print(name, relicName, generated, buffStacks)
 							damageGained = 0
 							hitCount = 0
 							totalHits = 0
