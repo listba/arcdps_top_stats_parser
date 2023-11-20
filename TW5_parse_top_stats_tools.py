@@ -1704,13 +1704,13 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 	elif stat == 'dmg':
 		print_string += " !FightTime DPS| !CombatTime DPS|  !Damage/Enemy|   !Wt. DPS/Enemy|"
 	elif stat == 'heal':
-		print_string += " !Squad HPS| !Group HPS| !Self HPS|"
+		print_string += " !Total HPS| !Squad HPS| !Group HPS| !Self HPS|"
 	elif stat == 'rips' or stat == 'ripsIn':
 		print_string += " !FightTime SPS| !CombatTime SPS|"
 	elif stat == 'cleanses' or stat == 'cleansesIn':
 		print_string += " !FightTime CPS| !CombatTime CPS|"
 	elif stat == 'barrier':
-		print_string += " !Squad BPS| !Group BPS| !Self BPS|"
+		print_string += " !Total BPS| !Squad BPS| !Group BPS| !Self BPS|"
 	elif stat == 'downs':
 		print_string += " !FightTime Downs/Min| !CombatTime Downs/Min|"
 	elif stat == 'kills':
@@ -1751,10 +1751,15 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 			print_string += " "+"{:.2f}".format(round(player.average_stats[stat], 2))+"| "+"{:.2f}".format(round(player.total_stats[stat]/combat_Time, 2))+"|"
 		elif stat == 'barrier' or stat == 'heal':
+			#Squad PS excludes Group and Self, Group excludes Self
+			Squad_PS = (player.total_stats[stat] - player.total_stats_group[stat])/player.duration_fights_present
+			Group_PS = (player.total_stats_group[stat] - player.total_stats_self[stat])/player.duration_fights_present
+			Self_PS = player.total_stats_self[stat]/player.duration_fights_present
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
 			print_string += " "+"{:.2f}".format(round(player.average_stats[stat], 2))+"|"
-			print_string += " "+"{:.2f}".format(round(player.total_stats_group[stat]/player.duration_fights_present, 2))+"|"
-			print_string += " "+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+"|"
+			print_string += " "+"{:.2f}".format(round(Squad_PS, 2))+"|"
+			print_string += " "+"{:.2f}".format(round(Group_PS, 2))+"|"
+			print_string += " "+"{:.2f}".format(round(Self_PS, 2))+"|"
 		elif stat == 'dmg':
 			weighted_DPS_Enemy=[]
 			for (dmg, enemy, duration) in zip(player.wt_dps_damage, player.wt_dps_enemies, player.wt_dps_duration):
