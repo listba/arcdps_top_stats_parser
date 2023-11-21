@@ -158,11 +158,11 @@ if __name__ == '__main__':
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
 	myprint(output, "|thead-dark table-caption-top sortable|k")
 	myprint(output, "|Requires Upload to DPSReport to Elite Insight activated to show links|c")
-	myprint(output, "|Date |Start Time |End Time |GMT |Location |Duration |Link |h")
+	myprint(output, "|Fight# |Date |Start Time |End Time |GMT |Location |Duration |Link |h")
 	for fight in Fight_Logs:
 		print_string="|"
 		for item in fight:
-			print_string+=item.strip()+" |"
+			print_string+=str(item).strip()+" |"
 			
 		myprint(output, print_string)
 
