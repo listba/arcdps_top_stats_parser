@@ -2046,7 +2046,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 		activeMods = {}
 		damageModMap = json_data['damageModMap']
 		for Modifier in damageModMap:
-			if 'Relic' in damageModMap[Modifier]['name']:
+			if 'Relic' in damageModMap[Modifier]['name'] or 'Superior Sigil of' in damageModMap[Modifier]['name'] or "Nourys's" in damageModMap[Modifier]['name']:
 				if damageModMap[Modifier]['name'] not in activeMods:
 					activeMods[damageModMap[Modifier]['name']] = Modifier[1:]
 		#End Damage Modifier collection
@@ -2121,7 +2121,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 					buffID = "b"+str(buff['id'])
 					generated=0
 					buffStacks=0
-					if "Relic" in buffMap[buffID]['name'] or "Superior Sigil of" in buffMap[buffID]['name']:
+					if "Relic" in buffMap[buffID]['name'] or "Superior Sigil of" in buffMap[buffID]['name'] or "Nourys's" in buffMap[buffID]['name']:
 						relicName = buffMap[buffID]['name']
 						relicIcon = buffMap[buffID]['icon']
 						if playerName_Prof not in RelicDataBuffs:
@@ -2178,7 +2178,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 			if config.include_comp_and_review:
 				skillMap = json_data['skillMap']
 				for skill in skillMap:
-					if 'Relic' in skillMap[skill]['name']:
+					if 'Relic' in skillMap[skill]['name'] or 'Sigil' in skillMap[skill]['name'] or "Nourys's" in skillMap[skill]['name']:
 						relicName = skillMap[skill]['name']
 						relicIcon = skillMap[skill]['icon']
 						if relicName not in usedRelicSkill:
