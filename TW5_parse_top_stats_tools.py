@@ -3330,11 +3330,12 @@ def get_stats_from_fight_json(fight_json, config, log):
 				if skill_name not in squad_Control:
 					squad_Control[skill_name] = {}
 				for name in item['statesPerSource']:
-					playerName = name
+					key_Prof = name
 					buffTime = 0
 					buffOn = 0
 					firstTime = 0
 					conditionTime = 0
+
 					for player in fight_json['players']:
 						if player['name'] == name:
 							prof = player['profession']
@@ -4276,7 +4277,9 @@ def print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, fou
 				print_string += " "+str(round(Cmd_Tags[name]['Kills'], 2))+"|"
 				Cmd_Tags[name]['Deaths'] = 1
 	print_string += "\n|Totals: | "+str(sum(tag['Fights'] for tag in Cmd_Tags.values() if tag))+"| "+str(sum(tag['Downs'] for tag in Cmd_Tags.values() if tag))+"| "+str(sum(tag['Kills'] for tag in Cmd_Tags.values() if tag))+"| "+str(sum(tag['Downed'] for tag in Cmd_Tags.values() if tag))+"| "+str(sum(tag['Deaths'] for tag in Cmd_Tags.values() if tag))+"| "
-	totalKDR = round((sum(tag['Kills'] for tag in Cmd_Tags.values() if tag)) / (sum(tag['Deaths'] for tag in Cmd_Tags.values() if tag)),2)
+	sumTagKills = sum(tag['Kills'] for tag in Cmd_Tags.values() if tag)
+	sumTagDeaths = sum(tag['Deaths'] for tag in Cmd_Tags.values() if tag) or 1
+	totalKDR = round(sumTagKills / sumTagDeaths, 2)
 	print_string += str(totalKDR)+"|f\n"
 	#print_string += "\nKill Death Ratio for the session was ''"+str(Raid_KDR)+"''.\n"
 	#JEL - Added beginning newline for TW5 spacing
