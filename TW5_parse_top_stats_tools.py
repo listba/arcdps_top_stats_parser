@@ -3474,7 +3474,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 
 		player_combat_time = sum_breakpoints(get_combat_time_breakpoints(player)) / 1000
 
-		#Collect Outgoing Healing adn Barrier by Target
+		#Collect Outgoing Healing and Barrier by Target
 		if config.include_comp_and_review:
 			if 'usedExtensions' not in fight_json:
 				players_running_healing_addon = []
@@ -3485,13 +3485,14 @@ def get_stats_from_fight_json(fight_json, config, log):
 						players_running_healing_addon = extension['runningExtension']
 
 			if player['name'] in players_running_healing_addon:
-				healerName = player['name']
+				healerName = player['name']+"|"+player['profession']
 				healerGroup = player['group']
 				healerProf = player['profession']
 				if healerName not in OutgoingHealing:
 					OutgoingHealing[healerName] = {}
 					OutgoingHealing[healerName]['Targets'] = {}
 					OutgoingHealing[healerName]['Skills'] = {}
+					OutgoingHealing[healerName]['Skills_Barrier'] = {}
 					OutgoingHealing[healerName]['Group'] = {}
 					OutgoingHealing[healerName]['Group'][healerGroup] = 1
 					OutgoingHealing[healerName]['Prof'] = healerProf
@@ -3543,7 +3544,18 @@ def get_stats_from_fight_json(fight_json, config, log):
 							OutgoingHealing[healerName]['Targets'][targetName]['Barrier'] = targetBarrier
 						else:
 							OutgoingHealing[healerName]['Targets'][targetName]['Barrier'] += targetBarrier
-	
+
+					for ally in player['extBarrierStats']['alliedBarrierDist']:
+						for skill in ally[0]:
+							skillID = skill['id']
+							skillHits = skill['hits']
+							skillBarrier = skill['totalBarrier']
+							if skillID not in OutgoingHealing[healerName]['Skills_Barrier'] and skillBarrier >0:
+								OutgoingHealing[healerName]['Skills_Barrier'][skillID]=[skillHits, skillBarrier]
+							else:
+								OutgoingHealing[healerName]['Skills_Barrier'][skillID][0] += skillHits
+								OutgoingHealing[healerName]['Skills_Barrier'][skillID][1] += skillBarrier
+
 		#Track MOA Activity - Casting of Signet of Humility
 		if player['profession'] in ['Mesmer', 'Mirage', 'Chronomancer']:
 			if 'rotation' in player:

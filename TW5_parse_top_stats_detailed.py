@@ -348,14 +348,14 @@ if __name__ == '__main__':
 		myprint(output, '<div style="overflow-x:auto;">\n\n')		
 
 		for name in OutgoingHealing:
-			myprint(output, '<$button setTitle="$:/state/outgoingHealing" setTo="'+name+'_'+OutgoingHealing[name]['Prof']+'" selectedClass="" class="btn btn-sm btn-dark" style=""> '+name+'{{'+OutgoingHealing[name]['Prof']+'}} </$button>')
+			myprint(output, '<$button setTitle="$:/state/outgoingHealing" setTo="'+name.split("|")[0]+'_'+OutgoingHealing[name]['Prof']+'" selectedClass="" class="btn btn-sm btn-dark" style=""> '+name.split("|")[0]+'{{'+OutgoingHealing[name]['Prof']+'}} </$button>')
 
 		for name in OutgoingHealing:
 			healerMaxGroup = max(OutgoingHealing[name]['Group'], key=OutgoingHealing[name]['Group'].get)
-			myprint(output, '<$reveal type="match" state="$:/state/outgoingHealing" text="'+name+'_'+OutgoingHealing[name]['Prof']+'">')
+			myprint(output, '<$reveal type="match" state="$:/state/outgoingHealing" text="'+name.split("|")[0]+'_'+OutgoingHealing[name]['Prof']+'">')
 			myprint(output, '<div style="overflow-x:auto;">\n\n')
 			myprint(output, "\n|Healer Name | Party|h")
-			myprint (output, "|"+name+" | "+str(healerMaxGroup)+" |")
+			myprint (output, "|"+name.split("|")[0]+" | "+str(healerMaxGroup)+" |")
 			myprint(output, "\n\n---\n")
 			myprint(output, '<div class="flex-row">')
 			myprint(output, '    <div class="flex-col border">\n')
@@ -375,6 +375,18 @@ if __name__ == '__main__':
 			for skill in OutgoingHealing[name]['Skills']:
 				hits=OutgoingHealing[name]['Skills'][skill][0]
 				heals=OutgoingHealing[name]['Skills'][skill][1]
+				skillName = skill_Dict[str(skill)]['name']
+				healString = "|"+str(skill)+" |"+str(skillName)+" | "+my_value(hits)+"| "+my_value(heals)+"| "+my_value(round(heals/hits,2))+"|"
+				myprint(output, healString)
+
+			myprint(output, '\n\n</div>\n\n')
+			myprint(output, '    <div class="flex-col border">\n')
+			myprint(output, "|thead-dark table-caption-top sortable|k")
+			myprint(output, "|Sortable Table: Click header to sort|c")
+			myprint(output, "|!Skill |!Skill Name | !Hits| !Total Barrier| !Barrier/Hit|h")
+			for skill in OutgoingHealing[name]['Skills_Barrier']:
+				hits=OutgoingHealing[name]['Skills_Barrier'][skill][0]
+				heals=OutgoingHealing[name]['Skills_Barrier'][skill][1]
 				skillName = skill_Dict[str(skill)]['name']
 				healString = "|"+str(skill)+" |"+str(skillName)+" | "+my_value(hits)+"| "+my_value(heals)+"| "+my_value(round(heals/hits,2))+"|"
 				myprint(output, healString)
