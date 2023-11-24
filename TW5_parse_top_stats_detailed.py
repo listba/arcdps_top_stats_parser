@@ -360,7 +360,7 @@ if __name__ == '__main__':
 			myprint(output, '<div class="flex-row">')
 			myprint(output, '    <div class="flex-col border">\n')
 			myprint(output, "|thead-dark table-caption-top sortable|k")
-			myprint(output, "|Sortable Table: Click header to sort|c")
+			myprint(output, '| <<hl "Total Healing & Barrier by Player" teal>> |c')
 			myprint(output, "|!Player Name | !Party | !Healing| !Barrier|h")
 			for target in OutgoingHealing[name]['Targets']:
 				targetMaxGroup = max(OutgoingHealing[name]['Targets'][target]['Group'], key=OutgoingHealing[name]['Targets'][target]['Group'].get)
@@ -370,7 +370,7 @@ if __name__ == '__main__':
 			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '    <div class="flex-col border">\n')
 			myprint(output, "|thead-dark table-caption-top sortable|k")
-			myprint(output, "|Sortable Table: Click header to sort|c")
+			myprint(output, '| <<hl "Total Healing by Skill" lightgreen>> |c')
 			myprint(output, "|!Skill |!Skill Name | !Hits| !Total Healing| !Heal/Hit|h")
 			for skill in OutgoingHealing[name]['Skills']:
 				hits=OutgoingHealing[name]['Skills'][skill][0]
@@ -382,7 +382,7 @@ if __name__ == '__main__':
 			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '    <div class="flex-col border">\n')
 			myprint(output, "|thead-dark table-caption-top sortable|k")
-			myprint(output, "|Sortable Table: Click header to sort|c")
+			myprint(output, '| <<hl "Total Barrier by Skill" lightblue>> |c')
 			myprint(output, "|!Skill |!Skill Name | !Hits| !Total Barrier| !Barrier/Hit|h")
 			for skill in OutgoingHealing[name]['Skills_Barrier']:
 				hits=OutgoingHealing[name]['Skills_Barrier'][skill][0]
