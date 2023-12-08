@@ -109,7 +109,7 @@ if __name__ == '__main__':
 	MenuTabs = ['General', 'Offensive', 'Defensive', 'Support', 'Boons & Buffs', 'Dashboard']
 
 	SubMenuTabs = {
-	'General': ['Overview', 'Fight Logs', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores', 'Gear Buffs'],
+	'General': ['Overview', 'Fight Logs', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores', 'Gear Buffs', 'Minions'],
 	'Offensive': ['Offensive Stats', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In', 'Condition Uptimes'],
 	'Support': ['Healing', 'Barrier', 'Outgoing Healing', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
@@ -171,6 +171,44 @@ if __name__ == '__main__':
 	myprint(output, '</$reveal>')
 
 	write_fights_overview_xls(fights, overall_squad_stats, overall_raid_stats, config, args.xls_output_filename)
+
+	#Minion Data Reveal
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Minions">')
+	myprint(output, '\n<<alert dark "Player created Minion Data from all Fights" width:60%>>\n')
+	myprint(output, "\nCounts based on `player[minions][combatReplayData]`\n\n")	
+	myprint(output, '\n---\n')
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
+
+	for prof in minion_Data:
+		myprint(output, '<$button setTitle="$:/state/minionProf" setTo="'+prof+'" selectedClass="" class="btn btn-sm btn-dark" style=""> '+prof+' {{'+prof+'}} </$button>')
+
+	for prof in minion_Data:
+		myprint(output, '\n<$reveal type="match" state="$:/state/minionProf" text="'+prof+'">\n')
+		myprint(output, "\n''__"+prof+"__'' {{"+prof+"}}")
+		myprint(output, "\n---\n\n")    
+
+		minionList = minion_Data[prof]["petsList"]
+		header="|Name "
+		for item in minionList:
+			header+="| "+item
+		header+=" |h"
+		detail=""
+		myprint(output, header)
+
+		for playerName in minion_Data[prof]["player"]:
+			detail +="|"+playerName
+			for item in minionList:
+				if item in minion_Data[prof]["player"][playerName]:
+					detail +=" | "+str(minion_Data[prof]["player"][playerName][item])
+				else:
+					detail +=" | 0 "
+			detail+=" |\n"
+		myprint(output, detail)
+		
+		myprint(output, '\n</$reveal>\n')
+	#End reveal
+	myprint(output, '\n\n</div>\n\n')
+	myprint(output, '</$reveal>')
 
 	#High Scores reveal
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="High Scores">')
