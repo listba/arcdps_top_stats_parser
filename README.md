@@ -3,6 +3,7 @@
 
 ![Alt](https://repobeats.axiom.co/api/embed/d07727b06a0bcacb7692ccd3c30bd9cfdb2394f7.svg "Repobeats analytics image")
 
+<a href="https://discord.gg/Eh5D6nYKyu"><img src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png" alt="DiscordLogo" width="50" height="50"></a>  - WvW Data Analysis Discord
 # TW5 Modifications #
 
 ```TW5_parse_top_stats_detailed.py``` and ```TW5_parse_top_stats_tools.py``` provide alternative output to support posting to a TW5 wiki with shiraz plugin.
