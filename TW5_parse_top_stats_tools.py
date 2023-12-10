@@ -3614,12 +3614,12 @@ def get_stats_from_fight_json(fight_json, config, log):
 
 
 		#Instant Revive tracking of downed healing
-		instant_Revive = {55026: 'Glyph of Stars - CA', 14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Renewal of Water', 5762: 'Renewal of Fire', 5760: 'Renewal of Air', 5761: 'Renewal of Earth', 10611: 'Signet of Undeath', 12596: "Nature's Renewal"}
+		instant_Revive = {55026: 'Glyph of Stars - CA', 14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Renewal of Water', 5762: 'Renewal of Fire', 5760: 'Renewal of Air', 5761: 'Renewal of Earth', 10611: 'Signet of Undeath', 12596: "Nature's Renewal", 59510: "Life Transfer", 10527: "Well of Blood", 13849: "Lesser Well of Blood"}
 		if 'extHealingStats' in player:
 			for target in player['extHealingStats']['totalHealingDist'][0]:
 				if 'totalDownedHealing' in target:
 					if int(target['totalDownedHealing']) > 0:
-						if target['id'] in instant_Revive:
+						if target['id'] in instant_Revive:	#Expanded beyond Instant Revives, consider reworking naming convention
 							reviveSkill = instant_Revive[target['id']]
 
 							if squadDps_prof_name not in downed_Healing:

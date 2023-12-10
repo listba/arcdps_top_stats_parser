@@ -969,7 +969,7 @@ if __name__ == '__main__':
 						prof = nameIndex.profession
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+"{:.4f}".format(round(sorted_squadControl[name], 4))+"| "+"{:.4f}".format(round((sorted_squadControl[name]/fightTime), 4))+"%|")
+					myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+"{:.4f}".format(round(sorted_squadControl[name], 4))+"| "+"{:.4f}".format(round((sorted_squadControl[name]/fightTime), 4))+"|")
 					i=i+1
 
 			myprint(output, "</$reveal>\n")
@@ -1548,7 +1548,7 @@ if __name__ == '__main__':
 	#end On Tag Death insert
 
 	#Downed Healing
-	down_Heal_Order = {55026: 'Glyph of Stars - CA', 14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Renewal of Water', 5762: 'Renewal of Fire', 5760: 'Renewal of Air', 5761: 'Renewal of Earth', 10611: 'Signet of Undeath', 12596: "Nature's Renewal"}
+	down_Heal_Order = {55026: 'Glyph of Stars - CA', 14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Renewal of Water', 5762: 'Renewal of Fire', 5760: 'Renewal of Air', 5761: 'Renewal of Earth', 10611: 'Signet of Undeath', 12596: "Nature's Renewal", 59510: "Life Transfer", 10527: "Well of Blood", 13849: "Lesser Well of Blood"}
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Downed_Healing">')    
 	myprint(output, '\n<<alert dark "Healing to downed players" width:60%>>\n\n')
 	myprint(output, '\nRequires Heal Stat addon for ARCDPS to track\n')
@@ -1570,12 +1570,13 @@ if __name__ == '__main__':
 		prof = downed_Healing[squadDps_prof_name]['prof']
 		fightTime = uptime_Table[squadDps_prof_name]['duration']
 
-		output_string = "|"+name+" | {{"+prof+"}} | "+my_value(round(fightTime))+" | "
+		output_string = "|"+name+" | {{"+prof+"}} | "+my_value(round(fightTime))
 		for skill in down_Heal_Order:
 			if down_Heal_Order[skill] in downed_Healing[squadDps_prof_name]:
-				output_string += my_value(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Heals'])+"| "
+				output_string += " | "+my_value(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Heals'])
 			else:
-				output_string += " |"
+				output_string += " | "
+		output_string +="|"
 		myprint(output, output_string)
 	
 	myprint(output, '\n</div>\n<div class="flex-col border">\n')
@@ -1593,12 +1594,13 @@ if __name__ == '__main__':
 		prof = downed_Healing[squadDps_prof_name]['prof']
 		fightTime = uptime_Table[squadDps_prof_name]['duration']
 
-		output_string = "|"+name+" | {{"+prof+"}} | "+my_value(round(fightTime))+" | "
+		output_string = "|"+name+" | {{"+prof+"}} | "+my_value(round(fightTime))
 		for skill in down_Heal_Order:
 			if down_Heal_Order[skill] in downed_Healing[squadDps_prof_name]:
-				output_string += my_value(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Hits'])+"| "
+				output_string += " |"+my_value(downed_Healing[squadDps_prof_name][down_Heal_Order[skill]]['Hits'])
 			else:
-				output_string += " |"
+				output_string += " | "
+		output_string += "|"
 		myprint(output, output_string)
 
 
