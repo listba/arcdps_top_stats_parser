@@ -956,7 +956,7 @@ if __name__ == '__main__':
 			myprint(output, "|table-caption-top|k")
 			myprint(output, "|{{"+key+"}} "+key+" output by Squad Player Descending [TOP 25 Max]|c")
 			myprint(output, "|thead-dark table-hover sortable|k")
-			myprint(output, "|!Place |!Name | !Profession | !Total Secs| !Uptime|h")
+			myprint(output, "|!Place |!Name | !Profession | !Total Secs| !Average|h")
 			
 			for name in sorted_squadControl:
 				playerName = name.split("_")[0]
@@ -969,7 +969,7 @@ if __name__ == '__main__':
 						prof = nameIndex.profession
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+"{:.2f}".format(round(sorted_squadControl[name], 2))+"| "+"{:.2f}".format(round((sorted_squadControl[name]/fightTime)*100, 2))+"%|")
+					myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+"{:.4f}".format(round(sorted_squadControl[name], 4))+"| "+"{:.4f}".format(round((sorted_squadControl[name]/fightTime), 4))+"%|")
 					i=i+1
 
 			myprint(output, "</$reveal>\n")
