@@ -291,6 +291,10 @@ Session_Fights=[]
 #Capture High Scores for stats
 HighScores={}
 
+#Total Skill Damage Tracking
+total_Squad_Skill_Dmg = {}
+total_Enemy_Skill_Dmg = {}
+
 #Capture Condition Uptime Data for player, party and squad
 conditionData = {}
 conditionDataGroups = {}
@@ -3312,6 +3316,10 @@ def get_stats_from_fight_json(fight_json, config, log):
 					enemy_skill_dmg[skill_name] = skill_dmg
 				else:
 					enemy_skill_dmg[skill_name] = enemy_skill_dmg[skill_name] +skill_dmg
+				if skill_name not in total_Enemy_Skill_Dmg:
+					total_Enemy_Skill_Dmg[skill_name] = skill_dmg
+				else:
+					total_Enemy_Skill_Dmg[skill_name] = total_Enemy_Skill_Dmg[skill_name] +skill_dmg
 
 			#Track MOA - Signet of Humility (Active)
 			for skill in enemy['totalDamageTaken'][0]:
@@ -3462,6 +3470,10 @@ def get_stats_from_fight_json(fight_json, config, log):
 				squad_skill_dmg[skill_name] = skill_dmg
 			else:
 				squad_skill_dmg[skill_name] = squad_skill_dmg[skill_name] +skill_dmg
+			if skill_name not in total_Squad_Skill_Dmg:
+				total_Squad_Skill_Dmg[skill_name] = skill_dmg
+			else:
+				total_Squad_Skill_Dmg[skill_name] = total_Squad_Skill_Dmg[skill_name] +skill_dmg
 
 			#Collect Offensive Battle Standard Data
 			if skill_id == 14419 and squadDps_profession in ['Berserker', 'Warrior', 'Bladesworn', 'Spellbreaker']:

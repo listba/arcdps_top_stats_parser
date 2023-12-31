@@ -1,4 +1,25 @@
 #GW2 Data Dictionaries
+"""
+ Damage_Conditions Dictionary
+    {ConditionName: IconURL}
+ Control_Conditions Dictionary
+    {ConditionName: IconURL}
+ Other_Conditions Dictionary
+    {ConditionName: IconURL}
+ All_Conditions Dictionary
+    {ConditionName: IconURL}
+ Control_Effects Dictionary
+    {EffectName: IconURL}
+ Boons Dictionary
+    {BoonnName: IconURL}
+ Auras Dictionary
+    {AuraaName: IconURL}
+ WvW_SiegeSkills Dictionary
+    {skillID: SkillName}
+ ProfIcon Dictionary
+    {Profession: [20px IconURL, 40px IconURL]}
+"""
+
 
 # Damage Conditions
 Damage_Conditions = {
