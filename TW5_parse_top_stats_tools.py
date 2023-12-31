@@ -295,6 +295,17 @@ HighScores={}
 total_Squad_Skill_Dmg = {}
 total_Enemy_Skill_Dmg = {}
 
+#Damage Modifiers Outgoing and Incoming
+squadDamageMods = {}
+profModifiers = {}
+modifierMap={}
+modifierMap['Incoming'] = {}
+modifierMap['Outgoing'] = {}
+modifierMap['Incoming']['Shared'] = {}
+modifierMap['Incoming']['Prof'] = {}
+modifierMap['Outgoing']['Shared'] = {}
+modifierMap['Outgoing']['Prof'] = {}
+
 #Capture Condition Uptime Data for player, party and squad
 conditionData = {}
 conditionDataGroups = {}
@@ -2050,13 +2061,37 @@ def collect_stat_data(args, config, log, anonymize=False):
 		#fight_number = used_fights-1
 		squad_comp[fight_number]={}
 
+		#Collect Personal Damage Modifiers for this fight
+		damageModMap = json_data['damageModMap']
+		if 'personalDamageMods' in json_data:
+			personalDamageMods = json_data['personalDamageMods']
+			for prof in personalDamageMods:
+				for mod in personalDamageMods[prof]:
+					modID ='d'+str(mod)
+					modName = damageModMap[modID]['name']
+					if modName not in profModifiers:
+						profModifiers[modName] = prof
 		#Collect Damage Modifiers for this fight
 		activeMods = {}
-		damageModMap = json_data['damageModMap']
+		#damageModMap = json_data['damageModMap']
 		for Modifier in damageModMap:
+			modifierName = damageModMap[Modifier]['name']
+			modifierIcon = damageModMap[Modifier]['icon']
+			if damageModMap[Modifier]['incoming']:
+				if modifierName in profModifiers and modifierName not in modifierMap['Incoming']['Prof']:
+					modifierMap['Incoming']['Prof'][modifierName] = modifierIcon
+				if modifierName not in profModifiers and modifierName not in modifierMap['Incoming']['Shared']:
+					modifierMap['Incoming']['Shared'][modifierName] = modifierIcon
+			else:
+				if modifierName in profModifiers and modifierName not in modifierMap['Outgoing']['Prof']:
+					modifierMap['Outgoing']['Prof'][modifierName] = modifierIcon
+				if modifierName not in profModifiers and modifierName not in modifierMap['Outgoing']['Shared']:
+					modifierMap['Outgoing']['Shared'][modifierName] = modifierIcon
+
 			if 'Relic' in damageModMap[Modifier]['name'] or 'Superior Sigil of' in damageModMap[Modifier]['name'] or "Nourys's" in damageModMap[Modifier]['name']:
 				if damageModMap[Modifier]['name'] not in activeMods:
 					activeMods[damageModMap[Modifier]['name']] = Modifier[1:]
+			
 		#End Damage Modifier collection
 
 		# get stats for each player
@@ -2215,6 +2250,59 @@ def collect_stat_data(args, config, log, anonymize=False):
 									else:
 										RelicDataSkills[playerName_Prof][itemName]['casts'] += len(cast['skills'])
 			#End Collect Relic Skill Data for each player
+
+			#Collect Damage Modifier Data for each player
+			if 'damageModifiersTarget' in player_data:
+				playerNameProf = name+"{{"+profession+"}}"
+				for target in player_data['damageModifiersTarget']:
+					if target:
+						for modifier in target:
+							modID = 'd'+str(modifier['id'])
+							modName = damageModMap[modID]['name']
+							modHitCount = modifier['damageModifiers'][0]['hitCount']
+							modTotalHitCount = modifier['damageModifiers'][0]['totalHitCount']
+							modDamageGain = modifier['damageModifiers'][0]['damageGain']
+							modTotalDamage = modifier['damageModifiers'][0]['totalDamage']
+
+							if playerNameProf not in squadDamageMods:
+								squadDamageMods[playerNameProf] = {}
+							if modName not in squadDamageMods[playerNameProf]:
+								squadDamageMods[playerNameProf][modName]={}
+								squadDamageMods[playerNameProf][modName]['hitCount']=modHitCount
+								squadDamageMods[playerNameProf][modName]['totalHitCount']=modTotalHitCount
+								squadDamageMods[playerNameProf][modName]['damageGain']=modDamageGain
+								squadDamageMods[playerNameProf][modName]['totalDamage']=modTotalDamage
+							else:
+								squadDamageMods[playerNameProf][modName]['hitCount']+=modHitCount
+								squadDamageMods[playerNameProf][modName]['totalHitCount']+=modTotalHitCount
+								squadDamageMods[playerNameProf][modName]['damageGain']+=modDamageGain
+								squadDamageMods[playerNameProf][modName]['totalDamage']+=modTotalDamage
+
+			if 'incomingDamageModifiersTarget' in player_data:
+				playerNameProf = name+"{{"+profession+"}}"
+				for target in player_data['incomingDamageModifiersTarget']:
+					if target:
+						for modifier in target:
+							modID = 'd'+str(modifier['id'])
+							modName = damageModMap[modID]['name']
+							modHitCount = modifier['damageModifiers'][0]['hitCount']
+							modTotalHitCount = modifier['damageModifiers'][0]['totalHitCount']
+							modDamageGain = modifier['damageModifiers'][0]['damageGain']
+							modTotalDamage = modifier['damageModifiers'][0]['totalDamage']
+
+							if playerNameProf not in squadDamageMods:
+								squadDamageMods[playerNameProf] = {}
+							if modName not in squadDamageMods[playerNameProf]:
+								squadDamageMods[playerNameProf][modName]={}
+								squadDamageMods[playerNameProf][modName]['hitCount']=modHitCount
+								squadDamageMods[playerNameProf][modName]['totalHitCount']=modTotalHitCount
+								squadDamageMods[playerNameProf][modName]['damageGain']=modDamageGain
+								squadDamageMods[playerNameProf][modName]['totalDamage']=modTotalDamage
+							else:
+								squadDamageMods[playerNameProf][modName]['hitCount']+=modHitCount
+								squadDamageMods[playerNameProf][modName]['totalHitCount']+=modTotalHitCount
+								squadDamageMods[playerNameProf][modName]['damageGain']+=modDamageGain
+								squadDamageMods[playerNameProf][modName]['totalDamage']+=modTotalDamage
 
 			if 'rotation' in player_data:
 				for rotation_skill in player_data['rotation']:
@@ -5265,7 +5353,11 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	#json_dict["squad_damage_output"] =  {key: value for key, value in squad_damage_output.items()}
 	json_dict["skill_Dict"] =  {key: value for key, value in skill_Dict.items()}
 	json_dict["minion_Data"] =  {key: value for key, value in minion_Data.items()}
-	#json_dict["prof_role_skills"] =  {key: value for key, value in prof_role_skills.items()}
+	json_dict["profModifiers"] =  {key: value for key, value in profModifiers.items()}
+	json_dict["modifierMap"] =  {key: value for key, value in modifierMap.items()}
+	json_dict["total_Squad_Skill_Dmg"] =  {key: value for key, value in total_Squad_Skill_Dmg.items()}
+	json_dict["total_Enemy_Skill_Dmg"] =  {key: value for key, value in total_Enemy_Skill_Dmg.items()}
+	json_dict["squadDamageMods"] =  {key: value for key, value in squadDamageMods.items()}
 	#json_dict["Plen_Bot_Logs"] =  {key: value for key, value in Plen_Bot_Logs.items()}
 	#json_dict["conditionData"] =  {key: value for key, value in conditionData.items()}
 	#json_dict["conditionDataGroups"] =  {key: value for key, value in conditionDataGroups.items()}
