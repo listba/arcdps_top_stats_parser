@@ -2077,16 +2077,17 @@ def collect_stat_data(args, config, log, anonymize=False):
 		for Modifier in damageModMap:
 			modifierName = damageModMap[Modifier]['name']
 			modifierIcon = damageModMap[Modifier]['icon']
-			if damageModMap[Modifier]['incoming']:
-				if modifierName in profModifiers and modifierName not in modifierMap['Incoming']['Prof']:
-					modifierMap['Incoming']['Prof'][modifierName] = modifierIcon
-				if modifierName not in profModifiers and modifierName not in modifierMap['Incoming']['Shared']:
-					modifierMap['Incoming']['Shared'][modifierName] = modifierIcon
-			else:
-				if modifierName in profModifiers and modifierName not in modifierMap['Outgoing']['Prof']:
-					modifierMap['Outgoing']['Prof'][modifierName] = modifierIcon
-				if modifierName not in profModifiers and modifierName not in modifierMap['Outgoing']['Shared']:
-					modifierMap['Outgoing']['Shared'][modifierName] = modifierIcon
+			if 'incoming' in Modifier:
+				if damageModMap[Modifier]['incoming']:
+					if modifierName in profModifiers and modifierName not in modifierMap['Incoming']['Prof']:
+						modifierMap['Incoming']['Prof'][modifierName] = modifierIcon
+					if modifierName not in profModifiers and modifierName not in modifierMap['Incoming']['Shared']:
+						modifierMap['Incoming']['Shared'][modifierName] = modifierIcon
+				else:
+					if modifierName in profModifiers and modifierName not in modifierMap['Outgoing']['Prof']:
+						modifierMap['Outgoing']['Prof'][modifierName] = modifierIcon
+					if modifierName not in profModifiers and modifierName not in modifierMap['Outgoing']['Shared']:
+						modifierMap['Outgoing']['Shared'][modifierName] = modifierIcon
 
 			if 'Relic' in damageModMap[Modifier]['name'] or 'Superior Sigil of' in damageModMap[Modifier]['name'] or "Nourys's" in damageModMap[Modifier]['name']:
 				if damageModMap[Modifier]['name'] not in activeMods:
