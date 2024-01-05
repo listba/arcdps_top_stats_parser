@@ -109,7 +109,7 @@ if __name__ == '__main__':
 	MenuTabs = ['General', 'Offensive', 'Defensive', 'Support', 'Boons & Buffs', 'Dashboard']
 
 	SubMenuTabs = {
-	'General': ['Overview', 'Fight Logs', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores', 'Gear Buffs', 'Minions'],
+	'General': ['Overview', 'Fight Logs', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores', 'Gear Buffs', 'Minions', 'Damage Modifiers', 'Top Skill Dmg'],
 	'Offensive': ['Offensive Stats', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Against Downed Damage', 'Against Downed Count', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In', 'Condition Uptimes'],
 	'Support': ['Healing', 'Barrier', 'Outgoing Healing', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
@@ -171,6 +171,158 @@ if __name__ == '__main__':
 	myprint(output, '</$reveal>')
 
 	write_fights_overview_xls(fights, overall_squad_stats, overall_raid_stats, config, args.xls_output_filename)
+
+	#Top Damage by Skills for Squad and Enemy
+	total_Squad_Damage = sum(total_Squad_Skill_Dmg.values())
+	total_Enemy_Damage = sum(total_Enemy_Skill_Dmg.values())	
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Top Skill Dmg">')
+	myprint(output, '\n<<alert dark "Top Damage by Skill for Squad and Enemy" width:60%>>\n')
+	myprint(output, "\nCounts based on `player['totalDamageDist']` & `enemy['totalDamageDist']`\n\n")	
+	myprint(output, '\n---\n')
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
+	myprint(output, '<div class="flex-row">')
+	myprint(output, '    <div class="flex-col border">\n\n')
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|Total Damage by Squad Skill Descending (Top 50)|c")
+	myprint(output, "|thead-dark table-hover|k")
+	myprint(output, "|#|!Squad Skill Name | !Damage Output| % of Total|h")
+    #start   Squad Skill Damage totals
+	sorted_squad_skill_dmg = dict(sorted(total_Squad_Skill_Dmg.items(), key=lambda x: x[1], reverse=True))
+	counter = 0
+	squadDamageListed = 0
+	for name in sorted_squad_skill_dmg:
+		counter +=1
+		if counter <=50:
+			squadDamageListed += sorted_squad_skill_dmg[name]
+			pctDmg = round((sorted_squad_skill_dmg[name]/total_Squad_Damage)*100, 2)
+			myprint(output,'|'+str(counter)+'|'+name+' | '+my_value(sorted_squad_skill_dmg[name])+'| '+my_value(pctDmg)+'%|')
+	myprint(output, "| Totals|<| "+my_value(squadDamageListed)+"| "+my_value(round((squadDamageListed/total_Squad_Damage)*100,2))+"%|f")
+	myprint(output, '\n\n\n')
+	myprint(output, '    </div>')
+	myprint(output, '<div class="flex-col border">\n\n')
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|Total Damage by Enemy Skill Descending (Top 50)|c")
+	myprint(output, "|thead-dark table-hover|k")
+	myprint(output, "|#|!Squad Skill Name | !Damage Output| % of Total|h")
+    #start   Enemy Skill Damage totals
+	sorted_enemy_skill_dmg = dict(sorted(total_Enemy_Skill_Dmg.items(), key=lambda x: x[1], reverse=True))
+	counter = 0
+	enemyDamageListed = 0
+	for name in sorted_enemy_skill_dmg:
+		counter +=1
+		if counter <=50:
+			enemyDamageListed += sorted_enemy_skill_dmg[name]
+			pctDmg = round((sorted_enemy_skill_dmg[name]/total_Enemy_Damage)*100, 2)
+			myprint(output, '|'+str(counter)+'|'+name+' | '+my_value(sorted_enemy_skill_dmg[name])+'| '+my_value(pctDmg)+'%|')
+	myprint(output, "| Totals|<| "+my_value(enemyDamageListed)+"| "+my_value(round((enemyDamageListed/total_Enemy_Damage)*100,2))+"%|f")
+	myprint(output, '\n\n\n')
+	myprint(output, '    </div>')
+	myprint(output, '</div>')
+	#End reveal - Top Damage by Skills for Squad and Enemy
+	myprint(output, '\n\n</div>\n\n')
+	myprint(output, '</$reveal>')
+
+	#Damage Modifier Data Reveal
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Damage Modifiers">')
+	myprint(output, '\n<<alert dark "Damage Modifiers across all Fights" width:60%>>\n')
+	myprint(output, "\nCounts based on `player[incomingDamageModifiersTarget]` & `player[damageModifiersTarget]`\n\n")	
+	myprint(output, '\n---\n')
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
+
+	tabList = ['Incoming Shared', 'Incoming Profession', 'Outgoing Shared', 'Outgoing Profession', ]
+
+	DM_Header = ""
+	for tab in tabList:
+		#make reveal button for each modifier tab in tabList
+		DM_Header += '<$button set="$:/state/damModifiers" class="btn btn-sm btn-dark" setTo="'+tab+'">'+tab+'</$button> '
+
+	myprint(output, DM_Header)
+	myprint(output, '\n\n---\n\n') 
+
+	#Output Shared Modifier Data
+	tableList = ['Incoming', 'Outgoing']
+	for item in tableList:
+		modList = modifierMap[item]['Shared'].keys()
+		myprint(output, '\n<$reveal type="match" state="$:/state/damModifiers" text="'+item+' Shared">\n')
+		myprint(output, "\n''__"+item+" Shared Damage Modifiers__''")
+		myprint(output, "\n---\n\n")    
+		myprint(output, "|table-caption-top|k")
+		myprint(output, "|"+item+" Damage Modifiers - Shared |c")
+		myprint(output, "|thead-dark table-hover sortable|k")
+		header = "|!Player Name | !Profession"
+		for modifier in modList:
+			modName = modifier
+			modIcon = modifierMap[item]['Shared'][modifier]
+			header +=" | ![img width=32 ["+modName+"|"+modIcon+"]]"
+		header +=" |h"
+		myprint(output, header)
+
+		for player in squadDamageMods:
+			playerName = player.split("{")[0]
+			playerProf = player.split("{")[2]
+			details = "|"+playerName+" | {{"+playerProf
+			for modifier in modList:
+				if modifier in squadDamageMods[player]:
+					hitCount = squadDamageMods[player][modifier]['hitCount']
+					totalHitCount = squadDamageMods[player][modifier]['totalHitCount']
+					damageGain = round(squadDamageMods[player][modifier]['damageGain'])
+					totalDamage = squadDamageMods[player][modifier]['totalDamage']
+					pctHit = my_value(round((hitCount/totalHitCount)*100,2))+"%"
+					if totalDamage >0:
+						pctDmg = my_value(round(damageGain/(totalDamage+abs(damageGain))*100, 2))+"%"
+					else:
+						pctDmg = "ToolTip"
+					tooltip = str(hitCount)+" out of "+str(totalHitCount)+" hits<br>"+pctHit+" hit<br>Pure Damage: "+my_value(damageGain)
+					detailEntry = '<div class="xtooltip">'+pctDmg+' <span class="xtooltiptext">'+tooltip+'</span></div>'
+				else:
+					detailEntry = "-"
+				details += " | "+detailEntry
+			details += " |"
+			myprint(output, details)
+		myprint(output, '\n</$reveal>\n')
+
+	#Output Profession Modifier Data
+	tableList = ['Incoming', 'Outgoing']
+	for item in tableList:
+		modList = modifierMap[item]['Shared'].keys()
+		myprint(output, '\n<$reveal type="match" state="$:/state/damModifiers" text="'+item+' Profession">\n')
+		myprint(output, "\n''__"+item+" Profession Damage Modifiers__''")
+		myprint(output, "\n---\n\n")
+		for prof in profModifiers['Professions']:
+			myprint(output, '<$button setTitle="$:/state/modifierProf" setTo="'+prof+'" selectedClass="" class="btn btn-sm btn-dark" style=""> '+prof+' {{'+prof+'}} </$button>')
+
+		for prof in profModifiers['Professions']:
+			myprint(output, '\n<$reveal type="match" state="$:/state/modifierProf" text="'+prof+'">\n')
+			myprint(output, "\n''__"+prof+"__'' {{"+prof+"}}")
+			myprint(output, "\n---\n\n")		
+
+			modifierList = profModifiers['Professions'][prof]
+			header="|Name "
+			if item == 'Incoming':
+				for modifier in modifierList:
+					if modifier in modifierMap['Incoming']['Prof']:
+						modName = modifier
+						modIcon = modifierMap[item]['Prof'][modifier]
+						header +=" | ![img width=32 ["+modName+"|"+modIcon+"]]"
+				header+=" |h"
+
+			else:
+				for modifier in modifierList:
+					if modifier in modifierMap['Outgoing']['Prof']:
+						modName = modifier
+						modIcon = modifierMap[item]['Prof'][modifier]
+						header +=" | ![img width=32 ["+modName+"|"+modIcon+"]]"
+				header+=" |h"
+
+			myprint(output, header)
+			myprint(output, '\n</$reveal>\n')	
+			#Start Detail output here
+		myprint(output, '\n</$reveal>\n')
+
+	#End reveal
+	myprint(output, '\n\n</div>\n\n')
+	myprint(output, '</$reveal>')
+
 
 	#Minion Data Reveal
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Minions">')

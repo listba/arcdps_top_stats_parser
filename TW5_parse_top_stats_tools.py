@@ -298,6 +298,7 @@ total_Enemy_Skill_Dmg = {}
 #Damage Modifiers Outgoing and Incoming
 squadDamageMods = {}
 profModifiers = {}
+profModifiers['Professions'] = {}
 modifierMap={}
 modifierMap['Incoming'] = {}
 modifierMap['Outgoing'] = {}
@@ -2071,13 +2072,18 @@ def collect_stat_data(args, config, log, anonymize=False):
 					modName = damageModMap[modID]['name']
 					if modName not in profModifiers:
 						profModifiers[modName] = prof
+					if prof not in profModifiers['Professions']:
+						profModifiers['Professions'][prof] = []
+					if modName not in profModifiers['Professions'][prof]:
+						profModifiers['Professions'][prof].append(modName)
+
 		#Collect Damage Modifiers for this fight
 		activeMods = {}
 		#damageModMap = json_data['damageModMap']
 		for Modifier in damageModMap:
 			modifierName = damageModMap[Modifier]['name']
 			modifierIcon = damageModMap[Modifier]['icon']
-			if 'incoming' in Modifier:
+			if 'incoming' in damageModMap[Modifier]:
 				if damageModMap[Modifier]['incoming']:
 					if modifierName in profModifiers and modifierName not in modifierMap['Incoming']['Prof']:
 						modifierMap['Incoming']['Prof'][modifierName] = modifierIcon
