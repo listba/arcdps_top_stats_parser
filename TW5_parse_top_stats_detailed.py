@@ -177,7 +177,7 @@ if __name__ == '__main__':
 	total_Enemy_Damage = sum(total_Enemy_Skill_Dmg.values())	
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Top Skill Dmg">')
 	myprint(output, '\n<<alert dark "Top Damage by Skill for Squad and Enemy" width:60%>>\n')
-	myprint(output, "\nCounts based on `player['totalDamageDist']` & `enemy['totalDamageDist']`\n\n")	
+	myprint(output, "\nCounts based on `player['targetDamageDist']` & `enemy['totalDamageDist']`\n\n")	
 	myprint(output, '\n---\n')
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
 	myprint(output, '<div class="flex-row">')

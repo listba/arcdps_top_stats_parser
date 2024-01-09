@@ -298,6 +298,7 @@ total_Enemy_Skill_Dmg = {}
 #Damage Modifiers Outgoing and Incoming
 squadDamageMods = {}
 profModifiers = {}
+profModifiers['buffList'] = []
 profModifiers['Professions'] = {}
 modifierMap={}
 modifierMap['Incoming'] = {}
@@ -2070,8 +2071,8 @@ def collect_stat_data(args, config, log, anonymize=False):
 				for mod in personalDamageMods[prof]:
 					modID ='d'+str(mod)
 					modName = damageModMap[modID]['name']
-					if modName not in profModifiers:
-						profModifiers[modName] = prof
+					if modName not in profModifiers['buffList']:
+						profModifiers['buffList'].append(modName)
 					if prof not in profModifiers['Professions']:
 						profModifiers['Professions'][prof] = []
 					if modName not in profModifiers['Professions'][prof]:
@@ -2085,14 +2086,14 @@ def collect_stat_data(args, config, log, anonymize=False):
 			modifierIcon = damageModMap[Modifier]['icon']
 			if 'incoming' in damageModMap[Modifier]:
 				if damageModMap[Modifier]['incoming']:
-					if modifierName in profModifiers and modifierName not in modifierMap['Incoming']['Prof']:
+					if modifierName in profModifiers['buffList'] and modifierName not in modifierMap['Incoming']['Prof']:
 						modifierMap['Incoming']['Prof'][modifierName] = modifierIcon
-					if modifierName not in profModifiers and modifierName not in modifierMap['Incoming']['Shared']:
+					if modifierName not in profModifiers['buffList'] and modifierName not in modifierMap['Incoming']['Shared']:
 						modifierMap['Incoming']['Shared'][modifierName] = modifierIcon
 				else:
-					if modifierName in profModifiers and modifierName not in modifierMap['Outgoing']['Prof']:
+					if modifierName in profModifiers['buffList'] and modifierName not in modifierMap['Outgoing']['Prof']:
 						modifierMap['Outgoing']['Prof'][modifierName] = modifierIcon
-					if modifierName not in profModifiers and modifierName not in modifierMap['Outgoing']['Shared']:
+					if modifierName not in profModifiers['buffList'] and modifierName not in modifierMap['Outgoing']['Shared']:
 						modifierMap['Outgoing']['Shared'][modifierName] = modifierIcon
 
 			if 'Relic' in damageModMap[Modifier]['name'] or 'Superior Sigil of' in damageModMap[Modifier]['name'] or "Nourys's" in damageModMap[Modifier]['name']:
@@ -3551,35 +3552,36 @@ def get_stats_from_fight_json(fight_json, config, log):
 			squadDps_damage = squadDps_damage + int(target[0]['damage'])
 		squad_Dps[squadDps_prof_name] = squadDps_damage
 
-		for skill_used in player['totalDamageDist'][0]:
-			skill_id = skill_used['id']
-			if skill_id in SiegeSkills:
-				continue            
-			if str(skill_id) in skill_Dict:
-				#skill_name = skill_Dict[str(skill_id)]
-				skill_name = skill_Dict[str(skill_id)]['name']
-			else:
-				skill_name = 'Skill-'+str(skill_id)            
-			skill_dmg = skill_used['totalDamage']
-			if skill_name not in squad_skill_dmg:
-				squad_skill_dmg[skill_name] = skill_dmg
-			else:
-				squad_skill_dmg[skill_name] = squad_skill_dmg[skill_name] +skill_dmg
-			if skill_name not in total_Squad_Skill_Dmg:
-				total_Squad_Skill_Dmg[skill_name] = skill_dmg
-			else:
-				total_Squad_Skill_Dmg[skill_name] = total_Squad_Skill_Dmg[skill_name] +skill_dmg
-
-			#Collect Offensive Battle Standard Data
-			if skill_id == 14419 and squadDps_profession in ['Berserker', 'Warrior', 'Bladesworn', 'Spellbreaker']:
-				skillData=skill_used
-				if squadDps_prof_name not in battle_Standard:
-					battle_Standard[squadDps_prof_name]={}
-					for item in skillData:
-						battle_Standard[squadDps_prof_name][item]=skillData[item]
+		for target in player['targetDamageDist']:
+			for skill_used in target[0]:
+				skill_id = skill_used['id']
+				if skill_id in SiegeSkills:
+					continue            
+				if str(skill_id) in skill_Dict:
+					#skill_name = skill_Dict[str(skill_id)]
+					skill_name = skill_Dict[str(skill_id)]['name']
 				else:
-					for item in skillData:
-						battle_Standard[squadDps_prof_name][item]+=skillData[item]
+					skill_name = 'Skill-'+str(skill_id)            
+				skill_dmg = skill_used['totalDamage']
+				if skill_name not in squad_skill_dmg:
+					squad_skill_dmg[skill_name] = skill_dmg
+				else:
+					squad_skill_dmg[skill_name] = squad_skill_dmg[skill_name] +skill_dmg
+				if skill_name not in total_Squad_Skill_Dmg:
+					total_Squad_Skill_Dmg[skill_name] = skill_dmg
+				else:
+					total_Squad_Skill_Dmg[skill_name] = total_Squad_Skill_Dmg[skill_name] +skill_dmg
+
+				#Collect Offensive Battle Standard Data
+				if skill_id == 14419 and squadDps_profession in ['Berserker', 'Warrior', 'Bladesworn', 'Spellbreaker']:
+					skillData=skill_used
+					if squadDps_prof_name not in battle_Standard:
+						battle_Standard[squadDps_prof_name]={}
+						for item in skillData:
+							battle_Standard[squadDps_prof_name][item]=skillData[item]
+					else:
+						for item in skillData:
+							battle_Standard[squadDps_prof_name][item]+=skillData[item]
 
 
 		#Collect Spike Damage for first 60 seconds of each fight
