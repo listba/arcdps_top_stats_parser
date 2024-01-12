@@ -229,95 +229,135 @@ if __name__ == '__main__':
 	myprint(output, '\n---\n')
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
 
-	tabList = ['Incoming Shared', 'Incoming Profession', 'Outgoing Shared', 'Outgoing Profession', ]
+	tabList = ['Shared', 'Profession']
 
 	DM_Header = ""
 	for tab in tabList:
 		#make reveal button for each modifier tab in tabList
-		DM_Header += '<$button set="$:/state/damModifiers" class="btn btn-sm btn-dark" setTo="'+tab+'">'+tab+'</$button> '
+		DM_Header += '<$button set="$:/state/damModifiers" class="btn btn-sm btn-dark" setTo="'+tab+'">'+tab+' Damage Modifiers</$button> '
 
 	myprint(output, DM_Header)
 	myprint(output, '\n\n---\n\n') 
 
 	#Output Shared Modifier Data
-	tableList = ['Incoming', 'Outgoing']
-	for item in tableList:
-		modList = modifierMap[item]['Shared'].keys()
-		myprint(output, '\n<$reveal type="match" state="$:/state/damModifiers" text="'+item+' Shared">\n')
-		myprint(output, "\n''__"+item+" Shared Damage Modifiers__''")
-		myprint(output, "\n---\n\n")    
-		myprint(output, "|table-caption-top|k")
-		myprint(output, "|"+item+" Damage Modifiers - Shared |c")
-		myprint(output, "|thead-dark table-hover sortable|k")
-		header = "|!Player Name | !Profession"
-		for modifier in modList:
-			modName = modifier
-			modIcon = modifierMap[item]['Shared'][modifier]
+	modListIn = modifierMap['Incoming']['Shared'].keys()
+	modListOut = modifierMap['Outgoing']['Shared'].keys()
+	myprint(output, '\n<$reveal type="match" state="$:/state/damModifiers" text="Shared">\n')
+	myprint(output, "\n''__Shared Damage Modifiers__''")
+	myprint(output, "\n---\n\n")    
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "|Shared Damage Modifiers |c")
+	myprint(output, "|thead-dark table-hover sortable|k")
+	header = "|!Player Name | !Profession"
+	for modifier in modListIn:
+		modName = modifier
+		modIcon = modifierMap['Incoming']['Shared'][modifier]
+		header +=" | ![img width=32 ["+modName+"|"+modIcon+"]]"		
+	for modifier in modListOut:
+		modName = modifier
+		modIcon = modifierMap['Outgoing']['Shared'][modifier]
+		header +=" | ![img width=32 ["+modName+"|"+modIcon+"]]"
+	header +=" |h"
+	myprint(output, header)
+
+	for player in squadDamageMods:
+		playerName = squadDamageMods[player]['name']
+		playerProf = squadDamageMods[player]['profession']
+		details = "|"+playerName+" | {{"+playerProf+"}}"
+		for modifier in modListIn:
+			if modifier in squadDamageMods[player]['Shared']:
+				hitCount = squadDamageMods[player]['Shared'][modifier]['hitCount']
+				totalHitCount = squadDamageMods[player]['Shared'][modifier]['totalHitCount']
+				damageGain = round(squadDamageMods[player]['Shared'][modifier]['damageGain'])
+				totalDamage = squadDamageMods[player]['Shared'][modifier]['totalDamage']
+				pctHit = my_value(round((hitCount/totalHitCount)*100,2))+"%"
+				if totalDamage >0:
+					pctDmg = my_value(round(damageGain/(totalDamage+abs(damageGain))*100, 2))+"%"
+				else:
+					pctDmg = "ToolTip"
+				tooltip = str(hitCount)+" out of "+str(totalHitCount)+" hits<br>"+pctHit+" hit<br>Pure Damage: "+my_value(damageGain)
+				detailEntry = '<div class="xtooltip">'+pctDmg+' <span class="xtooltiptext">'+tooltip+'</span></div>'
+			else:
+				detailEntry = "-"
+			details += " | "+detailEntry
+		for modifier in modListOut:
+			if modifier in squadDamageMods[player]['Shared']:
+				hitCount = squadDamageMods[player]['Shared'][modifier]['hitCount']
+				totalHitCount = squadDamageMods[player]['Shared'][modifier]['totalHitCount']
+				damageGain = round(squadDamageMods[player]['Shared'][modifier]['damageGain'])
+				totalDamage = squadDamageMods[player]['Shared'][modifier]['totalDamage']
+				pctHit = my_value(round((hitCount/totalHitCount)*100,2))+"%"
+				if totalDamage >0:
+					pctDmg = my_value(round(damageGain/(totalDamage+abs(damageGain))*100, 2))+"%"
+				else:
+					pctDmg = "ToolTip"
+				tooltip = str(hitCount)+" out of "+str(totalHitCount)+" hits<br>"+pctHit+" hit<br>Pure Damage: "+my_value(damageGain)
+				detailEntry = '<div class="xtooltip">'+pctDmg+' <span class="xtooltiptext">'+tooltip+'</span></div>'
+			else:
+				detailEntry = "-"
+			details += " | "+detailEntry
+		details += " |"
+		myprint(output, details)
+	myprint(output, '\n</$reveal>\n')
+
+	#Output Profession Modifier Data
+	#modListIn = modifierMap['Incoming']['Prof'].keys()
+	#modListOut = modifierMap['Outgoing']['Prof'].keys()
+	myprint(output, '\n<$reveal type="match" state="$:/state/damModifiers" text="Profession">\n')
+	myprint(output, "\n''__Profession Damage Modifiers__''")
+	myprint(output, "\n---\n\n")
+	for prof in profModifiers['Professions']:
+		myprint(output, '<$button setTitle="$:/state/modifierProf" setTo="'+prof+'" selectedClass="" class="btn btn-sm btn-dark" style=""> '+prof+' {{'+prof+'}} </$button>')
+
+	for prof in profModifiers['Professions']:
+		myprint(output, '\n<$reveal type="match" state="$:/state/modifierProf" text="'+prof+'">\n')
+		myprint(output, "\n''__"+prof+"__'' {{"+prof+"}}")
+		myprint(output, "\n---\n\n")		
+
+		modifierList = profModifiers['Professions'][prof]
+		header="|Name "
+
+		for modifier in modifierList:
+			if modifier in modifierMap['Incoming']['Prof']:
+				modName = modifier
+				modIcon = modifierMap['Incoming']['Prof'][modifier]
+			else:
+				modName = modifier
+				modIcon = modifierMap['Outgoing']['Prof'][modifier]
 			header +=" | ![img width=32 ["+modName+"|"+modIcon+"]]"
-		header +=" |h"
+		header+=" |h"
+
 		myprint(output, header)
 
 		for player in squadDamageMods:
-			playerName = player.split("{")[0]
-			playerProf = player.split("{")[2]
-			details = "|"+playerName+" | {{"+playerProf
-			for modifier in modList:
-				if modifier in squadDamageMods[player]:
-					hitCount = squadDamageMods[player][modifier]['hitCount']
-					totalHitCount = squadDamageMods[player][modifier]['totalHitCount']
-					damageGain = round(squadDamageMods[player][modifier]['damageGain'])
-					totalDamage = squadDamageMods[player][modifier]['totalDamage']
-					pctHit = my_value(round((hitCount/totalHitCount)*100,2))+"%"
-					if totalDamage >0:
-						pctDmg = my_value(round(damageGain/(totalDamage+abs(damageGain))*100, 2))+"%"
+			playerName = squadDamageMods[player]['name']
+			playerProf = squadDamageMods[player]['profession']
+			playerNameProf = playerName+"{{"+playerProf+"}}"
+			if prof in squadDamageMods[player]['profession']:
+				details = "|"+playerName
+				for modifier in profModifiers['Professions'][prof]:
+					if modifier in squadDamageMods[player]['Prof']:
+						hitCount = squadDamageMods[player]['Prof'][modifier]['hitCount']
+						totalHitCount = squadDamageMods[player]['Prof'][modifier]['totalHitCount']
+						damageGain = round(squadDamageMods[player]['Prof'][modifier]['damageGain'])
+						totalDamage = squadDamageMods[player]['Prof'][modifier]['totalDamage']
+						pctHit = my_value(round((hitCount/totalHitCount)*100,2))+"%"
+						if totalDamage >0:
+							pctDmg = my_value(round(damageGain/(totalDamage+abs(damageGain))*100, 2))+"%"
+						else:
+							pctDmg = "ToolTip"
+						tooltip = str(hitCount)+" out of "+str(totalHitCount)+" hits<br>"+pctHit+" hit<br>Pure Damage: "+my_value(damageGain)
+						detailEntry = '<div class="xtooltip">'+pctDmg+' <span class="xtooltiptext">'+tooltip+'</span></div>'
 					else:
-						pctDmg = "ToolTip"
-					tooltip = str(hitCount)+" out of "+str(totalHitCount)+" hits<br>"+pctHit+" hit<br>Pure Damage: "+my_value(damageGain)
-					detailEntry = '<div class="xtooltip">'+pctDmg+' <span class="xtooltiptext">'+tooltip+'</span></div>'
-				else:
-					detailEntry = "-"
-				details += " | "+detailEntry
-			details += " |"
-			myprint(output, details)
-		myprint(output, '\n</$reveal>\n')
+						detailEntry = "-"
+					details += " | "+detailEntry
+				details += " |"
+				myprint(output, details)
 
-	#Output Profession Modifier Data
-	tableList = ['Incoming', 'Outgoing']
-	for item in tableList:
-		modList = modifierMap[item]['Shared'].keys()
-		myprint(output, '\n<$reveal type="match" state="$:/state/damModifiers" text="'+item+' Profession">\n')
-		myprint(output, "\n''__"+item+" Profession Damage Modifiers__''")
-		myprint(output, "\n---\n\n")
-		for prof in profModifiers['Professions']:
-			myprint(output, '<$button setTitle="$:/state/modifierProf" setTo="'+prof+'" selectedClass="" class="btn btn-sm btn-dark" style=""> '+prof+' {{'+prof+'}} </$button>')
 
-		for prof in profModifiers['Professions']:
-			myprint(output, '\n<$reveal type="match" state="$:/state/modifierProf" text="'+prof+'">\n')
-			myprint(output, "\n''__"+prof+"__'' {{"+prof+"}}")
-			myprint(output, "\n---\n\n")		
-
-			modifierList = profModifiers['Professions'][prof]
-			header="|Name "
-			if item == 'Incoming':
-				for modifier in modifierList:
-					if modifier in modifierMap['Incoming']['Prof']:
-						modName = modifier
-						modIcon = modifierMap[item]['Prof'][modifier]
-						header +=" | ![img width=32 ["+modName+"|"+modIcon+"]]"
-				header+=" |h"
-
-			else:
-				for modifier in modifierList:
-					if modifier in modifierMap['Outgoing']['Prof']:
-						modName = modifier
-						modIcon = modifierMap[item]['Prof'][modifier]
-						header +=" | ![img width=32 ["+modName+"|"+modIcon+"]]"
-				header+=" |h"
-
-			myprint(output, header)
-			myprint(output, '\n</$reveal>\n')	
-			#Start Detail output here
-		myprint(output, '\n</$reveal>\n')
+		myprint(output, '\n</$reveal>\n')	
+		#Start Detail output here
+	myprint(output, '\n</$reveal>\n')
 
 	#End reveal
 	myprint(output, '\n\n</div>\n\n')
