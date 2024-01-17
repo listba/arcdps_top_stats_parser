@@ -110,7 +110,7 @@ if __name__ == '__main__':
 
 	SubMenuTabs = {
 	'General': ['Overview', 'Fight Logs', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores', 'Gear Buffs', 'Minions', 'Damage Modifiers', 'Top Skill Dmg'],
-	'Offensive': ['Offensive Stats', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Against Downed Damage', 'Against Downed Count', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
+	'Offensive': ['Offensive Stats', 'Damage Overview', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Against Downed Damage', 'Against Downed Count', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In', 'Condition Uptimes'],
 	'Support': ['Healing', 'Barrier', 'Outgoing Healing', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
 	'Boons & Buffs': ['Stability', 'Protection', 'Aegis', 'Might', 'Fury', 'Resistance', 'Resolution', 'Quickness', 'Swiftness', 'Superspeed', 'Alacrity', 'Vigor', 'Regeneration', 'Auras - Out', 'Auras - In', 'Personal Buffs', 'Buff Uptime', 'Stacking Buffs'],
@@ -1904,6 +1904,81 @@ if __name__ == '__main__':
 	write_squad_offensive_xls(squad_offensive, args.xls_output_filename)
 	myprint(output, "</$reveal>\n")
 	#end Offensive Stat Table insert
+
+	#start Damage Overview Table insert
+	DmgOverviewTable = {
+        'dmg': "Damage",
+        'Pdmg': "Power Dmg",
+        'Cdmg': "Condi Dmg",
+        'shieldDmg': "Shield Dmg",
+        'dmgAll': "Damage All",
+        'downContribution': "Down Contribution",
+        'againstDownedDamage': "Downed Damage",
+        'againstDownedCount': "Downed Hits",
+        'downs': "Downs",
+        'kills': "Kills"
+    }
+	top_players_Totals = get_top_players(players, config, 'dmg', StatType.TOTAL)
+	top_players_Averages = get_top_players(players, config, 'dmg', StatType.AVERAGE)
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Damage Overview">')    
+	myprint(output, '\n<<alert dark "Damage Stats across all fights attended." width:60%>>\n\n')
+	
+	myprint(output, '\n---\n')
+	
+
+	myprint(output, '<$button setTitle="$:/state/DmgTable" setTo="Total" class="btn btn-sm btn-dark"> Total Damage Stats </$button>')
+	myprint(output, '<$button setTitle="$:/state/DmgTable" setTo="Average" class="btn btn-sm btn-dark"> Average Damage Stats </$button>\n')
+	
+	myprint(output, '<$reveal type="match" state="$:/state/DmgTable" text="Total">')
+	myprint(output, '\n---\n')
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "| Sortable Total Stats |c")
+	myprint(output, "|thead-dark table-hover sortable|k")
+	header = "|Name | Profession | Duration"
+	for stat in DmgOverviewTable:
+		header +="| !"+DmgOverviewTable[stat]
+	header+="|h"
+	myprint(output, header)
+	for i in range(len(top_players_Totals)):
+		player = players[top_players_Totals[i]]
+	#for player in players:
+		name = player.name
+		prof = player.profession
+		durationActive = player.duration_fights_present
+		details = "|"+name+" | {{"+prof+"}} | "+my_value(durationActive)
+		for stat in DmgOverviewTable:
+			curStat = round(player.total_stats[stat], 1)
+			details += "| "+my_value(curStat)
+		details += "|"
+		myprint(output, details)
+	myprint(output, "</$reveal>\n")
+	
+	myprint(output, '<$reveal type="match" state="$:/state/DmgTable" text="Average">')
+	myprint(output,"\n---\n")
+	myprint(output, "|table-caption-top|k")
+	myprint(output, "| Sortable Average Stats |c")
+	myprint(output, "|thead-dark table-hover sortable|k")
+	header = "|Name | Profession | Duration"
+	for stat in DmgOverviewTable:
+		header +="| !"+DmgOverviewTable[stat]
+	header+="|h"
+	myprint(output, header)
+	for i in range(len(top_players_Averages)):
+		player = players[top_players_Averages[i]]
+	#for player in players:
+		name = player.name
+		prof = player.profession
+		durationActive = player.duration_fights_present
+		details = "|"+name+" | {{"+prof+"}} | "+my_value(durationActive)
+		for stat in DmgOverviewTable:
+			curStat = round(player.average_stats[stat], 1)
+			details += "| "+"{:,.1f}".format(curStat)
+		details += "|"
+		myprint(output, details)
+	myprint(output, "</$reveal>\n")
+
+	myprint(output, "</$reveal>\n")
+	#end Damage Overview Table insert
 
 	# Firebrand pages
 	tome1_skill_ids = ["41258", "40635", "42449", "40015", "42898"]
