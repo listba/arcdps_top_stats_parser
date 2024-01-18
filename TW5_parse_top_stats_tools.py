@@ -573,6 +573,7 @@ def fill_config(config_input):
 
 	config.charts = config_input.charts
 	config.include_comp_and_review = config_input.include_comp_and_review
+	config.damage_overview_only = config_input.damage_overview_only
 	config.use_PlenBot = config_input.use_PlenBot
 	config.PlenBotPath = config_input.PlenBotPath
 			

@@ -99,6 +99,20 @@ if __name__ == '__main__':
 	total_fight_duration = print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, found_healing, found_barrier, config, output)
 
 	include_comp_and_review = config.include_comp_and_review
+	damage_overview_only = config.damage_overview_only
+
+	DmgOverviewTable = {
+        'dmg': "Damage",
+        'Pdmg': "Power Dmg",
+        'Cdmg': "Condi Dmg",
+        'shieldDmg': "Shield Dmg",
+        'dmgAll': "Damage All",
+        'downContribution': "Down Contrib",
+        'againstDownedDamage': "Dmg to Downed",
+        'againstDownedCount': "Hits to Downed",
+        'downs': "Enemies Downed",
+        'kills': "Enemies Killed"
+    }
 
 	large_items = [
 		'<$button setTitle="$:/state/curTab" setTo="Squad Composition" selectedClass="" class="btn btn-sm btn-dark" style=""> Squad Composition </$button>',
@@ -120,6 +134,7 @@ if __name__ == '__main__':
 	alertColors = ["primary", "danger", "warning", "success", "info", "light"]
 
 	excludeForMonthly = ['Squad Composition','Fight Review', 'Spike Damage', 'Outgoing Healing', 'Gear Buffs']
+	excludeForDmgOverview = ['Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Against Downed Damage', 'Against Downed Count', 'Damage All']
 
 	for item in MenuTabs:
 		myprint(output, '<$button class="btn btn-sm btn-dark"> <$action-setfield $tiddler="$:/state/MenuTab" $field="text" $value="'+item+'"/> <$action-setfield $tiddler="$:/state/curTab" $field="text" $value="'+SubMenuTabs[item][0]+'"/> '+item+' </$button>')
@@ -132,6 +147,8 @@ if __name__ == '__main__':
 		myprint(output, '---')
 		for tab in SubMenuTabs[item]:
 			if not include_comp_and_review and tab in excludeForMonthly:
+				continue
+			if damage_overview_only and tab in excludeForDmgOverview:
 				continue
 			myprint(output, '<$button setTitle="$:/state/curTab" setTo="'+tab+'" class="btn btn-sm btn-dark"> '+tab+' </$button>')
 		myprint(output, '\n')
@@ -900,10 +917,12 @@ if __name__ == '__main__':
 	#JEL-Tweaked to output TW5 formatting (https://drevarr.github.io/FluxCapacity.html)
 
 	for stat in config.stats_to_compute:
+		if damage_overview_only and stat in DmgOverviewTable:
+			continue		
 		if stat not in config.aurasOut_to_compute and stat not in config.aurasIn_to_compute and stat not in config.defenses_to_compute:
 			if (stat == 'heal' and not found_healing) or (stat == 'barrier' and not found_barrier):
 				continue
-			
+
 			fileDate = myDate
 
 			#JEL-Tweaked to output TW5 output to maintain formatted table and slider (https://drevarr.github.io/FluxCapacity.html)
@@ -1906,18 +1925,6 @@ if __name__ == '__main__':
 	#end Offensive Stat Table insert
 
 	#start Damage Overview Table insert
-	DmgOverviewTable = {
-        'dmg': "Damage",
-        'Pdmg': "Power Dmg",
-        'Cdmg': "Condi Dmg",
-        'shieldDmg': "Shield Dmg",
-        'dmgAll': "Damage All",
-        'downContribution': "Down Contribution",
-        'againstDownedDamage': "Downed Damage",
-        'againstDownedCount': "Downed Hits",
-        'downs': "Downs",
-        'kills': "Kills"
-    }
 	top_players_Totals = get_top_players(players, config, 'dmg', StatType.TOTAL)
 	top_players_Averages = get_top_players(players, config, 'dmg', StatType.AVERAGE)
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Damage Overview">')    
@@ -1971,8 +1978,8 @@ if __name__ == '__main__':
 		durationActive = player.duration_fights_present
 		details = "|"+name+" | {{"+prof+"}} | "+my_value(durationActive)
 		for stat in DmgOverviewTable:
-			curStat = round(player.average_stats[stat], 1)
-			details += "| "+"{:,.1f}".format(curStat)
+			curStat = round(player.average_stats[stat], 3)
+			details += "| "+"{:,.2f}".format(curStat)
 		details += "|"
 		myprint(output, details)
 	myprint(output, "</$reveal>\n")
@@ -2387,6 +2394,8 @@ if __name__ == '__main__':
 
 	top_players_by_stat = top_average_stat_players if config.player_sorting_stat_type == 'average' else top_total_stat_players
 	for stat in config.stats_to_compute:
+		if damage_overview_only and stat in DmgOverviewTable:
+			continue		
 		skip_boxplot_charts = ['deaths', 'iol', 'stealth', 'HiS']
 		#boxplot_Stats = ['stability',  'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration', 'res', 'kills', 'downs', 'swaps', 'dmg', 'Pdmg', 'Cdmg', 'rips', 'cleanses', 'superspeed', 'barrierDamage']
 		if stat == 'dist':

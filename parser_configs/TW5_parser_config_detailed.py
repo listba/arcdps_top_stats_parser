@@ -62,7 +62,7 @@ percentage_of_top_for_buildswap = 75
 # minimum number of allied players to consider a fight in the stats
 min_allied_players = 5
 # minimum duration of a fight to be considered in the stats
-min_fight_duration = 20
+min_fight_duration = 15
 # minimum number of enemies to consider a fight in the stats
 min_enemy_players = 5
 
@@ -70,6 +70,9 @@ min_enemy_players = 5
 charts = True
 # Include the Squad Comp and Fight Review tabs
 include_comp_and_review = True
+
+# if damage_overview_only = True, do not build individual tables & charts for stats in overview table 
+damage_overview_only = False
 
 # Use PlenBot Logs? Set to True
 # Requires the "save logs to a CSV file" option to be checked in PlenBot
