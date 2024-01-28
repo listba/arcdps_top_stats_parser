@@ -1149,6 +1149,8 @@ if __name__ == '__main__':
 	#Control_Effects = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: "Hunter's Mark", 738:"Vulnerability"}
 	Control_Effects = {736: 'Bleeding', 737: 'Burning',861: 'Confusion', 723: 'Poison', 19426: 'Torment', 720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 738: 'Vulnerability', 30778: "Hunter's Mark", "total1": "appliedCounts", "total2": "totalDuration"}
 	for C_E in Control_Effects:
+		if C_E == "total2":
+			continue
 		myprint(output, '<$button setTitle="$:/state/curControl-Out" setTo="'+Control_Effects[C_E]+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+Control_Effects[C_E]+' </$button>')
 	myprint(output, '<$button setTitle="$:/state/curControl-Out" setTo="MOA Tracking" selectedClass="" class="btn btn-sm btn-dark" style="">MOA Tracking </$button>')
 	myprint(output, '<$button setTitle="$:/state/curControl-Out" setTo="BS_Tracking" selectedClass="" class="btn btn-sm btn-dark" style="">Battle Standard Tracking </$button>')
@@ -1156,6 +1158,8 @@ if __name__ == '__main__':
 	
 
 	for C_E in Control_Effects:
+		if C_E == "total2":
+			continue
 		key = Control_Effects[C_E]
 		if key in squad_Control:
 			sorted_squadControl = dict(sorted(squad_Control[key].items(), key=lambda x: x[1], reverse=True))
@@ -1168,7 +1172,7 @@ if __name__ == '__main__':
 			myprint(output, "|{{"+key+"}} "+key+" output by Squad Player Descending [TOP 25 Max]|c")
 			myprint(output, "|thead-dark table-hover sortable|k")
 			if key == "appliedCounts":
-				myprint(output, "|!Place |!Name | !Profession | !Total Applied| !Average|h")
+				myprint(output, "|!Place |!Name | !Profession | !Total Applied| !Total Duration| !Duration/Applied|h")
 			else:
 				myprint(output, "|!Place |!Name | !Profession | !Total Secs| !Average|h")
 			
@@ -1183,7 +1187,10 @@ if __name__ == '__main__':
 						prof = nameIndex.profession
 
 				if i <=25:
-					myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+"{:.4f}".format(round(sorted_squadControl[name], 4))+"| "+"{:.4f}".format(round((sorted_squadControl[name]/fightTime), 4))+"|")
+					if key == "appliedCounts":
+						myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+"{:.4f}".format(round(sorted_squadControl[name], 4))+"| "+"{:.4f}".format(round(squad_Control["totalDuration"][name], 4))+"| "+"{:.4f}".format(round((sorted_squadControl[name]/squad_Control["totalDuration"][name]), 4))+"|")
+					else:
+						myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+"{:.4f}".format(round(sorted_squadControl[name], 4))+"| "+"{:.4f}".format(round((sorted_squadControl[name]/fightTime), 4))+"|")
 					i=i+1
 
 			myprint(output, "</$reveal>\n")
