@@ -3447,14 +3447,16 @@ def get_stats_from_fight_json(fight_json, config, log):
 					skill_name = 'Skill-'+str(skill_id)
 				#skill_name = skill_Dict[skill_id]
 				skill_dmg = skill_used['totalDamage']
-				if skill_name not in enemy_skill_dmg:
-					enemy_skill_dmg[skill_name] = skill_dmg
-				else:
-					enemy_skill_dmg[skill_name] = enemy_skill_dmg[skill_name] +skill_dmg
-				if skill_name not in total_Enemy_Skill_Dmg:
-					total_Enemy_Skill_Dmg[skill_name] = skill_dmg
-				else:
-					total_Enemy_Skill_Dmg[skill_name] = total_Enemy_Skill_Dmg[skill_name] +skill_dmg
+				#if skill_name not in enemy_skill_dmg:
+				#	enemy_skill_dmg[skill_name] = skill_dmg
+				#else:
+				#	enemy_skill_dmg[skill_name] = enemy_skill_dmg[skill_name] +skill_dmg
+				#if skill_name not in total_Enemy_Skill_Dmg:
+				#	total_Enemy_Skill_Dmg[skill_name] = skill_dmg
+				#else:
+				#	total_Enemy_Skill_Dmg[skill_name] = total_Enemy_Skill_Dmg[skill_name] +skill_dmg
+				enemy_skill_dmg[skill_name] = enemy_skill_dmg.get(skill_name, 0) +skill_dmg
+				total_Enemy_Skill_Dmg[skill_name] = total_Enemy_Skill_Dmg.get(skill_name, 0) +skill_dmg
 
 			#Track MOA - Signet of Humility (Active)
 			for skill in enemy['totalDamageTaken'][0]:

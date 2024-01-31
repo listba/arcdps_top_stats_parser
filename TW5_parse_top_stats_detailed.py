@@ -397,15 +397,24 @@ if __name__ == '__main__':
 		myprint(output, "\n---\n\n")    
 
 		minionList = minion_Data[prof]["petsList"]
-		header="|Name "
+		header="|Name | !Fights | !Duration "
 		for item in minionList:
-			header+="| "+item
+			header+="| !"+item
 		header+=" |h"
 		detail=""
+		myprint(output, "|thead-dark table-caption-top sortable|k")
+		myprint(output, '| <<hl "Minion Generation" IndianRed>> |c')
 		myprint(output, header)
 
 		for playerName in minion_Data[prof]["player"]:
-			detail +="|"+playerName
+			minionDuration = 0
+			minionFights = 0
+			for nameIndex in players:
+				if nameIndex.name == playerName and nameIndex.profession == prof:
+					minionDuration = nameIndex.duration_fights_present
+					minionFights = nameIndex.num_fights_present
+
+			detail +="|"+playerName+" | "+my_value(minionFights)+" | "+my_value(minionDuration)
 			for item in minionList:
 				if item in minion_Data[prof]["player"][playerName]:
 					detail +=" | "+str(minion_Data[prof]["player"][playerName][item])
