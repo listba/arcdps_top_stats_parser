@@ -127,7 +127,7 @@ if __name__ == '__main__':
 	'Offensive': ['Offensive Stats', 'Damage Overview', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Against Downed Damage', 'Against Downed Count', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In', 'Condition Uptimes'],
 	'Support': ['Healing', 'Barrier', 'Outgoing Healing', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
-	'Boons & Buffs': ['Stability', 'Protection', 'Aegis', 'Might', 'Fury', 'Resistance', 'Resolution', 'Quickness', 'Swiftness', 'Superspeed', 'Alacrity', 'Vigor', 'Regeneration', 'Auras - Out', 'Auras - In', 'Personal Buffs', 'Buff Uptime', 'Stacking Buffs'],
+	'Boons & Buffs': ['Total Boons', 'Stability', 'Protection', 'Aegis', 'Might', 'Fury', 'Resistance', 'Resolution', 'Quickness', 'Swiftness', 'Superspeed', 'Alacrity', 'Vigor', 'Regeneration', 'Auras - Out', 'Auras - In', 'Personal Buffs', 'Buff Uptime', 'Stacking Buffs'],
 	'Dashboard': ["Dashboard"]
 		}
 
@@ -653,6 +653,24 @@ if __name__ == '__main__':
 		#end reveal
 		myprint(output, '\n\n</div>\n\n')
 		myprint(output, "</$reveal>\n")   	
+
+	#Total Boons
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Total Boons">\n')    
+	myprint(output, '\n<<alert dark "Total Boon Generation" width:60%>>\n')	
+	myprint(output, '\n---\n')    
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
+	
+	playerCount = len(players)
+	calcHeight = str(playerCount*25)
+	myprint(output, "\n!!Total Boon Generation\n")
+	myprint(output, '<$echarts $text={{'+myDate.strftime("%Y%m%d%H%M")+'_Total_Boon_Generation_BarChartData}} $height="'+calcHeight+'px" $theme="dark"/>')
+
+
+	#end reveal
+	myprint(output, '\n\n</div>\n\n')
+	myprint(output, "</$reveal>\n")     
+
+	# end Total Boons
 
 	#Personal Buffs
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Personal Buffs">\n')    
@@ -2196,7 +2214,7 @@ if __name__ == '__main__':
 	#start Dashboard insert
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Dashboard">')    
 	myprint(output, '\n<<alert dark "Dashboard for various charts" width:60%>>\n\n')
-	Dashboard_Charts = ["Kills/Downs/DPS", "Fury/Might/DPS", "Deaths/DamageTaken/DistanceFromTag", "Cleanses/Heals/BoonScore", "BoonStrips/OutgoingControlScore/DPS", "Profession_DPS_BoxPlot", "Player_DPS_BoxPlot", "Profession_SPS_BoxPlot", "Player_SPS_BoxPlot", "Profession_CPS_BoxPlot", "Player_CPS_BoxPlot", "Profession_HPS_BoxPlot", "Player_HPS_BoxPlot"]
+	Dashboard_Charts = ["Kills/Downs/DPS", "Fury/Might/DPS", "Deaths/DamageTaken/DistanceFromTag", "Total_Boon_Generation", "Cleanses/Heals/BoonScore", "BoonStrips/OutgoingControlScore/DPS", "Profession_DPS_BoxPlot", "Player_DPS_BoxPlot", "Profession_SPS_BoxPlot", "Player_SPS_BoxPlot", "Profession_CPS_BoxPlot", "Player_CPS_BoxPlot", "Profession_HPS_BoxPlot", "Player_HPS_BoxPlot"]
 	
 	for chart in Dashboard_Charts:
 		myprint(output, '<$button setTitle="$:/state/curChart" setTo="'+chart+'" selectedClass="" class="btn btn-sm btn-dark" style="">'+chart+' </$button>')
@@ -2223,6 +2241,11 @@ if __name__ == '__main__':
 				myprint(output, "\n!!Deaths / Damage Taken / Distance from Tag\n")
 				myprint(output, ",,Bubble Size based on Average Distance to Tag,,\n")
 				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_deaths_BubbleChartData}} $height="500px" $theme="dark"/>')
+			if chart == "Total_Boon_Generation":
+				playerCount = len(players)
+				calcHeight = str(playerCount*25)
+				myprint(output, "\n!!Total Boon Generation\n")
+				myprint(output, '<$echarts $text={{'+fileDate.strftime("%Y%m%d%H%M")+'_Total_Boon_Generation_BarChartData}} $height="'+calcHeight+'px" $theme="dark"/>')
 
 			if chart == "Cleanses/Heals/BoonScore":
 				myprint(output, "\n!!Cleanses / Heals / Boon Score\n")
@@ -2519,6 +2542,7 @@ if __name__ == '__main__':
 
 	#write out Bubble Charts and Box_Plots
 	write_bubble_charts(players, top_players_by_stat[stat], squad_Control, myDate, args.input_directory)
+	write_TotalBoon_bar_chart(players, myDate, args.input_directory)
 	if include_comp_and_review:
 		write_spike_damage_heatmap(squad_damage_output, myDate, args.input_directory)
 	write_box_plot_charts(DPS_List, myDate, args.input_directory, "DPS")

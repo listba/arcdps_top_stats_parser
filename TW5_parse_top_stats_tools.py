@@ -261,6 +261,9 @@ Cmd_Tags = {}
 #Collect Player Created Minions
 minion_Data = {}
 
+#Collect Total Boon Generation Scores
+Total_Boon_Chart = {}
+
 #Collect Outgoing Healing by target
 OutgoingHealing = {}
 
@@ -5387,6 +5390,118 @@ def write_spike_damage_heatmap(squad_damage_output, myDate, input_directory):
 	heatmap_Output.close()
 #end Heat Map Chart	
 
+#Start Total Boon Bar Chart
+def write_TotalBoon_bar_chart(players, myDate, input_directory):
+	boon_List = ['stability', 'protection', 'might', 'fury', 'alacrity', 'resolution', 'aegis', 'resistance', 'quickness', 'vigor', 'swiftness', 'regeneration']
+	Total_Boon_Chart = {}
+	for i in range(len(players)):
+		player = players[i]
+		prof_name = "{{"+player.profession+"}} "+player.name
+		if prof_name not in Total_Boon_Chart:
+			Total_Boon_Chart[prof_name]={}
+			Total_Boon_Chart[prof_name]['name'] = player.name
+			Total_Boon_Chart[prof_name]['profession'] = player.profession
+			Total_Boon_Chart[prof_name]['Total'] = 0
+			Total_Boon_Chart[prof_name]['Average'] = 0
+			for boon in boon_List:
+				Total_Boon_Chart[prof_name][boon+"_Avg"] = 0
+				Total_Boon_Chart[prof_name][boon+"_Total"] = 0
+		#gather boon score per player
+		sum_Boons_Total = 0
+		sum_Boons_Avg = 0
+		for boon in boon_List:
+			Total_Boon_Chart[prof_name][boon+"_Avg"] += player.average_stats[boon]
+			Total_Boon_Chart[prof_name][boon+"_Total"] += player.total_stats[boon]
+			sum_Boons_Avg += player.average_stats[boon]
+			sum_Boons_Total += player.total_stats[boon]
+		Total_Boon_Chart[prof_name]['Total'] = round(sum_Boons_Total, 4)
+		Total_Boon_Chart[prof_name]['Average'] = round(sum_Boons_Total, 4)
+
+	fileDate = myDate
+
+	TotalBoonBarfileTid = input_directory+"/"+fileDate.strftime('%Y%m%d%H%M')+"_Total_Boon_TW5_Bar_Chart.tid"
+	TotalBoonBar_chart_Output = open(TotalBoonBarfileTid, "w",encoding="utf-8")
+
+	print_string = 'created: '+fileDate.strftime("%Y%m%d%H%M%S")
+	print_string +="\ncreator: Drevarr\n"
+	print_string +="tags: ChartData\n"
+	print_string +='title: '+fileDate.strftime("%Y%m%d%H%M")+'_Total_Boon_Generation_BarChartData\n'
+	print_string +="type: text/vnd.tiddlywiki\n"
+	print_string += "\n\n"
+	print_string += "option = {\n"
+	print_string += "  color: ['#bfedd0', '#99e2b4','#88d4ab','#78c6a3', '#81c5ab', '#67b99a','#56ab91','#469d89','#358f80','#248277','#14746f','#036666'],\n"
+	print_string += "  legend: {},\n"
+	print_string += "  tooltip: {},\n"
+	print_string += "  grid: {left: '25%', top: '5%'},\n"
+	print_string += "  dataset: [\n"
+	print_string += "    {\n"
+	print_string += "      dimensions: ['Player', 'stability', 'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration', 'Total', 'Profession'],\n"
+	print_string += "      source: [\n"
+
+	
+	sorted_Total_Boon_Chart = OrderedDict(sorted(Total_Boon_Chart.items()))
+	
+	for player in sorted_Total_Boon_Chart:
+		playerBoonGen = []
+		playerBoonGen.append(player)
+		for boon in boon_List:
+			if boon+"_Total" in sorted_Total_Boon_Chart[player]:
+				playerBoonGen.append(sorted_Total_Boon_Chart[player][boon+"_Total"])
+			else:
+				playerBoonGen.append(0)
+		playerBoonGen.append(sorted_Total_Boon_Chart[player]['Total'])
+		playerBoonGen.append(sorted_Total_Boon_Chart[player]['profession'])
+		
+		print_string += str(playerBoonGen)+",\n"
+	
+	print_string += "      ]\n"
+	print_string += "    },\n"
+	print_string += "    {\n"
+	print_string += "      transform: {\n"
+	print_string += "        type: 'sort',\n"
+	print_string += "        config: [\n"
+	print_string += "          { dimension: 'Profession', order: 'desc' },\n"
+	print_string += "          { dimension: 'Total', order: 'asc' }\n"
+	print_string += "        ]\n"
+	print_string += "      }\n"
+	print_string += "    }\n"
+	print_string += "  ],\n"
+	print_string += "  yAxis: {\n"
+	print_string += "    type: 'category',\n"
+	print_string += "    axisLabel: { interval: 0, rotate: 0 }\n"
+	print_string += "  },\n"
+	print_string += "  xAxis: {},\n"
+	print_string += "  dataZoom: [\n"
+	print_string += "    {\n"
+	print_string += "      type: 'slider',\n"
+	print_string += "      yAxisIndex: 0,\n"
+	print_string += "      filterMode: 'none'\n"
+	print_string += "    },\n"
+	print_string += "    {\n"
+	print_string += "      type: 'inside',\n"
+	print_string += "      yAxisIndex: 0,\n"
+	print_string += "      filterMode: 'none'\n"
+	print_string += "    }\n"
+	print_string += "  ],    \n"
+	print_string += "  series: [\n"
+	for boon in boon_List:
+		print_string += "    {\n"
+		print_string += "      type: 'bar',\n"
+		print_string += "      stack: 'totalBoons',\n"
+		print_string += "      name: '"+boon.title()+"',\n"
+		print_string += "      encode: { y: 'Player', x: '"+boon+"' },\n"
+		print_string += "      datasetIndex: 1\n"
+		print_string += "    },\n"
+	print_string += "  ]\n"
+	print_string += "};\n"
+
+		
+	myprint(TotalBoonBar_chart_Output, print_string)
+
+	TotalBoonBar_chart_Output.close()
+#end write Total Boon Bar chart
+	
+#end Total Boon Bar Chart
 def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_total_stat_players, top_average_stat_players, top_consistent_stat_players, top_percentage_stat_players, top_late_players, top_jack_of_all_trades_players, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_Tablein, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats, output_file):
 	json_dict = {}
 	json_dict["overall_raid_stats"] = {key: value for key, value in overall_raid_stats.items()}
