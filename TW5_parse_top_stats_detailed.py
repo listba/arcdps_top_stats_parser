@@ -70,7 +70,7 @@ if __name__ == '__main__':
 	print_string = "Considering fights with at least "+str(config.min_allied_players)+" allied players and at least "+str(config.min_enemy_players)+" enemies that took longer than "+str(config.min_fight_duration)+" s."
 	myprint(log, print_string)
 
-	players, fights, found_healing, found_barrier, squad_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats = collect_stat_data(args, config, log, args.anonymize)    
+	players, fights, found_healing, found_barrier, squad_comp, party_comp, squad_offensive, squad_Control, enemy_Control, enemy_Control_Player, downed_Healing, uptime_Table, stacking_uptime_Table, auras_TableIn, auras_TableOut, Death_OnTag, Attendance, DPS_List, CPS_List, SPS_List, HPS_List, DPSStats = collect_stat_data(args, config, log, args.anonymize)    
 
 	# create xls file if it doesn't exist
 	book = xlwt.Workbook(encoding="utf-8")
@@ -123,7 +123,7 @@ if __name__ == '__main__':
 	MenuTabs = ['General', 'Offensive', 'Defensive', 'Support', 'Boons & Buffs', 'Dashboard']
 
 	SubMenuTabs = {
-	'General': ['Overview', 'Fight Logs', 'Squad Composition', 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores', 'Gear Buffs', 'Minions', 'Damage Modifiers', 'Top Skill Dmg'],
+	'General': ['Overview', 'Fight Logs', 'Squad Composition', "Party Composition", 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores', 'Gear Buffs', 'Minions', 'Damage Modifiers', 'Top Skill Dmg'],
 	'Offensive': ['Offensive Stats', 'Damage Overview', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Against Downed Damage', 'Against Downed Count', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In', 'Condition Uptimes'],
 	'Support': ['Healing', 'Barrier', 'Outgoing Healing', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
 	alertColors = ["primary", "danger", "warning", "success", "info", "light"]
 
-	excludeForMonthly = ['Squad Composition','Fight Review', 'Spike Damage', 'Outgoing Healing', 'Gear Buffs']
+	excludeForMonthly = ['Squad Composition', "Party Composition", 'Fight Review', 'Spike Damage', 'Outgoing Healing', 'Gear Buffs']
 	excludeForDmgOverview = ['Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Against Downed Damage', 'Against Downed Count', 'Damage All']
 
 	for item in MenuTabs:
@@ -817,6 +817,40 @@ if __name__ == '__main__':
 
 		# end Squad Composition insert
 
+		#Party Composition Testing
+		myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Party Composition">')    
+		myprint(output, '\n<<alert dark "PARTY COMPOSITION by FIGHT" width:60%>>\n')
+				
+		myprint(output, '\n\n')
+
+		output_string = ""
+
+		for fight in party_comp:
+			myprint(output, "|thead-dark table-hover table-caption-top w-75|k")
+			myprint(output, "|Fight Number: "+str(fight+1)+" |c")
+			myprint(output, "| Party | Members |<|<|<|<|h")
+			
+			#Set details
+			details = ""
+			for party in party_comp[fight]:
+				party_list = party_comp[fight][party]
+				chunk_size = 5
+				while party_list:
+					chunk, party_list = party_list[:chunk_size], party_list[chunk_size:] 
+					details +="| "+str(party)
+					for i in range(chunk_size):
+						if i >=len(chunk):
+							details+= " | "
+						else:
+							details+= " |{{"+str(chunk[i][0])+"}} "+str(chunk[i][1])
+					details+=" |\n"
+			myprint(output, details)
+			myprint(output, '\n\n')
+		#end reveal
+		myprint(output, "\n</$reveal>\n")     
+
+		# end Party Composition insert
+
 		#start Fight DPS Review insert
 		myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Fight Review">')    
 		myprint(output, '\n<<alert dark "Damage Output Review by Fight-#" width:60%>>\n\n')
@@ -844,14 +878,43 @@ if __name__ == '__main__':
 				myprint(output, '|Enemies Killed: |'+str(fight.kills)+' |')
 				myprint(output, '|Fight Duration: |'+str(fight.duration)+' |')
 				myprint(output, '|Fight End Time: |'+str(fight.end_time)+' |')
-				myprint(output, '|Squad Target Damage: |'+my_value(fight.total_stats['dmg'])+' |')
 				myprint(output, '|Squad All Damage: |'+my_value(fight.total_stats['dmgAll'])+' |')
 				myprint(output, '|Damage Delta (Target/All): |'+my_value(fight.total_stats['dmg'] - fight.total_stats['dmgAll'])+' |')
+				myprint(output, '|Squad Target Damage: |'+my_value(fight.total_stats['dmg'])+' |')
 				if fight.total_stats['dmg']:
 					myprint(output, '|Squad Shield Damage: |'+my_value(fight.total_stats['shieldDmg'])+'  ('+my_value(round(fight.total_stats['shieldDmg']/fight.total_stats['dmg']*100,1))+'%) |')
 				else:
 					myprint(output, '|Squad Shield Damage: |'+my_value(fight.total_stats['shieldDmg'])+'  ('+my_value(round(fight.total_stats['shieldDmg']/1*100,1))+'%) |')
-				myprint(output, '</div></div>\n\n')
+				myprint(output, '|Enemy Target Damage: |'+my_value(fight.total_stats['dmg_taken'])+' |')
+				if fight.total_stats['dmg_taken']:
+					myprint(output, '|Enemy Shield Damage: |'+my_value(fight.total_stats['barrierDamage'])+'  ('+my_value(round(fight.total_stats['barrierDamage']/fight.total_stats['dmg_taken']*100,1))+'%) |')
+				else:
+					myprint(output, '|Enemy Shield Damage: |'+my_value(fight.total_stats['barrierDamage'])+'  ('+my_value(round(fight.total_stats['barrierDamage']/1*100,1))+'%) |')				
+				myprint(output, '</div>\n\n')
+				#Insert Part Composition
+				myprint(output, '<div class="flex-col-3">\n')
+				myprint(output, "|thead-dark table-hover table-caption-top w-75|k")
+				myprint(output, "| Party | Party Members |<|<|<|<|h")
+
+				#Set details
+				details = ""
+				for party in party_comp[FightNum-1]:
+					party_list = party_comp[FightNum-1][party]
+					chunk_size = 5
+					while party_list:
+						chunk, party_list = party_list[:chunk_size], party_list[chunk_size:] 
+						details +="| "+str(party)
+						for i in range(chunk_size):
+							if i >=len(chunk):
+								details+= " | "
+							else:
+								details+= " |{{"+str(chunk[i][0])+"}} "+str(chunk[i][1])
+						details+=" |\n"
+				myprint(output, details)
+				myprint(output, '\n\n')
+
+				myprint(output, '</div>\n</div>\n')
+				myprint(output, '\n---\n')
 				#end fight Summary
 				myprint(output, '\n<div class="flex-row">\n    <div class="flex-col-1">\n')
 				myprint(output, "|table-caption-top|k")
