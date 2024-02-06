@@ -5435,7 +5435,7 @@ def write_TotalBoon_bar_chart(players, myDate, input_directory):
 	print_string += "  grid: {left: '25%', top: '5%'},\n"
 	print_string += "  dataset: [\n"
 	print_string += "    {\n"
-	print_string += "      dimensions: ['Player', 'stability', 'protection', 'aegis', 'might', 'fury', 'resistance', 'resolution', 'quickness', 'swiftness', 'alacrity', 'vigor', 'regeneration', 'Total', 'Profession'],\n"
+	print_string += "      dimensions: ['Player','stability','protection','might','fury','alacrity','resolution','aegis','resistance','quickness','vigor','swiftness','regeneration','Total','Profession'],\n"
 	print_string += "      source: [\n"
 
 	
