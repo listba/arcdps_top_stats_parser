@@ -1151,13 +1151,18 @@ if __name__ == '__main__':
 	myprint(output,'<$reveal type="match" state="$:/state/curDefense" text="Overview">')	
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
 	myprint(output, "|thead-dark table-hover sortable|k")	
-	myprint(output, "|!Name |!Profession | !{{Damage Taken}} | !{{BarrierDamage}} | !{{MissedHits}} | !{{Interrupted}} | !{{Invuln}} | !{{Evades}} | !{{Blocks}} | !{{Dodges}} | !{{Condition Cleanses}} | !{{Boon Strips}} | !{{Downed}} | !{{Died}} |h")
+	myprint(output, "|!Name |!Profession | !{{Damage Taken}} | !{{BarrierDamage}} | !Eff {{BarrierDamage}} % | !{{MissedHits}} | !{{Interrupted}} | !{{Invuln}} | !{{Evades}} | !{{Blocks}} | !{{Dodges}} | !{{Condition Cleanses}} | !{{Boon Strips}} | !{{Downed}} | !{{Died}} |h")
 	for player in players:
 		player_name = player.name
 		player_prof = player.profession
 		print_string = "|"+player_name+"| {{"+player_prof+"}} "
 		for item in DefensiveOverview:
-			print_string += "| "+my_value(player.total_stats[item])
+			if item == "barrierDamage":
+				eff_Damage = player.total_stats["dmg_taken"] or 1
+				eff_Barrier = round((player.total_stats[item]/eff_Damage)*100,2)
+				print_string += "| "+my_value(player.total_stats[item])+"| "+my_value(eff_Barrier)+"%"
+			else:
+				print_string += "| "+my_value(player.total_stats[item])
 		print_string +="|"
 		myprint(output, print_string)
 	myprint(output, '\n</div>')
