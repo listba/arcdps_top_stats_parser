@@ -300,6 +300,9 @@ HighScores={}
 total_Squad_Skill_Dmg = {}
 total_Enemy_Skill_Dmg = {}
 
+#Player Skill Damage Tracking
+Player_Damage_by_Skill = {}
+
 #Damage Modifiers Outgoing and Incoming
 squadDamageMods = {}
 profModifiers = {}
@@ -3567,6 +3570,14 @@ def get_stats_from_fight_json(fight_json, config, log):
 		squadDps_group = player['group']
 		if conditionFightTime <= 0:
 			continue
+
+		if squadDps_prof_name not in Player_Damage_by_Skill:
+			Player_Damage_by_Skill[squadDps_prof_name] = {}
+			Player_Damage_by_Skill[squadDps_prof_name]['Name'] = squadDps_name
+			Player_Damage_by_Skill[squadDps_prof_name]['Prof'] = squadDps_profession
+			Player_Damage_by_Skill[squadDps_prof_name]['Total'] = 0
+			Player_Damage_by_Skill[squadDps_prof_name]['Skills'] = {}
+		
 		if squadDps_group not in partyUptimes:
 			partyUptimes[squadDps_group]={}
 			partyUptimes[squadDps_group]['buffs']={}
@@ -3631,6 +3642,10 @@ def get_stats_from_fight_json(fight_json, config, log):
 					total_Squad_Skill_Dmg[skill_name] = skill_dmg
 				else:
 					total_Squad_Skill_Dmg[skill_name] = total_Squad_Skill_Dmg[skill_name] +skill_dmg
+
+                #Collect damage by skill for each player
+				Player_Damage_by_Skill[squadDps_prof_name]['Skills'][skill_name] = Player_Damage_by_Skill[squadDps_prof_name]['Skills'].get(skill_name, 0) + skill_dmg
+				Player_Damage_by_Skill[squadDps_prof_name]['Total'] += skill_dmg
 
 				#Collect Offensive Battle Standard Data
 				if skill_id == 14419 and squadDps_profession in ['Berserker', 'Warrior', 'Bladesworn', 'Spellbreaker']:
@@ -5539,6 +5554,7 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	#json_dict["profModifiers"] =  {key: value for key, value in profModifiers.items()}
 	#json_dict["modifierMap"] =  {key: value for key, value in modifierMap.items()}
 	#json_dict["total_Squad_Skill_Dmg"] =  {key: value for key, value in total_Squad_Skill_Dmg.items()}
+	json_dict["Player_Damage_by_Skill"] =  {key: value for key, value in Player_Damage_by_Skill.items()}
 	#json_dict["total_Enemy_Skill_Dmg"] =  {key: value for key, value in total_Enemy_Skill_Dmg.items()}
 	#json_dict["squadDamageMods"] =  {key: value for key, value in squadDamageMods.items()}
 	#json_dict["Plen_Bot_Logs"] =  {key: value for key, value in Plen_Bot_Logs.items()}
