@@ -123,7 +123,7 @@ if __name__ == '__main__':
 	MenuTabs = ['General', 'Offensive', 'Defensive', 'Support', 'Boons & Buffs', 'Dashboard']
 
 	SubMenuTabs = {
-	'General': ['Overview', 'Fight Logs', 'Squad Composition', "Party Composition", 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores', 'Gear Buffs', 'Minions', 'Damage Modifiers', 'Top Skill Dmg'],
+	'General': ['Overview', 'Fight Logs', 'Squad Composition', "Party Composition", 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores', 'Gear Buffs', 'Minions', 'Damage Modifiers', 'Top Skill Dmg', 'Player Damage by Skill'],
 	'Offensive': ['Offensive Stats', 'Damage Overview', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Against Downed Damage', 'Against Downed Count', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In', 'Condition Uptimes'],
 	'Support': ['Healing', 'Barrier', 'Outgoing Healing', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
@@ -238,6 +238,74 @@ if __name__ == '__main__':
 	#End reveal - Top Damage by Skills for Squad and Enemy
 	myprint(output, '\n\n</div>\n\n')
 	myprint(output, '</$reveal>')
+
+	#Squad Player Damage by Skills
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Player Damage by Skill">')
+	myprint(output, '\n<<alert dark "Player Damage by Skill for all Fights" width:60%>>\n')
+	myprint(output, "\nDamage based on `player['targetDamageDist']`\n\n")	
+	myprint(output, '\n---\n')
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
+	myprint(output, '<div class="flex-row">')
+	myprint(output, '    <div class="flex-col">\n\n')
+	#Start Selection Box
+	sorted_Player_Damage_by_Skill = OrderedDict(sorted(Player_Damage_by_Skill.items()))
+
+	myprint(output, "\n")
+	myprint(output, "\n")
+	myprint(output, "<<vspace 25px>>")
+	myprint(output, "\nSelect Player:")
+	myprint(output, "<$select tiddler=<<qualify '$:/state/Player_Damage_by_Skill'>> default='To View Damage by Skill Table' class='thead-dark'>")
+	myprint(output, "<option disabled>To View Damage by Skill Table</option>")
+	for item in sorted_Player_Damage_by_Skill:
+		playerName = sorted_Player_Damage_by_Skill[item]['Name']
+		playerProf = sorted_Player_Damage_by_Skill[item]['Prof']
+		playerTotal = sorted_Player_Damage_by_Skill[item]['Total']
+		if playerTotal < 1:
+			continue
+		spacedName = playerName.ljust(21, '.')
+		myprint(output, f'<option style="font-family: monospace">{spacedName} {playerProf}</option>')
+	myprint(output, "</$select>")
+	myprint(output, "\n")
+	myprint(output, "---")
+	myprint(output, "\n")	
+
+	#Start Table Generation
+	for item in sorted_Player_Damage_by_Skill:
+		playerName = sorted_Player_Damage_by_Skill[item]['Name']
+		playerProf = sorted_Player_Damage_by_Skill[item]['Prof']
+		playerTotal = sorted_Player_Damage_by_Skill[item]['Total']
+		spacedName = playerName.ljust(21, '.')
+		if playerTotal < 1:
+			continue
+		myprint(output, f'<$reveal type="match" state=<<qualify "$:/state/Player_Damage_by_Skill">> text="{spacedName} {playerProf}">')
+		myprint(output, "\n")
+		myprint(output, "|thead-dark table-hover|k")
+		myprint(output, "|@@display:block;width:50px;Player@@ | Profession | Total Damage|h")
+		myprint(output, "|"+playerName+" | {{"+playerProf +"}} | "+my_value(playerTotal)+"|")
+		myprint(output, "\n\n")
+		myprint(output, "|thead-dark table-hover|k")
+		myprint(output, "|@@display:block;width:75px;Skill Name@@ | Skill Damage| % of Total Damage|h")
+		sorted_Player_Damage_by_Skill_Total = OrderedDict(sorted(Player_Damage_by_Skill[item]['Skills'].items(), key = lambda x: x[1], reverse = True))
+		for skill in sorted_Player_Damage_by_Skill_Total:
+			skillIcon=""
+			for skillID in skill_Dict:
+				if skill_Dict[skillID]['name'] == skill:
+					skillIcon = skill_Dict[skillID]['icon']
+			skillDamage = sorted_Player_Damage_by_Skill_Total[skill]
+			pctTotal = round((skillDamage / playerTotal)*100,2)
+
+			myprint(output, "|[img width=24 ["+skillIcon+"]] "+skill+" | "+my_value(skillDamage)+"| "+my_value(pctTotal)+"%|")
+		myprint(output, "\n")
+		myprint(output, "---")
+		myprint(output, "\n")
+		myprint(output, "\n</$reveal>\n")
+	myprint(output, '\n\n\n')
+	myprint(output, '    </div>')
+	myprint(output, '</div>')
+	#End reveal - Player Damage by Skills for All Fights
+	myprint(output, '\n\n</div>\n\n')
+	myprint(output, '</$reveal>')
+
 
 	#Damage Modifier Data Reveal
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Damage Modifiers">')
