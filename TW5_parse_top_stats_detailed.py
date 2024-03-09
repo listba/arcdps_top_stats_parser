@@ -245,16 +245,16 @@ if __name__ == '__main__':
 	myprint(output, "\nDamage based on `player['targetDamageDist']`\n\n")	
 	myprint(output, '\n---\n')
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
-	myprint(output, '<div class="flex-row">')
-	myprint(output, '    <div class="flex-col">\n\n')
+	#myprint(output, '<div class="flex-row">')
+	#myprint(output, '    <div class="flex-col">\n\n')
 	#Start Selection Box
 	sorted_Player_Damage_by_Skill = OrderedDict(sorted(Player_Damage_by_Skill.items()))
 
 	myprint(output, "\n")
 	myprint(output, "\n")
 	myprint(output, "<<vspace 25px>>")
-	myprint(output, "\nSelect Player:")
-	myprint(output, "<$select tiddler=<<qualify '$:/state/Player_Damage_by_Skill'>> default='To View Damage by Skill Table' class='thead-dark'>")
+	myprint(output, "\nSelect Player(s):  ^^Ctrl Click to select multiple^^\n")
+	myprint(output, "<$select tiddler='$:/state/Player_Selected' default='To View Damage by Skill Table' multiple class='thead-dark'>")
 	myprint(output, "<option disabled>To View Damage by Skill Table</option>")
 	for item in sorted_Player_Damage_by_Skill:
 		playerName = sorted_Player_Damage_by_Skill[item]['Name']
@@ -263,11 +263,18 @@ if __name__ == '__main__':
 		if playerTotal < 1:
 			continue
 		spacedName = playerName.ljust(21, '.')
-		myprint(output, f'<option style="font-family: monospace">{spacedName} {playerProf}</option>')
+		myprint(output, f'<option style="font-family: monospace">{spacedName}{playerProf}</option>')
 	myprint(output, "</$select>")
 	myprint(output, "\n")
+	myprint(output, "\n<div>")
+	myprint(output, "\n<$button class='btn btn-sm btn-dark'><$action-setmultiplefields $tiddler='$:/state/Player_Selected' $fields='[[$:/state/Player_Selected]get[text]enlist-input[]]' $values='[[$:/state/Player_Selected]get[text]enlist-input[]]'/>Compare Selected </$button>")
+	myprint(output, "    ")
+	myprint(output, "<$button class='btn btn-sm btn-dark'><$action-deletetiddler $tiddler='$:/state/Player_Selected'/>Clear Selected</$button>")
+	myprint(output, "\n</div>\n")
 	myprint(output, "---")
-	myprint(output, "\n")	
+	myprint(output, "\n")
+	myprint(output, '\n<div class="flex-row">\n')
+
 
 	#Start Table Generation
 	for item in sorted_Player_Damage_by_Skill:
@@ -277,8 +284,8 @@ if __name__ == '__main__':
 		spacedName = playerName.ljust(21, '.')
 		if playerTotal < 1:
 			continue
-		myprint(output, f'<$reveal type="match" state=<<qualify "$:/state/Player_Damage_by_Skill">> text="{spacedName} {playerProf}">')
-		myprint(output, "\n")
+		myprint(output, f'<$reveal type="match" stateTitle="$:/state/Player_Selected" stateField="{spacedName}{playerProf}" text="{spacedName}{playerProf}">')
+		myprint(output, '\n<div class="flex-col">\n\n')
 		myprint(output, "|thead-dark table-hover|k")
 		myprint(output, "|@@display:block;width:50px;Player@@ | Profession | Total Damage|h")
 		myprint(output, "|"+playerName+" | {{"+playerProf +"}} | "+my_value(playerTotal)+"|")
@@ -297,10 +304,10 @@ if __name__ == '__main__':
 			myprint(output, "|[img width=24 ["+skillIcon+"]] "+skill+" | "+my_value(skillDamage)+"| "+my_value(pctTotal)+"%|")
 		myprint(output, "\n")
 		myprint(output, "---")
-		myprint(output, "\n")
+		myprint(output, "\n</div>\n")
 		myprint(output, "\n</$reveal>\n")
 	myprint(output, '\n\n\n')
-	myprint(output, '    </div>')
+	#myprint(output, '    </div>')
 	myprint(output, '</div>')
 	#End reveal - Player Damage by Skills for All Fights
 	myprint(output, '\n\n</div>\n\n')
