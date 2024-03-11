@@ -1080,7 +1080,7 @@ def write_support_players(players, top_players, stat, output_file):
 		if stat == 'stability' and (player.profession == 'Firebrand'):
 			print_string = "|"+player.account+" |"+player.name+" |"+player.profession+" | "+str(player.num_fights_present)+"| "+str(player.duration_fights_present)+"| "+stat+" |"+guildStatus+" |"
 			myprint(output_file, print_string)
-		if stat == 'heal' and (player.profession == 'Vindicator'):
+		if stat == 'heal' and (player.profession == 'Vindicator' or player.profession == 'Berserker'):
 			print_string = "|"+player.account+" |"+player.name+" |"+player.profession+" | "+str(player.num_fights_present)+"| "+str(player.duration_fights_present)+"| "+stat+" |"+guildStatus+" |"
 			myprint(output_file, print_string)
 # Write the top x people who achieved top total stat.
@@ -2458,14 +2458,14 @@ def collect_stat_data(args, config, log, anonymize=False):
 						player.total_stats[stat] += player.stats_per_fight[fight_number][stat]
 
 						if player_data['name'] in players_running_healing_addon and 'extHealingStats' in player_data:
-							allied_healing_1s = player_data['extHealingStats']['alliedHealing1S']
+							outgoingHealingAllies = player_data['extHealingStats']['outgoingHealingAllies']
 							total_healing_group = 0
 							for index in range(len(json_data['players'])):
 								is_same_group = player_data['group'] == json_data['players'][index]['group']
 								if is_same_group:
-									total_healing_group += allied_healing_1s[index][0][-1]
+									total_healing_group += (outgoingHealingAllies[index][0]['healing'] - outgoingHealingAllies[index][0]['downedHealing'])
 									if player_data['name'] == json_data['players'][index]['name']:
-										player.total_stats_self[stat] += allied_healing_1s[index][0][-1]
+										player.total_stats_self[stat] += (outgoingHealingAllies[index][0]['healing'] - outgoingHealingAllies[index][0]['downedHealing'])
 						player.total_stats_group[stat] += total_healing_group
 						if stat not in HighScores:
 							HighScores[stat]={}

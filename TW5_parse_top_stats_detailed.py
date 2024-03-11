@@ -307,7 +307,6 @@ if __name__ == '__main__':
 		myprint(output, "\n</div>\n")
 		myprint(output, "\n</$reveal>\n")
 	myprint(output, '\n\n\n')
-	#myprint(output, '    </div>')
 	myprint(output, '</div>')
 	#End reveal - Player Damage by Skills for All Fights
 	myprint(output, '\n\n</div>\n\n')
