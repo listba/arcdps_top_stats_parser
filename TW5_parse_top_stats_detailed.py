@@ -89,7 +89,7 @@ if __name__ == '__main__':
 	myprint(output, 'title: '+myDate.strftime("%Y%m%d")+'-WvW-Log-Review\n')
 	#End Tid file header
 
-	#JEL-Tweaked to output TW5 formatting (https://drevarr.github.io/FluxCapacity.html)
+	
 	print_string = "__''"+config.summary_title+"''__\n"
 	myprint(output, print_string)
 
@@ -123,8 +123,8 @@ if __name__ == '__main__':
 	MenuTabs = ['General', 'Offensive', 'Defensive', 'Support', 'Boons & Buffs', 'Dashboard']
 
 	SubMenuTabs = {
-	'General': ['Overview', 'Fight Logs', 'Squad Composition', "Party Composition", 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores', 'Gear Buffs', 'Minions', 'Damage Modifiers', 'Top Skill Dmg', 'Player Damage by Skill'],
-	'Offensive': ['Offensive Stats', 'Damage Overview', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Against Downed Damage', 'Against Downed Count', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
+	'General': ['Overview', 'Fight Logs', 'Squad Composition', "Party Composition", 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores', 'Gear Buffs', 'Minions', 'Damage Modifiers', 'Top Skill Dmg'],
+	'Offensive': ['Offensive Stats', 'Damage Overview', 'Player Damage by Skill', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Against Downed Damage', 'Against Downed Count', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In', 'Condition Uptimes'],
 	'Support': ['Healing', 'Barrier', 'Outgoing Healing', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
 	'Boons & Buffs': ['Total Boons', 'Stability', 'Protection', 'Aegis', 'Might', 'Fury', 'Resistance', 'Resolution', 'Quickness', 'Swiftness', 'Superspeed', 'Alacrity', 'Vigor', 'Regeneration', 'Auras - Out', 'Auras - In', 'Personal Buffs', 'Buff Uptime', 'Stacking Buffs'],
@@ -681,7 +681,15 @@ if __name__ == '__main__':
 			myprint(output, '<$button setTitle="$:/state/outgoingHealing" setTo="'+name.split("|")[0]+'_'+OutgoingHealing[name]['Prof']+'" selectedClass="" class="btn btn-sm btn-dark" style=""> '+name.split("|")[0]+'{{'+OutgoingHealing[name]['Prof']+'}} </$button>')
 
 		for name in OutgoingHealing:
+			totalHealingOutput = 0
+			totalBarrierOutput = 0
+			for skill in OutgoingHealing[name]['Skills']:
+				totalHealingOutput += OutgoingHealing[name]['Skills'][skill][1]
+			for skill in OutgoingHealing[name]['Skills_Barrier']:
+				totalBarrierOutput += OutgoingHealing[name]['Skills_Barrier'][skill][1]
+
 			healerMaxGroup = max(OutgoingHealing[name]['Group'], key=OutgoingHealing[name]['Group'].get)
+
 			myprint(output, '<$reveal type="match" state="$:/state/outgoingHealing" text="'+name.split("|")[0]+'_'+OutgoingHealing[name]['Prof']+'">')
 			myprint(output, '<div style="overflow-x:auto;">\n\n')
 			myprint(output, "\n|Healer Name | Party|h")
@@ -701,24 +709,24 @@ if __name__ == '__main__':
 			myprint(output, '    <div class="flex-col border">\n')
 			myprint(output, "|thead-dark table-caption-top sortable|k")
 			myprint(output, '| <<hl "Total Healing by Skill" lightgreen>> |c')
-			myprint(output, "|!Skill |!Skill Name | !Hits| !Total Healing| !Heal/Hit|h")
+			myprint(output, "|!Skill |!Skill Name | !Hits| !Total Healing| !Heal/Hit| !Pct|h")
 			for skill in OutgoingHealing[name]['Skills']:
 				hits=OutgoingHealing[name]['Skills'][skill][0]
 				heals=OutgoingHealing[name]['Skills'][skill][1]
 				skillName = skill_Dict[str(skill)]['name']
-				healString = "|"+str(skill)+" |"+str(skillName)+" | "+my_value(hits)+"| "+my_value(heals)+"| "+my_value(round(heals/hits,2))+"|"
+				healString = "|"+str(skill)+" |"+str(skillName)+" | "+my_value(hits)+"| "+my_value(heals)+"| "+my_value(round(heals/hits,2))+"| "+my_value(round(heals/totalHealingOutput*100,2))+"%|"
 				myprint(output, healString)
 
 			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '    <div class="flex-col border">\n')
 			myprint(output, "|thead-dark table-caption-top sortable|k")
 			myprint(output, '| <<hl "Total Barrier by Skill" lightblue>> |c')
-			myprint(output, "|!Skill |!Skill Name | !Hits| !Total Barrier| !Barrier/Hit|h")
+			myprint(output, "|!Skill |!Skill Name | !Hits| !Total Barrier| !Barrier/Hit| !Pct|h")
 			for skill in OutgoingHealing[name]['Skills_Barrier']:
 				hits=OutgoingHealing[name]['Skills_Barrier'][skill][0]
 				heals=OutgoingHealing[name]['Skills_Barrier'][skill][1]
 				skillName = skill_Dict[str(skill)]['name']
-				healString = "|"+str(skill)+" |"+str(skillName)+" | "+my_value(hits)+"| "+my_value(heals)+"| "+my_value(round(heals/hits,2))+"|"
+				healString = "|"+str(skill)+" |"+str(skillName)+" | "+my_value(hits)+"| "+my_value(heals)+"| "+my_value(round(heals/hits,2))+"| "+my_value(round(heals/totalBarrierOutput*100,2))+"%|"
 				myprint(output, healString)
 
 			myprint(output, '\n</div>\n</div>\n</div>\n')
