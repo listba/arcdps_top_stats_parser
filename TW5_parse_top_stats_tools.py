@@ -3809,7 +3809,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 
 
 		#Instant Revive tracking of downed healing
-		instant_Revive = {55026: 'Glyph of Stars - CA', 14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Renewal of Water', 5762: 'Renewal of Fire', 5760: 'Renewal of Air', 5761: 'Renewal of Earth', 10611: 'Signet of Undeath', 12596: "Nature's Renewal", 59510: "Life Transfer", 10527: "Well of Blood", 13849: "Lesser Well of Blood"}
+		instant_Revive = {55026: 'Glyph of Stars - CA', 69336:"Nature's Renewal", 12601: "Nature's Renewal",  12596: "Nature's Renewal", 14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Glyph of Renewal', 5762: 'Glyph of Renewal', 5760: 'Glyph of Renewal', 5761: 'Glyph of Renewal', 10611: 'Signet of Undeath', 59510: "Life Transfer", 10527: "Well of Blood", 13849: "Well of Blood"}
 		if 'extHealingStats' in player:
 			for target in player['extHealingStats']['totalHealingDist'][0]:
 				if 'totalDownedHealing' in target:
@@ -5544,7 +5544,7 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	#json_dict["SPS_List"] =  {key: value for key, value in SPS_List.items()}
 	#json_dict["HPS_List"] =  {key: value for key, value in HPS_List.items()}
 	#json_dict["DPSStats"] =  {key: value for key, value in DPSStats.items()}
-	#json_dict["downed_Healing"] =  {key: value for key, value in downed_Healing.items()}
+	json_dict["downed_Healing"] =  {key: value for key, value in downed_Healing.items()}
 	#json_dict["MOA_Targets"] =  {key: value for key, value in MOA_Targets.items()}
 	#json_dict["MOA_Casters"] =  {key: value for key, value in MOA_Casters.items()}
 	#json_dict["Buffs_Personal"] =  {key: value for key, value in buffs_personal.items()}
