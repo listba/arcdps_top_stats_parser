@@ -1628,7 +1628,10 @@ if __name__ == '__main__':
 
 		for item in uptime_Order:
 			if item in partyUptimes[party]['buffs']:
-				output_string += " "+"{:.2f}".format(round(((partyUptimes[party]['buffs'][item]/partyUptimes[party]['totalFightTime'])*100), 2))+"%|"
+				if partyUptimes[party]['totalFightTime']:
+					output_string += " "+"{:.2f}".format(round(((partyUptimes[party]['buffs'][item]/partyUptimes[party]['totalFightTime'])*100), 2))+"%|"
+				else:
+					output_string += " 0.00%|"
 			else:
 				output_string += " 0.00%|"
 		myprint(output, output_string)
