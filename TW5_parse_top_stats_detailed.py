@@ -1349,7 +1349,7 @@ if __name__ == '__main__':
 			myprint(output, "|{{"+key+"}} "+key+" output by Squad Player Descending [TOP 25 Max]|c")
 			myprint(output, "|thead-dark table-hover sortable|k")
 			if key == "appliedCounts":
-				myprint(output, "|!Place |!Name | !Profession | !Total Applied| !Total Duration| !Duration/Applied|h")
+				myprint(output, "|!Place |!Name | !Profession | !Total Applied| !Total Duration| !Duration/Applied| !Applied / Sec|h")
 			else:
 				myprint(output, "|!Place |!Name | !Profession | !Total Secs| !Average|h")
 			
@@ -1365,7 +1365,7 @@ if __name__ == '__main__':
 
 				if i <=25:
 					if key == "appliedCounts":
-						myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+"{:.4f}".format(round(sorted_squadControl[name], 4))+"| "+"{:.4f}".format(round(squad_Control["totalDuration"][name], 4))+"| "+"{:.4f}".format(round((sorted_squadControl[name]/squad_Control["totalDuration"][name]), 4))+"|")
+						myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+"{:.4f}".format(round(squad_Control["appliedCounts"][name], 4))+"| "+"{:.4f}".format(round(squad_Control["totalDuration"][name], 4))+"| "+"{:.4f}".format(round((squad_Control["totalDuration"][name]/squad_Control["appliedCounts"][name]), 4))+"| "+"{:.4f}".format(round((squad_Control["appliedCounts"][name]/fightTime), 4))+"|")
 					else:
 						myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+"{:.4f}".format(round(sorted_squadControl[name], 4))+"| "+"{:.4f}".format(round((sorted_squadControl[name]/fightTime), 4))+"|")
 					i=i+1

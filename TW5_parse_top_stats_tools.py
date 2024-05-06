@@ -176,6 +176,7 @@ squad_offensive = {}
 squad_Control = {}
 squad_Control['appliedCounts'] = {}
 squad_Control['totalDuration'] = {} 
+squad_Control['fightTime'] = {}
 enemy_Control = {} 
 enemy_Control_Player = {} 
 battle_Standard = {}
@@ -595,6 +596,7 @@ def reset_globals():
 	squad_Control = {} 
 	squad_Control['appliedCounts'] = {}
 	squad_Control['totalDuration'] = {}
+	squad_Control['activeSeconds'] = {}
 	enemy_Control = {} 
 	enemy_Control_Player = {}
 	battle_Standard = {}
@@ -3537,6 +3539,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 					squad_Control[skill_name][key_Prof] = squad_Control[skill_name].get(key_Prof, 0) + conditionTime
 					squad_Control['appliedCounts'][key_Prof] = squad_Control['appliedCounts'].get(key_Prof, 0) + appliedCounts
 					squad_Control['totalDuration'][key_Prof] = squad_Control['totalDuration'].get(key_Prof, 0) + conditionTime
+
 
 
 			if enemy_name not in enemy_squad:
