@@ -1349,7 +1349,7 @@ if __name__ == '__main__':
 			myprint(output, "|{{"+key+"}} "+key+" output by Squad Player Descending [TOP 25 Max]|c")
 			myprint(output, "|thead-dark table-hover sortable|k")
 			if key == "appliedCounts":
-				myprint(output, "|!Place |!Name | !Profession | !Total Applied| !Total Duration| !Duration/Applied|h")
+				myprint(output, "|!Place |!Name | !Profession | !Total Applied| !Total Duration| !Duration/Applied| !Applied / Sec|h")
 			else:
 				myprint(output, "|!Place |!Name | !Profession | !Total Secs| !Average|h")
 			
@@ -1365,7 +1365,7 @@ if __name__ == '__main__':
 
 				if i <=25:
 					if key == "appliedCounts":
-						myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+"{:.4f}".format(round(sorted_squadControl[name], 4))+"| "+"{:.4f}".format(round(squad_Control["totalDuration"][name], 4))+"| "+"{:.4f}".format(round((sorted_squadControl[name]/squad_Control["totalDuration"][name]), 4))+"|")
+						myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+"{:.4f}".format(round(squad_Control["appliedCounts"][name], 4))+"| "+"{:.4f}".format(round(squad_Control["totalDuration"][name], 4))+"| "+"{:.4f}".format(round((squad_Control["totalDuration"][name]/squad_Control["appliedCounts"][name]), 4))+"| "+"{:.4f}".format(round((squad_Control["appliedCounts"][name]/fightTime), 4))+"|")
 					else:
 						myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+"{:.4f}".format(round(sorted_squadControl[name], 4))+"| "+"{:.4f}".format(round((sorted_squadControl[name]/fightTime), 4))+"|")
 					i=i+1
@@ -1628,7 +1628,10 @@ if __name__ == '__main__':
 
 		for item in uptime_Order:
 			if item in partyUptimes[party]['buffs']:
-				output_string += " "+"{:.2f}".format(round(((partyUptimes[party]['buffs'][item]/partyUptimes[party]['totalFightTime'])*100), 2))+"%|"
+				if partyUptimes[party]['totalFightTime']:
+					output_string += " "+"{:.2f}".format(round(((partyUptimes[party]['buffs'][item]/partyUptimes[party]['totalFightTime'])*100), 2))+"%|"
+				else:
+					output_string += " 0.00%|"
 			else:
 				output_string += " 0.00%|"
 		myprint(output, output_string)
@@ -1946,7 +1949,7 @@ if __name__ == '__main__':
 	#end On Tag Death insert
 
 	#Downed Healing
-	down_Heal_Order = {55026: 'Glyph of Stars - CA', 14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Renewal of Water', 5762: 'Renewal of Fire', 5760: 'Renewal of Air', 5761: 'Renewal of Earth', 10611: 'Signet of Undeath', 12596: "Nature's Renewal", 59510: "Life Transfer", 10527: "Well of Blood", 13849: "Lesser Well of Blood"}
+	down_Heal_Order = {55026: 'Glyph of Stars - CA', 69336:"Nature's Renewal", 14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Glyph of Renewal', 10611: 'Signet of Undeath', 59510: "Life Transfer", 10527: "Well of Blood"}
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Downed_Healing">')    
 	myprint(output, '\n<<alert dark "Healing to downed players" width:60%>>\n\n')
 	myprint(output, '\nRequires Heal Stat addon for ARCDPS to track\n')
