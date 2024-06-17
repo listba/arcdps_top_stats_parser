@@ -2120,6 +2120,8 @@ def collect_stat_data(args, config, log, anonymize=False):
 
 		# get stats for each player
 		for player_data in json_data['players']:
+			if player_data['notInSquad']:
+				continue
 			create_new_player = False
 			build_swapped = False
 
@@ -2128,7 +2130,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 			#else:
 			account, name, profession = get_basic_player_data_from_json(player_data)
 			playerGroup = player_data['group']
-
+			
 			if profession not in squad_comp[fight_number]:
 				squad_comp[fight_number][profession] = 1
 			else:
