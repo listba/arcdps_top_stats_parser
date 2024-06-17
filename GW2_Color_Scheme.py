@@ -1,39 +1,21 @@
 #Color codes for each class
 ProfessionColor = {
-  "Warrior":"#FFD166",
-  "Berserker":"#B39247",
-  "Spellbreaker":"#665429",
-  "Bladesworn":"#19150A",
-  "Guardian":"#72C1D9",
-  "Dragonhunter":"#508798",
-  "Firebrand":"#2E4D57",
-  "Willbender":"#0B1316",
-  "Revenant":"#D16E5A",
-  "Herald":"#924D3F",
-  "Renegade":"#542C24",
-  "Vindicator":"#2A1612",
-  "Engineer":"#D09C59",
-  "Scrapper":"#926D3E",
-  "Holosmith":"#533E24",
-  "Mechanist":"#2A1F12",
-  "Ranger":"#8CDC82",
-  "Druid":"#629A5B",
-  "Soulbeast":"#385834",
-  "Untamed":"#1C2C1A",
-  "Thief":"#C08F95",
-  "Daredevil":"#866468",
-  "Deadeye":"#4D393C",
-  "Specter":"#261D1E",
-  "Elementalist":"#F68A87",
-  "Tempest":"#AC615F",
-  "Weaver":"#623736",
-  "Catalyst":"#311C1B",
-  "Mesmer":"#B679D5",
-  "Chronomancer":"#7F5595",
-  "Mirage":"#493055",
-  "Virtuoso":"#24182B",
-  "Necromancer":"#52A76F",
-  "Reaper":"#39754E",
-  "Scourge":"#21432C",
-  "Harbinger":"#08110B"
+	##WARRIORS
+	"Warrior":"#FF9933", "Berserker":"#FFA750", "Spellbreaker":"#FFB66D", "Bladesworn":"#FFC48A",
+	##GUARDIANS
+	"Guardian":"#3399cc",	"Dragonhunter":"#50A7D3", "Firebrand":"#6DB6DA", "Willbender":"#8AC4E1",
+	##REVENANTS
+	"Revenant":"#CC6342", 	"Herald":"#D3795D", "Renegade":"#DA8F78", "Vindicator":"#E1A593",
+	##ENGINEERS
+	"Engineer":"#996633",	"Scrapper":"#A77B50",	"Holosmith":"#B6916D", "Mechanist":"#C4A78A",
+	##RANGERS
+	"Ranger":"#66CC33", "Druid":"#7BD350",	"Soulbeast":"#91DA6D", "Untamed":"#A7E18A",
+	##THIEVES
+	"Thief":"#CC6666", "Daredevil":"#D37B7B", "Deadeye":"#DA9191", "Specter":"#E1A7A7",
+	##ELEMENTALISTS
+	"Elementalist":"#EC5752", "Tempest":"#EE6F6A", "Weaver":"#F18783",	"Catalyst":"#F49F9C",
+	#MESMERS
+	"Mesmer":"#993399", "Chronomancer":"#A750A7", "Mirage":"#B66DB6", "Virtuoso":"#C48AC4",
+	##NECROMANCERS
+	"Necromancer":"#339966", "Reaper":"#50A77B", "Scourge":"#6DB691", "Harbinger":"#8AC4A7"
 }

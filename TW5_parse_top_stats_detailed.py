@@ -91,7 +91,7 @@ if __name__ == '__main__':
 	myprint(output, 'title: '+args.review_title+'\n')
 	#End Tid file header
 
-	#JEL-Tweaked to output TW5 formatting (https://drevarr.github.io/FluxCapacity.html)
+	
 	print_string = "__''"+config.summary_title+"''__\n"
 	myprint(output, print_string)
 
@@ -126,7 +126,7 @@ if __name__ == '__main__':
 
 	SubMenuTabs = {
 	'General': ['Overview', 'Fight Logs', 'Squad Composition', "Party Composition", 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores', 'Gear Buffs', 'Minions', 'Damage Modifiers', 'Top Skill Dmg'],
-	'Offensive': ['Offensive Stats', 'Damage Overview', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Against Downed Damage', 'Against Downed Count', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
+	'Offensive': ['Offensive Stats', 'Damage Overview', 'Player Damage by Skill', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Against Downed Damage', 'Against Downed Count', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In', 'Condition Uptimes'],
 	'Support': ['Healing', 'Barrier', 'Outgoing Healing', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
 	'Boons & Buffs': ['Total Boons', 'Stability', 'Protection', 'Aegis', 'Might', 'Fury', 'Resistance', 'Resolution', 'Quickness', 'Swiftness', 'Superspeed', 'Alacrity', 'Vigor', 'Regeneration', 'Auras - Out', 'Auras - In', 'Personal Buffs', 'Buff Uptime', 'Stacking Buffs'],
@@ -240,6 +240,80 @@ if __name__ == '__main__':
 	#End reveal - Top Damage by Skills for Squad and Enemy
 	myprint(output, '\n\n</div>\n\n')
 	myprint(output, '</$reveal>')
+
+	#Squad Player Damage by Skills
+	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Player Damage by Skill">')
+	myprint(output, '\n<<alert dark "Player Damage by Skill for all Fights" width:60%>>\n')
+	myprint(output, "\nDamage based on `player['targetDamageDist']`\n\n")	
+	myprint(output, '\n---\n')
+	myprint(output, '<div style="overflow-x:auto;">\n\n')
+	#myprint(output, '<div class="flex-row">')
+	#myprint(output, '    <div class="flex-col">\n\n')
+	#Start Selection Box
+	sorted_Player_Damage_by_Skill = OrderedDict(sorted(Player_Damage_by_Skill.items()))
+
+	myprint(output, "\n")
+	myprint(output, "\n")
+	myprint(output, "<<vspace 25px>>")
+	myprint(output, "\nSelect Player(s):  ^^Ctrl Click to select multiple^^\n")
+	myprint(output, "<$select tiddler='$:/state/Player_Selected' default='To View Damage by Skill Table' multiple class='thead-dark'>")
+	myprint(output, "<option disabled>To View Damage by Skill Table</option>")
+	for item in sorted_Player_Damage_by_Skill:
+		playerName = sorted_Player_Damage_by_Skill[item]['Name']
+		playerProf = sorted_Player_Damage_by_Skill[item]['Prof']
+		playerTotal = sorted_Player_Damage_by_Skill[item]['Total']
+		if playerTotal < 1:
+			continue
+		spacedName = playerName.ljust(21, '.')
+		myprint(output, f'<option style="font-family: monospace">{spacedName}{playerProf}</option>')
+	myprint(output, "</$select>")
+	myprint(output, "\n")
+	myprint(output, "\n<div>")
+	myprint(output, "\n<$button class='btn btn-sm btn-dark'><$action-setmultiplefields $tiddler='$:/state/Player_Selected' $fields='[[$:/state/Player_Selected]get[text]enlist-input[]]' $values='[[$:/state/Player_Selected]get[text]enlist-input[]]'/>Compare Selected </$button>")
+	myprint(output, "    ")
+	myprint(output, "<$button class='btn btn-sm btn-dark'><$action-deletetiddler $tiddler='$:/state/Player_Selected'/>Clear Selected</$button>")
+	myprint(output, "\n</div>\n")
+	myprint(output, "---")
+	myprint(output, "\n")
+	myprint(output, '\n<div class="flex-row">\n')
+
+
+	#Start Table Generation
+	for item in sorted_Player_Damage_by_Skill:
+		playerName = sorted_Player_Damage_by_Skill[item]['Name']
+		playerProf = sorted_Player_Damage_by_Skill[item]['Prof']
+		playerTotal = sorted_Player_Damage_by_Skill[item]['Total']
+		spacedName = playerName.ljust(21, '.')
+		if playerTotal < 1:
+			continue
+		myprint(output, f'<$reveal type="match" stateTitle="$:/state/Player_Selected" stateField="{spacedName}{playerProf}" text="{spacedName}{playerProf}">')
+		myprint(output, '\n<div class="flex-col">\n\n')
+		myprint(output, "|thead-dark table-hover|k")
+		myprint(output, "|@@display:block;width:50px;Player@@ | Profession | Total Damage|h")
+		myprint(output, "|"+playerName+" | {{"+playerProf +"}} | "+my_value(playerTotal)+"|")
+		myprint(output, "\n\n")
+		myprint(output, "|thead-dark table-hover|k")
+		myprint(output, "|@@display:block;width:75px;Skill Name@@ | Skill Damage| % of Total Damage|h")
+		sorted_Player_Damage_by_Skill_Total = OrderedDict(sorted(Player_Damage_by_Skill[item]['Skills'].items(), key = lambda x: x[1], reverse = True))
+		for skill in sorted_Player_Damage_by_Skill_Total:
+			skillIcon=""
+			for skillID in skill_Dict:
+				if skill_Dict[skillID]['name'] == skill:
+					skillIcon = skill_Dict[skillID]['icon']
+			skillDamage = sorted_Player_Damage_by_Skill_Total[skill]
+			pctTotal = round((skillDamage / playerTotal)*100,2)
+
+			myprint(output, "|[img width=24 ["+skillIcon+"]] "+skill+" | "+my_value(skillDamage)+"| "+my_value(pctTotal)+"%|")
+		myprint(output, "\n")
+		myprint(output, "---")
+		myprint(output, "\n</div>\n")
+		myprint(output, "\n</$reveal>\n")
+	myprint(output, '\n\n\n')
+	myprint(output, '</div>')
+	#End reveal - Player Damage by Skills for All Fights
+	myprint(output, '\n\n</div>\n\n')
+	myprint(output, '</$reveal>')
+
 
 	#Damage Modifier Data Reveal
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Damage Modifiers">')
@@ -609,7 +683,15 @@ if __name__ == '__main__':
 			myprint(output, '<$button setTitle="$:/state/outgoingHealing" setTo="'+name.split("|")[0]+'_'+OutgoingHealing[name]['Prof']+'" selectedClass="" class="btn btn-sm btn-dark" style=""> '+name.split("|")[0]+'{{'+OutgoingHealing[name]['Prof']+'}} </$button>')
 
 		for name in OutgoingHealing:
+			totalHealingOutput = 0
+			totalBarrierOutput = 0
+			for skill in OutgoingHealing[name]['Skills']:
+				totalHealingOutput += OutgoingHealing[name]['Skills'][skill][1]
+			for skill in OutgoingHealing[name]['Skills_Barrier']:
+				totalBarrierOutput += OutgoingHealing[name]['Skills_Barrier'][skill][1]
+
 			healerMaxGroup = max(OutgoingHealing[name]['Group'], key=OutgoingHealing[name]['Group'].get)
+
 			myprint(output, '<$reveal type="match" state="$:/state/outgoingHealing" text="'+name.split("|")[0]+'_'+OutgoingHealing[name]['Prof']+'">')
 			myprint(output, '<div style="overflow-x:auto;">\n\n')
 			myprint(output, "\n|Healer Name | Party|h")
@@ -629,24 +711,24 @@ if __name__ == '__main__':
 			myprint(output, '    <div class="flex-col border">\n')
 			myprint(output, "|thead-dark table-caption-top sortable|k")
 			myprint(output, '| <<hl "Total Healing by Skill" lightgreen>> |c')
-			myprint(output, "|!Skill |!Skill Name | !Hits| !Total Healing| !Heal/Hit|h")
+			myprint(output, "|!Skill |!Skill Name | !Hits| !Total Healing| !Heal/Hit| !Pct|h")
 			for skill in OutgoingHealing[name]['Skills']:
 				hits=OutgoingHealing[name]['Skills'][skill][0]
 				heals=OutgoingHealing[name]['Skills'][skill][1]
 				skillName = skill_Dict[str(skill)]['name']
-				healString = "|"+str(skill)+" |"+str(skillName)+" | "+my_value(hits)+"| "+my_value(heals)+"| "+my_value(round(heals/hits,2))+"|"
+				healString = "|"+str(skill)+" |"+str(skillName)+" | "+my_value(hits)+"| "+my_value(heals)+"| "+my_value(round(heals/hits,2))+"| "+my_value(round(heals/totalHealingOutput*100,2))+"%|"
 				myprint(output, healString)
 
 			myprint(output, '\n\n</div>\n\n')
 			myprint(output, '    <div class="flex-col border">\n')
 			myprint(output, "|thead-dark table-caption-top sortable|k")
 			myprint(output, '| <<hl "Total Barrier by Skill" lightblue>> |c')
-			myprint(output, "|!Skill |!Skill Name | !Hits| !Total Barrier| !Barrier/Hit|h")
+			myprint(output, "|!Skill |!Skill Name | !Hits| !Total Barrier| !Barrier/Hit| !Pct|h")
 			for skill in OutgoingHealing[name]['Skills_Barrier']:
 				hits=OutgoingHealing[name]['Skills_Barrier'][skill][0]
 				heals=OutgoingHealing[name]['Skills_Barrier'][skill][1]
 				skillName = skill_Dict[str(skill)]['name']
-				healString = "|"+str(skill)+" |"+str(skillName)+" | "+my_value(hits)+"| "+my_value(heals)+"| "+my_value(round(heals/hits,2))+"|"
+				healString = "|"+str(skill)+" |"+str(skillName)+" | "+my_value(hits)+"| "+my_value(heals)+"| "+my_value(round(heals/hits,2))+"| "+my_value(round(heals/totalBarrierOutput*100,2))+"%|"
 				myprint(output, healString)
 
 			myprint(output, '\n</div>\n</div>\n</div>\n')
@@ -1153,13 +1235,18 @@ if __name__ == '__main__':
 	myprint(output,'<$reveal type="match" state="$:/state/curDefense" text="Overview">')	
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
 	myprint(output, "|thead-dark table-hover sortable|k")	
-	myprint(output, "|!Name |!Profession | !{{Damage Taken}} | !{{BarrierDamage}} | !{{MissedHits}} | !{{Interrupted}} | !{{Invuln}} | !{{Evades}} | !{{Blocks}} | !{{Dodges}} | !{{Condition Cleanses}} | !{{Boon Strips}} | !{{Downed}} | !{{Died}} |h")
+	myprint(output, "|!Name |!Profession | !{{Damage Taken}} | !{{BarrierDamage}} | !Eff {{BarrierDamage}} % | !{{MissedHits}} | !{{Interrupted}} | !{{Invuln}} | !{{Evades}} | !{{Blocks}} | !{{Dodges}} | !{{Condition Cleanses}} | !{{Boon Strips}} | !{{Downed}} | !{{Died}} |h")
 	for player in players:
 		player_name = player.name
 		player_prof = player.profession
 		print_string = "|"+player_name+"| {{"+player_prof+"}} "
 		for item in DefensiveOverview:
-			print_string += "| "+my_value(player.total_stats[item])
+			if item == "barrierDamage":
+				eff_Damage = player.total_stats["dmg_taken"] or 1
+				eff_Barrier = round((player.total_stats[item]/eff_Damage)*100,2)
+				print_string += "| "+my_value(player.total_stats[item])+"| "+my_value(eff_Barrier)+"%"
+			else:
+				print_string += "| "+my_value(player.total_stats[item])
 		print_string +="|"
 		myprint(output, print_string)
 	myprint(output, '\n</div>')
@@ -1264,7 +1351,7 @@ if __name__ == '__main__':
 			myprint(output, "|{{"+key+"}} "+key+" output by Squad Player Descending [TOP 25 Max]|c")
 			myprint(output, "|thead-dark table-hover sortable|k")
 			if key == "appliedCounts":
-				myprint(output, "|!Place |!Name | !Profession | !Total Applied| !Total Duration| !Duration/Applied|h")
+				myprint(output, "|!Place |!Name | !Profession | !Total Applied| !Total Duration| !Duration/Applied| !Applied / Sec|h")
 			else:
 				myprint(output, "|!Place |!Name | !Profession | !Total Secs| !Average|h")
 			
@@ -1280,7 +1367,7 @@ if __name__ == '__main__':
 
 				if i <=25:
 					if key == "appliedCounts":
-						myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+"{:.4f}".format(round(sorted_squadControl[name], 4))+"| "+"{:.4f}".format(round(squad_Control["totalDuration"][name], 4))+"| "+"{:.4f}".format(round((sorted_squadControl[name]/squad_Control["totalDuration"][name]), 4))+"|")
+						myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+"{:.4f}".format(round(squad_Control["appliedCounts"][name], 4))+"| "+"{:.4f}".format(round(squad_Control["totalDuration"][name], 4))+"| "+"{:.4f}".format(round((squad_Control["totalDuration"][name]/squad_Control["appliedCounts"][name]), 4))+"| "+"{:.4f}".format(round((squad_Control["appliedCounts"][name]/fightTime), 4))+"|")
 					else:
 						myprint(output, "| "+str(i)+" |"+playerName+" | {{"+prof+"}} | "+"{:.4f}".format(round(sorted_squadControl[name], 4))+"| "+"{:.4f}".format(round((sorted_squadControl[name]/fightTime), 4))+"|")
 					i=i+1
@@ -1543,7 +1630,10 @@ if __name__ == '__main__':
 
 		for item in uptime_Order:
 			if item in partyUptimes[party]['buffs']:
-				output_string += " "+"{:.2f}".format(round(((partyUptimes[party]['buffs'][item]/partyUptimes[party]['totalFightTime'])*100), 2))+"%|"
+				if partyUptimes[party]['totalFightTime']:
+					output_string += " "+"{:.2f}".format(round(((partyUptimes[party]['buffs'][item]/partyUptimes[party]['totalFightTime'])*100), 2))+"%|"
+				else:
+					output_string += " 0.00%|"
 			else:
 				output_string += " 0.00%|"
 		myprint(output, output_string)
@@ -1861,7 +1951,7 @@ if __name__ == '__main__':
 	#end On Tag Death insert
 
 	#Downed Healing
-	down_Heal_Order = {55026: 'Glyph of Stars - CA', 14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Renewal of Water', 5762: 'Renewal of Fire', 5760: 'Renewal of Air', 5761: 'Renewal of Earth', 10611: 'Signet of Undeath', 12596: "Nature's Renewal", 59510: "Life Transfer", 10527: "Well of Blood", 13849: "Lesser Well of Blood"}
+	down_Heal_Order = {55026: 'Glyph of Stars - CA', 69336:"Nature's Renewal", 14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Glyph of Renewal', 10611: 'Signet of Undeath', 59510: "Life Transfer", 10527: "Well of Blood"}
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Downed_Healing">')    
 	myprint(output, '\n<<alert dark "Healing to downed players" width:60%>>\n\n')
 	myprint(output, '\nRequires Heal Stat addon for ARCDPS to track\n')
