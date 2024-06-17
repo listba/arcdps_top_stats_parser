@@ -33,6 +33,7 @@ from TW5_parse_top_stats_tools import *
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='This reads a set of arcdps reports in xml format and generates top stats.')
 	parser.add_argument('input_directory', help='Directory containing .xml or .json files from arcdps reports')
+	parser.add_argument('-t', '--title', dest="review_title", help="Title to use for Tiddler")
 	parser.add_argument('-o', '--output', dest="output_filename", help="Text file to write the computed top stats")
 	#parser.add_argument('-f', '--input_filetype', dest="filetype", help="filetype of input files. Currently supports json and xml, defaults to json.", default="json")
 	parser.add_argument('-x', '--xls_output', dest="xls_output_filename", help="xls file to write the computed top stats")    
@@ -80,13 +81,14 @@ if __name__ == '__main__':
 	
 	#Create Tid file header to support drag and drop onto html page
 	myDate = datetime.datetime.now()
-
+	if args.review_title is None:
+		args.review_title = myDate.strftime("%Y%m%d")+'-WvW-Log-Review'
 	myprint(output, 'created: '+myDate.strftime("%Y%m%d%H%M%S"))
 	myprint(output, 'modified: '+myDate.strftime("%Y%m%d%H%M%S"))
 	myprint(output, 'creator: '+config.summary_creator)
-	myprint(output, 'caption: '+myDate.strftime("%Y%m%d")+'-WvW-Log-Review')
+	myprint(output, 'caption: '+args.review_title)
 	myprint(output, 'tags: Logs [['+myDate.strftime("%Y")+'-'+myDate.strftime("%m")+' Log Reviews]]')
-	myprint(output, 'title: '+myDate.strftime("%Y%m%d")+'-WvW-Log-Review\n')
+	myprint(output, 'title: '+args.review_title+'\n')
 	#End Tid file header
 
 	#JEL-Tweaked to output TW5 formatting (https://drevarr.github.io/FluxCapacity.html)

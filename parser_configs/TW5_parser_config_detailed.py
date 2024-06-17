@@ -23,7 +23,7 @@ defenses_to_compute = ['dmg_taken', 'barrierDamage', 'hitsMissed', 'interupted',
 
 # Settings for output tiddler
 summary_title = "WVW Log Review"
-summary_creator = "Drevarr"
+summary_creator = "Aetheros"
 
 # How many players will be listed who achieved top stats most often for each stat?
 num_players_listed = {'dmg': 100, 'Pdmg': 50, 'Cdmg': 50, 'shieldDmg': 100, 'dmgAll': 100, 'iol': 50,'rips': 50, 'cleanses': 50, 'dist': 50, 'stability': 50, 'protection': 50, 'aegis': 50, 'might': 50, 'fury': 50, 'dmg_taken': 50, 'deaths': 50, 'downed': 50,'res': 50, 'superspeed': 50, 'stealth': 50, 'HiS': 50, 'resistance': 50, 'resolution': 50, 'quickness': 50, 'swiftness': 50, 'alacrity': 50, 'vigor': 50, 'regeneration': 50, 'heal': 50, 'barrier': 50, 'barrierDamage': 50, 'swaps': 50, 'kills': 50, 'downs': 50, 'dodges': 50, 'evades': 50, 'hitsMissed': 50, 'interupted': 50, 'blocks': 50, 'invulns': 50, 'fireOut': 50, 'shockingOut': 50, 'frostOut': 50, 'magneticOut': 50, 'lightOut': 50, 'darkOut': 50, 'chaosOut': 50, 'ripsIn': 50, 'cleansesIn': 50, 'resOutTime': 50, 'cleansesOutTime': 50, 'ripsOutTime': 50, 'downContribution': 50, 'againstDownedDamage': 50, 'againstDownedCount': 50}
@@ -76,9 +76,9 @@ damage_overview_only = False
 
 # Use PlenBot Logs? Set to True
 # Requires the "save logs to a CSV file" option to be checked in PlenBot
-use_PlenBot = False
+use_PlenBot = True
 # Plenbot Install Directory, change to match your installation
-PlenBotPath = "d:\\PlenBot\\"
+PlenBotPath = "/logs/"
 
 
 # names as which each specialization will show up in the stats
