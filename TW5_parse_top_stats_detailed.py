@@ -971,7 +971,8 @@ if __name__ == '__main__':
 				#begin fight summary
 				myprint(output, "|thead-dark table-hover|k")
 				myprint(output, "|Fight Summary:| #"+str(FightNum)+"|h")
-				myprint(output, '|Squad Members: |'+str(fight.allies)+' |')
+				myprint(output, '|Squad Members: |'+str(fight.squad)+' |')
+				myprint(output, '|Ally Members: |'+str(fight.notSquad)+' |')				
 				myprint(output, '|Squad Deaths: |'+str(fight.total_stats['deaths'])+' |')
 				myprint(output, '|Enemies: |'+str(fight.enemies)+' |')
 				myprint(output, '|Enemies Downed: |'+str(fight.downs)+' |')

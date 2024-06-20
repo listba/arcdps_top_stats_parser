@@ -70,9 +70,9 @@ class Player:
 	name: str                           # character name
 	profession: str                     # profession name
 	num_fights_present: int = 0         # the number of fight the player was involved in 
-	num_enemies_present: int = 0        # the number of fight the player was involved in
-	num_allies_supported: int = 0       # the number of fight the player was involved in
-	num_allies_group_supported: int = 0  # the number of fight the player was involved in
+	num_enemies_present: int = 0        # the number of enemies the player was involved with
+	num_allies_supported: int = 0       # the number of allies the player supported
+	num_allies_group_supported: int = 0  # the number of allies in group the player was involved in
 	attendance_percentage: float = 0.   # the percentage of fights the player was involved in out of all fights
 	duration_fights_present: int = 0    # the total duration of all fights the player was involved in, in s
 	duration_active: int = 0            # the total duration a player was active (alive or down)
@@ -113,6 +113,7 @@ class Fight:
 	enemies_Blue: int = 0
 	enemies_Green: int = 0
 	allies: int = 0
+	squad: int = 0
 	kills: int = 0
 	start_time: str = ""
 	enemy_squad: dict = field(default_factory=dict) #profession and count of enemies
@@ -2434,8 +2435,8 @@ def collect_stat_data(args, config, log, anonymize=False):
 					# buff are generation squad values, using total over time
 					if stat in config.buffs_stacking_duration and stat != 'iol':
 						#value is generated boon time on all squad players / fight duration / (players-1)" in percent, we want generated boon time on all squad players
-						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration*(fight.allies - 1), 4)
-						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration*(fight.allies - 1), 4)
+						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration*(fight.squad - 1), 4)
+						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration*(fight.squad - 1), 4)
 
 						group_gen = get_stat_from_player_json(player_data, players_running_healing_addon, stat, config, False, BuffGenerationType.GROUP)
 						player.total_stats_group[stat] += round(group_gen/100.*fight.duration*(num_party_members - 1), 4)
@@ -2444,8 +2445,8 @@ def collect_stat_data(args, config, log, anonymize=False):
 						player.total_stats_self[stat] += round(self_gen/100.*fight.duration, 4)
 					elif stat in config.buffs_stacking_intensity and stat != 'iol':
 						#value is generated boon time on all squad players / fight duration / (players-1)", we want generated boon time on all squad players
-						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration*(fight.allies - 1), 4)
-						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration*(fight.allies - 1), 4)
+						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration*(fight.squad - 1), 4)
+						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration*(fight.squad - 1), 4)
 						
 						group_gen = get_stat_from_player_json(player_data, players_running_healing_addon, stat, config, False, BuffGenerationType.GROUP)
 						player.total_stats_group[stat] += round(group_gen*fight.duration*(num_party_members - 1), 4)
@@ -2528,7 +2529,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 
 			player.num_fights_present += 1
 			player.num_enemies_present += fight.enemies
-			player.num_allies_supported += (fight.allies)
+			player.num_allies_supported += (fight.squad)
 			player.wt_dps_enemies.append(fight.enemies)
 			player.wt_dps_duration.append(player.stats_per_fight[fight_number]['time_in_combat'])
 			player.wt_dps_damage.append(player.stats_per_fight[fight_number]['dmg'])
@@ -2537,7 +2538,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 			player.duration_in_combat += player.stats_per_fight[fight_number]['time_in_combat']
 			player.swapped_build |= build_swapped
 			player.stats_per_fight[fight_number]['fight_duration'] = fight.duration
-			player.stats_per_fight[fight_number]['allies'] = fight.allies
+			player.stats_per_fight[fight_number]['allies'] = fight.squad
 			player.stats_per_fight[fight_number]['role'] = find_sub_type(player_data, fight.duration)
 
 
@@ -3362,6 +3363,11 @@ def get_stats_from_fight_json(fight_json, config, log):
 	duration = round(fight_json['durationMS']/1000)
 
 	num_allies = len(fight_json['players'])
+	num_squad = 0
+	for player in fight_json['players']:
+		if not player['notInSquad']:
+			num_squad += 1
+	num_NotSquad = num_allies - num_squad
 	num_enemies = 0
 	num_enemies_Red = 0
 	num_enemies_Blue = 0
@@ -4348,6 +4354,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 	fight.enemy_skill_dmg = enemy_skill_dmg
 	fight.squad_skill_dmg = squad_skill_dmg
 	fight.allies = num_allies
+	fight.squad = num_squad
+	fight.notSquad = num_NotSquad
 	fight.kills = num_kills
 	fight.downs = num_downs
 	fight.start_time = fight_json['timeStartStd']
@@ -4426,8 +4434,14 @@ def get_overall_raid_stats(fights):
 	overall_raid_stats['end_time'] = max([f.end_time.split()[1] for f in used_fights]) +"<br>,,UTC "+ used_fights[0].end_time.split()[2]+",,"
 	overall_raid_stats['num_skipped_fights'] = len([f for f in fights if f.skipped])
 	overall_raid_stats['min_allies'] = min([f.allies for f in used_fights])
-	overall_raid_stats['max_allies'] = max([f.allies for f in used_fights])    
+	overall_raid_stats['max_allies'] = max([f.allies for f in used_fights])
+	overall_raid_stats['min_squad'] = min([f.squad for f in used_fights])
+	overall_raid_stats['max_squad'] = max([f.squad for f in used_fights])
+	overall_raid_stats['min_notSquad'] = min([f.notSquad for f in used_fights])
+	overall_raid_stats['max_notSquad'] = max([f.notSquad for f in used_fights])    
 	overall_raid_stats['mean_allies'] = round(sum([f.allies for f in used_fights])/len(used_fights), 1)
+	overall_raid_stats['mean_squad'] = round(sum([f.squad for f in used_fights])/len(used_fights), 1)
+	overall_raid_stats['mean_notSquad'] = round(sum([f.notSquad for f in used_fights])/len(used_fights), 1)
 	overall_raid_stats['min_enemies'] = min([f.enemies for f in used_fights])
 	overall_raid_stats['max_enemies'] = max([f.enemies for f in used_fights])        
 	overall_raid_stats['mean_enemies'] = round(sum([f.enemies for f in used_fights])/len(used_fights), 1)
@@ -4522,8 +4536,10 @@ def print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, fou
 	print_string += str(totalKDR)+"|f\n"
 	#print_string += "\nKill Death Ratio for the session was ''"+str(Raid_KDR)+"''.\n"
 	#JEL - Added beginning newline for TW5 spacing
-	print_string += "\nThere were between "+str(overall_raid_stats['min_allies'])+" and "+str(overall_raid_stats['max_allies'])+" allied players involved (average "+str(round(overall_raid_stats['mean_allies'], 1))+" players).\n"
-	print_string += "\nThe squad faced between "+str(overall_raid_stats['min_enemies'])+" and "+str(overall_raid_stats['max_enemies'])+" enemy players (average "+str(round(overall_raid_stats['mean_enemies'], 1))+" players).\n"    
+	print_string += "\nThere were between "+str(overall_raid_stats['min_squad'])+" and "+str(overall_raid_stats['max_squad'])+" squad players involved (average "+str(round(overall_raid_stats['mean_squad'], 1))+" squad players) \n"
+	print_string += " and between "+str(overall_raid_stats['min_notSquad'])+" and "+str(overall_raid_stats['max_notSquad'])+" allied players involved (average "+str(round(overall_raid_stats['mean_notSquad'], 1))+" ally players).\n"
+	print_string += "\nThere were between "+str(overall_raid_stats['min_allies'])+" and "+str(overall_raid_stats['max_allies'])+" total players involved (average "+str(round(overall_raid_stats['mean_allies'], 1))+" total players).\n"
+	print_string += "\nThe squad faced between "+str(overall_raid_stats['min_enemies'])+" and "+str(overall_raid_stats['max_enemies'])+" enemy players (average "+str(round(overall_raid_stats['mean_enemies'], 1))+" Enemy players).\n"    
 		
 	myprint(output, print_string)
 	return total_fight_duration
@@ -4563,7 +4579,7 @@ def write_fights_overview_xls(fights, overall_squad_stats, overall_raid_stats, c
 		sheet1.write(i+1, 4, fight.end_time.split()[1])
 		sheet1.write(i+1, 5, fight.duration)
 		sheet1.write(i+1, 6, skipped_str)
-		sheet1.write(i+1, 7, fight.allies)
+		sheet1.write(i+1, 7, fight.squad)
 		sheet1.write(i+1, 8, fight.enemies)
 		sheet1.write(i+1, 9, fight.kills)
 		for j,stat in enumerate(config.stats_to_compute):
@@ -4602,7 +4618,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 	myprint(output, print_string)
 	print_string = "|thead-dark table-hover w-auto scrollable|k"
 	myprint(output, print_string)
-	print_string = "| Fight # | Date | Ending | Secs | Skip | Allies | Enemies | R/B/G | Downs | Kills |"
+	print_string = "| Fight # | Date | Ending | Secs | Skip | Squad | Allies | Enemies | R/B/G | Downs | Kills |"
 	for stat in overall_squad_stats:
 		if stat not in exclude_Stat:
 			stat_len[stat] = max(len(config.stat_names[stat]), len(str(overall_squad_stats[stat])))
@@ -4616,14 +4632,14 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 			skipped_str = "yes" if fight.skipped else "no"
 			date = fight.start_time.split()[0]
 			end_time = fight.end_time.split()[1]        
-			print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.enemies_Red)+"/"+str(fight.enemies_Blue)+"/"+str(fight.enemies_Green)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
+			print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.squad)+" | <<tc src:'"+str(fight.notSquad)+"' color:'green'>> | "+str(fight.enemies)+" | "+str(fight.enemies_Red)+"/"+str(fight.enemies_Blue)+"/"+str(fight.enemies_Green)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
 			for stat in overall_squad_stats:
 				if stat not in exclude_Stat:
 					print_string += " "+my_value(round(fight.total_stats[stat]))+"|"
 			myprint(output, print_string)
 
 	#print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['start_time']:>10}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
-	print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" |  | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
+	print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_squad']):>11}"+" | "+f"{round(overall_raid_stats['mean_notSquad']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" |  | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
 	for stat in overall_squad_stats:
 		if stat not in exclude_Stat:
 			print_string += " "+my_value(round(overall_squad_stats[stat]))+"|"
