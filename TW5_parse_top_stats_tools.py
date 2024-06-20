@@ -4768,7 +4768,7 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
 		for fight in player.stats_per_fight:
 			if fight[stat] != -1:
 				duration = fight['fight_duration']
-				fightAllies = fight['squad']
+				fightAllies = fight['allies']
 				if stat in chart_per_fight:
 					statPerFight.append(round(fight[stat], 4))
 				elif stat in chart_per_second:
