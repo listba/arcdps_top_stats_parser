@@ -114,6 +114,7 @@ class Fight:
 	enemies_Green: int = 0
 	allies: int = 0
 	squad: int = 0
+	notSquad: int = 0
 	kills: int = 0
 	start_time: str = ""
 	enemy_squad: dict = field(default_factory=dict) #profession and count of enemies
@@ -4767,7 +4768,7 @@ def write_stats_box_plots(players, top_players, stat, ProfessionColor, myDate, i
 		for fight in player.stats_per_fight:
 			if fight[stat] != -1:
 				duration = fight['fight_duration']
-				fightAllies = fight['allies']
+				fightAllies = fight['squad']
 				if stat in chart_per_fight:
 					statPerFight.append(round(fight[stat], 4))
 				elif stat in chart_per_second:
