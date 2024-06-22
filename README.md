@@ -40,7 +40,7 @@ Currently supported stats are:
 
 Healing and barrier output can only be analyzed when contained in the logs, i.e., the [healing addon for arcdps](https://github.com/Krappa322/arcdps_healing_stats/releases) is installed. They will only be analyzed for players who also have the addon installed, since data may be incomplete for others.
 
-Provided are two scripts: ```TW5_parse_top_stats_detailed.py``` and ```TW5_parse_top_stats_per_fight.py```. The first gives an overview of top players considering consistency and total values of all desired stats. The second provides an .xlsw output showing the performance of all players contributing to each desired stat on a per fight basis.
+Provided are two scripts: ```TW5_parse_top_stats_detailed.py``` and ```TW5_parse_top_stats_per_fight.py```. The first gives an overview of top players considering consistency and total values of all desired stats. The second provides an ```.xlsx``` output showing the performance of all players contributing to each desired stat on a per fight basis.
 
 Note that currently, this tool is meant only for analyzing wwv fights.
 
@@ -60,7 +60,7 @@ There are three methods for generating the top stats.
 4. Navigate to where the script is located using "cd", in our case this means ```cd Downloads\arcdps_top_stats_parser```.
 5. Type ```python TW5_parse_top_stats_detailed.py <folder>```, where \<folder> is the path to your folder with json files. In our example case, we run ```python parse_top_stats_detailed.py C:\Users\Example\Documents\json_folder```. 
 6. Open ```/example_output/TW5_Top_Stat_Parse.html``` in your browser of choice
-7. Drag and Drop the resulting file ```TW5_top_stats_detailed.tid``` located in the \<folder> with your json files onto the top of the web page.
+7. Drag and Drop the resulting file ```TW5_top_stats_detailed.tid``` along with the ```*_TW5_Chart.tid``` files located in the \<folder> with your json files onto the top of the web page. The various ```*_TW5_Chart.tid``` files contain the js logic to generate the echarts.
   
   ![Screenshot_1](images/Screenshot_1.png)
 
@@ -88,10 +88,10 @@ There are three methods for generating the top stats.
 2. Put all .json files you want included in the top stats into one folder. We use the folder ```C:\Users\Example\Documents\json_folder``` as an example here. Note that different file types will be ignored, so no need to move your .evtc/.zevtc logs elsewhere if you have them in the same folder.
 3. Open a terminal / windows command line (press Windows key + r, type "cmd", enter).
 4. Navigate to where the script is located using "cd", in our case this means ```cd Downloads\arcdps_top_stats_parser```.
-5. Type ```python parse_top_stats_overview.py <folder>```, where \<folder> is the path to your folder with json files. In our example case, we run ```python parse_top_stats_overview.py C:\Users\Example\Documents\json_folder```. For the detailed version, use ```parse_top_stats_detailed.py``` instead of ```parse_top_stats_overview.py```.
+5. Type ```python parse_top_stats_detailed.py <folder>```, where \<folder> is the path to your folder with json files. In our example case, we run ```python parse_top_stats_overview.py C:\Users\Example\Documents\json_folder```. 
 
 ## Automated Top Stats Generation ##
-For a more automated version, you can use the batch script ```parsing_arc_top_stats.bat``` as follows:
+For a more automated version, you can use the batch script ```TW5_parsing_arc_top_stats.bat``` as follows:
 1. Move all logs you want included in the stats in one folder. We will use ```C:\Users\Example\Documents\log_folder\``` as an example.
 2. Open a windows command line (press Windows key + r, type "cmd", enter).
 3. Type ```<repo_folder>\parsing_arc_top_stats.bat "<log_folder>" "<Elite Insights folder>" "<repo_folder>"```. The full call in our example would be ```C:\Users\Example\Downloads\arcdps_top_stats_parser\parsing_arc_top_stats.bat "C:\Users\Example\Documents\log_folder\" "C:\Users\Example\Downloads\EliteInsights\" "C:\Users\Example\Downloads\arcdps_top_stats_parser\"```. This parses all logs in the log folder using EI with suitable settings and runs both scripts for generating the overview and detailed stats.
@@ -100,7 +100,7 @@ For a more automated version, you can use the batch script ```parsing_arc_top_st
 The console output for the overview and the detailed version shows you for each desired stat consistency and total awards. There are two exceptions: The first is distance to tag, where in our guild we found that the percentage of fights in which a top place was achieved is a more suitable measure for a job well done. The second is damage taken, where I compute the average damage taken per second based on time in combat and the person with least average damage taken gets a top spot. The overview also includes "late but great" and "Jack of all trades" awards if applicable. The award types are explained in detail on the [wiki](https://github.com/Freyavf/arcdps_top_stats_parser/wiki/Award-Types). Here is a short summary:
 Consistency awards are given for players with top scores in the most fights. Total awards are given for overall top stats. Late but great awards are given to players who weren't there for all fights, but who achieved great consistency in the time they were there. Jack of all trades awards are given to people who swapped build at least once and achieved great consistency on one of their builds. Players can only win a late but great award or a Jack of all trades award if they didn't get a top consistency or top total award in the same category. 
 
-Output files containing the tops stats are also generated in the json folder. By default, a .txt file containing the console output is created as ```top_stats_overview.txt``` or ```top_stats_detailed.txt```, respectively. For further processing, a .xls and a .json file with the same names are also created. Furthermore, a log file that contains information on which files were skipped and why is also created in the json folder as ```log_overview.txt``` or ```log_detailed.txt```, respectively. 
+Output files containing the tops stats are also generated in the json folder. By default, a .tid file containing the console output is created as ```top_stats_detailed.tid```. For further processing, a .xls and a .json file with the same names are also created. Furthermore, a log file that contains information on which files were skipped and why is also created in the json folder as ```log_detailed.txt```. 
 
 ## Settings ##
 For changing any of the default settings, check out the wiki pages on ![command line options](https://github.com/Freyavf/arcdps_top_stats_parser/wiki/Command-line-options) and ![configuration options](https://github.com/Freyavf/arcdps_top_stats_parser/wiki/Configuration-options).
