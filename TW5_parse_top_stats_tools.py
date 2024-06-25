@@ -3373,6 +3373,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 	enemy_squad = {}
 	num_kills = 0
 	num_downs = 0
+	squad_num_kills = 0
+	squad_num_downs = 0
 	enemy_Dps = {}
 	enemyDps_name = ''
 	enemyDps_damage = 0
@@ -3559,10 +3561,10 @@ def get_stats_from_fight_json(fight_json, config, log):
 #					if abs(item[1]) <= fight_json['durationMS']:						
 #						num_downs += 1
 
-#			if enemy['defenses'][0]['downCount']:
-#				num_downs += enemy['defenses'][0]['downCount']
-#			if enemy['defenses'][0]['deadCount']:
-#				num_kills += enemy['defenses'][0]['deadCount']				
+			if enemy['defenses'][0]['downCount']:
+				num_downs += enemy['defenses'][0]['downCount']
+			if enemy['defenses'][0]['deadCount']:
+				num_kills += enemy['defenses'][0]['deadCount']				
 
 	for player in fight_json['players']:
 		if player['notInSquad']:
@@ -3580,8 +3582,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 		if 'statsTargets' not in player or len(player['statsTargets']) == 0:
 			continue
 		else:
-			num_downs += sum(enemy[0]['downed'] for enemy in player['statsTargets'])
-			num_kills += sum(enemy[0]['killed'] for enemy in player['statsTargets'])
+			squad_num_downs += sum(enemy[0]['downed'] for enemy in player['statsTargets'])
+			squad_num_kills += sum(enemy[0]['killed'] for enemy in player['statsTargets'])
 
 		if conditionFightTime <= 0:
 			continue
