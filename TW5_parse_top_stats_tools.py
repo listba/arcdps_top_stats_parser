@@ -462,7 +462,7 @@ DPS_Utility = {
 	}
 
 def find_sub_type(player, fightTime):
-	supportProf = ["Tempest", "Scrapper", "Druid", "Chronomancer", "Vindicator", "Firebrand", "Spectre", "Spellbreaker", "Willbender", "Guardian"]
+	supportProf = ["Tempest", "Scrapper", "Druid", "Chronomancer", "Vindicator", "Firebrand", "Spectre", "Spellbreaker", "Willbender", "Guardian", "Berserker"]
 	if player['profession'] not in supportProf:
 
 		playerDamage = 0
