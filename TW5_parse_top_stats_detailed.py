@@ -107,6 +107,7 @@ if __name__ == '__main__':
         'Cdmg': "Condi Dmg",
         'shieldDmg': "Shield Dmg",
         'dmgAll': "Damage All",
+		'downContribution': "Down Contrib",
         'againstDownedDamage': "Dmg to Downed",
         'againstDownedCount': "Hits to Downed",
         'downs': "Enemies Downed",
@@ -123,7 +124,7 @@ if __name__ == '__main__':
 
 	SubMenuTabs = {
 	'General': ['Overview', 'Fight Logs', 'Squad Composition', "Party Composition", 'Fight Review', 'Spike Damage', 'Attendance', 'Support', 'Distance to Tag', 'On Tag Review', 'Skill Casts', 'High Scores', 'Gear Buffs', 'Minions', 'Damage Modifiers', 'Top Skill Dmg'],
-	'Offensive': ['Offensive Stats', 'Damage Overview', 'Player Damage by Skill', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Against Downed Damage', 'Against Downed Count', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
+	'Offensive': ['Offensive Stats', 'Damage Overview', 'Player Damage by Skill', 'Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Against Downed Damage', 'Against Downed Count', 'Damage All', 'DPSStats', 'Burst Damage', 'Damage with Buffs', 'Control Effects - Out', 'Weapon Swaps'],
 	'Defensive': ['Defensive Stats', 'Control Effects - In', 'Condition Uptimes'],
 	'Support': ['Healing', 'Barrier', 'Outgoing Healing', 'Condition Cleanses', 'Duration of Conditions Cleansed', 'Boon Strips', 'Duration of Boons Stripped', 'Illusion of Life', 'Resurrect', 'Downed_Healing', 'Stealth', 'Hide in Shadows', 'FBPages'],
 	'Boons & Buffs': ['Total Boons', 'Stability', 'Protection', 'Aegis', 'Might', 'Fury', 'Resistance', 'Resolution', 'Quickness', 'Swiftness', 'Superspeed', 'Alacrity', 'Vigor', 'Regeneration', 'Auras - Out', 'Auras - In', 'Personal Buffs', 'Buff Uptime', 'Stacking Buffs'],
@@ -133,7 +134,7 @@ if __name__ == '__main__':
 	alertColors = ["primary", "danger", "warning", "success", "info", "light"]
 
 	excludeForMonthly = ['Squad Composition', "Party Composition", 'Fight Review', 'Spike Damage', 'Outgoing Healing', 'Gear Buffs']
-	excludeForDmgOverview = ['Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Against Downed Damage', 'Against Downed Count', 'Damage All']
+	excludeForDmgOverview = ['Down Contribution', 'Enemies Downed', 'Enemies Killed', 'Damage', 'Shield Damage', 'Power Damage', 'Condi Damage', 'Against Downed Damage', 'Against Downed Count', 'Damage All']
 
 	for item in MenuTabs:
 		myprint(output, '<$button class="btn btn-sm btn-dark"> <$action-setfield $tiddler="$:/state/MenuTab" $field="text" $value="'+item+'"/> <$action-setfield $tiddler="$:/state/curTab" $field="text" $value="'+SubMenuTabs[item][0]+'"/> '+item+' </$button>')
@@ -508,10 +509,10 @@ if __name__ == '__main__':
 	myprint(output, '\n---\n')
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
 	
-	offensiveHighScores = ['dmg_PS',  'againstDownedDamage_PS', 'downs_PS', 'kills_PS']
+	offensiveHighScores = ['dmg_PS', 'downContribution_PS', 'downs_PS', 'kills_PS']
 	supportHighScores = ['rips_PS', 'cleanses_PS', 'heal_PS', 'barrier_PS']
 	defensiveHighScores = ['dodges_PS', 'evades_PS', 'blocks_PS', 'invulns_PS']
-	labelTopFive = {'dmg': 'Damage', 'dmg_PS': 'Damage per Second', 'againstDownedDamage': 'Against Down Damage', 'againstDownedDamage_PS': 'Against Down Damage per Second', 'downs': 'Downs', 'downs_PS': 'Downs per Second', 'invulns_PS': 'Invulnerable per Second', 'invulns': 'Invulnerable', 'kills': 'Kills', 'kills_PS': 'Kills per Second', 'rips': 'Boon Strips', 'rips_PS': 'Boon Strips per Second', 'cleanses': 'Condition Cleanses', 'cleanses_PS': 'Condition Cleanses per Second', 'heal': 'Healing', 'heal_PS': 'Healing per Second', 'barrier': 'Barrier', 'barrier_PS': 'Barrier per Second', 'dodges': 'Dodges', 'dodges_PS': 'Dodges per Second', 'evades': 'Evades', 'evades_PS': 'Evades per Second', 'blocks': 'Blocks', 'blocks_PS': 'Blocks per Second', 'downed': 'Downed', 'interupted_PS': 'Downed per Second'}
+	labelTopFive = {'dmg': 'Damage', 'dmg_PS': 'Damage per Second', 'downContribution': 'Down Contribution', 'downContribution_PS': 'Down Contribution per Second', 'downs': 'Downs', 'downs_PS': 'Downs per Second', 'invulns_PS': 'Invulnerable per Second', 'invulns': 'Invulnerable', 'kills': 'Kills', 'kills_PS': 'Kills per Second', 'rips': 'Boon Strips', 'rips_PS': 'Boon Strips per Second', 'cleanses': 'Condition Cleanses', 'cleanses_PS': 'Condition Cleanses per Second', 'heal': 'Healing', 'heal_PS': 'Healing per Second', 'barrier': 'Barrier', 'barrier_PS': 'Barrier per Second', 'dodges': 'Dodges', 'dodges_PS': 'Dodges per Second', 'evades': 'Evades', 'evades_PS': 'Evades per Second', 'blocks': 'Blocks', 'blocks_PS': 'Blocks per Second', 'downed': 'Downed', 'interupted_PS': 'Downed per Second'}
 	#myprint(output, '\n\n<<h1 "Offensive High Scores" IndianRed>>\n\n')	
 		
 	myprint(output, '<div class="flex-row">\n\n')
