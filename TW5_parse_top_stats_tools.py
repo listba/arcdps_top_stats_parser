@@ -4159,7 +4159,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 			commanderMissing = False
 
 	for id in fight_json['players']:
-		if player['notInSquad']:
+		if id['notInSquad']:
 			continue	
 		playerDistances = []
 		playerDistToTag = id['statsAll'][0]['distToCom']
