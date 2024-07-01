@@ -4159,6 +4159,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 			commanderMissing = False
 
 	for id in fight_json['players']:
+		if player['notInSquad']:
+			continue	
 		playerDistances = []
 		playerDistToTag = id['statsAll'][0]['distToCom']
 		deathOnTag_name = id['name']
@@ -4178,6 +4180,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 		if commanderMissing:
 			continue
 		if id['combatReplayData']['dead'] and id['combatReplayData']['down']:
+			print(id['profession'], id['name'])
 			playerDeaths = dict(id['combatReplayData']['dead'])
 			playerDowns = dict(id['combatReplayData']['down'])
 			playerDistToTag = id['statsAll'][0]['distToCom']
