@@ -3793,23 +3793,25 @@ def get_stats_from_fight_json(fight_json, config, log):
 		#config.condition_ids = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: 'Hunters Mark'}
 		for item in player['buffUptimesActive']:
 			conditionId = int(item['id'])
-			if conditionId not in Control_Effects:
-				continue
-			skill_name = Control_Effects[conditionId]
-			if skill_name not in enemy_Control:
-				enemy_Control[skill_name] = {}
-			if skill_name not in enemy_Control_Player:
-				enemy_Control_Player[skill_name] = {}
-			for cc in item['buffData']:
-				for key, value in cc['generated'].items():
-					if key not in enemy_Control_Player[skill_name]:
-						enemy_Control_Player[skill_name][key] = float((value/100)*player_combat_time)
-					else:
-						enemy_Control_Player[skill_name][key] = enemy_Control_Player[skill_name][key] + float((value/100)*player_combat_time)
-					if player['name'] not in enemy_Control[skill_name]:
-						enemy_Control[skill_name][player['name']] = float((value/100)*player_combat_time)
-					else:
-						enemy_Control[skill_name][player['name']] = enemy_Control[skill_name][player['name']] + float((value/100)*player_combat_time)
+			if conditionId in Control_Effects:
+
+				skill_name = Control_Effects[conditionId]
+				if skill_name not in enemy_Control:
+					enemy_Control[skill_name] = {}
+				if skill_name not in enemy_Control_Player:
+					enemy_Control_Player[skill_name] = {}
+				for cc in item['buffData']:
+					if 'generated' in cc:
+						for key in cc['generated']:
+							value = cc['generated'][key]
+							if key not in enemy_Control_Player[skill_name]:
+								enemy_Control_Player[skill_name][key] = float((value/100)*player_combat_time)
+							else:
+								enemy_Control_Player[skill_name][key] = enemy_Control_Player[skill_name][key] + float((value/100)*player_combat_time)
+							if player['name'] not in enemy_Control[skill_name]:
+								enemy_Control[skill_name][player['name']] = float((value/100)*player_combat_time)
+							else:
+								enemy_Control[skill_name][player['name']] = enemy_Control[skill_name][player['name']] + float((value/100)*player_combat_time)
 
 		#Track Offensive stats from [statsTarets]
 		statAll = ["totalDamageCount", "directDamageCount", "connectedDirectDamageCount", "connectedDamageCount", "critableDirectDamageCount", "criticalRate", "criticalDmg", "flankingRate", "againstMovingRate", "glanceRate", "missed", "evaded", "blocked", "interrupts", "invulned"]
@@ -3858,23 +3860,26 @@ def get_stats_from_fight_json(fight_json, config, log):
 		Auras_Id = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic', 25518: 'Light', 39978: 'Dark', 10332: 'Chaos'}
 		for item in player['buffUptimesActive']:
 			auraId = int(item['id'])
-			if auraId not in Auras_Id:
-				continue
-			skill_name = Auras_Id[auraId]
-			if skill_name not in auras_TableIn:
-				auras_TableIn[skill_name] = {}
-			if skill_name not in auras_TableOut:
-				auras_TableOut[skill_name] = {}				
-			for cc in item['buffData']:
-				for key, value in cc['generated'].items():
-					if player['name'] not in auras_TableIn[skill_name]:
-						auras_TableIn[skill_name][player['name']] = float((value/100)*player_combat_time)
-					else:
-						auras_TableIn[skill_name][player['name']] = auras_TableIn[skill_name][player['name']] + float((value/100)*player_combat_time)
-					if key not in auras_TableOut[skill_name]:
-						auras_TableOut[skill_name][key] = float((value/100)*player_combat_time)
-					else:
-						auras_TableOut[skill_name][key] = auras_TableOut[skill_name][key] + float((value/100)*player_combat_time)
+			if auraId in Auras_Id:
+				skill_name = Auras_Id[auraId]
+				if skill_name not in auras_TableIn:
+					auras_TableIn[skill_name] = {}
+				if skill_name not in auras_TableOut:
+					auras_TableOut[skill_name] = {}
+				#debug attempt
+				#print(player['name'], skill_name, auraId)				
+				for cc in item['buffData']:
+					if 'generated' in cc:
+						for key in cc['generated']:
+							value = cc['generated'][key]
+							if player['name'] not in auras_TableIn[skill_name]:
+								auras_TableIn[skill_name][player['name']] = float((value/100)*player_combat_time)
+							else:
+								auras_TableIn[skill_name][player['name']] = auras_TableIn[skill_name][player['name']] + float((value/100)*player_combat_time)
+							if key not in auras_TableOut[skill_name]:
+								auras_TableOut[skill_name][key] = float((value/100)*player_combat_time)
+							else:
+								auras_TableOut[skill_name][key] = auras_TableOut[skill_name][key] + float((value/100)*player_combat_time)
 
 		#Track Total Buff Uptimes
 		uptime_Buff_Ids = {1122: 'stability', 717: 'protection', 743: 'aegis', 740: 'might', 725: 'fury', 26980: 'resistance', 873: 'resolution', 1187: 'quickness', 719: 'swiftness', 30328: 'alacrity', 726: 'vigor', 718: 'regeneration'}
