@@ -2679,32 +2679,32 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		return round(int(player_json['activeTimes'][0])/1000)
 	
 	if stat == 'dmg_taken':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'damageTaken' not in player_json['defenses'][0] or 'damageBarrier' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'damageTaken' not in player_json['defenses'][0] or 'damageBarrier' not in player_json['defenses'][0]:
 			return 0
 		return int(player_json['defenses'][0]['damageTaken'])
 
 	if stat == 'barrierDamage':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'damageBarrier' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'damageBarrier' not in player_json['defenses'][0]:
 			return 0
 		return int(player_json['defenses'][0]['damageBarrier'])
 		
 	if stat == 'deaths':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'deadCount' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'deadCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['deadCount'])
 
 	if stat == 'downed':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'downCount' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'downCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['downCount'])
 
 	if stat == 'hitsMissed':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'missedCount' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'missedCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['missedCount'])
 
 	if stat == 'interupted':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'interruptedCount' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'interruptedCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['interruptedCount'])
 
@@ -2750,82 +2750,82 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		#return int(player_json['dpsAll'][0]['powerDamage'])  
 
 	if stat == 'res':
-		if 'support' not in player_json or len(player_json['support']) != 1 or 'resurrects' not in player_json['support'][0]:
+		if 'support' not in player_json or 'resurrects' not in player_json['support'][0]:
 			return 0
 		return int(player_json['support'][0]['resurrects'])
 
 	if stat == 'resOutTime':
-		if 'support' not in player_json or len(player_json['support']) != 1 or 'resurrectTime' not in player_json['support'][0]:
+		if 'support' not in player_json or 'resurrectTime' not in player_json['support'][0]:
 			return 0
 		return int(player_json['support'][0]['resurrectTime'])
 	
 	if stat == 'rips':
-		if 'support' not in player_json or len(player_json['support']) != 1 or 'boonStrips' not in player_json['support'][0]:
+		if 'support' not in player_json or 'boonStrips' not in player_json['support'][0]:
 			return 0
 		return int(player_json['support'][0]['boonStrips'])
 
 	if stat == 'ripsOutTime':
-		if 'support' not in player_json or len(player_json['support']) != 1 or 'boonStripsTime' not in player_json['support'][0]:
+		if 'support' not in player_json or 'boonStripsTime' not in player_json['support'][0]:
 			return 0
 		return int(player_json['support'][0]['boonStripsTime'])
 		
 	if stat == 'cleanses':
-		if 'support' not in player_json or len(player_json['support']) != 1 or 'condiCleanse' not in player_json['support'][0]:
+		if 'support' not in player_json or 'condiCleanse' not in player_json['support'][0]:
 			return 0
 		return int(player_json['support'][0]['condiCleanse'])
 
 	if stat == 'cleansesOutTime':
-		if 'support' not in player_json or len(player_json['support']) != 1 or 'condiCleanseTime' not in player_json['support'][0]:
+		if 'support' not in player_json or 'condiCleanseTime' not in player_json['support'][0]:
 			return 0
 		return int(player_json['support'][0]['condiCleanseTime'])
 	
 	if stat == 'ripsIn':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'boonStrips' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'boonStrips' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['boonStrips'])
 
 	if stat == 'ripsTime':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'boonStripsTime' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'boonStripsTime' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['boonStripsTime'])
 
 	if stat == 'cleansesIn':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'conditionCleanses' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'conditionCleanses' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['conditionCleanses'])				
 
 	if stat == 'cleansesTime':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'conditionCleansesTime' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'conditionCleansesTime' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['conditionCleansesTime'])		
 
 	if stat == 'dodges':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'dodgeCount' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'dodgeCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['dodgeCount'])	
 
 	if stat == 'evades':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'evadedCount' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'evadedCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['evadedCount'])
 
 	if stat == 'invulns':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'invulnedCount' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'invulnedCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['invulnedCount'])
 
 	if stat == 'blocks':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'blockedCount' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'blockedCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['blockedCount'])		
 
 	if stat == 'dist':
-		if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'distToCom' not in player_json['statsAll'][0]:
+		if 'statsAll' not in player_json or 'distToCom' not in player_json['statsAll'][0]:
 			return -1
 		return float(player_json['statsAll'][0]['distToCom'])
 
 	if stat == 'swaps':
-		if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'swapCount' not in player_json['statsAll'][0]:
+		if 'statsAll' not in player_json or 'swapCount' not in player_json['statsAll'][0]:
 			return -1
 		return float(player_json['statsAll'][0]['swapCount'])
 
