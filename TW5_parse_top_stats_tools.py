@@ -4281,7 +4281,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 #End DPS Box Plot Data Collection
 
 		#Collect Box Plot CPS data by Profession, Prof_Name, Name, Acct
-		if 'support' not in player or len(player['support']) != 1 or 'condiCleanse' not in player['support'][0]:
+		if 'support' not in player or 'condiCleanse' not in player['support'][0]:
 			playerCleanses = 0
 		else:
 			playerCleanses += int(player['support'][0]['condiCleanse'])   
@@ -4305,7 +4305,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 		#End CPS Box Plot Data Collection
 
 		#Collect Box Plot SPS data by Profession, Prof_Name, Name, Acct
-		if 'support' not in player or len(player['support']) != 1 or 'boonStrips' not in player['support'][0]:
+		if 'support' not in player or 'boonStrips' not in player['support'][0]:
 			playerStrips = 0
 		else:
 			playerStrips += int(player['support'][0]['boonStrips'])   
@@ -4389,12 +4389,12 @@ def get_stats_from_fight_json(fight_json, config, log):
 		for player in fight_json['players']:
 			if player['notInSquad']:
 				continue
-			if 'defenses' not in player or len(player['defenses']) != 1 or 'deadCount' not in player['defenses'][0]:
+			if 'defenses' not in player or 'deadCount' not in player['defenses'][0]:
 				Cmd_Tags[current_Tag]['Deaths'] += 0
 			else:
 				Cmd_Tags[current_Tag]['Deaths'] += int(player['defenses'][0]['deadCount'])
 				
-			if 'defenses' not in player or len(player['defenses']) != 1 or 'downCount' not in player['defenses'][0]:
+			if 'defenses' not in player or 'downCount' not in player['defenses'][0]:
 				Cmd_Tags[current_Tag]['Downed'] += 0
 			else:
 				Cmd_Tags[current_Tag]['Downed'] += int(player['defenses'][0]['downCount'])
