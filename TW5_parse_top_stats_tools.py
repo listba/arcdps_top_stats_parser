@@ -70,9 +70,9 @@ class Player:
 	name: str                           # character name
 	profession: str                     # profession name
 	num_fights_present: int = 0         # the number of fight the player was involved in 
-	num_enemies_present: int = 0        # the number of fight the player was involved in
-	num_allies_supported: int = 0       # the number of fight the player was involved in
-	num_allies_group_supported: int = 0  # the number of fight the player was involved in
+	num_enemies_present: int = 0        # the number of enemies the player was involved with
+	num_allies_supported: int = 0       # the number of allies the player supported
+	num_allies_group_supported: int = 0  # the number of allies in group the player was involved in
 	attendance_percentage: float = 0.   # the percentage of fights the player was involved in out of all fights
 	duration_fights_present: int = 0    # the total duration of all fights the player was involved in, in s
 	duration_active: int = 0            # the total duration a player was active (alive or down)
@@ -113,6 +113,8 @@ class Fight:
 	enemies_Blue: int = 0
 	enemies_Green: int = 0
 	allies: int = 0
+	squad: int = 0
+	notSquad: int = 0
 	kills: int = 0
 	start_time: str = ""
 	enemy_squad: dict = field(default_factory=dict) #profession and count of enemies
@@ -169,7 +171,7 @@ class Config:
 
 
 #Stats to exlucde from overview summary
-exclude_Stat = ["iol", "dist", "res", "dmgAll", "Cdmg", "Pdmg", "shieldDmg", "kills", "downs", 'downed', "HiS", "stealth", "superspeed", "swaps", "barrierDamage", "dodges", "evades", "blocks", "invulns", 'hitsMissed', 'interupted', 'fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut', 'ripsIn', 'ripsTime', 'cleansesIn', 'cleansesTime', 'downContrib', 'resOutTime', 'cleansesOutTime', 'ripsOutTime', 'downContribution', 'againstDownedDamage', 'againstDownedCount']
+exclude_Stat = ["iol", "dist", "res", "dmgAll", "Cdmg", "Pdmg", "shieldDmg", "kills", "downs", 'downed', "HiS", "stealth", "superspeed", "swaps", "barrierDamage", "dodges", "evades", "blocks", "invulns", 'hitsMissed', 'interupted', 'fireOut', 'shockingOut', 'frostOut', 'magneticOut', 'lightOut', 'darkOut', 'chaosOut', 'ripsIn', 'ripsTime', 'cleansesIn', 'cleansesTime', 'resOutTime', 'cleansesOutTime', 'ripsOutTime', 'downContribution', 'againstDownedDamage', 'againstDownedCount']
 
 #Control Effects Tracking
 squad_offensive = {}
@@ -460,7 +462,7 @@ DPS_Utility = {
 	}
 
 def find_sub_type(player, fightTime):
-	supportProf = ["Tempest", "Scrapper", "Druid", "Chronomancer", "Vindicator", "Firebrand", "Spectre", "Spellbreaker", "Willbender", "Guardian"]
+	supportProf = ["Tempest", "Scrapper", "Druid", "Chronomancer", "Vindicator", "Firebrand", "Spectre", "Spellbreaker", "Willbender", "Guardian", "Berserker"]
 	if player['profession'] not in supportProf:
 
 		playerDamage = 0
@@ -1849,7 +1851,7 @@ def write_sorted_total(players, top_total_players, config, total_fight_duration,
 			print_string += " "+'<span data-tooltip="'+my_value(round(stat_Generated_Self, 4))+' Self Generation">'+"{:.2f}".format(round(player.total_stats_self[stat]/player.duration_fights_present, 2))+'</span>|'
 		else:
 			print_string += " "+my_value(round(player.total_stats[stat]))+"|"
-			if stat in ['dmgAll', 'Pdmg', 'Cdmg', 'dmg_taken', 'barrierDamage', 'downContribution', 'deaths', 'againstDownedDamage', 'againstDownedCount']:
+			if stat in ['dmgAll', 'Pdmg', 'Cdmg', 'dmg_taken', 'barrierDamage', 'deaths', 'downContribution', 'againstDownedDamage', 'againstDownedCount']:
 				print_string += " "+"{:.2f}".format(round(player.average_stats[stat], 2))+"|"
 			else:
 				print_string += " "+"{:.2f}".format(round(player.average_stats[stat] * 60.0, 2))+"|"
@@ -2427,15 +2429,19 @@ def collect_stat_data(args, config, log, anonymize=False):
 					if player.stats_per_fight[fight_number]['time_in_combat'] == 0:
 						player.stats_per_fight[fight_number]['time_in_combat'] = 1
 					player.stats_per_fight[fight_number][stat] = player.stats_per_fight[fight_number][stat]/player.stats_per_fight[fight_number]['time_in_combat']
-
+				#ripsOutTime Hack to fix the random >2M boon strips time on some players
+				elif stat == 'ripsOutTime' and player.stats_per_fight[fight_number][stat] > 999999:
+					for target in json_data['targets']:
+						if target['defenses'][0]['boonStripsTime'] > 99999:
+							player.stats_per_fight[fight_number][stat] = max(player.stats_per_fight[fight_number][stat] - target['defenses'][0]['boonStripsTime'], 0)
 				#print(stat, name)
 				# add stats of this fight and player to total stats of this fight and player
 				if player.stats_per_fight[fight_number][stat] > 0:
 					# buff are generation squad values, using total over time
 					if stat in config.buffs_stacking_duration and stat != 'iol':
 						#value is generated boon time on all squad players / fight duration / (players-1)" in percent, we want generated boon time on all squad players
-						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration*(fight.allies - 1), 4)
-						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration*(fight.allies - 1), 4)
+						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration*(fight.squad - 1), 4)
+						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]/100.*fight.duration*(fight.squad - 1), 4)
 
 						group_gen = get_stat_from_player_json(player_data, players_running_healing_addon, stat, config, False, BuffGenerationType.GROUP)
 						player.total_stats_group[stat] += round(group_gen/100.*fight.duration*(num_party_members - 1), 4)
@@ -2444,8 +2450,8 @@ def collect_stat_data(args, config, log, anonymize=False):
 						player.total_stats_self[stat] += round(self_gen/100.*fight.duration, 4)
 					elif stat in config.buffs_stacking_intensity and stat != 'iol':
 						#value is generated boon time on all squad players / fight duration / (players-1)", we want generated boon time on all squad players
-						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration*(fight.allies - 1), 4)
-						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration*(fight.allies - 1), 4)
+						fight.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration*(fight.squad - 1), 4)
+						player.total_stats[stat] += round(player.stats_per_fight[fight_number][stat]*fight.duration*(fight.squad - 1), 4)
 						
 						group_gen = get_stat_from_player_json(player_data, players_running_healing_addon, stat, config, False, BuffGenerationType.GROUP)
 						player.total_stats_group[stat] += round(group_gen*fight.duration*(num_party_members - 1), 4)
@@ -2528,7 +2534,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 
 			player.num_fights_present += 1
 			player.num_enemies_present += fight.enemies
-			player.num_allies_supported += (fight.allies)
+			player.num_allies_supported += (fight.squad)
 			player.wt_dps_enemies.append(fight.enemies)
 			player.wt_dps_duration.append(player.stats_per_fight[fight_number]['time_in_combat'])
 			player.wt_dps_damage.append(player.stats_per_fight[fight_number]['dmg'])
@@ -2537,7 +2543,7 @@ def collect_stat_data(args, config, log, anonymize=False):
 			player.duration_in_combat += player.stats_per_fight[fight_number]['time_in_combat']
 			player.swapped_build |= build_swapped
 			player.stats_per_fight[fight_number]['fight_duration'] = fight.duration
-			player.stats_per_fight[fight_number]['allies'] = fight.allies
+			player.stats_per_fight[fight_number]['allies'] = fight.squad
 			player.stats_per_fight[fight_number]['role'] = find_sub_type(player_data, fight.duration)
 
 
@@ -2677,32 +2683,32 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		return round(int(player_json['activeTimes'][0])/1000)
 	
 	if stat == 'dmg_taken':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'damageTaken' not in player_json['defenses'][0] or 'damageBarrier' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'damageTaken' not in player_json['defenses'][0] or 'damageBarrier' not in player_json['defenses'][0]:
 			return 0
 		return int(player_json['defenses'][0]['damageTaken'])
 
 	if stat == 'barrierDamage':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'damageBarrier' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'damageBarrier' not in player_json['defenses'][0]:
 			return 0
 		return int(player_json['defenses'][0]['damageBarrier'])
 		
 	if stat == 'deaths':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'deadCount' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'deadCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['deadCount'])
 
 	if stat == 'downed':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'downCount' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'downCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['downCount'])
 
 	if stat == 'hitsMissed':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'missedCount' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'missedCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['missedCount'])
 
 	if stat == 'interupted':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'interruptedCount' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'interruptedCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['interruptedCount'])
 
@@ -2748,82 +2754,82 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		#return int(player_json['dpsAll'][0]['powerDamage'])  
 
 	if stat == 'res':
-		if 'support' not in player_json or len(player_json['support']) != 1 or 'resurrects' not in player_json['support'][0]:
+		if 'support' not in player_json or 'resurrects' not in player_json['support'][0]:
 			return 0
 		return int(player_json['support'][0]['resurrects'])
 
 	if stat == 'resOutTime':
-		if 'support' not in player_json or len(player_json['support']) != 1 or 'resurrectTime' not in player_json['support'][0]:
+		if 'support' not in player_json or 'resurrectTime' not in player_json['support'][0]:
 			return 0
 		return int(player_json['support'][0]['resurrectTime'])
 	
 	if stat == 'rips':
-		if 'support' not in player_json or len(player_json['support']) != 1 or 'boonStrips' not in player_json['support'][0]:
+		if 'support' not in player_json or 'boonStrips' not in player_json['support'][0]:
 			return 0
 		return int(player_json['support'][0]['boonStrips'])
 
 	if stat == 'ripsOutTime':
-		if 'support' not in player_json or len(player_json['support']) != 1 or 'boonStripsTime' not in player_json['support'][0]:
+		if 'support' not in player_json or 'boonStripsTime' not in player_json['support'][0]:
 			return 0
 		return int(player_json['support'][0]['boonStripsTime'])
 		
 	if stat == 'cleanses':
-		if 'support' not in player_json or len(player_json['support']) != 1 or 'condiCleanse' not in player_json['support'][0]:
+		if 'support' not in player_json or 'condiCleanse' not in player_json['support'][0]:
 			return 0
 		return int(player_json['support'][0]['condiCleanse'])
 
 	if stat == 'cleansesOutTime':
-		if 'support' not in player_json or len(player_json['support']) != 1 or 'condiCleanseTime' not in player_json['support'][0]:
+		if 'support' not in player_json or 'condiCleanseTime' not in player_json['support'][0]:
 			return 0
 		return int(player_json['support'][0]['condiCleanseTime'])
 	
 	if stat == 'ripsIn':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'boonStrips' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'boonStrips' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['boonStrips'])
 
 	if stat == 'ripsTime':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'boonStripsTime' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'boonStripsTime' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['boonStripsTime'])
 
 	if stat == 'cleansesIn':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'conditionCleanses' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'conditionCleanses' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['conditionCleanses'])				
 
 	if stat == 'cleansesTime':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'conditionCleansesTime' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'conditionCleansesTime' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['conditionCleansesTime'])		
 
 	if stat == 'dodges':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'dodgeCount' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'dodgeCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['dodgeCount'])	
 
 	if stat == 'evades':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'evadedCount' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'evadedCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['evadedCount'])
 
 	if stat == 'invulns':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'invulnedCount' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'invulnedCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['invulnedCount'])
 
 	if stat == 'blocks':
-		if 'defenses' not in player_json or len(player_json['defenses']) != 1 or 'blockedCount' not in player_json['defenses'][0]:
+		if 'defenses' not in player_json or 'blockedCount' not in player_json['defenses'][0]:
 			return 0        
 		return int(player_json['defenses'][0]['blockedCount'])		
 
 	if stat == 'dist':
-		if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'distToCom' not in player_json['statsAll'][0]:
+		if 'statsAll' not in player_json or 'distToCom' not in player_json['statsAll'][0]:
 			return -1
 		return float(player_json['statsAll'][0]['distToCom'])
 
 	if stat == 'swaps':
-		if 'statsAll' not in player_json or len(player_json['statsAll']) != 1 or 'swapCount' not in player_json['statsAll'][0]:
+		if 'statsAll' not in player_json or 'swapCount' not in player_json['statsAll'][0]:
 			return -1
 		return float(player_json['statsAll'][0]['swapCount'])
 
@@ -2850,13 +2856,13 @@ def get_stat_from_player_json(player_json, players_running_healing_addon, stat, 
 		for target in player_json['statsTargets']:
 			againstDownedCount = againstDownedCount + int(target[0]['againstDownedCount'])
 		return int(againstDownedCount)		
-	
+
 	if stat == 'downContribution':
 		downContributionDamage = 0
 		for target in player_json['statsTargets']:
 			downContributionDamage = downContributionDamage + int(target[0]['downContribution'])
 		return int(downContributionDamage)
-	
+		
 	### Buffs ###
 	if stat in config.buff_ids:
 		if buffGenType == BuffGenerationType.GROUP:
@@ -3362,6 +3368,11 @@ def get_stats_from_fight_json(fight_json, config, log):
 	duration = round(fight_json['durationMS']/1000)
 
 	num_allies = len(fight_json['players'])
+	num_squad = 0
+	for player in fight_json['players']:
+		if not player['notInSquad']:
+			num_squad += 1
+	num_NotSquad = num_allies - num_squad
 	num_enemies = 0
 	num_enemies_Red = 0
 	num_enemies_Blue = 0
@@ -3371,6 +3382,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 	enemy_squad = {}
 	num_kills = 0
 	num_downs = 0
+	squad_num_kills = 0
+	squad_num_downs = 0
 	enemy_Dps = {}
 	enemyDps_name = ''
 	enemyDps_damage = 0
@@ -3574,6 +3587,13 @@ def get_stats_from_fight_json(fight_json, config, log):
 		incomingClears = player['defenses'][0]['conditionCleanses']
 		squadDps_damage = 0
 		squadDps_group = player['group']
+
+		if 'statsTargets' not in player or len(player['statsTargets']) == 0:
+			continue
+		else:
+			squad_num_downs += sum(enemy[0]['downed'] for enemy in player['statsTargets'])
+			squad_num_kills += sum(enemy[0]['killed'] for enemy in player['statsTargets'])
+
 		if conditionFightTime <= 0:
 			continue
 
@@ -3777,23 +3797,25 @@ def get_stats_from_fight_json(fight_json, config, log):
 		#config.condition_ids = {720: 'Blinded', 721: 'Crippled', 722: 'Chilled', 727: 'Immobile', 742: 'Weakness', 791: 'Fear', 833: 'Daze', 872: 'Stun', 26766: 'Slow', 27705: 'Taunt', 30778: 'Hunters Mark'}
 		for item in player['buffUptimesActive']:
 			conditionId = int(item['id'])
-			if conditionId not in Control_Effects:
-				continue
-			skill_name = Control_Effects[conditionId]
-			if skill_name not in enemy_Control:
-				enemy_Control[skill_name] = {}
-			if skill_name not in enemy_Control_Player:
-				enemy_Control_Player[skill_name] = {}
-			for cc in item['buffData']:
-				for key, value in cc['generated'].items():
-					if key not in enemy_Control_Player[skill_name]:
-						enemy_Control_Player[skill_name][key] = float((value/100)*player_combat_time)
-					else:
-						enemy_Control_Player[skill_name][key] = enemy_Control_Player[skill_name][key] + float((value/100)*player_combat_time)
-					if player['name'] not in enemy_Control[skill_name]:
-						enemy_Control[skill_name][player['name']] = float((value/100)*player_combat_time)
-					else:
-						enemy_Control[skill_name][player['name']] = enemy_Control[skill_name][player['name']] + float((value/100)*player_combat_time)
+			if conditionId in Control_Effects:
+
+				skill_name = Control_Effects[conditionId]
+				if skill_name not in enemy_Control:
+					enemy_Control[skill_name] = {}
+				if skill_name not in enemy_Control_Player:
+					enemy_Control_Player[skill_name] = {}
+				for cc in item['buffData']:
+					if 'generated' in cc:
+						for key in cc['generated']:
+							value = cc['generated'][key]
+							if key not in enemy_Control_Player[skill_name]:
+								enemy_Control_Player[skill_name][key] = float((value/100)*player_combat_time)
+							else:
+								enemy_Control_Player[skill_name][key] = enemy_Control_Player[skill_name][key] + float((value/100)*player_combat_time)
+							if player['name'] not in enemy_Control[skill_name]:
+								enemy_Control[skill_name][player['name']] = float((value/100)*player_combat_time)
+							else:
+								enemy_Control[skill_name][player['name']] = enemy_Control[skill_name][player['name']] + float((value/100)*player_combat_time)
 
 		#Track Offensive stats from [statsTarets]
 		statAll = ["totalDamageCount", "directDamageCount", "connectedDirectDamageCount", "connectedDamageCount", "critableDirectDamageCount", "criticalRate", "criticalDmg", "flankingRate", "againstMovingRate", "glanceRate", "missed", "evaded", "blocked", "interrupts", "invulned"]
@@ -3815,7 +3837,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 
 
 		#Instant Revive tracking of downed healing
-		instant_Revive = {55026: 'Glyph of Stars - CA', 69336:"Nature's Renewal", 12601: "Nature's Renewal",  12596: "Nature's Renewal", 14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Glyph of Renewal', 5762: 'Glyph of Renewal', 5760: 'Glyph of Renewal', 5761: 'Glyph of Renewal', 10611: 'Signet of Undeath', 59510: "Life Transfer", 10527: "Well of Blood", 13849: "Well of Blood"}
+		instant_Revive = {55026: 'Glyph of Stars - CA', 69336:"Nature's Renewal", 12601: "Nature's Renewal",  12596: "Nature's Renewal", 14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Glyph of Renewal', 5762: 'Glyph of Renewal', 5760: 'Glyph of Renewal', 5761: 'Glyph of Renewal', 10611: 'Signet of Undeath', 59510: "Life Transfer", 10527: "Well of Blood", 13849: "Well of Blood", 5867: "Toss Elixer R", 6091: "Toss Elixer R"}
 		if 'extHealingStats' in player:
 			for target in player['extHealingStats']['totalHealingDist'][0]:
 				if 'totalDownedHealing' in target:
@@ -3842,23 +3864,26 @@ def get_stats_from_fight_json(fight_json, config, log):
 		Auras_Id = {5677: 'Fire', 5577: 'Shocking', 5579: 'Frost', 5684: 'Magnetic', 25518: 'Light', 39978: 'Dark', 10332: 'Chaos'}
 		for item in player['buffUptimesActive']:
 			auraId = int(item['id'])
-			if auraId not in Auras_Id:
-				continue
-			skill_name = Auras_Id[auraId]
-			if skill_name not in auras_TableIn:
-				auras_TableIn[skill_name] = {}
-			if skill_name not in auras_TableOut:
-				auras_TableOut[skill_name] = {}				
-			for cc in item['buffData']:
-				for key, value in cc['generated'].items():
-					if player['name'] not in auras_TableIn[skill_name]:
-						auras_TableIn[skill_name][player['name']] = float((value/100)*player_combat_time)
-					else:
-						auras_TableIn[skill_name][player['name']] = auras_TableIn[skill_name][player['name']] + float((value/100)*player_combat_time)
-					if key not in auras_TableOut[skill_name]:
-						auras_TableOut[skill_name][key] = float((value/100)*player_combat_time)
-					else:
-						auras_TableOut[skill_name][key] = auras_TableOut[skill_name][key] + float((value/100)*player_combat_time)
+			if auraId in Auras_Id:
+				skill_name = Auras_Id[auraId]
+				if skill_name not in auras_TableIn:
+					auras_TableIn[skill_name] = {}
+				if skill_name not in auras_TableOut:
+					auras_TableOut[skill_name] = {}
+				#debug attempt
+				#print(player['name'], skill_name, auraId)				
+				for cc in item['buffData']:
+					if 'generated' in cc:
+						for key in cc['generated']:
+							value = cc['generated'][key]
+							if player['name'] not in auras_TableIn[skill_name]:
+								auras_TableIn[skill_name][player['name']] = float((value/100)*player_combat_time)
+							else:
+								auras_TableIn[skill_name][player['name']] = auras_TableIn[skill_name][player['name']] + float((value/100)*player_combat_time)
+							if key not in auras_TableOut[skill_name]:
+								auras_TableOut[skill_name][key] = float((value/100)*player_combat_time)
+							else:
+								auras_TableOut[skill_name][key] = auras_TableOut[skill_name][key] + float((value/100)*player_combat_time)
 
 		#Track Total Buff Uptimes
 		uptime_Buff_Ids = {1122: 'stability', 717: 'protection', 743: 'aegis', 740: 'might', 725: 'fury', 26980: 'resistance', 873: 'resolution', 1187: 'quickness', 719: 'swiftness', 30328: 'alacrity', 726: 'vigor', 718: 'regeneration'}
@@ -4138,6 +4163,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 			commanderMissing = False
 
 	for id in fight_json['players']:
+		if id['notInSquad']:
+			continue	
 		playerDistances = []
 		playerDistToTag = id['statsAll'][0]['distToCom']
 		deathOnTag_name = id['name']
@@ -4157,6 +4184,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 		if commanderMissing:
 			continue
 		if id['combatReplayData']['dead'] and id['combatReplayData']['down']:
+			print(id['profession'], id['name'])
 			playerDeaths = dict(id['combatReplayData']['dead'])
 			playerDowns = dict(id['combatReplayData']['down'])
 			playerDistToTag = id['statsAll'][0]['distToCom']
@@ -4257,7 +4285,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 #End DPS Box Plot Data Collection
 
 		#Collect Box Plot CPS data by Profession, Prof_Name, Name, Acct
-		if 'support' not in player or len(player['support']) != 1 or 'condiCleanse' not in player['support'][0]:
+		if 'support' not in player or 'condiCleanse' not in player['support'][0]:
 			playerCleanses = 0
 		else:
 			playerCleanses += int(player['support'][0]['condiCleanse'])   
@@ -4281,7 +4309,7 @@ def get_stats_from_fight_json(fight_json, config, log):
 		#End CPS Box Plot Data Collection
 
 		#Collect Box Plot SPS data by Profession, Prof_Name, Name, Acct
-		if 'support' not in player or len(player['support']) != 1 or 'boonStrips' not in player['support'][0]:
+		if 'support' not in player or 'boonStrips' not in player['support'][0]:
 			playerStrips = 0
 		else:
 			playerStrips += int(player['support'][0]['boonStrips'])   
@@ -4348,6 +4376,8 @@ def get_stats_from_fight_json(fight_json, config, log):
 	fight.enemy_skill_dmg = enemy_skill_dmg
 	fight.squad_skill_dmg = squad_skill_dmg
 	fight.allies = num_allies
+	fight.squad = num_squad
+	fight.notSquad = num_NotSquad
 	fight.kills = num_kills
 	fight.downs = num_downs
 	fight.start_time = fight_json['timeStartStd']
@@ -4363,12 +4393,12 @@ def get_stats_from_fight_json(fight_json, config, log):
 		for player in fight_json['players']:
 			if player['notInSquad']:
 				continue
-			if 'defenses' not in player or len(player['defenses']) != 1 or 'deadCount' not in player['defenses'][0]:
+			if 'defenses' not in player or 'deadCount' not in player['defenses'][0]:
 				Cmd_Tags[current_Tag]['Deaths'] += 0
 			else:
 				Cmd_Tags[current_Tag]['Deaths'] += int(player['defenses'][0]['deadCount'])
 				
-			if 'defenses' not in player or len(player['defenses']) != 1 or 'downCount' not in player['defenses'][0]:
+			if 'defenses' not in player or 'downCount' not in player['defenses'][0]:
 				Cmd_Tags[current_Tag]['Downed'] += 0
 			else:
 				Cmd_Tags[current_Tag]['Downed'] += int(player['defenses'][0]['downCount'])
@@ -4426,8 +4456,14 @@ def get_overall_raid_stats(fights):
 	overall_raid_stats['end_time'] = max([f.end_time.split()[1] for f in used_fights]) +"<br>,,UTC "+ used_fights[0].end_time.split()[2]+",,"
 	overall_raid_stats['num_skipped_fights'] = len([f for f in fights if f.skipped])
 	overall_raid_stats['min_allies'] = min([f.allies for f in used_fights])
-	overall_raid_stats['max_allies'] = max([f.allies for f in used_fights])    
+	overall_raid_stats['max_allies'] = max([f.allies for f in used_fights])
+	overall_raid_stats['min_squad'] = min([f.squad for f in used_fights])
+	overall_raid_stats['max_squad'] = max([f.squad for f in used_fights])
+	overall_raid_stats['min_notSquad'] = min([f.notSquad for f in used_fights])
+	overall_raid_stats['max_notSquad'] = max([f.notSquad for f in used_fights])    
 	overall_raid_stats['mean_allies'] = round(sum([f.allies for f in used_fights])/len(used_fights), 1)
+	overall_raid_stats['mean_squad'] = round(sum([f.squad for f in used_fights])/len(used_fights), 1)
+	overall_raid_stats['mean_notSquad'] = round(sum([f.notSquad for f in used_fights])/len(used_fights), 1)
 	overall_raid_stats['min_enemies'] = min([f.enemies for f in used_fights])
 	overall_raid_stats['max_enemies'] = max([f.enemies for f in used_fights])        
 	overall_raid_stats['mean_enemies'] = round(sum([f.enemies for f in used_fights])/len(used_fights), 1)
@@ -4522,8 +4558,10 @@ def print_total_squad_stats(fights, overall_squad_stats, overall_raid_stats, fou
 	print_string += str(totalKDR)+"|f\n"
 	#print_string += "\nKill Death Ratio for the session was ''"+str(Raid_KDR)+"''.\n"
 	#JEL - Added beginning newline for TW5 spacing
-	print_string += "\nThere were between "+str(overall_raid_stats['min_allies'])+" and "+str(overall_raid_stats['max_allies'])+" allied players involved (average "+str(round(overall_raid_stats['mean_allies'], 1))+" players).\n"
-	print_string += "\nThe squad faced between "+str(overall_raid_stats['min_enemies'])+" and "+str(overall_raid_stats['max_enemies'])+" enemy players (average "+str(round(overall_raid_stats['mean_enemies'], 1))+" players).\n"    
+	print_string += "\nThere were between "+str(overall_raid_stats['min_squad'])+" and "+str(overall_raid_stats['max_squad'])+" squad players involved (average "+str(round(overall_raid_stats['mean_squad'], 1))+" squad players) \n"
+	print_string += " and between "+str(overall_raid_stats['min_notSquad'])+" and "+str(overall_raid_stats['max_notSquad'])+" allied players involved (average "+str(round(overall_raid_stats['mean_notSquad'], 1))+" ally players).\n"
+	print_string += "\nThere were between "+str(overall_raid_stats['min_allies'])+" and "+str(overall_raid_stats['max_allies'])+" total players involved (average "+str(round(overall_raid_stats['mean_allies'], 1))+" total players).\n"
+	print_string += "\nThe squad faced between "+str(overall_raid_stats['min_enemies'])+" and "+str(overall_raid_stats['max_enemies'])+" enemy players (average "+str(round(overall_raid_stats['mean_enemies'], 1))+" Enemy players).\n"    
 		
 	myprint(output, print_string)
 	return total_fight_duration
@@ -4563,7 +4601,7 @@ def write_fights_overview_xls(fights, overall_squad_stats, overall_raid_stats, c
 		sheet1.write(i+1, 4, fight.end_time.split()[1])
 		sheet1.write(i+1, 5, fight.duration)
 		sheet1.write(i+1, 6, skipped_str)
-		sheet1.write(i+1, 7, fight.allies)
+		sheet1.write(i+1, 7, fight.squad)
 		sheet1.write(i+1, 8, fight.enemies)
 		sheet1.write(i+1, 9, fight.kills)
 		for j,stat in enumerate(config.stats_to_compute):
@@ -4602,7 +4640,7 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 	myprint(output, print_string)
 	print_string = "|thead-dark table-hover w-auto scrollable|k"
 	myprint(output, print_string)
-	print_string = "| Fight # | Date | Ending | Secs | Skip | Allies | Enemies | R/B/G | Downs | Kills |"
+	print_string = "| Fight # | Date | Ending | Secs | Skip | Squad | Allies | Enemies | R/B/G | Downs | Kills |"
 	for stat in overall_squad_stats:
 		if stat not in exclude_Stat:
 			stat_len[stat] = max(len(config.stat_names[stat]), len(str(overall_squad_stats[stat])))
@@ -4616,14 +4654,14 @@ def print_fights_overview(fights, overall_squad_stats, overall_raid_stats, confi
 			skipped_str = "yes" if fight.skipped else "no"
 			date = fight.start_time.split()[0]
 			end_time = fight.end_time.split()[1]        
-			print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.allies)+" | "+str(fight.enemies)+" | "+str(fight.enemies_Red)+"/"+str(fight.enemies_Blue)+"/"+str(fight.enemies_Green)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
+			print_string = "| "+str((i+1))+" | "+str(date)+" | "+str(end_time)+" | "+str(fight.duration)+" | "+skipped_str+" | "+str(fight.squad)+" | <<tc src:'"+str(fight.notSquad)+"' color:'green'>> | "+str(fight.enemies)+" | "+str(fight.enemies_Red)+"/"+str(fight.enemies_Blue)+"/"+str(fight.enemies_Green)+" | "+str(fight.downs)+" | "+str(fight.kills)+" |"
 			for stat in overall_squad_stats:
 				if stat not in exclude_Stat:
 					print_string += " "+my_value(round(fight.total_stats[stat]))+"|"
 			myprint(output, print_string)
 
 	#print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['start_time']:>10}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
-	print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_allies']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" |  | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
+	print_string = f"| {overall_raid_stats['num_used_fights']:>3}"+" | "+f"{overall_raid_stats['date']:>7}"+" | "+f"{overall_raid_stats['end_time']:>8}"+" | "+f"{overall_raid_stats['used_fights_duration']:>13}"+" | "+f"{overall_raid_stats['num_skipped_fights']:>7}" +" | "+f"{round(overall_raid_stats['mean_squad']):>11}"+" | "+f"{round(overall_raid_stats['mean_notSquad']):>11}"+" | "+f"{round(overall_raid_stats['mean_enemies']):>12}"+" |  | "+f"{round(overall_raid_stats['total_downs']):>5}"+" | "+f"{overall_raid_stats['total_kills']:>5} |"
 	for stat in overall_squad_stats:
 		if stat not in exclude_Stat:
 			print_string += " "+my_value(round(overall_squad_stats[stat]))+"|"
@@ -5550,7 +5588,7 @@ def write_to_json(overall_raid_stats, overall_squad_stats, fights, players, top_
 	#json_dict["SPS_List"] =  {key: value for key, value in SPS_List.items()}
 	#json_dict["HPS_List"] =  {key: value for key, value in HPS_List.items()}
 	#json_dict["DPSStats"] =  {key: value for key, value in DPSStats.items()}
-	json_dict["downed_Healing"] =  {key: value for key, value in downed_Healing.items()}
+	json_dict["HighScores"] =  {key: value for key, value in HighScores.items()}
 	#json_dict["MOA_Targets"] =  {key: value for key, value in MOA_Targets.items()}
 	#json_dict["MOA_Casters"] =  {key: value for key, value in MOA_Casters.items()}
 	#json_dict["Buffs_Personal"] =  {key: value for key, value in buffs_personal.items()}

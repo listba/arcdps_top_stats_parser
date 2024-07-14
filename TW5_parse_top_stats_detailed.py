@@ -109,7 +109,7 @@ if __name__ == '__main__':
         'Cdmg': "Condi Dmg",
         'shieldDmg': "Shield Dmg",
         'dmgAll': "Damage All",
-        'downContribution': "Down Contrib",
+		'downContribution': "Down Contrib",
         'againstDownedDamage': "Dmg to Downed",
         'againstDownedCount': "Hits to Downed",
         'downs': "Enemies Downed",
@@ -511,7 +511,7 @@ if __name__ == '__main__':
 	myprint(output, '\n---\n')
 	myprint(output, '<div style="overflow-x:auto;">\n\n')
 	
-	offensiveHighScores = ['dmg_PS',  'downContribution_PS', 'downs_PS', 'kills_PS']
+	offensiveHighScores = ['dmg_PS', 'downContribution_PS', 'downs_PS', 'kills_PS']
 	supportHighScores = ['rips_PS', 'cleanses_PS', 'heal_PS', 'barrier_PS']
 	defensiveHighScores = ['dodges_PS', 'evades_PS', 'blocks_PS', 'invulns_PS']
 	labelTopFive = {'dmg': 'Damage', 'dmg_PS': 'Damage per Second', 'downContribution': 'Down Contribution', 'downContribution_PS': 'Down Contribution per Second', 'downs': 'Downs', 'downs_PS': 'Downs per Second', 'invulns_PS': 'Invulnerable per Second', 'invulns': 'Invulnerable', 'kills': 'Kills', 'kills_PS': 'Kills per Second', 'rips': 'Boon Strips', 'rips_PS': 'Boon Strips per Second', 'cleanses': 'Condition Cleanses', 'cleanses_PS': 'Condition Cleanses per Second', 'heal': 'Healing', 'heal_PS': 'Healing per Second', 'barrier': 'Barrier', 'barrier_PS': 'Barrier per Second', 'dodges': 'Dodges', 'dodges_PS': 'Dodges per Second', 'evades': 'Evades', 'evades_PS': 'Evades per Second', 'blocks': 'Blocks', 'blocks_PS': 'Blocks per Second', 'downed': 'Downed', 'interupted_PS': 'Downed per Second'}
@@ -973,7 +973,8 @@ if __name__ == '__main__':
 				#begin fight summary
 				myprint(output, "|thead-dark table-hover|k")
 				myprint(output, "|Fight Summary:| #"+str(FightNum)+"|h")
-				myprint(output, '|Squad Members: |'+str(fight.allies)+' |')
+				myprint(output, '|Squad Members: |'+str(fight.squad)+' |')
+				myprint(output, '|Ally Members: |'+str(fight.notSquad)+' |')				
 				myprint(output, '|Squad Deaths: |'+str(fight.total_stats['deaths'])+' |')
 				myprint(output, '|Enemies: |'+str(fight.enemies)+' |')
 				myprint(output, '|Enemies Downed: |'+str(fight.downs)+' |')
@@ -1951,7 +1952,7 @@ if __name__ == '__main__':
 	#end On Tag Death insert
 
 	#Downed Healing
-	down_Heal_Order = {55026: 'Glyph of Stars - CA', 69336:"Nature's Renewal", 14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Glyph of Renewal', 10611: 'Signet of Undeath', 59510: "Life Transfer", 10527: "Well of Blood"}
+	down_Heal_Order = {55026: 'Glyph of Stars - CA', 69336:"Nature's Renewal", 14419: 'Battle Standard', 9163: 'Signet of Mercy', 5763: 'Glyph of Renewal', 10611: 'Signet of Undeath', 59510: "Life Transfer", 10527: "Well of Blood", 6091: "Toss Elixer R"}
 	myprint(output, '<$reveal type="match" state="$:/state/curTab" text="Downed_Healing">')    
 	myprint(output, '\n<<alert dark "Healing to downed players" width:60%>>\n\n')
 	myprint(output, '\nRequires Heal Stat addon for ARCDPS to track\n')
