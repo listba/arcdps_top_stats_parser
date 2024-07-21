@@ -11,4 +11,4 @@ log_path="/logs/$GROUP/$DATE/json"
 docker run -it --rm \
   -v $LOG_HOME:/logs \
   topstats:latest \
-  python TW5_parse_top_stats_detailed.py -t "${DATE}-WvW-Raid-FS" "${log_path}"
+  python TW5_parse_top_stats_detailed.py -t "${DATE}-WvW-Raid-POGU" "${log_path}"
